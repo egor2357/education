@@ -246,6 +246,28 @@ class Option(models.Model):
       self.activity
     )
 
+class Option_file(models.Model):
+  option = models.ForeignKey(
+    Option, null=False,
+    on_delete=models.CASCADE, verbose_name='Вариант занятия'
+  )
+
+  def get_file_upload_to(instance, filename):
+    return 'option_files/{0}/%Y/%m/%d/{1}'.format(instance.option.activity.name, filename)
+  file = models.FileField(
+    upload_to=get_file_upload_to,
+    verbose_name='Файл'
+  )
+
+  class Meta:
+    db_table = 'option_file'
+    verbose_name = 'Файл варианта занятия'
+    verbose_name_plural = 'Файлы варианта занятия'
+    ordering = ['option']
+
+  def __str__(self):
+    return self.file.name
+
 class Job(models.Model):
   option = models.ForeignKey(
     Option, null=False,
