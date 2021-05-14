@@ -31,3 +31,21 @@ class Development_direction(models.Model):
 
   def __str__(self):
     return self.name
+
+class Skill(models.Model):
+  direction = models.ForeignKey(
+    Development_direction, null=False,
+    on_delete=models.CASCADE, verbose_name=u'Направление развития'
+  )
+
+  name = models.TextField(max_length=200, verbose_name='Название')
+  number = models.PositiveSmallIntegerField(verbose_name='Номер')
+
+  class Meta:
+    db_table = 'skill'
+    verbose_name = 'Навык'
+    verbose_name_plural = 'Навыки'
+    ordering = ['number']
+
+  def __str__(self):
+    return self.name
