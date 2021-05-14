@@ -57,6 +57,8 @@ class Specialist(models.Model):
     on_delete=models.SET_NULL, verbose_name=u'Пользователь'
   )
 
+  skills = models.ManyToManyField(Skill, through='Competence', verbose_name=u'Развиваемые навыки')
+
   surname = models.TextField(max_length=200, verbose_name='Фамилия')
   name = models.TextField(max_length=200, verbose_name='Имя')
   patronymic = models.TextField(max_length=200, verbose_name='Отчество')
@@ -150,4 +152,22 @@ class Schedule(models.Model):
       self.weekday_names[self.day],
       self.start_time.strftime('%H:%M'),
       self.activity.name
+    )
+
+class Competence(models.Model):
+  specialist = models.ForeignKey(Specialist, on_delete=models.CASCADE, verbose_name='Специалист')
+  skill = models.ForeignKey(Skill, on_delete=models.CASCADE, verbose_name='Навык')
+
+  coefficient = models.FloatField(verbose_name='Коэффициент')
+
+  class Meta:
+    db_table = 'competence'
+    verbose_name = 'Компетенция специалиста'
+    verbose_name_plural = 'Компетенции специалиста'
+    ordering = ['specialist', 'skill']
+
+  def __str__(self):
+    return '{0} развивает {1}'.format(
+      self.specialist,
+      self.skill
     )
