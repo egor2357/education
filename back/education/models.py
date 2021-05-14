@@ -39,7 +39,7 @@ class Skill(models.Model):
     on_delete=models.CASCADE, verbose_name='Направление развития'
   )
 
-  name = models.TextField(max_length=200, verbose_name='Название')
+  name = models.TextField(max_length=200, unique=True, verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
 
   class Meta:
