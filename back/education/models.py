@@ -81,3 +81,15 @@ class Specialist(models.Model):
       res = '{0} {1} {2}'.format(self.surname, self.name, self.patronymic)
 
     return res
+
+class Form(models.Model):
+  name = models.TextField(max_length=200, verbose_name='Название')
+
+  class Meta:
+    db_table = 'form'
+    verbose_name = 'Форма проведения занятий'
+    verbose_name_plural = 'Формы проведения занятий'
+    ordering = ['name']
+
+  def __str__(self):
+    return self.name
