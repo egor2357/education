@@ -93,3 +93,20 @@ class Form(models.Model):
 
   def __str__(self):
     return self.name
+
+class Method(models.Model):
+  form = models.ForeignKey(
+    Form, null=False,
+    on_delete=models.CASCADE, verbose_name=u'Форма'
+  )
+
+  name = models.TextField(max_length=200, verbose_name='Название')
+
+  class Meta:
+    db_table = 'method'
+    verbose_name = 'Способ проведения занятия'
+    verbose_name_plural = 'Способы проведения занятия'
+    ordering = ['name']
+
+  def __str__(self):
+    return self.name
