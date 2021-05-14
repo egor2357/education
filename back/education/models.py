@@ -291,6 +291,28 @@ class Job(models.Model):
       self.start_time.strftime('%H.%M')
     )
 
+class Job_file(models.Model):
+  job = models.ForeignKey(
+    Job, null=False,
+    on_delete=models.CASCADE, verbose_name='Занятие'
+  )
+
+  def get_file_upload_to(instance, filename):
+    return 'job_files/{0}/%Y/%m/%d/{1}'.format(instance.job.option.activity.name, filename)
+  file = models.FileField(
+    upload_to=get_file_upload_to,
+    verbose_name='Файл'
+  )
+
+  class Meta:
+    db_table = 'job_file'
+    verbose_name = 'Файл занятия'
+    verbose_name_plural = 'Файлы занятия'
+    ordering = ['job']
+
+  def __str__(self):
+    return self.file.name
+
 class Skill_report(models.Model):
   job = models.ForeignKey(
     Job, null=False,
