@@ -85,6 +85,29 @@ class Specialist(models.Model):
 
     return res
 
+class Presense(models.Model):
+  specialist = models.ForeignKey(
+    Specialist, null=False,
+    on_delete=models.CASCADE, verbose_name='Специалист'
+  )
+
+  date_from = models.DateField(verbose_name='Первый день')
+  date_to = models.DateField(verbose_name='Последний день')
+  is_available = models.BooleanField(default=True, verbose_name='Является ли доступным')
+
+  class Meta:
+    db_table = 'presense'
+    verbose_name = 'Присутствие'
+    verbose_name_plural = 'Присутствия'
+    ordering = ['date_from']
+
+  def __str__(self):
+    return '{0} с {1} по {2}'.format(
+      self.specialist,
+      self.date_from.strftime('%m.%d'),
+      self.date_to.strftime('%m.%d')
+    )
+
 class Form(models.Model):
   name = models.TextField(max_length=200, verbose_name='Название')
 
