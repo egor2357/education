@@ -229,6 +229,8 @@ class Option(models.Model):
     Activity, null=False,
     on_delete=models.CASCADE, verbose_name='Вид деятельсности')
 
+  skills = models.ManyToManyField(Skill, verbose_name='Развиваемые на занятии навыки')
+
   caption = models.TextField(max_length=200, verbose_name='Подпись')
 
   class Meta:
