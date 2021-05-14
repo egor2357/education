@@ -18,7 +18,7 @@ class Educational_area(models.Model):
 class Development_direction(models.Model):
   area = models.ForeignKey(
     Educational_area, null=False,
-    on_delete=models.CASCADE, verbose_name=u'Образовательная область'
+    on_delete=models.CASCADE, verbose_name='Образовательная область'
   )
 
   name = models.TextField(max_length=200, verbose_name='Название')
@@ -36,7 +36,7 @@ class Development_direction(models.Model):
 class Skill(models.Model):
   direction = models.ForeignKey(
     Development_direction, null=False,
-    on_delete=models.CASCADE, verbose_name=u'Направление развития'
+    on_delete=models.CASCADE, verbose_name='Направление развития'
   )
 
   name = models.TextField(max_length=200, verbose_name='Название')
@@ -54,10 +54,11 @@ class Skill(models.Model):
 class Specialist(models.Model):
   user = models.OneToOneField(
     User, null=True, blank=True,
-    on_delete=models.SET_NULL, verbose_name=u'Пользователь'
+    on_delete=models.SET_NULL, verbose_name='Пользователь'
   )
 
-  skills = models.ManyToManyField(Skill, through='Competence', verbose_name=u'Развиваемые навыки')
+  skills = models.ManyToManyField(Skill, through='Competence', verbose_name='Развиваемые навыки')
+  activities = models.ManyToManyField('Activity', through='Specialty', verbose_name='Направления деятельности')
 
   surname = models.TextField(max_length=200, verbose_name='Фамилия')
   name = models.TextField(max_length=200, verbose_name='Имя')
@@ -76,7 +77,7 @@ class Specialist(models.Model):
     if (self.surname):
       res += self.surname
       if (self.name and self.patronymic):
-        res += '{0}.{1}.'.format(self.name[0], self.patronymic[0])
+        res += ' {0}.{1}.'.format(self.name[0], self.patronymic[0])
     elif self.user:
       res = self.user.login
     else:
@@ -99,7 +100,7 @@ class Form(models.Model):
 class Method(models.Model):
   form = models.ForeignKey(
     Form, null=False,
-    on_delete=models.CASCADE, verbose_name=u'Форма'
+    on_delete=models.CASCADE, verbose_name='Форма'
   )
 
   name = models.TextField(max_length=200, verbose_name='Название')
@@ -115,7 +116,7 @@ class Method(models.Model):
 
 class Activity(models.Model):
   name = models.TextField(max_length=200, verbose_name='Название')
-  color = models.CharField(max_length=7, default='#CCCCCC', blank=True, verbose_name=u'Код цвета')
+  color = models.CharField(max_length=7, default='#CCCCCC', blank=True, verbose_name='Код цвета')
 
   class Meta:
     db_table = 'activity'
@@ -129,7 +130,7 @@ class Activity(models.Model):
 class Schedule(models.Model):
   activity = models.ForeignKey(
     Activity, null=False,
-    on_delete=models.CASCADE, verbose_name=u'Вид деятельности'
+    on_delete=models.CASCADE, verbose_name='Вид деятельности'
   )
 
   day = models.PositiveSmallIntegerField(verbose_name='Индекс дня недели')
@@ -170,4 +171,22 @@ class Competence(models.Model):
     return '{0} развивает {1}'.format(
       self.specialist,
       self.skill
+    )
+
+class Specialty(models.Model):
+  specialist = models.ForeignKey(Specialist, on_delete=models.CASCADE, verbose_name='Специалист')
+  activity = models.ForeignKey(Activity, on_delete=models.CASCADE, verbose_name='Вид деятельности')
+
+  is_main = models.BooleanField(default=True, verbose_name='Является ли основным')
+
+  class Meta:
+    db_table = 'specialty'
+    verbose_name = 'Направление деятельности специалиста'
+    verbose_name_plural = 'Направления деятельности специалиста'
+    ordering = ['specialist', 'activity']
+
+  def __str__(self):
+    return '{0} ответственен за {1}'.format(
+      self.specialist,
+      self.activity
     )
