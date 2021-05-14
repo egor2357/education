@@ -2,10 +2,14 @@ import Vue from "vue";
 import Vuex from "vuex";
 import axios from "@/plugins/axios";
 
+import auth from "@/store/auth"
+
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
-  modules: {},
+  modules: {
+    auth: auth
+  },
 });
 store.$axios = axios;
 

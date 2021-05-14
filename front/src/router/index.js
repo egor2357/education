@@ -6,15 +6,25 @@ Vue.use(VueRouter);
 const router = new VueRouter({
   mode: "history",
   routes: [
-    // {
-    //   path: "/",
-    //   name: "Main",
-    //   component: () => import("@/views/Main"),
-    //   meta: {
-    //     breadcrumbs: [{ title: "Главная" }],
-    //     roles: [1, 2]
-    //   },
-    // },
+    {
+      path: "/login",
+      name: "Login",
+      component: () => import("@/views/Login"),
+      meta: {
+        breadcrumbs: [],
+      },
+    },
+    {
+      path: "/skills",
+      name: "Skills",
+      component: () => import("@/components/TableSkill"),
+      meta: {
+        breadcrumbs: [
+          { title: "Навыки" }
+        ],
+        staffOnly: true
+      },
+    },
   ],
 });
 
