@@ -243,3 +243,26 @@ class Option(models.Model):
       self.specialist,
       self.activity
     )
+
+class Job(models.Model):
+  option = models.ForeignKey(
+    Option, null=False,
+    on_delete=models.CASCADE, verbose_name='Вариант занятия'
+  )
+
+  date = models.DateField(verbose_name='Дата проведения')
+  start_time = models.TimeField(verbose_name='Время начала')
+  comment = models.TextField(verbose_name='Комментарий по занятию')
+
+  class Meta:
+    db_table = 'job'
+    verbose_name = 'Занятие'
+    verbose_name_plural = 'Занятия'
+    ordering = ['date']
+
+  def __str__(self):
+    return '{0} {1} с {2}'.format(
+      self.option,
+      self.date.strftime('%m.%d'),
+      self.start_time.strftime('%H.%M')
+    )
