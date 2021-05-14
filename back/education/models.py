@@ -123,3 +123,31 @@ class Activity(models.Model):
 
   def __str__(self):
     return self.name
+
+class Schedule(models.Model):
+  activity = models.ForeignKey(
+    Activity, null=False,
+    on_delete=models.CASCADE, verbose_name=u'Вид деятельности'
+  )
+
+  day = models.PositiveSmallIntegerField(verbose_name='Индекс дня недели')
+  start_time = models.TimeField(verbose_name='Время начала')
+
+  weekday_names = [
+    'Понедельник', 'Вторник',
+    'Среда', 'Четверг',
+    'Пятница', 'Суббота', 'Воскресенье'
+  ]
+
+  class Meta:
+    db_table = 'schedule'
+    verbose_name = 'Шаблон занятия'
+    verbose_name_plural = 'Шаблоны занятия'
+    ordering = ['day', 'start_time']
+
+  def __str__(self):
+    return '{0}: {1} - {2}'.format(
+      self.weekday_names[self.day],
+      self.start_time.strftime('%H:%M'),
+      self.activity.name
+    )
