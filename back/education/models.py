@@ -215,3 +215,31 @@ class Specialty(models.Model):
       self.specialist,
       self.activity
     )
+
+class Option(models.Model):
+  method = models.ForeignKey(
+    Method, null=True, blank=True,
+    on_delete=models.SET_NULL, verbose_name='Способ проведения занятия'
+  )
+  specialist = models.ForeignKey(
+    Specialist, null=False,
+    on_delete=models.CASCADE, verbose_name='Специалист'
+  )
+  activity = models.ForeignKey(
+    Activity, null=False,
+    on_delete=models.CASCADE, verbose_name='Вид деятельсности')
+
+  caption = models.TextField(max_length=200, verbose_name='Подпись')
+
+  class Meta:
+    db_table = 'option'
+    verbose_name = 'Вариант занятия'
+    verbose_name_plural = 'Варианты занятия'
+    ordering = ['specialist']
+
+  def __str__(self):
+    return '{0} ({1}, {2})'.format(
+      self.caption,
+      self.specialist,
+      self.activity
+    )
