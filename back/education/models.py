@@ -266,3 +266,30 @@ class Job(models.Model):
       self.date.strftime('%m.%d'),
       self.start_time.strftime('%H.%M')
     )
+
+class Skill_report(models.Model):
+  job = models.ForeignKey(
+    Job, null=False,
+    on_delete=models.CASCADE, verbose_name='Занятие'
+  )
+  skill = models.ForeignKey(
+    Skill, null=False,
+    on_delete=models.CASCADE, verbose_name='Навык'
+  )
+
+  mark = models.PositiveSmallIntegerField(verbose_name='Успешность оттачивания навыка')
+  comment = models.TextField(verbose_name='Комментарий по занятию')
+
+  marks = ['Неудовлетворительно', 'Удовлетворительно', 'Хорошо']
+
+  class Meta:
+    db_table = 'skill_report'
+    verbose_name = 'Отчет по навыку'
+    verbose_name_plural = 'Отчеты по навыку'
+    ordering = ['job']
+
+  def __str__(self):
+    return 'Оценка за {0}: {1}'.format(
+      self.job,
+      self.marks[self.mark]
+    )
