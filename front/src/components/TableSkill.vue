@@ -172,12 +172,15 @@ export default {
 
 <style lang="sass">
 .td-label--sticky
+  position: -webkit-sticky
   position: sticky
   top: 0
 .ant-table-tbody > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td
   background-color: unset
 .ant-table-row
-  td:hover
-    background-color: #e6f7ff !important
+  td
+    vertical-align: baseline
+    &:hover
+      background-color: #e6f7ff !important
 
 </style>
