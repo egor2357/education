@@ -110,3 +110,16 @@ class Method(models.Model):
 
   def __str__(self):
     return self.name
+
+class Activity(models.Model):
+  name = models.TextField(max_length=200, verbose_name='Название')
+  color = models.CharField(max_length=7, default='#CCCCCC', blank=True, verbose_name=u'Код цвета')
+
+  class Meta:
+    db_table = 'activity'
+    verbose_name = 'Вид деятельности'
+    verbose_name_plural = 'Виды деятельности'
+    ordering = ['name']
+
+  def __str__(self):
+    return self.name
