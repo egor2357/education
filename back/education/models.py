@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Educational_area(models.Model):
   name = models.TextField(max_length=200, verbose_name='Название')
@@ -49,3 +50,34 @@ class Skill(models.Model):
 
   def __str__(self):
     return self.name
+
+class Specialist(models.Model):
+  user = models.OneToOneField(
+    User, null=True, blank=True,
+    on_delete=models.SET_NULL, verbose_name=u'Пользователь'
+  )
+
+  surname = models.TextField(max_length=200, verbose_name='Фамилия')
+  name = models.TextField(max_length=200, verbose_name='Имя')
+  patronymic = models.TextField(max_length=200, verbose_name='Отчество')
+  role = models.TextField(max_length=200, verbose_name='Роль')
+
+
+  class Meta:
+    db_table = 'specialist'
+    verbose_name = 'Специалист'
+    verbose_name_plural = 'Специалисты'
+    ordering = ['surname']
+
+  def __str__(self):
+    res = ''
+    if (self.surname):
+      res += self.surname
+      if (self.name and self.patronymic):
+        res += '{0}.{1}.'.format(self.name[0], self.patronymic[0])
+    elif self.user:
+      res = self.user.login
+    else:
+      res = '{0} {1} {2}'.format(self.surname, self.name, self.patronymic)
+
+    return res
