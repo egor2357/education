@@ -16,7 +16,7 @@ const getters = {
 };
 
 const actions = {
-  async login({ commit }) {
+  async login({ commit }, payload) {
     try {
       let res = await this.$axios.post("/api/login/", payload);
       if (res.status === 200) {
