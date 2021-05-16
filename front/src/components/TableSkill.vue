@@ -10,27 +10,117 @@
           return index;
         }
       "
-      :scroll="{y: 'calc(100vh - 260px)'}"
+      :scroll="{ y: 'calc(100vh - 260px)' }"
     >
       <template slot="area" slot-scope="text">
         <div class="td-label--sticky" v-if="!text.empty" :length="text.length">
-          {{ `${text.index}. ${text.name}` }}
+          <span>
+            {{ `${text.index}. ${text.name}` }}
+          </span>
+          <a-dropdown
+            :trigger="['click']"
+            placement="bottomLeft"
+            class="dropdown--hover"
+          >
+            <a-icon class="icon-button" type="dash"></a-icon>
+            <a-menu slot="overlay">
+              <a-menu-item key="1" @click="openModalEdit(text, 1)">
+                Изменить
+              </a-menu-item>
+              <a-menu-item key="2">
+                <a-popconfirm
+                  title="Вы действительно хотите удалить данную область?"
+                  ok-text="Да"
+                  cancel-text="Нет"
+                  @confirm="deleteRecord(text, 1)"
+                >
+                  <span>Удалить</span>
+                </a-popconfirm>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </div>
         <div class="need-delete" v-else />
       </template>
       <template slot="direction" slot-scope="text, record">
         <div class="td-label--sticky" v-if="!text.empty" :length="text.length">
-          {{ `${record.area.index}.${text.index}. ${text.name}` }}
+          <span>
+            {{ `${record.area.index}.${text.index}. ${text.name}` }}
+          </span>
+          <a-dropdown
+            :trigger="['click']"
+            placement="bottomLeft"
+            class="dropdown--hover"
+          >
+            <a-icon class="icon-button" type="dash"></a-icon>
+            <a-menu slot="overlay">
+              <a-menu-item key="1" @click="openModalEdit(text, 2)">
+                Изменить
+              </a-menu-item>
+              <a-menu-item key="2">
+                <a-popconfirm
+                  title="Вы действительно хотите удалить данное направление?"
+                  ok-text="Да"
+                  cancel-text="Нет"
+                  @confirm="deleteRecord(text, 2)"
+                >
+                  <span>Удалить</span>
+                </a-popconfirm>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </div>
         <div class="need-delete" v-else />
       </template>
+      <template slot="skill" slot-scope="text, record">
+        <div>
+          <span>
+            {{
+              `${record.area.index}.${record.direction.index}.${text.index}. ${text.name}`
+            }}
+          </span>
+          <a-dropdown
+            :trigger="['click']"
+            placement="bottomLeft"
+            class="dropdown--hover"
+          >
+            <a-icon class="icon-button" type="dash"></a-icon>
+            <a-menu slot="overlay">
+              <a-menu-item key="1" @click="openModalEdit(text, 3)">
+                Изменить
+              </a-menu-item>
+              <a-menu-item key="2">
+                <a-popconfirm
+                  title="Вы действительно хотите удалить данный навык?"
+                  ok-text="Да"
+                  cancel-text="Нет"
+                  @confirm="deleteRecord(text, 3)"
+                >
+                  <span>Удалить</span>
+                </a-popconfirm>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+        </div>
+      </template>
     </a-table>
+    <ModalSkills
+      v-if="displayModal"
+      :adding="modalAdding"
+      :type="modalType"
+      :editableData="modalEditableData"
+      @close="displayModal = false"
+    />
   </div>
 </template>
 
 <script>
+import ModalSkills from "@/components/Modals/ModalSkills";
 export default {
   name: "TableSkill",
+  components: {
+    ModalSkills,
+  },
   data() {
     return {
       columns: [
@@ -38,18 +128,6 @@ export default {
           title: "Образовательная область",
           dataIndex: "area",
           width: "13%",
-          // customRender: (text) => {
-          //   let obj = {
-          //     children:`${text.index}. ${text.name}`,
-          //     attrs: {}
-          //   };
-          //   if (!text.empty) {
-          //     obj.attrs.rowSpan = text.length;
-          //   } else {
-          //     obj.attrs.rowSpan = 0;
-          //   }
-          //   return obj
-          // },
           scopedSlots: {
             customRender: "area",
           },
@@ -58,18 +136,6 @@ export default {
           title: "Направление развития",
           dataIndex: "direction",
           width: "26%",
-          // customRender: (text, record) => {
-          //   let obj = {
-          //     children: `${record.area.index}.${text.index}. ${text.name}`,
-          //     attrs: {},
-          //   };
-          //   if (!text.empty) {
-          //     obj.attrs.rowSpan = text.length;
-          //   } else {
-          //     obj.attrs.rowSpan = 0;
-          //   }
-          //   return obj;
-          // },
           scopedSlots: {
             customRender: "direction",
           },
@@ -78,8 +144,8 @@ export default {
           title: "Навык",
           dataIndex: "skill",
           width: "61%",
-          customRender: (text, record) => {
-            return `${record.area.index}.${record.direction.index}.${text.index}. ${text.name}`;
+          scopedSlots: {
+            customRender: "skill",
           },
         },
       ],
@@ -145,10 +211,14 @@ export default {
           skill: { name: "Навык 10", index: 3 },
         },
       ],
+      displayModal: false,
+      modalAdding: true,
+      modalType: 0,
+      modalEditableData: {},
     };
   },
   created() {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 2; i++) {
       this.data = this.data.concat(this.data);
     }
   },
@@ -165,6 +235,16 @@ export default {
       for (let i = lengthForDel - 1; i >= 0; i--) {
         elForDel[i].parentNode.remove();
       }
+    },
+    openModalEdit(item, type) {
+      this.modalAdding = false;
+      this.modalType = type;
+      this.modalEditableData = item;
+      this.displayModal = true;
+    },
+    deleteRecord(item, type) {
+      console.log(type);
+      console.log(item);
     },
   },
 };
@@ -183,4 +263,11 @@ export default {
     &:hover
       background-color: #e6f7ff !important
 
+.ant-table-row
+  td
+    .dropdown--hover
+      display: none
+    &:hover
+      .dropdown--hover
+        display: unset
 </style>

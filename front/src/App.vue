@@ -38,4 +38,12 @@ export default {
 };
 </script>
 
-<style lang="sass"></style>
+<style lang="sass">
+.icon-button
+  &:hover
+    cursor: pointer
+    color: #1890ff
+  &.icon-exit
+    font-size: 20px
+    margin-top: 2px
+</style>

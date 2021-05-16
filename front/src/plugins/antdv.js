@@ -14,7 +14,9 @@ import {
   Card,
   FormModel,
   Input,
-  ConfigProvider
+  ConfigProvider,
+  Dropdown,
+  Popconfirm
 } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
@@ -32,6 +34,8 @@ Vue.use(Card);
 Vue.use(FormModel);
 Vue.use(Input);
 Vue.use(ConfigProvider);
+Vue.use(Dropdown);
+Vue.use(Popconfirm);
 
 Vue.prototype.$message = message;
 
