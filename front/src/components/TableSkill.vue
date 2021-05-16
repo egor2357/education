@@ -24,6 +24,9 @@
           >
             <a-icon class="icon-button" type="dash"></a-icon>
             <a-menu slot="overlay">
+              <a-menu-item key="0" @click="openModalAdd(1)">
+                Добавить
+              </a-menu-item>
               <a-menu-item key="1" @click="openModalEdit(text, 1)">
                 Изменить
               </a-menu-item>
@@ -54,6 +57,9 @@
           >
             <a-icon class="icon-button" type="dash"></a-icon>
             <a-menu slot="overlay">
+              <a-menu-item key="0" @click="openModalAdd(2)">
+                Добавить
+              </a-menu-item>
               <a-menu-item key="1" @click="openModalEdit(text, 2)">
                 Изменить
               </a-menu-item>
@@ -86,6 +92,9 @@
           >
             <a-icon class="icon-button" type="dash"></a-icon>
             <a-menu slot="overlay">
+              <a-menu-item key="0" @click="openModalAdd(3)">
+                Добавить
+              </a-menu-item>
               <a-menu-item key="1" @click="openModalEdit(text, 3)">
                 Изменить
               </a-menu-item>
@@ -110,6 +119,7 @@
       :type="modalType"
       :editableData="modalEditableData"
       @close="displayModal = false"
+      @closeSuccess="displayModal = false"
     />
   </div>
 </template>
@@ -223,10 +233,10 @@ export default {
     }
   },
   mounted() {
-    this.testMethod();
+    this.changeDOM();
   },
   methods: {
-    testMethod() {
+    changeDOM() {
       for (let el of document.getElementsByClassName("td-label--sticky")) {
         el.parentElement.rowSpan = Number(el.attributes[0].value);
       }
@@ -235,6 +245,11 @@ export default {
       for (let i = lengthForDel - 1; i >= 0; i--) {
         elForDel[i].parentNode.remove();
       }
+    },
+    openModalAdd(type) {
+      this.modalAdding = true;
+      this.modalType = type;
+      this.displayModal = true;
     },
     openModalEdit(item, type) {
       this.modalAdding = false;
