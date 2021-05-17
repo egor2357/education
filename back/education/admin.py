@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import Educational_area, Development_direction, Skill, Form, Method
 from .models import Specialist, Competence, Specialty, Presense
 from .models import Activity, Schedule
+from .models import Option, Option_file, Job, Skill_report, Job_file
 
 # Register your models here.
 class Educational_areaAdmin(admin.ModelAdmin):
@@ -77,7 +78,7 @@ class ScheduleInline(admin.TabularInline):
 
 class ScheduleAdmin(admin.ModelAdmin):
   search_fields = ('activity_name',)
-  list_filter = ('day', )
+  list_filter = ('day',)
 
 admin.site.register(Schedule, ScheduleAdmin)
 
@@ -88,3 +89,48 @@ class ActivityAdmin(admin.ModelAdmin):
   inlines = (ScheduleInline,)
 
 admin.site.register(Activity, ActivityAdmin)
+
+class Option_fileInline(admin.TabularInline):
+  model = Option_file
+  extra = 0
+
+class Option_fileAdmin(admin.ModelAdmin):
+  list_filter = ('option',)
+
+admin.site.register(Option_file, Option_fileAdmin)
+
+class OptionAdmin(admin.ModelAdmin):
+  search_fields = ('caption',)
+  list_display = ('specialist', 'activity', 'caption')
+  list_filter = ('specialist', 'activity')
+  filter_horizontal = ('skills',)
+  inlines = (Option_fileInline,)
+
+admin.site.register(Option, OptionAdmin)
+
+class Job_fileInline(admin.TabularInline):
+  model = Job_file
+  extra = 0
+
+class Job_fileAdmin(admin.ModelAdmin):
+  list_filter = ('job',)
+
+admin.site.register(Job_file, Job_fileAdmin)
+
+class Skill_reportInline(admin.TabularInline):
+  model = Skill_report
+  extra = 0
+
+class Skill_reportAdmin(admin.ModelAdmin):
+  list_filter = ('job', 'skill')
+  list_display = ('job', 'skill', 'mark', 'comment')
+
+admin.site.register(Skill_report, Skill_reportAdmin)
+
+class JobAdmin(admin.ModelAdmin):
+  search_fields = ('comment',)
+  list_display = ('date', 'option', 'start_time', 'comment')
+  inlines = (Job_fileInline, Skill_reportInline)
+  date_hierarchy = 'date'
+
+admin.site.register(Job, JobAdmin)
