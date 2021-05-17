@@ -280,6 +280,8 @@ class Job(models.Model):
     on_delete=models.CASCADE, verbose_name='Вариант занятия'
   )
 
+  reports = models.ManyToManyField('Skill', through='Skill_report', verbose_name='Отчеты по навыкам')
+
   date = models.DateField(verbose_name='Дата проведения')
   start_time = models.TimeField(verbose_name='Время начала')
   comment = models.TextField(verbose_name='Комментарий по занятию')
