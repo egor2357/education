@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import Educational_area, Development_direction, Skill, Form, Method
 from .models import Specialist, Competence, Specialty
+from .models import Activity, Schedule
 
 # Register your models here.
 class Educational_areaAdmin(admin.ModelAdmin):
@@ -63,3 +64,21 @@ class SpecialistAdmin(admin.ModelAdmin):
   inlines = (CompetenceInline, SpecialtyInline)
 
 admin.site.register(Specialist, SpecialistAdmin)
+
+class ScheduleInline(admin.TabularInline):
+  model = Schedule
+  extra = 0
+
+class ScheduleAdmin(admin.ModelAdmin):
+  search_fields = ('activity_name',)
+  list_filter = ('day', )
+
+admin.site.register(Schedule, ScheduleAdmin)
+
+class ActivityAdmin(admin.ModelAdmin):
+  search_fields = ('name',)
+  list_display = ('name', 'color')
+  filter_horizontal = ('skills',)
+  inlines = (ScheduleInline,)
+
+admin.site.register(Activity, ActivityAdmin)
