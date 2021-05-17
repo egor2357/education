@@ -253,9 +253,15 @@ class Option_file(models.Model):
   )
 
   def get_file_upload_to(instance, filename):
-    return 'option_files/{0}/%Y/%m/%d/{1}'.format(instance.option.activity.name, filename)
+    return 'option_files/{0}/{1}/{2}/{3}'.format(
+      instance.option.activity.name,
+      instance.option.specialist,
+      instance.option.caption,
+      filename
+    )
   file = models.FileField(
     upload_to=get_file_upload_to,
+    max_length=300,
     verbose_name='Файл'
   )
 
@@ -298,9 +304,16 @@ class Job_file(models.Model):
   )
 
   def get_file_upload_to(instance, filename):
-    return 'job_files/{0}/%Y/%m/%d/{1}'.format(instance.job.option.activity.name, filename)
+    return 'job_files/{0}/{1}/{2}/{3}/{4}'.format(
+      instance.job.option.activity.name,
+      instance.job.date.year,
+      instance.job.date.month,
+      instance.job.date.day,
+      filename
+    )
   file = models.FileField(
     upload_to=get_file_upload_to,
+    max_length=200,
     verbose_name='Файл'
   )
 
