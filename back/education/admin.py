@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import Educational_area, Development_direction, Skill, Form, Method
+from .models import Specialist, Competence, Specialty
 
 # Register your models here.
 class Educational_areaAdmin(admin.ModelAdmin):
@@ -35,3 +36,30 @@ class MethodAdmin(admin.ModelAdmin):
   list_filter = ('form',)
 
 admin.site.register(Method, MethodAdmin)
+
+class CompetenceInline(admin.TabularInline):
+  model = Competence
+  extra = 0
+
+class CompetenceAdmin(admin.ModelAdmin):
+  list_display = ('specialist', 'skill', 'coefficient')
+  list_filter = ('specialist', 'skill')
+
+admin.site.register(Competence, CompetenceAdmin)
+
+class SpecialtyInline(admin.TabularInline):
+  model = Specialty
+  extra = 0
+
+class SpecialtyAdmin(admin.ModelAdmin):
+  list_display = ('specialist', 'activity', 'is_main')
+  list_filter = ('specialist', 'activity')
+
+admin.site.register(Specialty, SpecialtyAdmin)
+
+class SpecialistAdmin(admin.ModelAdmin):
+  search_fields = ('surname', 'name', 'patronymic', 'role')
+  list_display = ('__str__', 'user')
+  inlines = (CompetenceInline, SpecialtyInline)
+
+admin.site.register(Specialist, SpecialistAdmin)
