@@ -348,6 +348,7 @@ class Skill_report(models.Model):
     verbose_name = 'Отчет по навыку'
     verbose_name_plural = 'Отчеты по навыку'
     ordering = ['job']
+    unique_together = ('job', 'skill')
 
   def __str__(self):
     return 'Оценка за {0}: {1}'.format(
