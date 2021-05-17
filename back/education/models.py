@@ -284,7 +284,7 @@ class Job(models.Model):
 
   date = models.DateField(verbose_name='Дата проведения')
   start_time = models.TimeField(verbose_name='Время начала')
-  comment = models.TextField(verbose_name='Комментарий по занятию')
+  comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
   class Meta:
     db_table = 'job'
