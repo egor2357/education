@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Educational_area, Development_direction, Skill
+from .models import Educational_area, Development_direction, Skill, Form, Method
 
 # Register your models here.
 class Educational_areaAdmin(admin.ModelAdmin):
@@ -22,3 +22,16 @@ class SkillAdmin(admin.ModelAdmin):
   list_filter = ('direction',)
 
 admin.site.register(Skill, SkillAdmin)
+
+class FormAdmin(admin.ModelAdmin):
+  search_fields = ('name',)
+  list_display = ('name',)
+
+admin.site.register(Form, FormAdmin)
+
+class MethodAdmin(admin.ModelAdmin):
+  search_fields = ('name',)
+  list_display = ('name', 'form')
+  list_filter = ('form',)
+
+admin.site.register(Method, MethodAdmin)
