@@ -1,9 +1,6 @@
 from django.contrib import admin
 
-from .models import Educational_area, Development_direction, Skill, Form, Method
-from .models import Specialist, Competence, Specialty, Presense
-from .models import Activity, Schedule
-from .models import Option, Option_file, Job, Skill_report, Job_file
+from .models import *
 
 # Register your models here.
 class Educational_areaAdmin(admin.ModelAdmin):
