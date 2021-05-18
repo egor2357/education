@@ -48,15 +48,16 @@ class UserSerializer(serializers.ModelSerializer):
     fields = ['id', 'username', 'is_staff', 'password', 'specialist']
 
   def create(self, validated_data):
-        user = super().create(validated_data)
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
+    user = super().create(validated_data)
+    user.set_password(validated_data['password'])
+    user.save()
+    return user
 
   def update(self, instance, validated_data):
-      instance.set_password(validated_data['password'])
-      instance.save()
-      return instance
+    instance.username = validated_data['username']
+    instance.set_password(validated_data['password'])
+    instance.save()
+    return instance
 
 class SkillSerializer(serializers.ModelSerializer):
   direction_id = serializers.IntegerField()

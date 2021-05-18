@@ -1,5 +1,6 @@
 from rest_framework import status, viewsets, views, permissions
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from django.contrib.auth import login, logout
 
@@ -29,18 +30,18 @@ class LogoutView(views.APIView):
     logout(request)
     return Response()
 
-class CurrentUserView(views.APIView):
-  permission_classes = (permissions.AllowAny,)
-  def get(self, request):
+class UserView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = User.objects.all()
+  serializer_class = UserSerializer
+
+  @action(detail=False)
+  def current(self, request, *args, **kwargs):
     if request.user.is_authenticated:
       return Response(UserSerializer(request.user).data)
     else:
       return Response({}, status=403)
 
-class UserView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
-  queryset = User.objects.all()
-  serializer_class = UserSerializer
 
 class Educational_areaView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
