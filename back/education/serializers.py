@@ -45,7 +45,7 @@ class UserSerializer(serializers.ModelSerializer):
   specialist = SpecialistSerializer(read_only=True)
   class Meta:
     model = User
-    fields = ['pk', 'username', 'is_staff', 'password', 'specialist']
+    fields = ['id', 'username', 'is_staff', 'password', 'specialist']
 
   def create(self, validated_data):
         user = super().create(validated_data)
@@ -62,7 +62,7 @@ class SkillSerializer(serializers.ModelSerializer):
   direction_id = serializers.IntegerField()
   class Meta:
     model = Skill
-    fields = ('pk', 'name', 'number', 'direction_id')
+    fields = ('id', 'name', 'number', 'direction_id')
 
 class Development_directionSerializer(serializers.ModelSerializer):
   area_id = serializers.IntegerField()
@@ -71,7 +71,7 @@ class Development_directionSerializer(serializers.ModelSerializer):
   )
   class Meta:
     model = Development_direction
-    fields = ('pk', 'name', 'number', 'skills', 'area_id')
+    fields = ('id', 'name', 'number', 'skills', 'area_id')
 
 class Educational_areaSerializer(serializers.ModelSerializer):
   development_directions = Development_directionSerializer(
@@ -79,4 +79,4 @@ class Educational_areaSerializer(serializers.ModelSerializer):
   )
   class Meta:
     model = Educational_area
-    fields = ('pk', 'name', 'number', 'development_directions')
+    fields = ('id', 'name', 'number', 'development_directions')
