@@ -23,3 +23,9 @@ class LoginView(views.APIView):
     user = serializer.validated_data['user']
     login(request, user)
     return Response(UserSerializer(user).data)
+
+class LogoutView(views.APIView):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  def get(self, request):
+    logout(request)
+    return Response()
