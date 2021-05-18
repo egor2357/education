@@ -39,3 +39,21 @@ class SpecialistSerializer(serializers.ModelSerializer):
   class Meta:
     model = Specialist
     fields = ['surname', 'name', 'patronymic', 'role']
+
+
+class UserSerializer(serializers.ModelSerializer):
+  specialist = SpecialistSerializer(read_only=True)
+  class Meta:
+    model = User
+    fields = ['pk', 'username', 'is_staff', 'password', 'specialist']
+
+  def create(self, validated_data):
+        user = super().create(validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+  def update(self, instance, validated_data):
+      instance.set_password(validated_data['password'])
+      instance.save()
+      return instance
