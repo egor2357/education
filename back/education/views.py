@@ -57,3 +57,14 @@ class SkillView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   queryset = Skill.objects.all()
   serializer_class = SkillSerializer
+
+class FormView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = Form.objects.all()
+  serializer_class = FormSerializer
+
+class MethodView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = Method.objects.all()
+  serializer_class = MethodSerializer
+

@@ -81,3 +81,18 @@ class Educational_areaSerializer(serializers.ModelSerializer):
   class Meta:
     model = Educational_area
     fields = ('id', 'name', 'number', 'development_directions')
+
+class MethodSerializer(serializers.ModelSerializer):
+  form_id = serializers.IntegerField()
+  class Meta:
+    model = Method
+    fields = ('id', 'name', 'form_id')
+
+class FormSerializer(serializers.ModelSerializer):
+  methods = MethodSerializer(
+    source='method_set', many=True, read_only=True
+  )
+  class Meta:
+    model = Form
+    fields = ('id', 'name', 'methods')
+
