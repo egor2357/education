@@ -29,3 +29,11 @@ class LogoutView(views.APIView):
   def get(self, request):
     logout(request)
     return Response()
+
+class CurrentUserView(views.APIView):
+  permission_classes = (permissions.AllowAny,)
+  def get(self, request):
+    if request.user.is_authenticated:
+      return Response(UserSerializer(request.user).data)
+    else:
+      return Response({}, status=403)
