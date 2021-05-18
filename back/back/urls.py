@@ -19,10 +19,8 @@ from django.conf import settings
 
 
 urlpatterns = [
-  path('', include('education.urls')),
+  path('api/', include('education.urls')),
 ]
 
 if settings.DEBUG:
-  urlpatterns = [
-    path('admin/', admin.site.urls),
-  ] + urlpatterns
+  urlpatterns.append(path('admin/', admin.site.urls))
