@@ -25,7 +25,6 @@ class LoginView(views.APIView):
     return Response(UserSerializer(user).data)
 
 class LogoutView(views.APIView):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   def get(self, request):
     logout(request)
     return Response()
@@ -39,17 +38,21 @@ class CurrentUserView(views.APIView):
       return Response({}, status=403)
 
 class UserView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
   queryset = User.objects.all()
   serializer_class = UserSerializer
 
 class Educational_areaView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
   queryset = Educational_area.objects.all()
   serializer_class = Educational_areaSerializer
 
 class Development_directionView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
   queryset = Development_direction.objects.all()
   serializer_class = Development_directionSerializer
 
 class SkillView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
   queryset = Skill.objects.all()
   serializer_class = SkillSerializer
