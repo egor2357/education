@@ -4,6 +4,9 @@ from .views import *
 
 router = routers.DefaultRouter()
 router.register(r'users', UserView)
+router.register(r'educational_areas', Educational_areaView)
+router.register(r'development_directions', Development_directionView)
+router.register(r'skills', SkillView)
 
 urlpatterns = [
   path('', include(router.urls)),
