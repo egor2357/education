@@ -57,3 +57,26 @@ class UserSerializer(serializers.ModelSerializer):
       instance.set_password(validated_data['password'])
       instance.save()
       return instance
+
+class SkillSerializer(serializers.ModelSerializer):
+  direction_id = serializers.IntegerField()
+  class Meta:
+    model = Skill
+    fields = ('pk', 'name', 'number', 'direction_id')
+
+class Development_directionSerializer(serializers.ModelSerializer):
+  area_id = serializers.IntegerField()
+  skills = SkillSerializer(
+    source='skill_set', many=True, read_only=True
+  )
+  class Meta:
+    model = Development_direction
+    fields = ('pk', 'name', 'number', 'skills', 'area_id')
+
+class Educational_areaSerializer(serializers.ModelSerializer):
+  development_directions = Development_directionSerializer(
+    source='development_direction_set', many=True, read_only=True
+  )
+  class Meta:
+    model = Educational_area
+    fields = ('pk', 'name', 'number', 'development_directions')
