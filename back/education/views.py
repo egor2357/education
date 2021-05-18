@@ -37,3 +37,7 @@ class CurrentUserView(views.APIView):
       return Response(UserSerializer(request.user).data)
     else:
       return Response({}, status=403)
+
+class UserView(viewsets.ModelViewSet):
+  queryset = User.objects.all()
+  serializer_class = UserSerializer
