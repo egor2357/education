@@ -41,3 +41,15 @@ class CurrentUserView(views.APIView):
 class UserView(viewsets.ModelViewSet):
   queryset = User.objects.all()
   serializer_class = UserSerializer
+
+class Educational_areaView(viewsets.ModelViewSet):
+  queryset = Educational_area.objects.all()
+  serializer_class = Educational_areaSerializer
+
+class Development_directionView(viewsets.ModelViewSet):
+  queryset = Development_direction.objects.all()
+  serializer_class = Development_directionSerializer
+
+class SkillView(viewsets.ModelViewSet):
+  queryset = Skill.objects.all()
+  serializer_class = SkillSerializer
