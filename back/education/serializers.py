@@ -34,3 +34,8 @@ class LoginSerializer(serializers.Serializer):
       )
 
     return {'user': user}
+
+class SpecialistSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Specialist
+    fields = ['surname', 'name', 'patronymic', 'role']
