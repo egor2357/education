@@ -35,17 +35,55 @@ class LoginSerializer(serializers.Serializer):
 
     return {'user': user}
 
+class SkillSerializer(serializers.ModelSerializer):
+  direction_id = serializers.IntegerField()
+  class Meta:
+    model = Skill
+    fields = ('id', 'name', 'number', 'direction_id')
+
+class ScheduleSerializer(serializers.ModelSerializer):
+  activity_id = serializers.IntegerField()
+  class Meta:
+    model = Schedule
+    fields = ('id', 'day', 'start_time', 'activity_id')
+
+class ActivitySerializer(serializers.ModelSerializer):
+  skills = SkillSerializer(
+    many=True, read_only=True
+  )
+  schedule = ScheduleSerializer(
+    source='schedule_set', many=True, read_only=True
+  )
+  class Meta:
+    model = Activity
+    fields = ('id', 'name', 'color', 'skills', 'schedule')
+
 class SpecialistSerializer(serializers.ModelSerializer):
+  skills = SkillSerializer(
+    many=True, read_only=True
+  )
+  activities = ActivitySerializer(
+    many=True, read_only=True
+  )
+  user_id = serializers.IntegerField()
   class Meta:
     model = Specialist
-    fields = ['surname', 'name', 'patronymic', 'role']
-
+    fields = (
+      'surname', 'name',
+      'patronymic', 'role',
+      'skills', 'activities',
+      'user_id'
+    )
 
 class UserSerializer(serializers.ModelSerializer):
   specialist = SpecialistSerializer(read_only=True)
   class Meta:
     model = User
-    fields = ['id', 'username', 'is_staff', 'password', 'specialist']
+    fields = (
+      'id', 'username',
+      'is_staff', 'password',
+      'specialist'
+    )
 
   def create(self, validated_data):
     user = super().create(validated_data)
@@ -58,12 +96,6 @@ class UserSerializer(serializers.ModelSerializer):
     instance.set_password(validated_data['password'])
     instance.save()
     return instance
-
-class SkillSerializer(serializers.ModelSerializer):
-  direction_id = serializers.IntegerField()
-  class Meta:
-    model = Skill
-    fields = ('id', 'name', 'number', 'direction_id')
 
 class Development_directionSerializer(serializers.ModelSerializer):
   area_id = serializers.IntegerField()
@@ -95,4 +127,26 @@ class FormSerializer(serializers.ModelSerializer):
   class Meta:
     model = Form
     fields = ('id', 'name', 'methods')
+
+class Option_fileSerializer(serializers.ModelSerializer):
+  option_id = serializers.IntegerField()
+  class Meta:
+    model = Option_file
+    fields = ('id', 'file', 'option_id')
+
+class OptionSerializer(serializers.ModelSerializer):
+  method_id = serializers.IntegerField()
+  activity_id = serializers.IntegerField()
+  specialist_id = serializers.IntegerField()
+  option_files = Option_fileSerializer(
+    source='option_file_set', many=True, read_only=True
+  )
+  class Meta:
+    model = Option
+    fields = (
+      'id', 'caption',
+      'method_id', 'specialist_id',
+      'activity_id', 'option_files'
+    )
+
 

@@ -68,3 +68,27 @@ class MethodView(viewsets.ModelViewSet):
   queryset = Method.objects.all()
   serializer_class = MethodSerializer
 
+class ScheduleView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = Schedule.objects.all()
+  serializer_class = ScheduleSerializer
+
+class ActivityView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = Activity.objects.all()
+  serializer_class = ActivitySerializer
+
+class Option_fileView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = Option_file.objects.all()
+  serializer_class = Option_fileSerializer
+
+class OptionView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = Option.objects.all()
+  serializer_class = OptionSerializer
+
+class SpecialistView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = Specialist.objects.all()
+  serializer_class = SpecialistSerializer
