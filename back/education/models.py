@@ -223,8 +223,8 @@ class Option(models.Model):
     on_delete=models.SET_NULL, verbose_name='Способ проведения занятия'
   )
   specialist = models.ForeignKey(
-    Specialist, null=False,
-    on_delete=models.CASCADE, verbose_name='Специалист'
+    Specialist, null=True,
+    on_delete=models.SET_NULL, verbose_name='Специалист'
   )
   activity = models.ForeignKey(
     Activity, null=False,
