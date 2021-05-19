@@ -95,3 +95,18 @@ class SpecialistView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   queryset = Specialist.objects.all()
   serializer_class = SpecialistSerializer
+
+class Job_fileView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = Job_file.objects.all()
+  serializer_class = Job_fileSerializer
+
+class Skill_reportView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = Skill_report.objects.all()
+  serializer_class = Skill_reportSerializer
+
+class JobView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = Job.objects.all()
+  serializer_class = JobSerializer

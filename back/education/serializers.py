@@ -174,4 +174,35 @@ class OptionSerializer(serializers.ModelSerializer):
       'activity_id', 'option_files'
     )
 
+class Job_fileSerializer(serializers.ModelSerializer):
+  job_id = serializers.IntegerField()
+  class Meta:
+    model = Job_file
+    fields = ('id', 'file', 'job_id')
+
+class Skill_reportSerializer(serializers.ModelSerializer):
+  job_id = serializers.IntegerField()
+  skill_id = serializers.IntegerField()
+  class Meta:
+    model = Skill_report
+    fields = (
+      'id', 'job_id', 'skill_id',
+      'mark', 'comment'
+    )
+
+class JobSerializer(serializers.ModelSerializer):
+  option_id = serializers.IntegerField()
+  reports = Skill_reportSerializer(
+    many=True, read_only=True
+  )
+  job_files = Job_fileSerializer(
+    source='job_file_set', many=True, read_only=True
+  )
+  class Meta:
+    model = Job
+    fields = (
+      'id', 'reports',
+      'option_id', 'job_files',
+      'date', 'start_time', 'comment'
+    )
 
