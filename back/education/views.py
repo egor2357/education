@@ -24,6 +24,7 @@ class UserView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   queryset = User.objects.all()
   serializer_class = UserSerializer
+  permission_classes = (permissions.IsAuthenticated,)
 
   @action(detail=False)
   def current(self, request, *args, **kwargs):
@@ -50,70 +51,84 @@ class UserView(viewsets.ModelViewSet):
 
 class Educational_areaView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Educational_area.objects.all()
   serializer_class = Educational_areaSerializer
 
 class Development_directionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Development_direction.objects.all()
   serializer_class = Development_directionSerializer
 
 class SkillView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Skill.objects.all()
   serializer_class = SkillSerializer
 
 class FormView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Form.objects.all()
   serializer_class = FormSerializer
 
 class MethodView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Method.objects.all()
   serializer_class = MethodSerializer
 
 class ScheduleView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Schedule.objects.all()
   serializer_class = ScheduleSerializer
 
 class ActivityView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Activity.objects.all()
   serializer_class = ActivitySerializer
 
 class Option_fileView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Option_file.objects.all()
   serializer_class = Option_fileSerializer
 
 class OptionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Option.objects.all()
   serializer_class = OptionSerializer
 
 class PresenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Presence.objects.all()
   serializer_class = PresenceSerializer
 
 class SpecialistView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Specialist.objects.all()
   serializer_class = SpecialistSerializer
 
 class Job_fileView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Job_file.objects.all()
   serializer_class = Job_fileSerializer
 
 class Skill_reportView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Skill_report.objects.all()
   serializer_class = Skill_reportSerializer
 
 class JobView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
   queryset = Job.objects.all()
   serializer_class = JobSerializer
