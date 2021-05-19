@@ -64,6 +64,7 @@ class Specialist(models.Model):
   name = models.CharField(max_length=20, blank=True, verbose_name='Имя')
   patronymic = models.CharField(max_length=20, blank=True, verbose_name='Отчество')
   role = models.TextField(max_length=200, blank=True, verbose_name='Роль')
+  is_active = models.BooleanField(default=True, verbose_name='Активен ли')
 
 
   class Meta:

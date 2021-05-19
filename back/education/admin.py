@@ -64,7 +64,8 @@ admin.site.register(Specialty, SpecialtyAdmin)
 
 class SpecialistAdmin(admin.ModelAdmin):
   search_fields = ('surname', 'name', 'patronymic', 'role')
-  list_display = ('__str__', 'user')
+  list_display = ('__str__', 'user', 'is_active')
+  list_filter = ('is_active',)
   inlines = (CompetenceInline, SpecialtyInline)
 
 admin.site.register(Specialist, SpecialistAdmin)
