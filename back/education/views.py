@@ -12,6 +12,13 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
   def enforce_csrf(self, request):
     return
 
+class IsAdminOrReadOnly(permissions.BasePermission):
+  def has_permission(self, request, view):
+    if request.method in permissions.SAFE_METHODS:
+      return True
+    else:
+      return request.user.is_staff
+
 # Create your views here.
 class UserView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
