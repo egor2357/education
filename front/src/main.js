@@ -5,6 +5,8 @@ import router from "@/router";
 import store from "@/store";
 import axios from "@/plugins/axios";
 
+import 'vue-swatches/dist/vue-swatches.css';
+
 Vue.prototype.$axios = axios;
 Vue.config.productionTip = false;
 

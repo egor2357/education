@@ -25,6 +25,15 @@ const router = new VueRouter({
       },
     },
     {
+      path: "/activities-types",
+      name: "ActivitiesTypes",
+      component: () => import("@/views/ActivitiesTypes"),
+      meta: {
+        breadcrumbs: [{ title: "Вид деятельности/навыки" }],
+        staffOnly: true,
+      },
+    },
+    {
       path: "/404",
       name: "Page404",
       component: () => import("@/views/Page404"),

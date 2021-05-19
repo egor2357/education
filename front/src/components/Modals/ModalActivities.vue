@@ -6,8 +6,8 @@
     okText="Сохранить"
     cancelText="Отмена"
     :title="title"
-    v-if="type !== 0"
     @confirmLoading="loadingButton"
+    class="modal-activities"
   >
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <template v-for="(field, index) in fields">
@@ -24,11 +24,12 @@
             @change="fieldChanged(field)"
             :ref="`field${index}`"
           />
-          <a-input-number
-            v-else-if="field.type === 'number'"
+          <v-swatches
+            v-else-if="field.type === 'color'"
             v-model="form[field.name]"
             @change="fieldChanged(field)"
-            :min="0"
+            shapes="circles"
+            :swatches="swatches"
           />
         </a-form-model-item>
       </template>
@@ -37,15 +38,16 @@
 </template>
 
 <script>
+import VSwatches from "vue-swatches";
 export default {
-  name: "ModalSkills",
+  name: "ModalActivities",
+  components: {
+    VSwatches,
+  },
   props: {
     adding: {
       type: Boolean,
       default: true,
-    },
-    type: {
-      type: Number,
     },
     editableData: Object,
   },
@@ -53,7 +55,7 @@ export default {
     return {
       form: {
         name: null,
-        number: null,
+        color: null,
       },
       title: "",
       layout: {
@@ -69,9 +71,9 @@ export default {
           help: "",
         },
         {
-          name: "number",
-          label: "Номер",
-          type: "number",
+          name: "color",
+          label: "Цвет",
+          type: "color",
           validateStatus: "",
           help: "",
         },
@@ -84,21 +86,65 @@ export default {
             message: "Пожалуйста, введите название",
           },
         ],
-        number: [
+        color: [
           {
             trigger: "blur",
             required: true,
-            message: "Пожалуйста, введите номер",
+            message: "Пожалуйста, введите цвет",
           },
         ],
       },
       loadingButton: false,
+      swatches: [
+        "#5c0011",
+        "#a8071a",
+        "#cf1322",
+        "#ff4d4f",
+        "#ffa39e",
+        "#610b00",
+        "#ad2102",
+        "#fa541c",
+        "#ff9c6e",
+        "#ffbb96",
+        "#612500",
+        "#ad4e00",
+        "#fa8c16",
+        "#ffc069",
+        "#613400",
+        "#ad6800",
+        "#faad14",
+        "#ffd666",
+        "#614700",
+        "#ad8b00",
+        "#fadb14",
+        "#fff566",
+        "#254000",
+        "#5b8c00",
+        "#a0d911",
+        "#d3f261",
+        "#092b00",
+        "#237804",
+        "#52c41a",
+        "#95de64",
+        "#002329",
+        "#006d75",
+        "#08979c",
+        "#36cfc9",
+        "#002766",
+        "#0050b3",
+        "#1890ff",
+        "#69c0ff",
+        "#120338",
+        "#391085",
+        "#722ed1",
+        "#b37feb",
+      ],
     };
   },
   methods: {
     handleCancel() {
       this.form.name = null;
-      this.form.number = null;
+      this.form.color = null;
       this.$emit("close");
     },
     async handleOk() {
@@ -109,30 +155,14 @@ export default {
           let successCode = 0;
           let successMessage = "";
 
-          if (this.type === 1 && this.adding) {
-            dispatchName = "skills/addArea";
+          if (this.adding) {
+            dispatchName = "activities/addActivity";
             successCode = 201;
-            successMessage = "Образовательная область успешно добавлена";
-          } else if (this.type === 1 && !this.adding) {
-            dispatchName = "skills/editArea";
+            successMessage = "Вид деятельности успешно добавлен";
+          } else if (!this.adding) {
+            dispatchName = "activities/editActivity";
             successCode = 200;
-            successMessage = "Образовательная область успешно изменена";
-          } else if (this.type === 2 && this.adding) {
-            dispatchName = "skills/addDirection";
-            successCode = 201;
-            successMessage = "Направление развития успешно добавлено";
-          } else if (this.type === 2 && !this.adding) {
-            dispatchName = "skills/editDirection";
-            successCode = 200;
-            successMessage = "Направлние развития успешно изменено";
-          } else if (this.type === 3 && this.adding) {
-            dispatchName = "skills/addSkill";
-            successCode = 201;
-            successMessage = "Навык успешно добавлен";
-          } else if (this.type === 3 && !this.adding) {
-            dispatchName = "skills/editSkill";
-            successCode = 200;
-            successMessage = "Навык успешно изменен";
+            successMessage = "Вид деятельности успешно изменен";
           }
           try {
             let res = await this.$store.dispatch(dispatchName, this.form);
@@ -177,37 +207,17 @@ export default {
     },
   },
   created() {
+    this.form.name = null;
+    this.form.color = null;
     if (this.adding) {
-      this.title += "Добавление ";
+      this.title += "Добавление вида деятельности";
     } else {
-      this.title += "Изменение ";
+      this.title += "Изменение вида деятельности";
       this.editableData.id ? (this.form.id = this.editableData.id) : "";
       this.editableData.name ? (this.form.name = this.editableData.name) : "";
-      this.editableData.number
-        ? (this.form.number = this.editableData.number)
+      this.editableData.color
+        ? (this.form.color = this.editableData.color)
         : "";
-    }
-    if (this.type === 1) {
-      this.title += "образовательной области";
-      this.editableData.lastNumberArea
-        ? (this.form.number = this.editableData.lastNumberArea)
-        : "";
-    } else if (this.type === 2) {
-      this.editableData.areaId
-        ? (this.form.area_id = this.editableData.areaId)
-        : "";
-      this.editableData.lastNumberDirection
-        ? (this.form.number = this.editableData.lastNumberDirection)
-        : "";
-      this.title += "направления развития";
-    } else if (this.type === 3) {
-      this.editableData.directionId
-        ? (this.form.direction_id = this.editableData.directionId)
-        : "";
-      this.editableData.lastNumberSkill
-        ? (this.form.number = this.editableData.lastNumberSkill)
-        : "";
-      this.title += "навыка";
     }
     document.addEventListener("keydown", this.keydown);
   },
@@ -219,4 +229,10 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style lang="sass">
+.vue-swatches__wrapper
+  width: 320px !important
+.modal-activities
+  .ant-modal-body
+    padding-bottom: 0
+</style>

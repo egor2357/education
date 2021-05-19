@@ -18,7 +18,10 @@ import {
   Dropdown,
   Popconfirm,
   Result,
-  InputNumber
+  InputNumber,
+  Tabs,
+  List,
+  Avatar
 } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
@@ -40,6 +43,9 @@ Vue.use(Dropdown);
 Vue.use(Popconfirm);
 Vue.use(Result);
 Vue.use(InputNumber);
+Vue.use(Tabs);
+Vue.use(List);
+Vue.use(Avatar);
 
 Vue.prototype.$message = message;
 Vue.prototype.$confirm = Modal.confirm;
