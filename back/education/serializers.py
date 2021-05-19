@@ -59,14 +59,8 @@ class ActivitySerializer(FlexFieldsModelSerializer):
     model = Activity
     fields = ('id', 'name', 'color', 'skills', 'schedule')
     expandable_fields = {
-      'skills': (
-        SkillSerializer,
-        {'many': True, 'read_only': True}
-      ),
-      'schedule': (
-        ScheduleSerializer,
-        {'source': 'schedule_set', 'many': True, 'read_only': True}
-      ),
+      'skills': SkillSerializer,
+      'schedule': ScheduleSerializer,
     }
 
 class PresenceSerializer(serializers.ModelSerializer):
@@ -98,18 +92,9 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
       'presence', 'user_id'
     )
     expandable_fields = {
-      'activities': (
-        ActivitySerializer,
-        {'many': True, 'read_only': True}
-      ),
-      'skills': (
-        SkillSerializer,
-        {'many': True, 'read_only': True}
-      ),
-      'presence': (
-        PresenceSerializer,
-        {'source': 'presence_set', 'many': True, 'read_only': True}
-      ),
+      'activities': ActivitySerializer,
+      'skills': SkillSerializer,
+      'presence': PresenceSerializer,
     }
 
 class UserSerializer(FlexFieldsModelSerializer):
