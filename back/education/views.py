@@ -24,7 +24,7 @@ class UserView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   queryset = User.objects.all()
   serializer_class = UserSerializer
-  permission_classes = (permissions.IsAuthenticated,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
 
   @action(detail=False)
   def current(self, request, *args, **kwargs):
@@ -48,43 +48,43 @@ class UserView(viewsets.ModelViewSet):
 
 class Educational_areaView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
-  permission_classes = (permissions.IsAuthenticated,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Educational_area.objects.all()
   serializer_class = Educational_areaSerializer
 
 class Development_directionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
-  permission_classes = (permissions.IsAuthenticated,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Development_direction.objects.all()
   serializer_class = Development_directionSerializer
 
 class SkillView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
-  permission_classes = (permissions.IsAuthenticated,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Skill.objects.all()
   serializer_class = SkillSerializer
 
 class FormView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
-  permission_classes = (permissions.IsAuthenticated,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Form.objects.all()
   serializer_class = FormSerializer
 
 class MethodView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
-  permission_classes = (permissions.IsAuthenticated,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Method.objects.all()
   serializer_class = MethodSerializer
 
 class ScheduleView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
-  permission_classes = (permissions.IsAuthenticated,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Schedule.objects.all()
   serializer_class = ScheduleSerializer
 
 class ActivityView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
-  permission_classes = (permissions.IsAuthenticated,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Activity.objects.all()
   serializer_class = ActivitySerializer
 
@@ -101,14 +101,14 @@ class OptionView(viewsets.ModelViewSet):
   serializer_class = OptionSerializer
 
 class PresenceView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
+  authentication_classes = (CsrfExemptSessionAuthentication, IsAdminOrReadOnly)
   permission_classes = (permissions.IsAuthenticated,)
   queryset = Presence.objects.all()
   serializer_class = PresenceSerializer
 
 class SpecialistView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
-  permission_classes = (permissions.IsAuthenticated,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Specialist.objects.all()
   serializer_class = SpecialistSerializer
 
