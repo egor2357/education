@@ -18,8 +18,6 @@ router.register(r'option', OptionView)
 
 urlpatterns = [
   path('', include(router.urls)),
-  path('login/', LoginView.as_view()),
-  path('logout/', LogoutView.as_view()),
 
   path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

@@ -13,23 +13,6 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     return
 
 # Create your views here.
-class LoginView(views.APIView):
-  permission_classes = (permissions.AllowAny,)
-  authentication_classes = (CsrfExemptSessionAuthentication,)
-  serializer_class = LoginSerializer
-
-  def post(self, request):
-    serializer = self.serializer_class(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    user = serializer.validated_data['user']
-    login(request, user)
-    return Response(UserSerializer(user).data)
-
-class LogoutView(views.APIView):
-  def get(self, request):
-    logout(request)
-    return Response()
-
 class UserView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   queryset = User.objects.all()
@@ -42,6 +25,21 @@ class UserView(viewsets.ModelViewSet):
     else:
       return Response({}, status=403)
 
+  @action(detail=False)
+  def logout(self, request, *args, **kwargs):
+    logout(request)
+    return Response()
+
+  @action(
+    detail=False, methods=['post',],
+    permission_classes = (permissions.AllowAny,), serializer_class = LoginSerializer
+  )
+  def login(self, request, *args, **kwargs):
+    serializer = LoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.validated_data['user']
+    login(request, user)
+    return Response(UserSerializer(user).data)
 
 class Educational_areaView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
