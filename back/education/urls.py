@@ -12,8 +12,9 @@ router.register(r'methods', MethodView)
 router.register(r'option_files', Option_fileView)
 router.register(r'activities', ActivityView)
 router.register(r'schedule', ScheduleView)
-router.register(r'specialist', SpecialistView)
-router.register(r'option', OptionView)
+router.register(r'specialists', SpecialistView)
+router.register(r'options', OptionView)
+router.register(r'presence', PresenceView)
 
 
 urlpatterns = [

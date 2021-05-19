@@ -70,11 +70,11 @@ class SpecialistAdmin(admin.ModelAdmin):
 
 admin.site.register(Specialist, SpecialistAdmin)
 
-class PresenseAdmin(admin.ModelAdmin):
+class PresenceAdmin(admin.ModelAdmin):
   list_filter = ('specialist', 'is_available')
   list_display = ('specialist', 'date_from', 'date_to', 'is_available')
 
-admin.site.register(Presense, PresenseAdmin)
+admin.site.register(Presence, PresenceAdmin)
 
 class ScheduleInline(admin.TabularInline):
   model = Schedule

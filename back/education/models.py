@@ -86,7 +86,7 @@ class Specialist(models.Model):
 
     return res
 
-class Presense(models.Model):
+class Presence(models.Model):
   specialist = models.ForeignKey(
     Specialist, null=False,
     on_delete=models.CASCADE, verbose_name='Специалист'
@@ -97,7 +97,7 @@ class Presense(models.Model):
   is_available = models.BooleanField(default=True, verbose_name='Является ли доступным')
 
   class Meta:
-    db_table = 'presense'
+    db_table = 'presence'
     verbose_name = 'Присутствие'
     verbose_name_plural = 'Присутствия'
     ordering = ['date_from']

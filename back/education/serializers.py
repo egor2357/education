@@ -59,36 +59,63 @@ class ActivitySerializer(FlexFieldsModelSerializer):
     model = Activity
     fields = ('id', 'name', 'color', 'skills', 'schedule')
     expandable_fields = {
-      'skills': (SkillSerializer, {'many': True, 'read_only': True}),
-      'schedule': (ScheduleSerializer, {'source': 'schedule_set', 'many': True, 'read_only': True}),
+      'skills': (
+        SkillSerializer,
+        {'many': True, 'read_only': True}
+      ),
+      'schedule': (
+        ScheduleSerializer,
+        {'source': 'schedule_set', 'many': True, 'read_only': True}
+      ),
     }
+
+class PresenceSerializer(serializers.ModelSerializer):
+  specialist_id = serializers.IntegerField()
+  class Meta:
+    model = Presence
+    fields = ('id', 'specialist_id', 'date_from', 'date_to', 'is_available')
 
 class SpecialistSerializer(FlexFieldsModelSerializer):
   user_id = serializers.IntegerField()
 
   activities = ActivitySerializer(
-    many=True, read_only=True
+    many=True, read_only=True,
+    omit=['schedule', 'skills']
   )
   skills = SkillSerializer(
     many=True, read_only=True
   )
+  presence = PresenceSerializer(
+    source='presence_set', many=True, read_only=True
+  )
   class Meta:
     model = Specialist
     fields = (
+      'id',
       'surname', 'name',
       'patronymic', 'role',
       'skills', 'activities',
-      'user_id'
+      'presence', 'user_id'
     )
     expandable_fields = {
-      'activities': (ActivitySerializer, {'many': True, 'read_only': True}),
-      'skills': (SkillSerializer, {'many': True, 'read_only': True}),
+      'activities': (
+        ActivitySerializer,
+        {'many': True, 'read_only': True}
+      ),
+      'skills': (
+        SkillSerializer,
+        {'many': True, 'read_only': True}
+      ),
+      'presence': (
+        PresenceSerializer,
+        {'source': 'presence_set', 'many': True, 'read_only': True}
+      ),
     }
 
 class UserSerializer(FlexFieldsModelSerializer):
   specialist = SpecialistSerializer(
     read_only=True,
-    omit=['skills', 'activities'],
+    omit=['skills', 'activities', 'presence'],
   )
   class Meta:
     model = User

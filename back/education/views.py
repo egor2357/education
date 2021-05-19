@@ -86,6 +86,11 @@ class OptionView(viewsets.ModelViewSet):
   queryset = Option.objects.all()
   serializer_class = OptionSerializer
 
+class PresenceView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  queryset = Presence.objects.all()
+  serializer_class = PresenceSerializer
+
 class SpecialistView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   queryset = Specialist.objects.all()
