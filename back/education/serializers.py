@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_flex_fields import FlexFieldsModelSerializer
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -58,13 +59,7 @@ class ActivitySerializer(serializers.ModelSerializer):
     model = Activity
     fields = ('id', 'name', 'color', 'skills', 'schedule')
 
-class SpecialistSerializer(serializers.ModelSerializer):
-  skills = SkillSerializer(
-    many=True, read_only=True
-  )
-  activities = ActivitySerializer(
-    many=True, read_only=True
-  )
+class SpecialistSerializer(FlexFieldsModelSerializer):
   user_id = serializers.IntegerField()
   class Meta:
     model = Specialist
@@ -74,9 +69,16 @@ class SpecialistSerializer(serializers.ModelSerializer):
       'skills', 'activities',
       'user_id'
     )
+    expandable_fields = {
+      'activities': (ActivitySerializer, {'many': True, 'read_only': True}),
+      'skills': (SkillSerializer, {'many': True, 'read_only': True}),
+    }
 
-class UserSerializer(serializers.ModelSerializer):
-  specialist = SpecialistSerializer(read_only=True)
+class UserSerializer(FlexFieldsModelSerializer):
+  specialist = SpecialistSerializer(
+    read_only=True,
+    omit=['skills', 'activities'],
+  )
   class Meta:
     model = User
     fields = (
