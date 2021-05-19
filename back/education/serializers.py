@@ -48,7 +48,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
     model = Schedule
     fields = ('id', 'day', 'start_time', 'activity_id')
 
-class ActivitySerializer(serializers.ModelSerializer):
+class ActivitySerializer(FlexFieldsModelSerializer):
   skills = SkillSerializer(
     many=True, read_only=True
   )
@@ -58,9 +58,20 @@ class ActivitySerializer(serializers.ModelSerializer):
   class Meta:
     model = Activity
     fields = ('id', 'name', 'color', 'skills', 'schedule')
+    expandable_fields = {
+      'skills': (SkillSerializer, {'many': True, 'read_only': True}),
+      'schedule': (ScheduleSerializer, {'source': 'schedule_set', 'many': True, 'read_only': True}),
+    }
 
 class SpecialistSerializer(FlexFieldsModelSerializer):
   user_id = serializers.IntegerField()
+
+  activities = ActivitySerializer(
+    many=True, read_only=True
+  )
+  skills = SkillSerializer(
+    many=True, read_only=True
+  )
   class Meta:
     model = Specialist
     fields = (
