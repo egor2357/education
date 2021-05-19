@@ -16,7 +16,9 @@ import {
   Input,
   ConfigProvider,
   Dropdown,
-  Popconfirm
+  Popconfirm,
+  Result,
+  InputNumber
 } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
@@ -36,7 +38,10 @@ Vue.use(Input);
 Vue.use(ConfigProvider);
 Vue.use(Dropdown);
 Vue.use(Popconfirm);
+Vue.use(Result);
+Vue.use(InputNumber);
 
 Vue.prototype.$message = message;
+Vue.prototype.$confirm = Modal.confirm;
 
 export default Vue;

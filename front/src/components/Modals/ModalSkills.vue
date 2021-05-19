@@ -10,9 +10,28 @@
     @confirmLoading="loadingButton"
   >
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
-      <a-form-model-item label="Название" key="name" prop="name">
-        <a-input v-model="form.name" />
-      </a-form-model-item>
+      <template v-for="(field,index) in fields">
+        <a-form-model-item
+          :prop="field.name"
+          :label="field.label"
+          :key="field.name"
+          :validateStatus="field.validateStatus"
+          :help="field.help"
+        >
+          <a-input
+            v-if="field.type === 'text'"
+            v-model="form[field.name]"
+            @change="fieldChanged(field)"
+            :ref="`field${index}`"
+          />
+          <a-input-number
+            v-else-if="field.type === 'number'"
+            v-model="form[field.name]"
+            @change="fieldChanged(field)"
+            :min="0"
+          />
+        </a-form-model-item>
+      </template>
     </a-form-model>
   </a-modal>
 </template>
@@ -34,18 +53,42 @@ export default {
     return {
       form: {
         name: null,
+        number: null,
       },
       title: "",
       layout: {
         labelCol: { span: 5 },
         wrapperCol: { span: 19 },
       },
+      fields: [
+        {
+          name: "name",
+          label: "Название",
+          type: "text",
+          validateStatus: "",
+          help: "",
+        },
+        {
+          name: "number",
+          label: "Номер",
+          type: "number",
+          validateStatus: "",
+          help: "",
+        },
+      ],
       rules: {
         name: [
           {
             trigger: "blur",
             required: true,
             message: "Пожалуйста, введите название",
+          },
+        ],
+        number: [
+          {
+            trigger: "blur",
+            required: true,
+            message: "Пожалуйста, введите номер",
           },
         ],
       },
@@ -68,15 +111,15 @@ export default {
           if (this.type === 1 && this.adding) {
             dispatchName = "skills/addArea";
             successCode = 201;
-            successMessage = "Область образования успешно добавлена";
+            successMessage = "Образовательная область успешно добавлена";
           } else if (this.type === 1 && !this.adding) {
             dispatchName = "skills/editArea";
             successCode = 200;
-            successMessage = "Область образования успешно изменена";
+            successMessage = "Образовательная область успешно изменена";
           } else if (this.type === 2 && this.adding) {
             dispatchName = "skills/addDirection";
             successCode = 201;
-            successMessage = "Направлние развития успешно добавлено";
+            successMessage = "Направление развития успешно добавлено";
           } else if (this.type === 2 && !this.adding) {
             dispatchName = "skills/editDirection";
             successCode = 200;
@@ -90,7 +133,6 @@ export default {
             successCode = 200;
             successMessage = "Навык успешно изменен";
           }
-
           try {
             let res = await this.$store.dispatch(dispatchName, this.form);
             if (res.status === successCode) {
@@ -98,14 +140,14 @@ export default {
               this.$emit("closeSuccess");
             } else if (res.status === 400) {
               this.$message.error("Проверьте введённые данные");
-              // for (let key in res.data) {
-              //   this.fields.forEach((field) => {
-              //     if (field.name === key) {
-              //       field.validateStatus = "error";
-              //       field.help = res.data[key];
-              //     }
-              //   });
-              // }
+              for (let key in res.data) {
+                this.fields.forEach((field) => {
+                  if (field.name === key) {
+                    field.validateStatus = "error";
+                    field.help = res.data[key];
+                  }
+                });
+              }
             } else {
               this.$message.error("Произошла ошибка");
             }
@@ -119,27 +161,56 @@ export default {
         }
       });
     },
+    fieldChanged(field) {
+      field.validateStatus = "";
+      field.help = "";
+    },
+    keydown(event) {
+      if(event.type === 'keydown' && event.keyCode === 13 && this.$refs.form !== undefined) {
+        this.handleOk();
+      }
+    },
   },
   created() {
     if (this.adding) {
       this.title += "Добавление ";
     } else {
       this.title += "Изменение ";
-      if (this.editableData.id) {
-        this.form.id = this.editableData.id;
-      }
-      if (this.editableData.name) {
-        this.form.name = this.editableData.name;
-      }
+      this.editableData.id ? (this.form.id = this.editableData.id) : "";
+      this.editableData.name ? (this.form.name = this.editableData.name) : "";
+      this.editableData.number
+        ? (this.form.number = this.editableData.number)
+        : "";
     }
     if (this.type === 1) {
       this.title += "образовательной области";
+      this.editableData.lastNumberArea
+        ? (this.form.number = this.editableData.lastNumberArea)
+        : "";
     } else if (this.type === 2) {
+      this.editableData.areaId
+        ? (this.form.area_id = this.editableData.areaId)
+        : "";
+      this.editableData.lastNumberDirection
+        ? (this.form.number = this.editableData.lastNumberDirection)
+        : "";
       this.title += "направления развития";
     } else if (this.type === 3) {
+      this.editableData.directionId
+        ? (this.form.direction_id = this.editableData.directionId)
+        : "";
+      this.editableData.lastNumberSkill
+        ? (this.form.number = this.editableData.lastNumberSkill)
+        : "";
       this.title += "навыка";
     }
+    document.addEventListener("keydown", this.keydown)
   },
+  mounted() {
+    this.$nextTick(() => {
+      this.$refs['field0'][0].focus();
+    })
+  }
 };
 </script>
 

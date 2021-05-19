@@ -42,6 +42,7 @@
 </template>
 
 <script>
+import displayErrors from "@/middleware/displayErrors";
 export default {
   name: "LoginForm",
   data() {
@@ -87,13 +88,13 @@ export default {
       this.$store
         .dispatch("auth/login", this.form)
         .then((res) => {
-          if (res.status === 400) {
-            this.$message.error("Проверьте введённые данные");
-            //displayErrors(this.$message, res.data, this.fields);
-          } else if (res.status === 500) {
-            this.$message.error("Произошла ошибка");
-          } else {
+          if (res.status === 200) {
             this.$message.success("Вход успешно выполнен");
+          } else if (res.status === 400) {
+            this.$message.error("Проверьте введённые данные");
+            displayErrors(this.$message, res.data, this.fields);
+          } else {
+            this.$message.error("Произошла ошибка");
           }
         })
         .catch(() => {

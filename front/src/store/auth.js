@@ -1,8 +1,8 @@
 const state = () => ({
-  isAuth: true,
+  isAuth: null,
   userInfo: {
-    name: 'Иванов И.И.',
-    staff: true,
+    name: null,
+    staff: false,
   },
 });
 
@@ -18,18 +18,21 @@ const getters = {
 const actions = {
   async login({ commit }, payload) {
     try {
-      let res = await this.$axios.post("/api/login/", payload);
+      let res = await this.$axios.post("/api/users/login/", payload);
       if (res.status === 200) {
         commit("setIsAuth", true);
         commit("setUserInfo", {
-          name: res.data.fullname,
+          name:
+            res.data.specialist !== null && res.data.specialist.surname
+              ? `${res.data.specialist.surname} ${res.data.specialist.name[0]}. ${res.data.specialist.patronymic[0]}.`
+              : res.data.username,
           staff: res.data.is_staff,
         });
       }
       return res;
     } catch (e) {
       commit("setIsAuth", false);
-      commit("setUserInfo", { name: null, staff: false, });
+      commit("setUserInfo", { name: null, staff: false });
       if (e.response) {
         return e.response;
       } else {
@@ -39,7 +42,7 @@ const actions = {
   },
   async logout({ commit }) {
     try {
-      let res = await this.$axios.post("/api/logout/");
+      let res = await this.$axios.get("/api/users/logout/");
       if (res.status === 200) {
         commit("setIsAuth", false);
         commit("setUserInfo", { name: null, staff: false });
@@ -55,12 +58,15 @@ const actions = {
   },
   async checkUser({ commit }) {
     try {
-      let res = await this.$axios.get("/api/user/?current=true");
+      let res = await this.$axios.get("/api/users/current");
       if (res.status === 200) {
         commit("setIsAuth", true);
         commit("setUserInfo", {
-          name: res.data.results[0].fullname,
-          staff: res.data.results[0].is_staff,
+          name:
+            res.data.specialist !== null && res.data.specialist.surname
+              ? `${res.data.specialist.surname} ${res.data.specialist.name[0]}. ${res.data.specialist.patronymic[0]}.`
+              : res.data.username,
+          staff: res.data.is_staff,
         });
       }
       return res;
