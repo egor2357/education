@@ -28,10 +28,7 @@ class UserView(viewsets.ModelViewSet):
 
   @action(detail=False)
   def current(self, request, *args, **kwargs):
-    if request.user.is_authenticated:
-      return Response(UserSerializer(request.user).data)
-    else:
-      return Response({}, status=403)
+    return Response(UserSerializer(request.user).data)
 
   @action(detail=False)
   def logout(self, request, *args, **kwargs):
