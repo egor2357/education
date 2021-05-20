@@ -6,6 +6,7 @@ from django.contrib.auth import login, logout
 
 from .models import *
 from .serializers import *
+from .filters import *
 
 from rest_framework.authentication import SessionAuthentication
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -98,7 +99,7 @@ class ActivityView(viewsets.ModelViewSet):
   def add_skill(self, request, *args, **kwargs):
     activity = self.get_object()
     serializer = Activity_skillSerializer(data=request.data)
-    serializer.is_valid()
+    serializer.is_valid(raise_exception=True)
     skill = serializer.validated_data['skill_id']
     activity.skills.add(skill)
     return Response(ActivitySerializer(activity, fields=['skills']).data)
@@ -107,7 +108,7 @@ class ActivityView(viewsets.ModelViewSet):
   def delete_skill(self, request, *args, **kwargs):
     activity = self.get_object()
     serializer = Activity_skillSerializer(data=request.data)
-    serializer.is_valid()
+    serializer.is_valid(raise_exception=True)
     skill = serializer.validated_data['skill_id']
     activity.skills.remove(skill)
     return Response(ActivitySerializer(activity, fields=['skills']).data)
@@ -153,3 +154,5 @@ class JobView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated,)
   queryset = Job.objects.all()
   serializer_class = JobSerializer
+  filter_backends = (DjangoFilterBackend,)
+  filterset_class = JobFilter

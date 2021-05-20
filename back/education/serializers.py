@@ -199,8 +199,8 @@ class Skill_reportSerializer(serializers.ModelSerializer):
     )
 
 class JobSerializer(serializers.ModelSerializer):
-  option_id = serializers.IntegerField()
-  specialist_id = serializers.IntegerField()
+  option_id = serializers.IntegerField(required=False)
+  specialist_id = serializers.IntegerField(required=False)
   activity_id = serializers.IntegerField()
   reports = Skill_reportSerializer(
     many=True, read_only=True

@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'education',
     'rest_framework',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
