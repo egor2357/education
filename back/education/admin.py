@@ -133,7 +133,7 @@ admin.site.register(Skill_report, Skill_reportAdmin)
 
 class JobAdmin(admin.ModelAdmin):
   search_fields = ('comment',)
-  list_display = ('date', 'option', 'start_time', 'comment')
+  list_display = ('activity', 'date', 'specialist', 'option', 'start_time', 'comment')
   inlines = (Job_fileInline, Skill_reportInline)
   date_hierarchy = 'date'
 

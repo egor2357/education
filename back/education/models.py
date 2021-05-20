@@ -277,8 +277,16 @@ class Option_file(models.Model):
 
 class Job(models.Model):
   option = models.ForeignKey(
-    Option, null=False,
-    on_delete=models.CASCADE, verbose_name='Вариант занятия'
+    Option, null=True, blank=True,
+    on_delete=models.SET_NULL, verbose_name='Вариант занятия'
+  )
+  specialist = models.ForeignKey(
+    Specialist, null=True, blank=True,
+    on_delete=models.SET_NULL, verbose_name='Специалист'
+  )
+  activity = models.ForeignKey(
+    Activity, null=False,
+    on_delete=models.CASCADE, verbose_name='Вид деятельности'
   )
 
   reports = models.ManyToManyField('Skill', through='Skill_report', verbose_name='Отчеты по навыкам')
