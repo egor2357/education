@@ -210,6 +210,7 @@ class Specialty(models.Model):
     db_table = 'specialty'
     verbose_name = 'Направление деятельности специалиста'
     verbose_name_plural = 'Направления деятельности специалиста'
+    unique_together = ('specialist', 'activity')
     ordering = ['specialist', 'activity']
 
   def __str__(self):
