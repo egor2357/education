@@ -57,7 +57,7 @@ class Activity_skillSerializer(serializers.ModelSerializer):
     fields = ('skill_id',)
 
 class ActivitySerializer(FlexFieldsModelSerializer):
-  skills = SkillSerializer(
+  skills = serializers.PrimaryKeyRelatedField(
     many=True, read_only=True
   )
   schedule = ScheduleSerializer(
