@@ -48,6 +48,14 @@ class ScheduleSerializer(serializers.ModelSerializer):
     model = Schedule
     fields = ('id', 'day', 'start_time', 'activity_id')
 
+class Activity_skillSerializer(serializers.ModelSerializer):
+  skill_id = serializers.PrimaryKeyRelatedField(
+    queryset=Skill.objects.all(), write_only=True
+  )
+  class Meta:
+    model = Activity
+    fields = ('skill_id',)
+
 class ActivitySerializer(FlexFieldsModelSerializer):
   skills = SkillSerializer(
     many=True, read_only=True

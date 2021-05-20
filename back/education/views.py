@@ -88,6 +88,30 @@ class ActivityView(viewsets.ModelViewSet):
   queryset = Activity.objects.all()
   serializer_class = ActivitySerializer
 
+  @action(detail=True, methods=['get'], serializer_class=Activity_skillSerializer)
+  def skills(self, request, *args, **kwargs):
+    activity = self.get_object()
+    serializer = ActivitySerializer(activity, fields=['skills'])
+    return Response(serializer.data)
+
+  @skills.mapping.put
+  def add_skill(self, request, *args, **kwargs):
+    activity = self.get_object()
+    serializer = Activity_skillSerializer(data=request.data)
+    serializer.is_valid()
+    skill = serializer.validated_data['skill_id']
+    activity.skills.add(skill)
+    return Response(ActivitySerializer(activity, fields=['skills']).data)
+
+  @skills.mapping.delete
+  def delete_skill(self, request, *args, **kwargs):
+    activity = self.get_object()
+    serializer = Activity_skillSerializer(data=request.data)
+    serializer.is_valid()
+    skill = serializer.validated_data['skill_id']
+    activity.skills.remove(skill)
+    return Response(ActivitySerializer(activity, fields=['skills']).data)
+
 class Option_fileView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
