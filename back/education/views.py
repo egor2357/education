@@ -156,3 +156,15 @@ class JobView(viewsets.ModelViewSet):
   serializer_class = JobSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = JobFilter
+
+class CompetenceView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
+  queryset = Competence.objects.all()
+  serializer_class = CompetenceSerializer
+
+class SpecialtyView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
+  queryset = Specialty.objects.all()
+  serializer_class = SpecialtySerializer

@@ -218,3 +218,34 @@ class JobSerializer(serializers.ModelSerializer):
       'date', 'start_time', 'comment'
     )
 
+class CompetenceSerializer(serializers.ModelSerializer):
+  skill = serializers.PrimaryKeyRelatedField(
+    queryset=Skill.objects.all()
+  )
+  specialist = serializers.PrimaryKeyRelatedField(
+    queryset=Specialist.objects.all()
+  )
+  coefficient = serializers.FloatField(min_value= 0, max_value=1)
+  class Meta:
+    model = Competence
+    fields = (
+      'id',
+      'skill', 'specialist',
+      'coefficient',
+    )
+
+class SpecialtySerializer(serializers.ModelSerializer):
+  activity = serializers.PrimaryKeyRelatedField(
+    queryset=Activity.objects.all()
+  )
+  specialist = serializers.PrimaryKeyRelatedField(
+    queryset=Specialist.objects.all()
+  )
+  is_main = serializers.BooleanField()
+  class Meta:
+    model = Specialty
+    fields = (
+      'id',
+      'activity', 'specialist',
+      'is_main',
+    )
