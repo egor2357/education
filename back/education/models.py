@@ -191,6 +191,7 @@ class Competence(models.Model):
     db_table = 'competence'
     verbose_name = 'Компетенция специалиста'
     verbose_name_plural = 'Компетенции специалиста'
+    unique_together = ('specialist', 'skill')
     ordering = ['specialist', 'skill']
 
   def __str__(self):
