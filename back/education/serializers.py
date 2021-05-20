@@ -200,6 +200,8 @@ class Skill_reportSerializer(serializers.ModelSerializer):
 
 class JobSerializer(serializers.ModelSerializer):
   option_id = serializers.IntegerField()
+  specialist_id = serializers.IntegerField()
+  activity_id = serializers.IntegerField()
   reports = Skill_reportSerializer(
     many=True, read_only=True
   )
@@ -209,8 +211,10 @@ class JobSerializer(serializers.ModelSerializer):
   class Meta:
     model = Job
     fields = (
-      'id', 'reports',
-      'option_id', 'job_files',
+      'id',
+      'reports','job_files',
+      'option_id', 'specialist_id',
+      'activity_id',
       'date', 'start_time', 'comment'
     )
 
