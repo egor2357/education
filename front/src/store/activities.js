@@ -4,12 +4,16 @@ import deleteAxios from "@/middleware/deleteAxios";
 
 const state = () => ({
   activities: [],
+  activitiesCheckboxes: {},
 });
 
 const getters = {
   getActivities(state) {
     return state.activities;
-  }
+  },
+  getActivitiesCheckboxes(state) {
+    return state.activitiesCheckboxes;
+  },
 };
 
 const actions = {
@@ -33,11 +37,20 @@ const actions = {
   async deleteActivity(context, id) {
     return deleteAxios(this.$axios, `/api/activities/${id}/`, {});
   },
+  async addLinkSkill(context, payload) {
+    return put(this.$axios, `/api/activities/${payload.activityId}/skills/`, {skill_id: payload.skillId});
+  },
+  async deleteLinkSkill(context, payload) {
+    return deleteAxios(this.$axios, `/api/activities/${payload.activityId}/skills/`, {skill_id: payload.skillId});
+  }
 };
 
 const mutations = {
   setActivities(state, payload) {
     state.activities = payload;
+  },
+  setActivitiesCheckboxes(state, payload) {
+    state.activitiesCheckboxes = payload;
   }
 };
 

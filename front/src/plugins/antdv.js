@@ -21,7 +21,8 @@ import {
   InputNumber,
   Tabs,
   List,
-  Avatar
+  Avatar,
+  Checkbox
 } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
@@ -46,6 +47,7 @@ Vue.use(InputNumber);
 Vue.use(Tabs);
 Vue.use(List);
 Vue.use(Avatar);
+Vue.use(Checkbox);
 
 Vue.prototype.$message = message;
 Vue.prototype.$confirm = Modal.confirm;

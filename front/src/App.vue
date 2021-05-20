@@ -56,4 +56,7 @@ export default {
   &.ant-menu-inline
     &.ant-menu-sub
       box-shadow: none !important
+
+.content
+  height: calc(100vh - 150px)
 </style>

@@ -11,9 +11,8 @@
         }
       "
       :scroll="{ y: 'calc(100vh - 300px)' }"
-      :loading="tableLoading"
+      :loading="tableLoading || tableLoadingActivity"
     >
-      <!--:key="`table${indexTable}`"-->
       <template slot="area" slot-scope="text">
         <div class="td-label--sticky" v-if="!text.empty" :length="text.length">
           <span class="label--justify">
@@ -23,6 +22,7 @@
             :trigger="['click']"
             placement="bottomLeft"
             class="dropdown--hover"
+            v-if="!readOnly"
           >
             <a-icon class="icon-button" type="dash"></a-icon>
             <a-menu slot="overlay">
@@ -32,10 +32,7 @@
               <a-menu-item key="1" @click="openModalEdit(text, 1)">
                 Изменить
               </a-menu-item>
-              <a-menu-item
-                key="2"
-                @click="displayConfirmDelete(text, 1)"
-              >
+              <a-menu-item key="2" @click="displayConfirmDelete(text, 1)">
                 <span> Удалить </span>
               </a-menu-item>
             </a-menu>
@@ -52,6 +49,7 @@
             :trigger="['click']"
             placement="bottomLeft"
             class="dropdown--hover"
+            v-if="!readOnly"
           >
             <a-icon class="icon-button" type="dash"></a-icon>
             <a-menu slot="overlay">
@@ -83,6 +81,7 @@
             :trigger="['click']"
             placement="bottomLeft"
             class="dropdown--hover"
+            v-if="!readOnly"
           >
             <a-icon class="icon-button" type="dash"></a-icon>
             <a-menu slot="overlay">
@@ -99,8 +98,23 @@
           </a-dropdown>
         </div>
       </template>
+      <template
+        :slot="`activity${activity.id}`"
+        slot-scope="text, record, index"
+        v-for="activity in activitiesList"
+      >
+        <a-checkbox
+          :key="activity.id"
+          v-model="activityCheckboxes[activity.id][record.skill.id]"
+          @change="changeLink($event, activity.id, record.skill.id)"
+        />
+      </template>
     </a-table>
-    <a-button style="margin-top: 10px" @click="openModalAdd(1)">
+    <a-button
+      style="margin-top: 10px"
+      @click="openModalAdd(1)"
+      v-if="!readOnly"
+    >
       Добавить образовательную область
     </a-button>
     <ModalSkills
@@ -122,6 +136,24 @@ export default {
   name: "TableSkill",
   components: {
     ModalSkills,
+  },
+  props: {
+    readOnly: {
+      type: Boolean,
+      default: false,
+    },
+    activities: {
+      type: Boolean,
+      default: false,
+    },
+    activitiesList: {
+      type: Array,
+      default: null,
+    },
+    tableLoadingActivity: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -159,10 +191,40 @@ export default {
       tableLoading: true,
       lastNumberArea: 1,
       indexTable: 1,
+      activityCheckboxes: {},
     };
   },
   async created() {
     await this.getData();
+    if (this.activities) {
+      this.columns[0].width = "10%";
+      this.columns[1].width = "10%";
+      this.columns[2].width = "30%";
+      for (let activity of this.activitiesList) {
+        this.columns.push({
+          title: () => {
+            return (
+              <div title={activity.name} class="activity-title">
+                <span
+                  class="activity-color"
+                  style={`background-color: ${activity.color}`}
+                />
+                <span style="flex: 0 0 calc(100% - 25px); text-align: left;">
+                  {activity.name}
+                </span>
+              </div>
+            );
+          },
+          dataIndex: activity,
+          align: "center",
+          key: `activity${activity.id}`,
+          class: "vertical-header",
+          scopedSlots: {
+            customRender: `activity${activity.id}`,
+          },
+        });
+      }
+    }
   },
   methods: {
     ...mapActions({ fetchAreas: "skills/fetchAreas" }),
@@ -170,7 +232,7 @@ export default {
       let elForDel = document.getElementsByClassName("need-delete");
       for (let i = elForDel.length - 1; i >= 0; i--) {
         elForDel[i].parentElement.hidden = true;
-        elForDel[i].parentElement.classList.add('was-hidden')
+        elForDel[i].parentElement.classList.add("was-hidden");
       }
       for (let el of document.getElementsByClassName("td-label--sticky")) {
         el.parentElement.rowSpan = Number(
@@ -179,7 +241,7 @@ export default {
             : el.attributes[1].value
         );
         el.parentElement.hidden = false;
-        el.parentElement.classList.add('was-spanned')
+        el.parentElement.classList.add("was-spanned");
       }
     },
     openModalAdd(type, item) {
@@ -249,6 +311,7 @@ export default {
           length: 1,
           number: area.number,
           empty: false,
+          emptySkills: 0,
           lastNumberDirection:
             area.development_directions.length > 0
               ? area.development_directions[
@@ -263,6 +326,9 @@ export default {
         });
         indexCurrentRow += 1;
         let firstDirection = true;
+        if (area.development_directions.length === 0) {
+          this.data[indexStartArea].area.emptySkills += 1;
+        }
         for (let direction of area.development_directions) {
           if (firstDirection) {
             direction.skills.length > 1
@@ -298,6 +364,9 @@ export default {
             });
             indexCurrentRow += 1;
           }
+          if (direction.skills.length === 0) {
+            this.data[indexStartArea].area.emptySkills += 1;
+          }
           let firstSkill = true;
           for (let skill of direction.skills) {
             if (firstSkill) {
@@ -332,6 +401,8 @@ export default {
       this.tableLoading = true;
       await this.fetchAreas();
       await this.prepareData();
+      if (this.activities) await this.prepareDataForActivities();
+      if (this.activities) await this.prepareActivityCheckboxes();
       await this.changeDOM();
       this.tableLoading = false;
     },
@@ -363,18 +434,76 @@ export default {
       let elWasHidden = document.getElementsByClassName("was-hidden");
       for (let i = elWasHidden.length - 1; i >= 0; i--) {
         elWasHidden[i].hidden = false;
-        elWasHidden[i].classList.remove('was-hidden');
+        elWasHidden[i].classList.remove("was-hidden");
       }
       let elWasSpanned = document.getElementsByClassName("was-spanned");
       for (let i = elWasSpanned.length - 1; i >= 0; i--) {
         elWasSpanned[i].rowSpan = 1;
-        elWasSpanned[i].classList.remove('was-spanned')
+        elWasSpanned[i].classList.remove("was-spanned");
       }
       this.getData();
     },
+    prepareDataForActivities() {
+      let index = 0;
+      let deleted = false;
+      let len = this.data.length;
+      let element = {};
+      for (index; index < len; ) {
+        deleted = false;
+        if (this.data[index]) {
+          element = this.data[index];
+          element.area.empty === false
+            ? (element.area.length -= element.area.emptySkills)
+            : "";
+        } else {
+          break;
+        }
+        if (
+          (element.skill.empty === true && element.area.empty === true) ||
+          (element.skill.empty === true && element.direction.empty === true) ||
+          (element.skill.empty === true &&
+            element.direction.empty !== true &&
+            element.direction.area !== true)
+        ) {
+          this.data.splice(index, 1);
+          deleted = true;
+        }
+        deleted === false ? (index += 1) : "";
+      }
+    },
+    prepareActivityCheckboxes() {
+      if (Object.keys(this.activitiesCheckboxes).length === 0) {
+        for (let activity of this.activitiesList) {
+          this.$set(this.activityCheckboxes, activity.id, {});
+          for (let element of this.data) {
+            this.$set(
+              this.activityCheckboxes[activity.id],
+              element.skill.id,
+              activity.skills.indexOf(element.skill.id) !== -1
+            );
+          }
+        }
+        this.$store.commit(
+          "activities/setActivitiesCheckboxes",
+          this.activityCheckboxes
+        );
+      } else {
+        this.activityCheckboxes = this.activitiesCheckboxes;
+      }
+    },
+    changeLink(event, activityId, skillId) {
+      this.$emit("changeLink", {
+        activityId: activityId,
+        skillId: skillId,
+        value: event.target.checked,
+      });
+    },
   },
   computed: {
-    ...mapGetters({ areas: "skills/getAreas" }),
+    ...mapGetters({
+      areas: "skills/getAreas",
+      activitiesCheckboxes: "activities/getActivitiesCheckboxes",
+    }),
   },
 };
 </script>
@@ -414,4 +543,25 @@ export default {
   /*overflow: auto !important*/
   /*margin-bottom: 0 !important*/
   /*padding-right: 16px*/
+
+.vertical-header
+  padding: 5px !important
+  vertical-align: middle !important
+  .ant-table-header-column
+    writing-mode: vertical-rl
+    transform: rotate(180deg)
+    max-height: 180px
+    height: 100%
+    .activity-title
+      display: flex
+      overflow: hidden
+      text-overflow: ellipsis
+      max-width: 40px
+      .activity-color
+        width: 20px
+        height: 20px
+        border-radius: 20px
+        flex: 0 0 20px
+        align-self: center
+        margin-bottom: 5px
 </style>

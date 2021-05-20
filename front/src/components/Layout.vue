@@ -69,7 +69,7 @@
           />
         </div>
       </a-layout-header>
-      <a-layout-content style="margin: 10px 16px;">
+      <a-layout-content style="margin: 10px 16px;" >
         <a-breadcrumb style="margin: 16px 0" v-if="breadcrumbs.length > 0">
           <a-breadcrumb-item
             v-for="(breadcrumb, index) in breadcrumbs"
@@ -77,7 +77,7 @@
             >{{ breadcrumb.title }}
           </a-breadcrumb-item>
         </a-breadcrumb>
-        <div :style="{ padding: '24px', background: '#fff' }">
+        <div :style="{ padding: '24px', background: '#fff' }" class="content">
           <router-view v-if="$route.name !== 'Login'" />
         </div>
       </a-layout-content>

@@ -10,27 +10,37 @@
       <a-tab-pane key="2">
         <span slot="tab">
           <a-icon type="share-alt" />
-          Вид деятельности/навыки
+          Вид деятельности / навыки
         </span>
       </a-tab-pane>
     </a-tabs>
-    <TypesList v-if="activeTab == 1" :data="activities" @needUpdate="fetchActivities" :loadingList="loadingList"/>
+    <TypesList
+      v-if="activeTab == 1"
+      :data="activities"
+      @needUpdate="fetchActivities"
+      :loadingList="loadingList"
+    />
+    <ActivitiesSkills
+      v-if="activeTab == 2"
+    />
   </div>
 </template>
 
 <script>
 import TypesList from "@/components/ActivitiesTypes/TypesList";
+import ActivitiesSkills from "@/components/ActivitiesTypes/ActivitiesSkills";
 import { mapActions, mapGetters } from "vuex";
 export default {
   name: "ActivitiesTypes",
   components: {
     TypesList,
+    ActivitiesSkills
   },
   data() {
     return {
       activeTab: "1",
       loadingList: true,
-    }
+    };
   },
   async created() {
     await this.fetchActivities();
@@ -51,6 +61,6 @@ export default {
 
 <style lang="sass">
 .tabs--center
-  padding-right: calc(50% - 180px)
-  padding-left: calc(50% - 180px)
+  padding-right: calc(50% - 185px)
+  padding-left: calc(50% - 185px)
 </style>
