@@ -66,7 +66,6 @@ class Specialist(models.Model):
   role = models.TextField(max_length=200, blank=True, verbose_name='Роль')
   is_active = models.BooleanField(default=True, verbose_name='Активен ли')
 
-
   class Meta:
     db_table = 'specialist'
     verbose_name = 'Специалист'
@@ -247,7 +246,7 @@ class Option(models.Model):
 
   skills = models.ManyToManyField(Skill, verbose_name='Развиваемые на занятии навыки')
 
-  caption = models.TextField(max_length=200, verbose_name='Подпись')
+  caption = models.TextField(max_length=200, blank=True, verbose_name='Подпись')
 
   class Meta:
     db_table = 'option'
@@ -263,11 +262,6 @@ class Option(models.Model):
     )
 
 class Option_file(models.Model):
-  option = models.ForeignKey(
-    Option, null=False,
-    on_delete=models.CASCADE, verbose_name='Вариант занятия'
-  )
-
   def get_file_upload_to(instance, filename):
     return 'option_files/{0}/{1}/{2}/{3}'.format(
       instance.option.activity.name,
@@ -275,6 +269,12 @@ class Option_file(models.Model):
       instance.option.caption,
       filename
     )
+
+  option = models.ForeignKey(
+    Option, null=False,
+    on_delete=models.CASCADE, verbose_name='Вариант занятия'
+  )
+
   file = models.FileField(
     upload_to=get_file_upload_to,
     max_length=300,
@@ -324,11 +324,6 @@ class Job(models.Model):
     )
 
 class Job_file(models.Model):
-  job = models.ForeignKey(
-    Job, null=False,
-    on_delete=models.CASCADE, verbose_name='Занятие'
-  )
-
   def get_file_upload_to(instance, filename):
     return 'job_files/{0}/{1}/{2}/{3}/{4}'.format(
       instance.job.option.activity.name,
@@ -337,6 +332,12 @@ class Job_file(models.Model):
       instance.job.date.day,
       filename
     )
+
+  job = models.ForeignKey(
+    Job, null=False,
+    on_delete=models.CASCADE, verbose_name='Занятие'
+  )
+
   file = models.FileField(
     upload_to=get_file_upload_to,
     max_length=200,
@@ -365,8 +366,7 @@ class Skill_report(models.Model):
   )
 
   mark = models.PositiveSmallIntegerField(choices=mark_choices, verbose_name='Успешность оттачивания навыка')
-  comment = models.TextField(verbose_name='Комментарий по занятию')
-
+  comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
   class Meta:
     db_table = 'skill_report'
