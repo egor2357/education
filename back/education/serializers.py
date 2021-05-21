@@ -36,7 +36,7 @@ class LoginSerializer(serializers.Serializer):
 
     return {'user': user}
 
-class SkillSerializer(serializers.ModelSerializer):
+class SkillSerializer(FlexFieldsModelSerializer):
   direction_id = serializers.PrimaryKeyRelatedField(
     source='direction', queryset=Development_direction.objects.all()
   )
@@ -87,17 +87,70 @@ class PresenceSerializer(serializers.ModelSerializer):
       'is_available'
     )
 
-class SpecialistSerializer(FlexFieldsModelSerializer):
-  user_id = serializers.PrimaryKeyRelatedField(
-    source='user', queryset=User.objects.all(), required=False
+class UserSerializer(FlexFieldsModelSerializer):
+  def to_representation(self, instance):
+    obj = {
+      'id': instance.id,
+      'username': instance.username,
+      'is_staff': instance.is_staff,
+      'specialist': None
+    }
+    if hasattr(instance, 'specialist'):
+      obj['specialist'] = {
+        'id': instance.specialist.id,
+        'surname': instance.specialist.surname,
+        'name': instance.specialist.name,
+        'patronymic': instance.specialist.patronymic,
+        'role': instance.specialist.role
+      }
+    return obj
+  class Meta:
+    model = User
+    fields = '__all__'
+
+class SpecialtySerializer(FlexFieldsModelSerializer):
+  activity_id = serializers.PrimaryKeyRelatedField(
+    source='activity', queryset=Activity.objects.all()
+  )
+  activity = ActivitySerializer(
+    read_only=True,
+    fields=['id', 'name', 'color']
+  )
+  specialist_id = serializers.PrimaryKeyRelatedField(
+    source='specialist', queryset=Specialist.objects.all()
   )
 
-  activities = ActivitySerializer(
-    many=True, read_only=True,
-    omit=['schedule', 'skills']
+  is_main = serializers.BooleanField()
+  class Meta:
+    model = Specialty
+    fields = (
+      'id',
+      'activity_id', 'specialist_id',
+      'is_main',
+      'activity'
+    )
+
+class CompetenceSerializer(FlexFieldsModelSerializer):
+  skill_id = serializers.PrimaryKeyRelatedField(
+    source='skill', queryset=Skill.objects.all()
   )
-  skills = SkillSerializer(
-    many=True, read_only=True
+  skill = SkillSerializer(
+    read_only=True,
+    fields=['id', 'name', 'number']
+  )
+  specialist_id = serializers.PrimaryKeyRelatedField(
+    source='specialist',queryset=Specialist.objects.all()
+  )
+  coefficient = serializers.FloatField(min_value= 0, max_value=1)
+  class Meta:
+    model = Competence
+    fields = (
+      'id',
+      'skill_id', 'specialist_id',
+      'coefficient',
+      'skill'
+    )
+
 class SpecialistSerializer(FlexFieldsModelSerializer):
   user = UserSerializer(read_only=True)
   activities = SpecialtySerializer(
@@ -290,36 +343,4 @@ class JobSerializer(serializers.ModelSerializer):
       'option_id', 'specialist_id',
       'activity_id',
       'date', 'start_time', 'comment'
-    )
-
-class CompetenceSerializer(serializers.ModelSerializer):
-  skill_id = serializers.PrimaryKeyRelatedField(
-    source='skill', queryset=Skill.objects.all()
-  )
-  specialist_id = serializers.PrimaryKeyRelatedField(
-    source='specialist',queryset=Specialist.objects.all()
-  )
-  coefficient = serializers.FloatField(min_value= 0, max_value=1)
-  class Meta:
-    model = Competence
-    fields = (
-      'id',
-      'skill_id', 'specialist_id',
-      'coefficient',
-    )
-
-class SpecialtySerializer(serializers.ModelSerializer):
-  activity_id = serializers.PrimaryKeyRelatedField(
-    source='activity', queryset=Activity.objects.all()
-  )
-  specialist_id = serializers.PrimaryKeyRelatedField(
-    source='specialist', queryset=Specialist.objects.all()
-  )
-  is_main = serializers.BooleanField()
-  class Meta:
-    model = Specialty
-    fields = (
-      'id',
-      'activity_id', 'specialist_id',
-      'is_main',
     )
