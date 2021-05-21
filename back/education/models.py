@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Educational_area(models.Model):
-  name = models.TextField(max_length=200, verbose_name='Название')
+  name = models.TextField(max_length=200, unique=True, verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
 
   class Meta:
@@ -21,7 +21,7 @@ class Development_direction(models.Model):
     on_delete=models.CASCADE, verbose_name='Образовательная область'
   )
 
-  name = models.TextField(max_length=200, verbose_name='Название')
+  name = models.TextField(max_length=200, unique=True, verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
 
   class Meta:
@@ -39,7 +39,7 @@ class Skill(models.Model):
     on_delete=models.CASCADE, verbose_name='Направление развития'
   )
 
-  name = models.TextField(max_length=200, unique=True, verbose_name='Название')
+  name = models.TextField(max_length=200, verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
 
   class Meta:
@@ -182,8 +182,14 @@ class Schedule(models.Model):
     )
 
 class Competence(models.Model):
-  specialist = models.ForeignKey(Specialist, on_delete=models.CASCADE, verbose_name='Специалист')
-  skill = models.ForeignKey(Skill, on_delete=models.CASCADE, verbose_name='Навык')
+  specialist = models.ForeignKey(
+    Specialist,
+    on_delete=models.CASCADE, verbose_name='Специалист'
+  )
+  skill = models.ForeignKey(
+    Skill,
+    on_delete=models.CASCADE, verbose_name='Навык'
+  )
 
   coefficient = models.FloatField(verbose_name='Коэффициент')
 
@@ -201,8 +207,14 @@ class Competence(models.Model):
     )
 
 class Specialty(models.Model):
-  specialist = models.ForeignKey(Specialist, on_delete=models.CASCADE, verbose_name='Специалист')
-  activity = models.ForeignKey(Activity, on_delete=models.CASCADE, verbose_name='Вид деятельности')
+  specialist = models.ForeignKey(
+    Specialist,
+    on_delete=models.CASCADE, verbose_name='Специалист'
+  )
+  activity = models.ForeignKey(
+    Activity,
+    on_delete=models.CASCADE, verbose_name='Вид деятельности'
+  )
 
   is_main = models.BooleanField(default=True, verbose_name='Является ли основным')
 
