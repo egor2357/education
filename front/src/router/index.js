@@ -27,9 +27,18 @@ const router = new VueRouter({
     {
       path: "/activities-types",
       name: "ActivitiesTypes",
-      component: () => import("@/views/ActivitiesTypes"),
+      component: () => import("@/views/Admin/ActivitiesTypes"),
       meta: {
-        breadcrumbs: [{ title: "Вид деятельности/навыки" }],
+        breadcrumbs: [{ title: "Вид деятельности / навыки" }],
+        staffOnly: true,
+      },
+    },
+    {
+      path: "/specialists",
+      name: "Specialists",
+      component: () => import("@/views/Admin/Specialists"),
+      meta: {
+        breadcrumbs: [{ title: "Специалисты" }],
         staffOnly: true,
       },
     },
