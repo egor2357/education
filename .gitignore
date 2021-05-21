@@ -126,3 +126,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+node_modules/
+.idea/
+package-lock.json
