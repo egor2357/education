@@ -10,7 +10,7 @@
           return index;
         }
       "
-      :scroll="{ y: 'calc(100vh - 300px)' }"
+      :scroll="{ y: 'calc(100vh - 310px)' }"
       :loading="tableLoading || tableLoadingActivity"
     >
       <template slot="area" slot-scope="text">
@@ -375,6 +375,7 @@ export default {
                 name: skill.name,
                 number: skill.number,
                 directionId: skill.direction_id,
+                empty: false,
               };
               firstSkill = false;
             } else {
@@ -386,6 +387,7 @@ export default {
                   name: skill.name,
                   number: skill.number,
                   directionId: skill.direction_id,
+                  empty: false
                 },
               });
               indexCurrentRow += 1;
@@ -448,6 +450,7 @@ export default {
       let deleted = false;
       let len = this.data.length;
       let element = {};
+      let savedArea = {};
       for (index; index < len; ) {
         deleted = false;
         if (this.data[index]) {
@@ -465,8 +468,15 @@ export default {
             element.direction.empty !== true &&
             element.direction.area !== true)
         ) {
+          if (element.skill.empty === true && element.area.empty === false) {
+            savedArea = element.area;
+          }
           this.data.splice(index, 1);
           deleted = true;
+        } else if(element.skill.empty === false && element.area.empty === true && element.direction.empty === false) {
+          if (this.data[index - 1] && element.direction.areaId === savedArea.id && this.data[index - 1].direction.areaId !== savedArea.id) {
+            element.area = savedArea
+          }
         }
         deleted === false ? (index += 1) : "";
       }
