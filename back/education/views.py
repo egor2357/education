@@ -137,6 +137,15 @@ class SpecialistView(viewsets.ModelViewSet):
   queryset = Specialist.objects.all()
   serializer_class = SpecialistSerializer
 
+  def destroy(self, request, *args, **kwargs):
+    specialist = self.get_object()
+    user = specialist.user
+    specialist.is_active = False
+    specialist.save()
+    if not user is None:
+      user.delete()
+    return Response(SpecialistSerializer(specialist).data)
+
 class Job_fileView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)

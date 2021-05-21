@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_flex_fields import FlexFieldsModelSerializer
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate
 from .models import *
 
@@ -98,49 +98,74 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
   )
   skills = SkillSerializer(
     many=True, read_only=True
+class SpecialistSerializer(FlexFieldsModelSerializer):
+  user = UserSerializer(read_only=True)
+  activities = SpecialtySerializer(
+    source='specialty_set' , many=True, read_only=True,
+    fields=['activity', 'is_main']
+  )
+  skills = CompetenceSerializer(
+    source='competence_set', many=True, read_only=True,
+    fields=['skill', 'coefficient']
   )
   presence = PresenceSerializer(
     source='presence_set', many=True, read_only=True
   )
+
+  username = serializers.CharField(required=False, write_only=True)
+  password = serializers.CharField(required=False, write_only=True)
+  is_staff = serializers.BooleanField(write_only=True)
+
+  def create(self, validated_data):
+    admin_group = Group.objects.get(name='education_admins')
+
+    username = validated_data.pop('username', None)
+    password = validated_data.pop('password', None)
+    is_staff = validated_data.pop('is_staff', False)
+
+    if not(username is None) and not(password is None):
+      user = User(username=username, is_staff=is_staff)
+      user.set_password(password)
+      user.save()
+      if user.is_staff:
+        user.groups.add(admin_group)
+
+        specialist = Specialist(**validated_data)
+        specialist.user = user
+        specialist.save()
+        return specialist
+    else:
+      raise serializers.ValidationError('Не указан username или password')
+
+  def update(self, instance, validated_data):
+    print(instance)
+    # username = validated_data['username']
+    # password = validated_data['password']
+    # is_staff = validated_data.pop('is_staff')
+
+    # user.set_password(password)
+    # user.save()
+
+    # specialist = Specialist.objects.create(**validated_data)
+    # return specialistreturn instance
+
   class Meta:
     model = Specialist
     fields = (
       'id',
       'surname', 'name',
       'patronymic', 'role',
+      'is_active',
       'skills', 'activities',
-      'presence', 'user_id'
+      'presence',
+      'user',
+      'username', 'password', 'is_staff'
     )
     expandable_fields = {
       'activities': ActivitySerializer,
       'skills': SkillSerializer,
       'presence': PresenceSerializer,
     }
-
-class UserSerializer(FlexFieldsModelSerializer):
-  specialist = SpecialistSerializer(
-    read_only=True,
-    omit=['skills', 'activities', 'presence'],
-  )
-  class Meta:
-    model = User
-    fields = (
-      'id', 'username',
-      'is_staff', 'password',
-      'specialist'
-    )
-
-  def create(self, validated_data):
-    user = super().create(validated_data)
-    user.set_password(validated_data['password'])
-    user.save()
-    return user
-
-  def update(self, instance, validated_data):
-    instance.username = validated_data['username']
-    instance.set_password(validated_data['password'])
-    instance.save()
-    return instance
 
 class Development_directionSerializer(serializers.ModelSerializer):
   area_id = serializers.PrimaryKeyRelatedField(
