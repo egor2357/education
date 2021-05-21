@@ -353,6 +353,8 @@ class Job_file(models.Model):
     return self.file.name
 
 class Skill_report(models.Model):
+  marks = ['Неудовлетворительно', 'Удовлетворительно', 'Хорошо']
+  mark_choices = [item for item in enumerate(marks)]
   job = models.ForeignKey(
     Job, null=False,
     on_delete=models.CASCADE, verbose_name='Занятие'
@@ -362,10 +364,9 @@ class Skill_report(models.Model):
     on_delete=models.CASCADE, verbose_name='Навык'
   )
 
-  mark = models.PositiveSmallIntegerField(verbose_name='Успешность оттачивания навыка')
+  mark = models.PositiveSmallIntegerField(choices=mark_choices, verbose_name='Успешность оттачивания навыка')
   comment = models.TextField(verbose_name='Комментарий по занятию')
 
-  marks = ['Неудовлетворительно', 'Удовлетворительно', 'Хорошо']
 
   class Meta:
     db_table = 'skill_report'
