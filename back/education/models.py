@@ -154,19 +154,20 @@ class Activity(models.Model):
     return self.name
 
 class Schedule(models.Model):
-  activity = models.ForeignKey(
-    Activity, null=False,
-    on_delete=models.CASCADE, verbose_name='Вид деятельности'
-  )
-
-  day = models.PositiveSmallIntegerField(verbose_name='Индекс дня недели')
-  start_time = models.TimeField(verbose_name='Время начала')
-
   weekday_names = [
     'Понедельник', 'Вторник',
     'Среда', 'Четверг',
     'Пятница', 'Суббота', 'Воскресенье'
   ]
+  day_choices = [item for item in enumerate(weekday_names)]
+
+  activity = models.ForeignKey(
+    Activity, null=False,
+    on_delete=models.CASCADE, verbose_name='Вид деятельности'
+  )
+
+  day = models.PositiveSmallIntegerField(choices=day_choices, verbose_name='Индекс дня недели')
+  start_time = models.TimeField(verbose_name='Время начала')
 
   class Meta:
     db_table = 'schedule'
