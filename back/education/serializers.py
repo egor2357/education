@@ -37,13 +37,17 @@ class LoginSerializer(serializers.Serializer):
     return {'user': user}
 
 class SkillSerializer(serializers.ModelSerializer):
-  direction_id = serializers.IntegerField()
+  direction_id = serializers.PrimaryKeyRelatedField(
+    source='direction', queryset=Development_direction.objects.all()
+  )
   class Meta:
     model = Skill
     fields = ('id', 'name', 'number', 'direction_id')
 
 class ScheduleSerializer(serializers.ModelSerializer):
-  activity_id = serializers.IntegerField()
+  activity_id = serializers.PrimaryKeyRelatedField(
+    source='activity', queryset=Activity.objects.all()
+  )
   class Meta:
     model = Schedule
     fields = ('id', 'day', 'start_time', 'activity_id')
@@ -72,13 +76,21 @@ class ActivitySerializer(FlexFieldsModelSerializer):
     }
 
 class PresenceSerializer(serializers.ModelSerializer):
-  specialist_id = serializers.IntegerField()
+  specialist_id = serializers.PrimaryKeyRelatedField(
+    source='specialist', queryset=Specialist.objects.all()
+  )
   class Meta:
     model = Presence
-    fields = ('id', 'specialist_id', 'date_from', 'date_to', 'is_available')
+    fields = (
+      'id', 'specialist_id',
+      'date_from', 'date_to',
+      'is_available'
+    )
 
 class SpecialistSerializer(FlexFieldsModelSerializer):
-  user_id = serializers.IntegerField()
+  user_id = serializers.PrimaryKeyRelatedField(
+    source='user', queryset=User.objects.all(), required=False
+  )
 
   activities = ActivitySerializer(
     many=True, read_only=True,
@@ -131,13 +143,19 @@ class UserSerializer(FlexFieldsModelSerializer):
     return instance
 
 class Development_directionSerializer(serializers.ModelSerializer):
-  area_id = serializers.IntegerField()
+  area_id = serializers.PrimaryKeyRelatedField(
+    source='area', queryset=Educational_area.objects.all()
+  )
   skills = SkillSerializer(
     source='skill_set', many=True, read_only=True
   )
   class Meta:
     model = Development_direction
-    fields = ('id', 'name', 'number', 'skills', 'area_id')
+    fields = (
+      'id', 'area_id',
+      'skills',
+      'name', 'number',
+    )
 
 class Educational_areaSerializer(serializers.ModelSerializer):
   development_directions = Development_directionSerializer(
@@ -148,10 +166,15 @@ class Educational_areaSerializer(serializers.ModelSerializer):
     fields = ('id', 'name', 'number', 'development_directions')
 
 class MethodSerializer(serializers.ModelSerializer):
-  form_id = serializers.IntegerField()
+  form_id = serializers.PrimaryKeyRelatedField(
+    source='form', queryset=Form.objects.all()
+  )
   class Meta:
     model = Method
-    fields = ('id', 'name', 'form_id')
+    fields = (
+      'id', 'form_id',
+      'name',
+    )
 
 class FormSerializer(serializers.ModelSerializer):
   methods = MethodSerializer(
@@ -162,15 +185,26 @@ class FormSerializer(serializers.ModelSerializer):
     fields = ('id', 'name', 'methods')
 
 class Option_fileSerializer(serializers.ModelSerializer):
-  option_id = serializers.IntegerField()
+  option_id = serializers.PrimaryKeyRelatedField(
+    source='option', queryset=Option.objects.all()
+  )
   class Meta:
     model = Option_file
-    fields = ('id', 'file', 'option_id')
+    fields = (
+      'id', 'option_id',
+      'file',
+    )
 
 class OptionSerializer(serializers.ModelSerializer):
-  method_id = serializers.IntegerField()
-  activity_id = serializers.IntegerField()
-  specialist_id = serializers.IntegerField()
+  method_id = serializers.PrimaryKeyRelatedField(
+    source='method', queryset=Method.objects.all(), required=False
+  )
+  activity_id = serializers.PrimaryKeyRelatedField(
+    source='activity', queryset=Activity.objects.all()
+  )
+  specialist_id = serializers.PrimaryKeyRelatedField(
+    source='specialist', queryset=Specialist.objects.all(), required=False
+  )
   option_files = Option_fileSerializer(
     source='option_file_set', many=True, read_only=True
   )
@@ -183,14 +217,23 @@ class OptionSerializer(serializers.ModelSerializer):
     )
 
 class Job_fileSerializer(serializers.ModelSerializer):
-  job_id = serializers.IntegerField()
+  job_id = serializers.PrimaryKeyRelatedField(
+    source='job', queryset=Job.objects.all()
+  )
   class Meta:
     model = Job_file
-    fields = ('id', 'file', 'job_id')
+    fields = (
+      'id', 'job_id',
+      'file'
+    )
 
 class Skill_reportSerializer(serializers.ModelSerializer):
-  job_id = serializers.IntegerField()
-  skill_id = serializers.IntegerField()
+  job_id = serializers.PrimaryKeyRelatedField(
+    source='job', queryset=Job.objects.all()
+  )
+  skill_id = serializers.PrimaryKeyRelatedField(
+    source='skill', queryset=Skill.objects.all()
+  )
   class Meta:
     model = Skill_report
     fields = (
@@ -199,9 +242,15 @@ class Skill_reportSerializer(serializers.ModelSerializer):
     )
 
 class JobSerializer(serializers.ModelSerializer):
-  option_id = serializers.IntegerField(required=False)
-  specialist_id = serializers.IntegerField(required=False)
-  activity_id = serializers.IntegerField()
+  option_id = serializers.PrimaryKeyRelatedField(
+    source='option', queryset=Option.objects.all(), required=False
+  )
+  specialist_id = serializers.PrimaryKeyRelatedField(
+    source='specialist', queryset=Specialist.objects.all(), required=False
+  )
+  activity_id = serializers.PrimaryKeyRelatedField(
+    source='activity', queryset=Activity.objects.all()
+  )
   reports = Skill_reportSerializer(
     many=True, read_only=True
   )
@@ -219,33 +268,33 @@ class JobSerializer(serializers.ModelSerializer):
     )
 
 class CompetenceSerializer(serializers.ModelSerializer):
-  skill = serializers.PrimaryKeyRelatedField(
-    queryset=Skill.objects.all()
+  skill_id = serializers.PrimaryKeyRelatedField(
+    source='skill', queryset=Skill.objects.all()
   )
-  specialist = serializers.PrimaryKeyRelatedField(
-    queryset=Specialist.objects.all()
+  specialist_id = serializers.PrimaryKeyRelatedField(
+    source='specialist',queryset=Specialist.objects.all()
   )
   coefficient = serializers.FloatField(min_value= 0, max_value=1)
   class Meta:
     model = Competence
     fields = (
       'id',
-      'skill', 'specialist',
+      'skill_id', 'specialist_id',
       'coefficient',
     )
 
 class SpecialtySerializer(serializers.ModelSerializer):
-  activity = serializers.PrimaryKeyRelatedField(
-    queryset=Activity.objects.all()
+  activity_id = serializers.PrimaryKeyRelatedField(
+    source='activity', queryset=Activity.objects.all()
   )
-  specialist = serializers.PrimaryKeyRelatedField(
-    queryset=Specialist.objects.all()
+  specialist_id = serializers.PrimaryKeyRelatedField(
+    source='specialist', queryset=Specialist.objects.all()
   )
   is_main = serializers.BooleanField()
   class Meta:
     model = Specialty
     fields = (
       'id',
-      'activity', 'specialist',
+      'activity_id', 'specialist_id',
       'is_main',
     )
