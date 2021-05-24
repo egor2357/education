@@ -379,5 +379,6 @@ class JobSerializer(serializers.ModelSerializer):
       'reports','job_files',
       'option_id', 'specialist_id',
       'activity_id',
-      'date', 'start_time', 'comment'
+      'date', 'start_time', 'comment',
+      'is_templated'
     )

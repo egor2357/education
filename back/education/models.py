@@ -309,6 +309,7 @@ class Job(models.Model):
   date = models.DateField(verbose_name='Дата проведения')
   start_time = models.TimeField(verbose_name='Время начала')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
+  is_templated = models.BooleanField(default=False, verbose_name='Создано по шаблону')
 
   class Meta:
     db_table = 'job'
