@@ -8,6 +8,8 @@ from .models import *
 from .serializers import *
 from .filters import *
 
+from dateutil.relativedelta import relativedelta
+
 from rest_framework.authentication import SessionAuthentication
 class CsrfExemptSessionAuthentication(SessionAuthentication):
   def enforce_csrf(self, request):
@@ -165,6 +167,79 @@ class JobView(viewsets.ModelViewSet):
   serializer_class = JobSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = JobFilter
+
+  def get_between(start_date, end_date):
+    jobs = Job.objects.filter(date__gte=start_date, date__lte=end_date)
+    job_by_day_dict = {}
+    for job in jobs:
+      key = job.date.strftime('%d.%m.%Y')
+      job_serialized = JobSerializer(job).data
+      if key not in job_by_day_dict.keys():
+        job_by_day_dict[key] = [job_serialized]
+      else:
+        job_by_day_dict[key].append(job_serialized)
+
+    return job_by_day_dict
+
+  @action(
+    detail=False, methods=['get'],
+    permission_classes=(permissions.IsAuthenticated, IsAdminOrReadOnly),
+    serializer_class=WeekJobSerializer
+  )
+  def week(self, request, *args, **kwargs):
+    serializer = WeekJobSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    start_date = serializer.validated_data['date']
+    end_date = start_date + relativedelta(days=7)
+
+    return Response(Job.get_between(start_date, end_date))
+
+  @week.mapping.post
+  def set_jobs(self, request, *args, **kwargs):
+    serializer = WeekJobSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    start_date = serializer.validated_data['date']
+    end_date = start_date + relativedelta(days=7)
+
+    jobs = (Job.objects.filter(date__gte=start_date, date__lte=end_date)
+                        .exclude(schedule=None))
+    jobs_schedule_ids = jobs.values_list('schedule_id', flat=True)
+
+    new_jobs = []
+
+    templates = Schedule.objects.exclude(pk__in=jobs_schedule_ids)
+    for template in templates:
+      tdelta = start_date.weekday() - template.day
+      curr_date = start_date + relativedelta(days=tdelta)
+
+      available_specs_ids = (template.activity.Specialty_set.filter(is_main=True)
+                                                            .values_list('specialist_id', flat=True))
+      presense_specs_ids = Presence.objects.filter(
+        specialist_id__in=available_specs_ids,
+        date_from__gte=start_date,
+        date_to__lte=end_date,
+        is_available=True
+      ).values_list('specialist_id', flat=True)
+
+      specs = Specialist.objects.filter(pk__in=presense_specs_ids)
+      if specs.exists():
+        specialist = specs.first()
+      else:
+        specialist = None
+
+      new_job = Job(option=None, activity=template.activity,
+                    specialist=specialist,
+                    schedule=template, date=curr_date,
+                    start_time=template.start_time, comment='')
+
+      new_jobs.append(new_job)
+
+    Job.objects.bulk_create(new_jobs)
+
+    return Response(Job.get_between(start_date, end_date))
+
 
 class CompetenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
