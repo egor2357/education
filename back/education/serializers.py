@@ -87,26 +87,24 @@ class PresenceSerializer(serializers.ModelSerializer):
       'is_available'
     )
 
+class SpecialistSerializer(FlexFieldsModelSerializer):
+  class Meta:
+    model = Specialist
+    fields = (
+      'id',
+      'surname', 'name',
+      'patronymic', 'role',
+    )
+
 class UserSerializer(FlexFieldsModelSerializer):
-  def to_representation(self, instance):
-    obj = {
-      'id': instance.id,
-      'username': instance.username,
-      'is_staff': instance.is_staff,
-      'specialist': None
-    }
-    if hasattr(instance, 'specialist'):
-      obj['specialist'] = {
-        'id': instance.specialist.id,
-        'surname': instance.specialist.surname,
-        'name': instance.specialist.name,
-        'patronymic': instance.specialist.patronymic,
-        'role': instance.specialist.role
-      }
-    return obj
+  specialist = SpecialistSerializer(read_only=True)
   class Meta:
     model = User
-    fields = '__all__'
+    fields = [
+      'id',
+      'username', 'is_staff',
+      'specialist'
+    ]
 
 class SpecialtySerializer(FlexFieldsModelSerializer):
   activity_id = serializers.PrimaryKeyRelatedField(
@@ -152,7 +150,10 @@ class CompetenceSerializer(FlexFieldsModelSerializer):
     )
 
 class SpecialistSerializer(FlexFieldsModelSerializer):
-  user = UserSerializer(read_only=True)
+  user = UserSerializer(
+    read_only=True,
+    omit=['specialist']
+  )
   activities = SpecialtySerializer(
     source='specialty_set' , many=True, read_only=True,
     fields=['activity', 'is_main', 'id']
