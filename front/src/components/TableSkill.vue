@@ -109,6 +109,21 @@
           @change="changeLink($event, activity.id, record.skill.id)"
         />
       </template>
+      <template slot="coefficient" slot-scope="text, record, index">
+        <a-checkbox
+          v-model="coefficientCheckboxes[index]"
+          style="padding-right: 10px"
+          @change="changeCoefficientCheckbox($event, index, record.skill.id)"
+        />
+        <a-input-number
+          :step="0.1"
+          :min="0"
+          :max="1"
+          :disabled="!coefficientCheckboxes[index]"
+          v-model="coefficientValues[index]"
+          @blur="changeCoefficient(index, record.skill.id)"
+        />
+      </template>
     </a-table>
     <a-button
       style="margin-top: 10px"
@@ -154,6 +169,16 @@ export default {
       type: Boolean,
       default: false,
     },
+    specialists: {
+      type: Boolean,
+      default: false,
+    },
+    specialistSkills: {
+      type: Array,
+    },
+    specialistId: {
+      type: [Number, String],
+    },
   },
   data() {
     return {
@@ -192,6 +217,9 @@ export default {
       lastNumberArea: 1,
       indexTable: 1,
       activityCheckboxes: {},
+      coefficientCheckboxes: [],
+      coefficientValues: [],
+      coefficientLinkId: [],
     };
   },
   async created() {
@@ -225,9 +253,26 @@ export default {
         });
       }
     }
+    if (this.specialists) {
+      this.columns[0].width = "20%";
+      this.columns[1].width = "20%";
+      this.columns[2].width = "50%";
+      this.columns.push({
+        title: "Развитие навыка / коэффициент",
+        align: "center",
+        scopedSlots: {
+          customRender: "coefficient",
+        },
+      });
+    }
   },
   methods: {
-    ...mapActions({ fetchAreas: "skills/fetchAreas" }),
+    ...mapActions({
+      fetchAreas: "skills/fetchAreas",
+      addSkill: "specialists/addSpecialistSkill",
+      editSkill: "specialists/editSpecialistSkill",
+      deleteSkill: "specialists/deleteSpecialistSkill",
+    }),
     changeDOM() {
       let elForDel = document.getElementsByClassName("need-delete");
       for (let i = elForDel.length - 1; i >= 0; i--) {
@@ -387,7 +432,7 @@ export default {
                   name: skill.name,
                   number: skill.number,
                   directionId: skill.direction_id,
-                  empty: false
+                  empty: false,
                 },
               });
               indexCurrentRow += 1;
@@ -403,8 +448,10 @@ export default {
       this.tableLoading = true;
       await this.fetchAreas();
       await this.prepareData();
-      if (this.activities) await this.prepareDataForActivities();
+      if (this.activities || this.specialists)
+        await this.prepareDataForActivities();
       if (this.activities) await this.prepareActivityCheckboxes();
+      if (this.specialists) await this.prepareCoefficientCheckboxes();
       await this.changeDOM();
       this.tableLoading = false;
     },
@@ -473,9 +520,17 @@ export default {
           }
           this.data.splice(index, 1);
           deleted = true;
-        } else if(element.skill.empty === false && element.area.empty === true && element.direction.empty === false) {
-          if (this.data[index - 1] && element.direction.areaId === savedArea.id && this.data[index - 1].direction.areaId !== savedArea.id) {
-            element.area = savedArea
+        } else if (
+          element.skill.empty === false &&
+          element.area.empty === true &&
+          element.direction.empty === false
+        ) {
+          if (
+            this.data[index - 1] &&
+            element.direction.areaId === savedArea.id &&
+            this.data[index - 1].direction.areaId !== savedArea.id
+          ) {
+            element.area = savedArea;
           }
         }
         deleted === false ? (index += 1) : "";
@@ -507,6 +562,67 @@ export default {
         skillId: skillId,
         value: event.target.checked,
       });
+    },
+    prepareCoefficientCheckboxes() {
+      let empty = true;
+      this.data.forEach((row) => {
+        for (let skill of this.specialistSkills) {
+          empty = true;
+          if (skill.skill.id === row.skill.id) {
+            this.coefficientCheckboxes.push(true);
+            this.coefficientValues.push(skill.coefficient);
+            this.coefficientLinkId.push(skill.id);
+            empty = false;
+            break;
+          }
+        }
+        if (empty) {
+          this.coefficientCheckboxes.push(false);
+          this.coefficientValues.push(null);
+          this.coefficientLinkId.push(null);
+        }
+      });
+    },
+    async changeCoefficientCheckbox(event, index, skillId) {
+      if (event.target.checked === false) {
+        this.coefficientValues[index] = null;
+        let res = await this.deleteSkill(this.coefficientLinkId[index]);
+        if (res.status === 204) {
+          this.$message.success("Навык у специалиста успешно удалён");
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      } else {
+        this.coefficientValues[index] = 1;
+        if (this.coefficientLinkId[index] === null) {
+          let res = await this.addSkill({
+            skill_id: skillId,
+            specialist_id: this.specialistId,
+            coefficient: this.coefficientValues[index],
+          });
+          if (res.status === 201) {
+            this.$message.success("Навык у специалиста успешно добавлен");
+            this.coefficientLinkId[index] = res.data.id;
+          } else {
+            this.$message.error("Произошла ошибка");
+          }
+        }
+      }
+    },
+    async changeCoefficient(index, id) {
+      if (this.coefficientLinkId[index] !== null && this.coefficientValues[index] <= 1) {
+        let res = await this.editSkill({
+          id: this.coefficientLinkId[index],
+          skill_id: id,
+          specialist_id: this.specialistId,
+          coefficient: this.coefficientValues[index],
+        });
+        if (res.status === 200) {
+          this.$message.success("Коэффициент успешно изменён");
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      }
     },
   },
   computed: {

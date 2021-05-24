@@ -68,7 +68,6 @@ function checkIsAuth(name) {
   } else if (!store.getters["auth/getIsAuth"] && name === "Login") {
     return true;
   } else if (store.getters["auth/getIsAuth"] && name === "Login") {
-    router.push({ name: "Flights", query: { type: 1 } });
     return false;
   } else {
     return true;

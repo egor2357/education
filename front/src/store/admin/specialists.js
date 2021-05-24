@@ -52,6 +52,15 @@ const actions = {
   async deleteSpecialistActivity(context, id) {
     return deleteAxios(this.$axios, `/api/specialties/${id}/`, {});
   },
+  async addSpecialistSkill(context, payload) {
+    return post(this.$axios, "/api/competence/", payload);
+  },
+  async editSpecialistSkill(context, payload) {
+    return put(this.$axios, `/api/competence/${payload.id}/`, payload);
+  },
+  async deleteSpecialistSkill(context, id) {
+    return deleteAxios(this.$axios, `/api/competence/${id}/`, {});
+  },
 };
 
 const mutations = {

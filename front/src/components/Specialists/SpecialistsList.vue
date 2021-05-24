@@ -212,6 +212,9 @@ export default {
       .activity-block
         margin: 5px
         padding: 3px
+        -webkit-border-radius: 4px
+        -moz-border-radius: 4px
+        border-radius: 4px
         .activity-label
           margin: 5px
           color: #111111
