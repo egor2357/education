@@ -168,7 +168,7 @@ class JobView(viewsets.ModelViewSet):
   filter_backends = (DjangoFilterBackend,)
   filterset_class = JobFilter
 
-  def get_between(start_date, end_date):
+  def get_between(self, start_date, end_date):
     jobs = Job.objects.filter(date__gte=start_date, date__lte=end_date)
     job_by_day_dict = {}
     for job in jobs:
@@ -186,16 +186,16 @@ class JobView(viewsets.ModelViewSet):
     permission_classes=(permissions.IsAuthenticated, IsAdminOrReadOnly),
     serializer_class=WeekJobSerializer
   )
-  def week(self, request, *args, **kwargs):
+  def weekly_templates(self, request, *args, **kwargs):
     serializer = WeekJobSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
     start_date = serializer.validated_data['date']
     end_date = start_date + relativedelta(days=7)
 
-    return Response(Job.get_between(start_date, end_date))
+    return Response(self.get_between(start_date, end_date))
 
-  @week.mapping.post
+  @weekly_templates.mapping.post
   def set_jobs(self, request, *args, **kwargs):
     serializer = WeekJobSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -214,7 +214,7 @@ class JobView(viewsets.ModelViewSet):
       tdelta = start_date.weekday() - template.day
       curr_date = start_date + relativedelta(days=tdelta)
 
-      available_specs_ids = (template.activity.Specialty_set.filter(is_main=True)
+      available_specs_ids = (template.activity.specialty_set.filter(is_main=True)
                                                             .values_list('specialist_id', flat=True))
       presense_specs_ids = Presence.objects.filter(
         specialist_id__in=available_specs_ids,
@@ -238,7 +238,7 @@ class JobView(viewsets.ModelViewSet):
 
     Job.objects.bulk_create(new_jobs)
 
-    return Response(Job.get_between(start_date, end_date))
+    return Response(self.get_between(start_date, end_date))
 
 
 class CompetenceView(viewsets.ModelViewSet):
