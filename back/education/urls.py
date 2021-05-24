@@ -18,7 +18,7 @@ router.register(r'presence', PresenceView)
 router.register(r'job_files', Job_fileView)
 router.register(r'skill_reports', Skill_reportView)
 router.register(r'jobs', JobView)
-router.register(r'competence', CompetenceView)
+router.register(r'competence', CompetenceView, basename='Competence')
 router.register(r'specialties', SpecialtyView, basename='Specialty')
 
 
