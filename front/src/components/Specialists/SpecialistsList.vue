@@ -111,7 +111,7 @@
         fetchSpecialists();
       "
     />
-    <ActivitySkillTabs :currentUser="currentUser" v-if="displayTabs" @goBack="displayTabs = false"/>
+    <ActivitySkillTabs :currentUser="currentUser" v-if="displayTabs" @goBack="closeTabs"/>
   </div>
 </template>
 
@@ -184,6 +184,12 @@ export default {
     displayActivitySkill(user) {
       this.currentUser = user;
       this.displayTabs = true;
+    },
+    async closeTabs() {
+      this.loading = true;
+      this.displayTabs = false;
+      await this.fetchSpecialists();
+      this.loading = false;
     },
   },
   computed: {

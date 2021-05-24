@@ -30,7 +30,7 @@
         </span>
       </a-tab-pane>
     </a-tabs>
-    <ActivitiesTypes v-if="activeTab == 1" :activities="activities" />
+    <ActivitiesTypes v-show="activeTab == 1" :activities="activities" :userActivities="currentUser.activities" :specialistId="currentUser.id" />
   </div>
 </template>
 

@@ -1,15 +1,27 @@
 <template>
   <div>
     <a-list
-      :loading="loadingList || loading"
+      :loading="loading"
       item-layout="horizontal"
       :data-source="activities"
       class="types-list"
     >
-      <a-list-item slot="renderItem" slot-scope="item, index" style="height: 75px">
+      <a-list-item
+        slot="renderItem"
+        slot-scope="item, index"
+        style="height: 75px"
+      >
         <div slot="actions">
-          <a-checkbox style="margin-right: 15px;" v-model="checkboxes[index]" @change="checkboxChanged($event, index)"/>
-          <a-radio-group v-model="radios[index]" :disabled="!checkboxes[index]" >
+          <a-checkbox
+            style="margin-right: 15px"
+            v-model="checkboxes[index]"
+            @change="checkboxChanged($event, index, item)"
+          />
+          <a-radio-group
+            v-model="radios[index]"
+            :disabled="!checkboxes[index]"
+            @change="radioChanged(index, item)"
+          >
             <a-radio-button :value="true"> Основной </a-radio-button>
             <a-radio-button :value="false"> Дополнительный </a-radio-button>
           </a-radio-group>
@@ -28,12 +40,17 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   name: "ActivitiesTypes",
   props: {
     activities: {
       type: Array,
-    }
+    },
+    userActivities: {
+      type: Array,
+    },
+    specialistId: [Number, String],
   },
   data() {
     return {
@@ -43,49 +60,87 @@ export default {
       loading: false,
       checkboxes: [],
       radios: [],
+      specialtyLinks: [],
     };
   },
   created() {
-    this.checkboxes = [];
-    this.radios = [];
-    this.activities.forEach(() => {
-      this.checkboxes.push(null)
-      this.radios.push(null)
-    })
+    this.prepareData();
   },
   methods: {
-    async deleteRecord(id) {
-      this.loading = true;
-      try {
-        let res = await this.$store.dispatch("activities/deleteActivity", id);
+    async checkboxChanged(event, index, item) {
+      if (event.target.checked === false) {
+        this.radios[index] = true;
+        let res = await this.deleteActivity(this.specialtyLinks[index]);
         if (res.status === 204) {
-          this.$message.success("Вид деятельности успешно удалён");
-          this.$emit("needUpdate");
+          this.$message.success(
+            "Вид деятельности у специалиста успешно удалён"
+          );
         } else {
           this.$message.error("Произошла ошибка");
         }
-      } catch (e) {
-        this.$message.error("Произошла ошибка");
-      } finally {
-        this.loading = false;
+      } else {
+        if (this.specialtyLinks[index] === null) {
+          let res = await this.addActivity({
+            activity_id: item.id,
+            specialist_id: this.specialistId,
+            is_main: this.radios[index],
+          });
+          if (res.status === 201) {
+            this.$message.success(
+              "Вид деятельности у специалиста успешно добавлен"
+            );
+            this.specialtyLinks[index] = res.data.id;
+          } else {
+            this.$message.error("Произошла ошибка");
+          }
+        }
       }
     },
-    displayDelete(item) {
-      let that = this;
-      this.$confirm({
-        title: `Вы действительно хотите удалить образовательную область ${item.name}?`,
-        content: `Будут удалены все связанные занятия.`,
-        okType: "danger",
-        onOk() {
-          that.deleteRecord(item.id);
-        },
+    async radioChanged(index, item) {
+      if (this.specialtyLinks[index] !== null) {
+        let res = await this.editActivity({
+          id: this.specialtyLinks[index],
+          activity_id: item.id,
+          specialist_id: this.specialistId,
+          is_main: this.radios[index],
+        });
+        if (res.status === 200) {
+          this.$message.success(
+            "Вид деятельности у специалиста успешно изменён"
+          );
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      }
+    },
+    prepareData() {
+      this.checkboxes = [];
+      this.radios = [];
+      let activityInUser = false;
+      let activityIsMain = true;
+      let specialtyLink = null;
+      this.activities.forEach((activity) => {
+        activityInUser = false;
+        activityIsMain = true;
+        specialtyLink = null;
+        for (let userActivity of this.userActivities) {
+          if (activity.id === userActivity.activity.id) {
+            activityInUser = true;
+            activityIsMain = userActivity.is_main;
+            specialtyLink = userActivity.id;
+            break;
+          }
+        }
+        this.checkboxes.push(activityInUser);
+        this.radios.push(activityIsMain);
+        this.specialtyLinks.push(specialtyLink);
       });
     },
-    checkboxChanged(event, index) {
-      if (event.target.checked === false) {
-        this.radios[index] = null;
-      }
-    },
+    ...mapActions({
+      addActivity: "specialists/addSpecialistActivity",
+      editActivity: "specialists/editSpecialistActivity",
+      deleteActivity: "specialists/deleteSpecialistActivity",
+    }),
   },
 };
 </script>
