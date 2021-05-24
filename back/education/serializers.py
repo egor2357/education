@@ -44,14 +44,6 @@ class SkillSerializer(FlexFieldsModelSerializer):
     model = Skill
     fields = ('id', 'name', 'number', 'direction_id')
 
-class ScheduleSerializer(serializers.ModelSerializer):
-  activity_id = serializers.PrimaryKeyRelatedField(
-    source='activity', queryset=Activity.objects.all()
-  )
-  class Meta:
-    model = Schedule
-    fields = ('id', 'day', 'start_time', 'activity_id')
-
 class Activity_skillSerializer(serializers.ModelSerializer):
   skill_id = serializers.PrimaryKeyRelatedField(
     queryset=Skill.objects.all(), write_only=True
@@ -64,16 +56,29 @@ class ActivitySerializer(FlexFieldsModelSerializer):
   skills = serializers.PrimaryKeyRelatedField(
     many=True, read_only=True
   )
-  schedule = ScheduleSerializer(
-    source='schedule_set', many=True, read_only=True
-  )
   class Meta:
     model = Activity
-    fields = ('id', 'name', 'color', 'skills', 'schedule')
+    fields = (
+      'id',
+      'name', 'color',
+      'skills',
+    )
     expandable_fields = {
       'skills': SkillSerializer,
-      'schedule': ScheduleSerializer,
     }
+
+class ScheduleSerializer(serializers.ModelSerializer):
+  activity = ActivitySerializer(
+    read_only=True,
+    omit=['skills']
+  )
+  class Meta:
+    model = Schedule
+    fields = (
+      'id',
+      'day', 'start_time',
+      'activity'
+    )
 
 class PresenceSerializer(serializers.ModelSerializer):
   specialist_id = serializers.PrimaryKeyRelatedField(
@@ -356,19 +361,41 @@ class Skill_reportSerializer(serializers.ModelSerializer):
       'mark', 'comment'
     )
 
-class JobSerializer(serializers.ModelSerializer):
+class WeekJobSerializer(serializers.Serializer):
+  date = serializers.DateField()
+
+class JobSerializer(FlexFieldsModelSerializer):
   option_id = serializers.PrimaryKeyRelatedField(
-    source='option', queryset=Option.objects.all(), required=False
+    source='option', queryset=Option.objects.all(),
+    required=False, write_only=True
+  )
+  option = OptionSerializer(
+    read_only=True
   )
   specialist_id = serializers.PrimaryKeyRelatedField(
-    source='specialist', queryset=Specialist.objects.all(), required=False
+    source='specialist', queryset=Specialist.objects.all(),
+    required=False, write_only=True
+  )
+  specialist = SpecialistSerializer(
+    read_only=True,
+    fields=['id', 'surname', 'name', 'patronymic', 'role']
   )
   activity_id = serializers.PrimaryKeyRelatedField(
-    source='activity', queryset=Activity.objects.all()
+    source='activity', queryset=Activity.objects.all(),
+    write_only=True
+  )
+  activity = ActivitySerializer(
+    read_only=True,
+    fields=['id', 'name', 'color']
   )
   schedule_id = serializers.PrimaryKeyRelatedField(
-    source='schedule', queryset=Schedule.objects.all()
+    source='schedule', queryset=Schedule.objects.all(),
+    write_only=True
   )
+  schedule = ScheduleSerializer(
+    read_only=True,
+  )
+
   reports = Skill_reportSerializer(
     many=True, read_only=True
   )
@@ -379,9 +406,11 @@ class JobSerializer(serializers.ModelSerializer):
     model = Job
     fields = (
       'id',
-      'reports','job_files',
-      'option_id', 'specialist_id',
-      'activity_id',
+      'option_id', 'option',
+      'specialist_id', 'specialist',
+      'activity_id', 'activity',
+      'schedule_id', 'schedule',
+      'reports',
+      'job_files',
       'date', 'start_time', 'comment',
-      'schedule_id'
     )
