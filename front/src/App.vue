@@ -46,4 +46,17 @@ export default {
   &.icon-exit
     font-size: 20px
     margin-top: 2px
+.ant-menu.ant-menu-dark .ant-menu-item-selected, .ant-menu-submenu-selected
+  background: #0060B9 !important
+
+.ant-layout-sider, .ant-menu-dark, .ant-menu-inline, .ant-layout-sider-trigger, .ant-menu-sub
+  background: #1890FF !important
+
+.ant-menu
+  &.ant-menu-inline
+    &.ant-menu-sub
+      box-shadow: none !important
+
+.content
+  height: calc(100vh - 150px)
 </style>

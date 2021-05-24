@@ -10,35 +10,30 @@
           return index;
         }
       "
-      :scroll="{ y: 'calc(100vh - 260px)' }"
+      :scroll="{ y: 'calc(100vh - 310px)' }"
+      :loading="tableLoading || tableLoadingActivity"
     >
       <template slot="area" slot-scope="text">
         <div class="td-label--sticky" v-if="!text.empty" :length="text.length">
-          <span>
-            {{ `${text.index}. ${text.name}` }}
+          <span class="label--justify">
+            {{ `${text.number}. ${text.name}` }}
           </span>
           <a-dropdown
             :trigger="['click']"
             placement="bottomLeft"
             class="dropdown--hover"
+            v-if="!readOnly"
           >
             <a-icon class="icon-button" type="dash"></a-icon>
             <a-menu slot="overlay">
-              <a-menu-item key="0" @click="openModalAdd(1)">
-                Добавить
+              <a-menu-item key="0" @click="openModalAdd(2, text)">
+                Добавить направление развития
               </a-menu-item>
               <a-menu-item key="1" @click="openModalEdit(text, 1)">
                 Изменить
               </a-menu-item>
-              <a-menu-item key="2">
-                <a-popconfirm
-                  title="Вы действительно хотите удалить данную область?"
-                  ok-text="Да"
-                  cancel-text="Нет"
-                  @confirm="deleteRecord(text, 1)"
-                >
-                  <span>Удалить</span>
-                </a-popconfirm>
+              <a-menu-item key="2" @click="displayConfirmDelete(text, 1)">
+                <span> Удалить </span>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -47,89 +42,118 @@
       </template>
       <template slot="direction" slot-scope="text, record">
         <div class="td-label--sticky" v-if="!text.empty" :length="text.length">
-          <span>
-            {{ `${record.area.index}.${text.index}. ${text.name}` }}
+          <span class="label--justify">
+            {{ `${record.area.number}.${text.number}. ${text.name}` }}
           </span>
           <a-dropdown
             :trigger="['click']"
             placement="bottomLeft"
             class="dropdown--hover"
+            v-if="!readOnly"
           >
             <a-icon class="icon-button" type="dash"></a-icon>
             <a-menu slot="overlay">
-              <a-menu-item key="0" @click="openModalAdd(2)">
-                Добавить
+              <a-menu-item key="0" @click="openModalAdd(3, text)">
+                Добавить навык
               </a-menu-item>
               <a-menu-item key="1" @click="openModalEdit(text, 2)">
                 Изменить
               </a-menu-item>
-              <a-menu-item key="2">
-                <a-popconfirm
-                  title="Вы действительно хотите удалить данное направление?"
-                  ok-text="Да"
-                  cancel-text="Нет"
-                  @confirm="deleteRecord(text, 2)"
-                >
-                  <span>Удалить</span>
-                </a-popconfirm>
+              <a-menu-item
+                key="2"
+                @click="displayConfirmDelete(text, 2, record)"
+              >
+                <span>Удалить</span>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
         </div>
-        <div class="need-delete" v-else />
+        <div class="need-delete" v-else-if="record.area.empty" />
       </template>
       <template slot="skill" slot-scope="text, record">
-        <div>
-          <span>
+        <div class="skill-label" v-if="!text.empty">
+          <span class="label--justify">
             {{
-              `${record.area.index}.${record.direction.index}.${text.index}. ${text.name}`
+              `${record.area.number}.${record.direction.number}.${text.number}. ${text.name}`
             }}
           </span>
           <a-dropdown
             :trigger="['click']"
             placement="bottomLeft"
             class="dropdown--hover"
+            v-if="!readOnly"
           >
             <a-icon class="icon-button" type="dash"></a-icon>
             <a-menu slot="overlay">
-              <a-menu-item key="0" @click="openModalAdd(3)">
-                Добавить
-              </a-menu-item>
               <a-menu-item key="1" @click="openModalEdit(text, 3)">
                 Изменить
               </a-menu-item>
-              <a-menu-item key="2">
-                <a-popconfirm
-                  title="Вы действительно хотите удалить данный навык?"
-                  ok-text="Да"
-                  cancel-text="Нет"
-                  @confirm="deleteRecord(text, 3)"
-                >
-                  <span>Удалить</span>
-                </a-popconfirm>
+              <a-menu-item
+                key="2"
+                @click="displayConfirmDelete(text, 3, record)"
+              >
+                <span>Удалить</span>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
         </div>
       </template>
+      <template
+        :slot="`activity${activity.id}`"
+        slot-scope="text, record, index"
+        v-for="activity in activitiesList"
+      >
+        <a-checkbox
+          :key="activity.id"
+          v-model="activityCheckboxes[activity.id][record.skill.id]"
+          @change="changeLink($event, activity.id, record.skill.id)"
+        />
+      </template>
     </a-table>
+    <a-button
+      style="margin-top: 10px"
+      @click="openModalAdd(1)"
+      v-if="!readOnly"
+    >
+      Добавить образовательную область
+    </a-button>
     <ModalSkills
       v-if="displayModal"
       :adding="modalAdding"
       :type="modalType"
       :editableData="modalEditableData"
       @close="displayModal = false"
-      @closeSuccess="displayModal = false"
+      @closeSuccess="closeSuccess"
     />
   </div>
 </template>
 
 <script>
 import ModalSkills from "@/components/Modals/ModalSkills";
+import { mapGetters, mapActions } from "vuex";
+
 export default {
   name: "TableSkill",
   components: {
     ModalSkills,
+  },
+  props: {
+    readOnly: {
+      type: Boolean,
+      default: false,
+    },
+    activities: {
+      type: Boolean,
+      default: false,
+    },
+    activitiesList: {
+      type: Array,
+      default: null,
+    },
+    tableLoadingActivity: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -159,97 +183,82 @@ export default {
           },
         },
       ],
-      data: [
-        {
-          area: { name: "Область 1", index: 1, length: 10, empty: false },
-          direction: {
-            name: "Направление 1",
-            index: 1,
-            length: 7,
-            empty: false,
-          },
-          skill: { name: "Навык 1. ", index: 1 },
-        },
-        {
-          area: { empty: true, index: 1 },
-          direction: { empty: true, index: 1 },
-          skill: { name: "Навык 2", index: 2 },
-        },
-        {
-          area: { empty: true, index: 1 },
-          direction: { empty: true, index: 1 },
-          skill: { name: "Навык 3", index: 3 },
-        },
-        {
-          area: { empty: true, index: 1 },
-          direction: { empty: true, index: 1 },
-          skill: { name: "Навык 4", index: 4 },
-        },
-        {
-          area: { empty: true, index: 1 },
-          direction: { empty: true, index: 1 },
-          skill: { name: "Навык 5", index: 5 },
-        },
-        {
-          area: { empty: true, index: 1 },
-          direction: { empty: true, index: 1 },
-          skill: { name: "Навык 6", index: 6 },
-        },
-        {
-          area: { empty: true, index: 1 },
-          direction: { empty: true, index: 1 },
-          skill: { name: "Навык 7", index: 7 },
-        },
-        {
-          area: { empty: true, index: 1 },
-          direction: {
-            name: "Направление 2",
-            index: 2,
-            length: 3,
-            empty: false,
-          },
-          skill: { name: "Навык 8", index: 1 },
-        },
-        {
-          area: { empty: true, index: 1 },
-          direction: { empty: true, index: 2 },
-          skill: { name: "Навык 9", index: 2 },
-        },
-        {
-          area: { empty: true, index: 1 },
-          direction: { empty: true, index: 2 },
-          skill: { name: "Навык 10", index: 3 },
-        },
-      ],
+      data: [],
       displayModal: false,
       modalAdding: true,
       modalType: 0,
       modalEditableData: {},
+      tableLoading: true,
+      lastNumberArea: 1,
+      indexTable: 1,
+      activityCheckboxes: {},
     };
   },
-  created() {
-    for (let i = 0; i < 2; i++) {
-      this.data = this.data.concat(this.data);
+  async created() {
+    await this.getData();
+    if (this.activities) {
+      this.columns[0].width = "10%";
+      this.columns[1].width = "10%";
+      this.columns[2].width = "30%";
+      for (let activity of this.activitiesList) {
+        this.columns.push({
+          title: () => {
+            return (
+              <div title={activity.name} class="activity-title">
+                <span
+                  class="activity-color"
+                  style={`background-color: ${activity.color}`}
+                />
+                <span style="flex: 0 0 calc(100% - 25px); text-align: left;">
+                  {activity.name}
+                </span>
+              </div>
+            );
+          },
+          dataIndex: activity,
+          align: "center",
+          key: `activity${activity.id}`,
+          class: "vertical-header",
+          scopedSlots: {
+            customRender: `activity${activity.id}`,
+          },
+        });
+      }
     }
   },
-  mounted() {
-    this.changeDOM();
-  },
   methods: {
+    ...mapActions({ fetchAreas: "skills/fetchAreas" }),
     changeDOM() {
-      for (let el of document.getElementsByClassName("td-label--sticky")) {
-        el.parentElement.rowSpan = Number(el.attributes[0].value);
-      }
       let elForDel = document.getElementsByClassName("need-delete");
-      let lengthForDel = elForDel.length;
-      for (let i = lengthForDel - 1; i >= 0; i--) {
-        elForDel[i].parentNode.remove();
+      for (let i = elForDel.length - 1; i >= 0; i--) {
+        elForDel[i].parentElement.hidden = true;
+        elForDel[i].parentElement.classList.add("was-hidden");
+      }
+      for (let el of document.getElementsByClassName("td-label--sticky")) {
+        el.parentElement.rowSpan = Number(
+          !isNaN(el.attributes[0].value)
+            ? el.attributes[0].value
+            : el.attributes[1].value
+        );
+        el.parentElement.hidden = false;
+        el.parentElement.classList.add("was-spanned");
       }
     },
-    openModalAdd(type) {
+    openModalAdd(type, item) {
       this.modalAdding = true;
       this.modalType = type;
       this.displayModal = true;
+      if (type === 1) {
+        this.modalEditableData.lastNumberArea = this.lastNumberArea;
+      }
+      if (type === 2) {
+        this.modalEditableData.areaId = item.id;
+        this.modalEditableData.lastNumberDirection = item.lastNumberDirection;
+      }
+      if (type === 3) {
+        this.modalEditableData.directionId = item.id;
+        this.modalEditableData.lastNumberSkill = item.lastNumberSkill;
+      }
     },
     openModalEdit(item, type) {
       this.modalAdding = false;
@@ -257,19 +266,266 @@ export default {
       this.modalEditableData = item;
       this.displayModal = true;
     },
-    deleteRecord(item, type) {
-      console.log(type);
-      console.log(item);
+    async deleteRecord(item, type) {
+      let dispatchName = "";
+      let successMessage = "";
+      this.tableLoading = true;
+      if (type === 1) {
+        dispatchName = "skills/deleteArea";
+        successMessage = "Образовательная область успешно удалена";
+      } else if (type === 2) {
+        dispatchName = "skills/deleteDirection";
+        successMessage = "Направление развития успешно удалено";
+      } else if (type === 3) {
+        dispatchName = "skills/deleteSkill";
+        successMessage = "Навык успешно удален";
+      } else {
+        this.tableLoading = false;
+        return;
+      }
+      try {
+        let res = await this.$store.dispatch(dispatchName, item.id);
+        if (res.status === 204) {
+          this.$message.success(successMessage);
+          await this.closeSuccess();
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка");
+      } finally {
+        this.tableLoading = false;
+      }
     },
+    prepareData() {
+      this.data = [];
+      let areaObj = {};
+      let directionObj = {};
+      let indexStartArea = 0;
+      let indexCurrentRow = 0;
+      for (let area of this.areas) {
+        indexStartArea = this.data.length;
+        areaObj = {
+          id: area.id,
+          name: area.name,
+          length: 1,
+          number: area.number,
+          empty: false,
+          emptySkills: 0,
+          lastNumberDirection:
+            area.development_directions.length > 0
+              ? area.development_directions[
+                  area.development_directions.length - 1
+                ].number + 1
+              : 1,
+        };
+        this.data.push({
+          area: areaObj,
+          direction: { empty: true },
+          skill: { empty: true },
+        });
+        indexCurrentRow += 1;
+        let firstDirection = true;
+        if (area.development_directions.length === 0) {
+          this.data[indexStartArea].area.emptySkills += 1;
+        }
+        for (let direction of area.development_directions) {
+          if (firstDirection) {
+            direction.skills.length > 1
+              ? (this.data[indexStartArea].area.length +=
+                  direction.skills.length - 1)
+              : "";
+          } else {
+            direction.skills.length > 1
+              ? (this.data[indexStartArea].area.length +=
+                  direction.skills.length)
+              : (this.data[indexStartArea].area.length += 1);
+          }
+          directionObj = {
+            id: direction.id,
+            name: direction.name,
+            length: direction.skills.length > 0 ? direction.skills.length : 1,
+            number: direction.number,
+            areaId: direction.area_id,
+            lastNumberSkill:
+              direction.skills.length > 0
+                ? direction.skills[direction.skills.length - 1].number + 1
+                : 1,
+            empty: false,
+          };
+          if (firstDirection) {
+            this.data[indexCurrentRow - 1].direction = directionObj;
+            firstDirection = false;
+          } else {
+            this.data.push({
+              area: { empty: true, number: area.number },
+              direction: directionObj,
+              skill: { empty: true },
+            });
+            indexCurrentRow += 1;
+          }
+          if (direction.skills.length === 0) {
+            this.data[indexStartArea].area.emptySkills += 1;
+          }
+          let firstSkill = true;
+          for (let skill of direction.skills) {
+            if (firstSkill) {
+              this.data[indexCurrentRow - 1].skill = {
+                id: skill.id,
+                name: skill.name,
+                number: skill.number,
+                directionId: skill.direction_id,
+                empty: false,
+              };
+              firstSkill = false;
+            } else {
+              this.data.push({
+                area: { empty: true, number: area.number },
+                direction: { empty: true, number: direction.number },
+                skill: {
+                  id: skill.id,
+                  name: skill.name,
+                  number: skill.number,
+                  directionId: skill.direction_id,
+                  empty: false
+                },
+              });
+              indexCurrentRow += 1;
+            }
+          }
+        }
+      }
+      if (this.areas.length > 0) {
+        this.lastNumberArea = this.areas[this.areas.length - 1].number + 1;
+      }
+    },
+    async getData() {
+      this.tableLoading = true;
+      await this.fetchAreas();
+      await this.prepareData();
+      if (this.activities) await this.prepareDataForActivities();
+      if (this.activities) await this.prepareActivityCheckboxes();
+      await this.changeDOM();
+      this.tableLoading = false;
+    },
+    displayConfirmDelete(text, type, record) {
+      let title = "";
+      let content = "";
+      if (type === 1) {
+        title = `Вы действительно хотите удалить образовательную область "${text.number}.${text.name}"?`;
+        content = "Будут удалены все связанные направления развития и навыки.";
+      } else if (type === 2) {
+        title = `Вы действительно хотите удалить направление развития "${record.area.number}.${text.number}.${text.name}"?`;
+        content = "Будут удалены все связанные навыки.";
+      } else if (type === 3) {
+        title = `Вы действительно хотите удалить навык "${record.area.number}.${record.direction.number}.${text.number}.${text.name}?"`;
+        content = "";
+      }
+      let that = this;
+      this.$confirm({
+        title: title,
+        content: content,
+        okType: "danger",
+        onOk() {
+          that.deleteRecord(text, type);
+        },
+      });
+    },
+    closeSuccess() {
+      this.displayModal = false;
+      let elWasHidden = document.getElementsByClassName("was-hidden");
+      for (let i = elWasHidden.length - 1; i >= 0; i--) {
+        elWasHidden[i].hidden = false;
+        elWasHidden[i].classList.remove("was-hidden");
+      }
+      let elWasSpanned = document.getElementsByClassName("was-spanned");
+      for (let i = elWasSpanned.length - 1; i >= 0; i--) {
+        elWasSpanned[i].rowSpan = 1;
+        elWasSpanned[i].classList.remove("was-spanned");
+      }
+      this.getData();
+    },
+    prepareDataForActivities() {
+      let index = 0;
+      let deleted = false;
+      let len = this.data.length;
+      let element = {};
+      let savedArea = {};
+      for (index; index < len; ) {
+        deleted = false;
+        if (this.data[index]) {
+          element = this.data[index];
+          element.area.empty === false
+            ? (element.area.length -= element.area.emptySkills)
+            : "";
+        } else {
+          break;
+        }
+        if (
+          (element.skill.empty === true && element.area.empty === true) ||
+          (element.skill.empty === true && element.direction.empty === true) ||
+          (element.skill.empty === true &&
+            element.direction.empty !== true &&
+            element.direction.area !== true)
+        ) {
+          if (element.skill.empty === true && element.area.empty === false) {
+            savedArea = element.area;
+          }
+          this.data.splice(index, 1);
+          deleted = true;
+        } else if(element.skill.empty === false && element.area.empty === true && element.direction.empty === false) {
+          if (this.data[index - 1] && element.direction.areaId === savedArea.id && this.data[index - 1].direction.areaId !== savedArea.id) {
+            element.area = savedArea
+          }
+        }
+        deleted === false ? (index += 1) : "";
+      }
+    },
+    prepareActivityCheckboxes() {
+      if (Object.keys(this.activitiesCheckboxes).length === 0) {
+        for (let activity of this.activitiesList) {
+          this.$set(this.activityCheckboxes, activity.id, {});
+          for (let element of this.data) {
+            this.$set(
+              this.activityCheckboxes[activity.id],
+              element.skill.id,
+              activity.skills.indexOf(element.skill.id) !== -1
+            );
+          }
+        }
+        this.$store.commit(
+          "activities/setActivitiesCheckboxes",
+          this.activityCheckboxes
+        );
+      } else {
+        this.activityCheckboxes = this.activitiesCheckboxes;
+      }
+    },
+    changeLink(event, activityId, skillId) {
+      this.$emit("changeLink", {
+        activityId: activityId,
+        skillId: skillId,
+        value: event.target.checked,
+      });
+    },
+  },
+  computed: {
+    ...mapGetters({
+      areas: "skills/getAreas",
+      activitiesCheckboxes: "activities/getActivitiesCheckboxes",
+    }),
   },
 };
 </script>
 
 <style lang="sass">
-.td-label--sticky
+.td-label--sticky, .skill-label
   position: -webkit-sticky
   position: sticky
   top: 0
+  display: flex
+  .label--justify
+    flex: 0 0 98%
 .ant-table-tbody > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td
   background-color: unset
 .ant-table-row
@@ -282,7 +538,40 @@ export default {
   td
     .dropdown--hover
       display: none
+      flex: 0 0 2%
+      height: 20px
+      svg
+        transform: rotate(90deg)
+        margin-top: 3px
     &:hover
       .dropdown--hover
         display: unset
+
+/*.ant-table-body*/
+  /*overflow-y: auto !important*/
+/*.ant-table-header*/
+  /*overflow: auto !important*/
+  /*margin-bottom: 0 !important*/
+  /*padding-right: 16px*/
+
+.vertical-header
+  padding: 5px !important
+  vertical-align: middle !important
+  .ant-table-header-column
+    writing-mode: vertical-rl
+    transform: rotate(180deg)
+    max-height: 180px
+    height: 100%
+    .activity-title
+      display: flex
+      overflow: hidden
+      text-overflow: ellipsis
+      max-width: 40px
+      .activity-color
+        width: 20px
+        height: 20px
+        border-radius: 20px
+        flex: 0 0 20px
+        align-self: center
+        margin-bottom: 5px
 </style>

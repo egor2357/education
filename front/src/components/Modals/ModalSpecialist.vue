@@ -6,8 +6,8 @@
     okText="Сохранить"
     cancelText="Отмена"
     :title="title"
-    v-if="type !== 0"
     @confirmLoading="loadingButton"
+    class="modal-activities"
   >
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <template v-for="(field, index) in fields">
@@ -17,6 +17,11 @@
           :key="field.name"
           :validateStatus="field.validateStatus"
           :help="field.help"
+          v-if="
+            field.name !== 'password' ||
+            adding ||
+            (!adding && displayPassword)
+          "
         >
           <a-input
             v-if="field.type === 'text'"
@@ -24,36 +29,37 @@
             @change="fieldChanged(field)"
             :ref="`field${index}`"
           />
-          <a-input-number
-            v-else-if="field.type === 'number'"
-            v-model="form[field.name]"
-            @change="fieldChanged(field)"
-            :min="0"
-          />
         </a-form-model-item>
       </template>
+      <a-form-model-item v-if="adding === false && !displayPassword">
+        <a-button @click="form.password = null; displayPassword = true">Сменить пароль</a-button>
+      </a-form-model-item>
     </a-form-model>
   </a-modal>
 </template>
 
 <script>
 export default {
-  name: "ModalSkills",
+  name: "ModalActivities",
   props: {
     adding: {
       type: Boolean,
       default: true,
     },
-    type: {
-      type: Number,
-    },
     editableData: Object,
+    staffSelected: {
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {
       form: {
         name: null,
-        number: null,
+        surname: null,
+        patronymic: null,
+        username: null,
+        password: null
       },
       title: "",
       layout: {
@@ -62,16 +68,37 @@ export default {
       },
       fields: [
         {
-          name: "name",
-          label: "Название",
+          name: "surname",
+          label: "Фамилия",
           type: "text",
           validateStatus: "",
           help: "",
         },
         {
-          name: "number",
-          label: "Номер",
-          type: "number",
+          name: "name",
+          label: "Имя",
+          type: "text",
+          validateStatus: "",
+          help: "",
+        },
+        {
+          name: "patronymic",
+          label: "Отчество",
+          type: "text",
+          validateStatus: "",
+          help: "",
+        },
+        {
+          name: "username",
+          label: "Логин",
+          type: "text",
+          validateStatus: "",
+          help: "",
+        },
+        {
+          name: "password",
+          label: "Пароль",
+          type: "text",
           validateStatus: "",
           help: "",
         },
@@ -81,24 +108,39 @@ export default {
           {
             trigger: "blur",
             required: true,
-            message: "Пожалуйста, введите название",
+            message: "Пожалуйста, введите имя",
           },
         ],
-        number: [
+        surname: [
           {
             trigger: "blur",
             required: true,
-            message: "Пожалуйста, введите номер",
+            message: "Пожалуйста, введите фамилию",
           },
         ],
+        username: [
+          {
+            trigger: "blur",
+            required: true,
+            message: "Пожалуйста, введите логин",
+          },
+        ],
+        password: [
+          {
+            trigger: "blur",
+            required: true,
+            message: "Пожалуйста, введите пароль",
+          },
+        ],
+
       },
       loadingButton: false,
+      displayPassword: false,
     };
   },
   methods: {
     handleCancel() {
-      this.form.name = null;
-      this.form.number = null;
+      this.clearFields();
       this.$emit("close");
     },
     async handleOk() {
@@ -109,30 +151,18 @@ export default {
           let successCode = 0;
           let successMessage = "";
 
-          if (this.type === 1 && this.adding) {
-            dispatchName = "skills/addArea";
+          if (this.adding) {
+            dispatchName = "specialists/addSpecialist";
             successCode = 201;
-            successMessage = "Образовательная область успешно добавлена";
-          } else if (this.type === 1 && !this.adding) {
-            dispatchName = "skills/editArea";
+            this.staffSelected
+              ? successMessage = "Администратор успешно добавлен"
+              : successMessage = "Специалист успешно добавлен";
+          } else if (!this.adding) {
+            dispatchName = "specialists/editSpecialist";
             successCode = 200;
-            successMessage = "Образовательная область успешно изменена";
-          } else if (this.type === 2 && this.adding) {
-            dispatchName = "skills/addDirection";
-            successCode = 201;
-            successMessage = "Направление развития успешно добавлено";
-          } else if (this.type === 2 && !this.adding) {
-            dispatchName = "skills/editDirection";
-            successCode = 200;
-            successMessage = "Направлние развития успешно изменено";
-          } else if (this.type === 3 && this.adding) {
-            dispatchName = "skills/addSkill";
-            successCode = 201;
-            successMessage = "Навык успешно добавлен";
-          } else if (this.type === 3 && !this.adding) {
-            dispatchName = "skills/editSkill";
-            successCode = 200;
-            successMessage = "Навык успешно изменен";
+            this.staffSelected
+              ? successMessage = "Администратор успешно изменён"
+              : successMessage = "Специалист успешно изменён";
           }
           try {
             let res = await this.$store.dispatch(dispatchName, this.form);
@@ -175,40 +205,36 @@ export default {
         this.handleOk();
       }
     },
+    clearFields() {
+      this.form = {
+        name: null,
+        subname: null,
+        patronymic: null,
+        username: null,
+        password: null
+      }
+    },
+    fillFields(data) {
+      data.id ? this.form.id = data.id : '';
+      data.name ? this.form.name = data.name : '';
+      data.surname ? this.form.surname = data.surname : '';
+      data.patronymic ? this.form.patronymic = data.patronymic : '';
+      data.user.username ? this.form.username = data.user.username : '';
+    },
   },
   created() {
+    this.clearFields();
     if (this.adding) {
-      this.title += "Добавление ";
+      this.staffSelected
+        ? this.title += "Добавление администратора"
+        : this.title += "Добавление специалиста";
     } else {
-      this.title += "Изменение ";
-      this.editableData.id ? (this.form.id = this.editableData.id) : "";
-      this.editableData.name ? (this.form.name = this.editableData.name) : "";
-      this.editableData.number
-        ? (this.form.number = this.editableData.number)
-        : "";
+      this.staffSelected
+        ? this.title += "Изменение администратора"
+        : this.title += "Изменение специалиста";
+      this.fillFields(this.editableData);
     }
-    if (this.type === 1) {
-      this.title += "образовательной области";
-      this.editableData.lastNumberArea
-        ? (this.form.number = this.editableData.lastNumberArea)
-        : "";
-    } else if (this.type === 2) {
-      this.editableData.areaId
-        ? (this.form.area_id = this.editableData.areaId)
-        : "";
-      this.editableData.lastNumberDirection
-        ? (this.form.number = this.editableData.lastNumberDirection)
-        : "";
-      this.title += "направления развития";
-    } else if (this.type === 3) {
-      this.editableData.directionId
-        ? (this.form.direction_id = this.editableData.directionId)
-        : "";
-      this.editableData.lastNumberSkill
-        ? (this.form.number = this.editableData.lastNumberSkill)
-        : "";
-      this.title += "навыка";
-    }
+    this.staffSelected ? this.form.is_staff = true : this.form.is_staff = false;
     document.addEventListener("keydown", this.keydown);
   },
   mounted() {
@@ -219,4 +245,4 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style lang="sass"></style>
