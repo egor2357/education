@@ -129,7 +129,7 @@ export default {
             {
               key: "2.4",
               title: "Расписание",
-              to: { name: "Skills" },
+              to: { name: "Schedule" },
             },
             {
               key: "2.5",

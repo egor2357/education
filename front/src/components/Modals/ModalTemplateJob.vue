@@ -7,7 +7,6 @@
     cancelText="Отмена"
     :title="title"
     @confirmLoading="loadingButton"
-    class="modal-activities"
   >
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <template v-for="(field, index) in fields">
@@ -17,133 +16,122 @@
           :key="field.name"
           :validateStatus="field.validateStatus"
           :help="field.help"
-          v-if="
-            field.name !== 'password' || adding || (!adding && displayPassword)
-          "
         >
           <a-input
-            v-if="field.type === 'text'"
+            v-if="field.type === 'time'"
             v-model="form[field.name]"
             @change="fieldChanged(field)"
             :ref="`field${index}`"
+            type="time"
+            style="width: 85px"
           />
+          <a-select
+            v-if="field.type === 'select'"
+            v-model="form[field.name]"
+            @change="fieldChanged(field)"
+            :ref="`field${index}`"
+          >
+            <template v-if="field.name === 'activity_id'">
+              <a-select-option
+                v-for="activity in activities"
+                :key="activity.id"
+              >
+                {{ activity.name }}
+              </a-select-option>
+            </template>
+            <template v-if="field.name === 'day'">
+              <a-select-option v-for="(day, index) in daysOfWeek" :key="index">
+                {{ day.long }}
+              </a-select-option>
+            </template>
+          </a-select>
         </a-form-model-item>
       </template>
-      <a-form-model-item v-if="adding === false && !displayPassword">
-        <a-button
-          @click="
-            form.password = null;
-            displayPassword = true;
-          "
-          >Сменить пароль</a-button
-        >
-      </a-form-model-item>
     </a-form-model>
   </a-modal>
 </template>
 
 <script>
+import consts from "@/const";
 export default {
-  name: "ModalActivities",
+  name: "ModalTemplateJob",
   props: {
     adding: {
       type: Boolean,
       default: true,
     },
-    editableData: Object,
-    staffSelected: {
-      type: Boolean,
-      default: false,
+    activities: {
+      type: Array,
     },
+    editableData: Object,
   },
   data() {
     return {
+      daysOfWeek: consts.daysOfWeek,
       form: {
-        name: null,
-        surname: null,
-        patronymic: null,
-        username: null,
-        password: null,
+        day: null,
+        activity_id: null,
+        start_time: null,
       },
       title: "",
       layout: {
-        labelCol: { span: 5 },
-        wrapperCol: { span: 19 },
+        labelCol: { span: 8 },
+        wrapperCol: { span: 16 },
       },
       fields: [
         {
-          name: "surname",
-          label: "Фамилия",
-          type: "text",
+          name: "day",
+          label: "День недели",
+          type: "select",
           validateStatus: "",
           help: "",
         },
         {
-          name: "name",
-          label: "Имя",
-          type: "text",
+          name: "activity_id",
+          label: "Вид деятельности",
+          type: "select",
           validateStatus: "",
           help: "",
         },
         {
-          name: "patronymic",
-          label: "Отчество",
-          type: "text",
-          validateStatus: "",
-          help: "",
-        },
-        {
-          name: "username",
-          label: "Логин",
-          type: "text",
-          validateStatus: "",
-          help: "",
-        },
-        {
-          name: "password",
-          label: "Пароль",
-          type: "text",
+          name: "start_time",
+          label: "Время",
+          type: "time",
           validateStatus: "",
           help: "",
         },
       ],
       rules: {
-        name: [
+        day: [
           {
             trigger: "blur",
             required: true,
-            message: "Пожалуйста, введите имя",
+            message: "Пожалуйста, выберите день недели",
           },
         ],
-        surname: [
+        activity_id: [
           {
             trigger: "blur",
             required: true,
-            message: "Пожалуйста, введите фамилию",
+            message: "Пожалуйста, выберите вид деятельности",
           },
         ],
-        username: [
+        start_time: [
           {
             trigger: "blur",
             required: true,
-            message: "Пожалуйста, введите логин",
-          },
-        ],
-        password: [
-          {
-            trigger: "blur",
-            required: true,
-            message: "Пожалуйста, введите пароль",
+            message: "Пожалуйста, введите время",
           },
         ],
       },
       loadingButton: false,
-      displayPassword: false,
     };
   },
   methods: {
     handleCancel() {
-      this.clearFields();
+      this.form.day = null;
+      this.form.activity_id = null;
+      this.form.start_time = null;
       this.$emit("close");
     },
     async handleOk() {
@@ -155,17 +143,13 @@ export default {
           let successMessage = "";
 
           if (this.adding) {
-            dispatchName = "specialists/addSpecialist";
+            dispatchName = "schedule/addJob";
             successCode = 201;
-            this.staffSelected
-              ? (successMessage = "Администратор успешно добавлен")
-              : (successMessage = "Специалист успешно добавлен");
+            successMessage = "Занятие успешно добавлено";
           } else if (!this.adding) {
-            dispatchName = "specialists/editSpecialist";
+            dispatchName = "schedule/editJob";
             successCode = 200;
-            this.staffSelected
-              ? (successMessage = "Администратор успешно изменён")
-              : (successMessage = "Специалист успешно изменён");
+            successMessage = "Занятие успешно изменено";
           }
           try {
             let res = await this.$store.dispatch(dispatchName, this.form);
@@ -208,38 +192,25 @@ export default {
         this.handleOk();
       }
     },
-    clearFields() {
-      this.form = {
-        name: null,
-        subname: null,
-        patronymic: null,
-        username: null,
-        password: null,
-      };
-    },
-    fillFields(data) {
-      data.id ? (this.form.id = data.id) : "";
-      data.name ? (this.form.name = data.name) : "";
-      data.surname ? (this.form.surname = data.surname) : "";
-      data.patronymic ? (this.form.patronymic = data.patronymic) : "";
-      data.user.username ? (this.form.username = data.user.username) : "";
-    },
   },
   created() {
-    this.clearFields();
+    this.form.day = null;
+    this.form.activity_id = null;
+    this.form.start_time = null;
     if (this.adding) {
-      this.staffSelected
-        ? (this.title += "Добавление администратора")
-        : (this.title += "Добавление специалиста");
+      this.title += "Добавление занятия";
     } else {
-      this.staffSelected
-        ? (this.title += "Изменение администратора")
-        : (this.title += "Изменение специалиста");
-      this.fillFields(this.editableData);
+      this.title += "Изменение занятия";
+      this.editableData.id ? (this.form.id = this.editableData.id) : "";
+      if (this.editableData.day || this.editableData.day === 0)
+        this.form.day = this.editableData.day;
+      this.editableData.activity
+        ? (this.form.activity_id = this.editableData.activity.id)
+        : "";
+      this.editableData.start_time
+        ? (this.form.start_time = this.editableData.start_time)
+        : "";
     }
-    this.staffSelected
-      ? (this.form.is_staff = true)
-      : (this.form.is_staff = false);
     document.addEventListener("keydown", this.keydown);
   },
   mounted() {

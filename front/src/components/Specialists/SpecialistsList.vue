@@ -111,7 +111,11 @@
         fetchSpecialists();
       "
     />
-    <ActivitySkillTabs :currentUser="currentUser" v-if="displayTabs" @goBack="closeTabs"/>
+    <ActivitySkillTabs
+      :currentUser="currentUser"
+      v-if="displayTabs"
+      @goBack="closeTabs"
+    />
   </div>
 </template>
 

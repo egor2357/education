@@ -43,6 +43,15 @@ const router = new VueRouter({
       },
     },
     {
+      path: "/schedule",
+      name: "Schedule",
+      component: () => import("@/views/Admin/Schedule"),
+      meta: {
+        breadcrumbs: [{ title: "Шаблон расписания занятий" }],
+        staffOnly: true,
+      },
+    },
+    {
       path: "/404",
       name: "Page404",
       component: () => import("@/views/Page404"),
