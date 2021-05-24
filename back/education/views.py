@@ -175,5 +175,14 @@ class CompetenceView(viewsets.ModelViewSet):
 class SpecialtyView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Specialty.objects.all()
   serializer_class = SpecialtySerializer
+
+  def get_queryset(self):
+    user = self.request.user
+    if user.is_staff:
+      return Specialty.objects.all()
+    else:
+      if user.specialist is None:
+        return Specialty.objects.none()
+      else:
+        return Specialty.objects.filter(specialist=user.specialist)
