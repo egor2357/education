@@ -175,11 +175,14 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
   def create(self, validated_data):
     admin_group = Group.objects.get(name='education_admins')
 
-    username = validated_data.pop('username', '')
-    password = validated_data.pop('password', '')
+    username = validated_data.pop('username', None)
+    password = validated_data.pop('password', None)
     is_staff = validated_data.pop('is_staff', False)
 
-    if username and password:
+    has_username = (not (username is None) and username)
+    has_password = (not (password is None) and password)
+
+    if has_username and has_password:
       user = User(username=username, is_staff=is_staff)
       user.set_password(password)
       user.save()
@@ -196,17 +199,20 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
   def update(self, instance, validated_data):
     admin_group = Group.objects.get(name='education_admins')
 
-    username = validated_data.pop('username', '')
-    password = validated_data.pop('password', '')
+    username = validated_data.pop('username', None)
+    password = validated_data.pop('password', None)
     is_staff = validated_data.pop('is_staff', None)
+
+    has_username = (not (username is None) and username)
+    has_password = (not (password is None) and password)
 
     user = instance.user
     if not (user is None):
-      if username:
+      if has_username:
         user.username = username
       if not is_staff is None:
         user.is_staff = is_staff
-      if password:
+      if has_password:
         user.set_password(password)
       user.save()
 
@@ -215,7 +221,7 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
       else:
         user.groups.remove(admin_group)
 
-    elif username and password:
+    elif has_username and has_password:
       if is_staff is None:
         is_staff = False
       user = User(username=username, is_staff=is_staff)
