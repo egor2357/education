@@ -68,6 +68,10 @@ class ActivitySerializer(FlexFieldsModelSerializer):
     }
 
 class ScheduleSerializer(serializers.ModelSerializer):
+  activity_id = serializers.PrimaryKeyRelatedField(
+    source='activity', queryset=Activity.objects.all(),
+    many=False, write_only=True
+  )
   activity = ActivitySerializer(
     read_only=True,
     omit=['skills']
@@ -77,7 +81,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
     fields = (
       'id',
       'day', 'start_time',
-      'activity'
+      'activity_id', 'activity',
     )
 
 class PresenceSerializer(serializers.ModelSerializer):
