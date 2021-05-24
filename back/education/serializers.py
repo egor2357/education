@@ -366,6 +366,9 @@ class JobSerializer(serializers.ModelSerializer):
   activity_id = serializers.PrimaryKeyRelatedField(
     source='activity', queryset=Activity.objects.all()
   )
+  schedule_id = serializers.PrimaryKeyRelatedField(
+    source='schedule', queryset=Schedule.objects.all()
+  )
   reports = Skill_reportSerializer(
     many=True, read_only=True
   )
@@ -380,5 +383,5 @@ class JobSerializer(serializers.ModelSerializer):
       'option_id', 'specialist_id',
       'activity_id',
       'date', 'start_time', 'comment',
-      'is_templated'
+      'schedule_id'
     )

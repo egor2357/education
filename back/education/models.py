@@ -303,13 +303,16 @@ class Job(models.Model):
     Activity, null=False,
     on_delete=models.CASCADE, verbose_name='Вид деятельности'
   )
+  schedule = models.ForeignKey(
+    Schedule, null=True,
+    on_delete=models.SET_NULL, verbose_name='Шаблон занятия'
+  )
 
   reports = models.ManyToManyField('Skill', through='Skill_report', verbose_name='Отчеты по навыкам')
 
   date = models.DateField(verbose_name='Дата проведения')
   start_time = models.TimeField(verbose_name='Время начала')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
-  is_templated = models.BooleanField(default=False, verbose_name='Создано по шаблону')
 
   class Meta:
     db_table = 'job'
