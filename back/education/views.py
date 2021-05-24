@@ -142,7 +142,7 @@ class SpecialistView(viewsets.ModelViewSet):
     user = specialist.user
     specialist.is_active = False
     specialist.save()
-    if not user is None:
+    if not (user is None):
       user.delete()
     return Response(SpecialistSerializer(specialist).data)
 

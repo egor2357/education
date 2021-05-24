@@ -155,15 +155,17 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
   user = UserSerializer(read_only=True)
   activities = SpecialtySerializer(
     source='specialty_set' , many=True, read_only=True,
-    fields=['activity', 'is_main']
+    fields=['activity', 'is_main', 'id']
   )
   skills = CompetenceSerializer(
     source='competence_set', many=True, read_only=True,
-    fields=['skill', 'coefficient']
+    fields=['skill', 'coefficient', 'id']
   )
   presence = PresenceSerializer(
     source='presence_set', many=True, read_only=True
   )
+
+  is_active = serializers.BooleanField(required=False, read_only=True)
 
   username = serializers.CharField(required=False, write_only=True)
   password = serializers.CharField(required=False, write_only=True)
@@ -172,35 +174,63 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
   def create(self, validated_data):
     admin_group = Group.objects.get(name='education_admins')
 
-    username = validated_data.pop('username', None)
-    password = validated_data.pop('password', None)
+    username = validated_data.pop('username', '')
+    password = validated_data.pop('password', '')
     is_staff = validated_data.pop('is_staff', False)
 
-    if not(username is None) and not(password is None):
+    if username and password:
       user = User(username=username, is_staff=is_staff)
       user.set_password(password)
       user.save()
       if user.is_staff:
         user.groups.add(admin_group)
 
-        specialist = Specialist(**validated_data)
-        specialist.user = user
-        specialist.save()
-        return specialist
+      specialist = Specialist(**validated_data)
+      specialist.user = user
+      specialist.save()
+      return specialist
     else:
       raise serializers.ValidationError('Не указан username или password')
 
   def update(self, instance, validated_data):
-    print(instance)
-    # username = validated_data['username']
-    # password = validated_data['password']
-    # is_staff = validated_data.pop('is_staff')
+    admin_group = Group.objects.get(name='education_admins')
 
-    # user.set_password(password)
-    # user.save()
+    username = validated_data.pop('username', '')
+    password = validated_data.pop('password', '')
+    is_staff = validated_data.pop('is_staff', None)
 
-    # specialist = Specialist.objects.create(**validated_data)
-    # return specialistreturn instance
+    user = instance.user
+    if not (user is None):
+      if username:
+        user.username = username
+      if not is_staff is None:
+        user.is_staff = is_staff
+      if password:
+        user.set_password(password)
+      user.save()
+
+      if user.is_staff:
+        user.groups.add(admin_group)
+      else:
+        user.groups.remove(admin_group)
+
+    elif username and password:
+      if is_staff is None:
+        is_staff = False
+      user = User(username=username, is_staff=is_staff)
+      user.set_password(password)
+      user.save()
+      if user.is_staff:
+        user.groups.add(admin_group)
+      instance.user = user
+
+    instance.surname = validated_data.pop('surname', '')
+    instance.name = validated_data.pop('name', '')
+    instance.patronymic = validated_data.pop('patronymic', '')
+    instance.role = validated_data.pop('role', '')
+    instance.is_active = False if (user is None) else True
+    instance.save()
+    return instance
 
   class Meta:
     model = Specialist
