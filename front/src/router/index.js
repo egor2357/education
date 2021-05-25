@@ -52,6 +52,15 @@ const router = new VueRouter({
       },
     },
     {
+      path: "/forms",
+      name: "Forms",
+      component: () => import("@/views/Admin/Forms"),
+      meta: {
+        breadcrumbs: [{ title: "Формы и способы проведения занятий" }],
+        staffOnly: true,
+      },
+    },
+    {
       path: "/404",
       name: "Page404",
       component: () => import("@/views/Page404"),
