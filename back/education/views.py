@@ -107,6 +107,77 @@ class ScheduleView(viewsets.ModelViewSet):
   queryset = Schedule.objects.all()
   serializer_class = ScheduleSerializer
 
+  @action(
+    detail=False, methods=['post'],
+    permission_classes=(permissions.IsAuthenticated, IsAdminOrReadOnly),
+    serializer_class=OnlyDateSerializer
+  )
+  def set_for_the_week(self, request, *args, **kwargs):
+    serializer = OnlyDateSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    start_date = serializer.validated_data['date']
+    end_date = start_date + relativedelta(days=7)
+
+    jobs = (Job.objects.filter(date__gte=start_date, date__lte=end_date)
+                        .exclude(schedule=None))
+    jobs_schedule_ids = jobs.values_list('schedule_id', flat=True)
+
+    templates = Schedule.objects.exclude(pk__in=jobs_schedule_ids)
+
+    new_jobs = []
+    for template in templates:
+      tdelta = start_date.weekday() - template.day
+      if tdelta < 0:
+        tdelta = 7 + tdelta
+      curr_date = start_date + relativedelta(days=tdelta)
+
+      specialist = Specialist.get_available(template, curr_date)
+
+      new_job = Job(option=None, activity=template.activity,
+                    specialist=specialist,
+                    schedule=template, date=curr_date,
+                    start_time=template.start_time, comment='')
+      new_jobs.append(new_job)
+
+    Job.objects.bulk_create(new_jobs)
+
+    return Response(JobView.get_between(start_date, end_date))
+
+  @action(
+    detail=True, methods=['post'],
+    permission_classes=(permissions.IsAuthenticated, IsAdminOrReadOnly),
+    serializer_class=OnlyDateSerializer
+  )
+  def set_for_the_day(self, request, *args, **kwargs):
+    template = self.get_object()
+
+    serializer = OnlyDateSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    date = serializer.validated_data['date']
+
+
+    weekday_match = template.day == date.weekday()
+    if not weekday_match:
+      return Response('Дни недели не совпадают')
+
+    job_qs = Job.objects.filter(date=date, schedule=template)
+
+    was_scheduled = job_qs.exists()
+    if was_scheduled:
+      job = job_qs[0]
+      return Response(JobSerializer(job).data)
+
+    specialist = Specialist.get_available(template, date)
+
+    new_job = Job(option=None, activity=template.activity,
+                  specialist=specialist,
+                  schedule=template, date=date,
+                  start_time=template.start_time, comment='')
+    new_job.save()
+
+    return Response(JobSerializer(new_job).data)
+
 class ActivityView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
@@ -181,87 +252,6 @@ class Skill_reportView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated,)
   queryset = Skill_report.objects.all()
   serializer_class = Skill_reportSerializer
-
-class JobView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
-  permission_classes = (permissions.IsAuthenticated,)
-  queryset = Job.objects.all()
-  serializer_class = JobSerializer
-  filter_backends = (DjangoFilterBackend,)
-  filterset_class = JobFilter
-
-  def get_between(self, start_date, end_date):
-    jobs = Job.objects.filter(date__gte=start_date, date__lte=end_date)
-    job_by_day_dict = {}
-    for job in jobs:
-      key = job.date.strftime('%d.%m.%Y')
-      job_serialized = JobSerializer(job).data
-      if key not in job_by_day_dict.keys():
-        job_by_day_dict[key] = [job_serialized]
-      else:
-        job_by_day_dict[key].append(job_serialized)
-
-    return job_by_day_dict
-
-  @action(
-    detail=False, methods=['get'],
-    permission_classes=(permissions.IsAuthenticated, IsAdminOrReadOnly),
-    serializer_class=WeekJobSerializer
-  )
-  def weekly_templates(self, request, *args, **kwargs):
-    serializer = WeekJobSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-
-    start_date = serializer.validated_data['date']
-    end_date = start_date + relativedelta(days=7)
-
-    return Response(self.get_between(start_date, end_date))
-
-  @weekly_templates.mapping.post
-  def set_jobs(self, request, *args, **kwargs):
-    serializer = WeekJobSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-
-    start_date = serializer.validated_data['date']
-    end_date = start_date + relativedelta(days=7)
-
-    jobs = (Job.objects.filter(date__gte=start_date, date__lte=end_date)
-                        .exclude(schedule=None))
-    jobs_schedule_ids = jobs.values_list('schedule_id', flat=True)
-
-    new_jobs = []
-
-    templates = Schedule.objects.exclude(pk__in=jobs_schedule_ids)
-    for template in templates:
-      tdelta = start_date.weekday() - template.day
-      curr_date = start_date + relativedelta(days=tdelta)
-
-      available_specs_ids = (template.activity.specialty_set.filter(is_main=True)
-                                                            .values_list('specialist_id', flat=True))
-      presense_specs_ids = Presence.objects.filter(
-        specialist_id__in=available_specs_ids,
-        date_from__gte=start_date,
-        date_to__lte=end_date,
-        is_available=True
-      ).values_list('specialist_id', flat=True)
-
-      specs = Specialist.objects.filter(pk__in=presense_specs_ids)
-      if specs.exists():
-        specialist = specs.first()
-      else:
-        specialist = None
-
-      new_job = Job(option=None, activity=template.activity,
-                    specialist=specialist,
-                    schedule=template, date=curr_date,
-                    start_time=template.start_time, comment='')
-
-      new_jobs.append(new_job)
-
-    Job.objects.bulk_create(new_jobs)
-
-    return Response(self.get_between(start_date, end_date))
-
 
 class CompetenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
