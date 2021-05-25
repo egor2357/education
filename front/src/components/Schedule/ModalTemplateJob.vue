@@ -7,7 +7,6 @@
     cancelText="Отмена"
     :title="title"
     @confirmLoading="loadingButton"
-    class="modal-activities"
   >
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <template v-for="(field, index) in fields">
@@ -19,18 +18,33 @@
           :help="field.help"
         >
           <a-input
-            v-if="field.type === 'text'"
+            v-if="field.type === 'time'"
             v-model="form[field.name]"
             @change="fieldChanged(field)"
             :ref="`field${index}`"
+            type="time"
+            style="width: 90px"
           />
-          <v-swatches
-            v-else-if="field.type === 'color'"
+          <a-select
+            v-if="field.type === 'select'"
             v-model="form[field.name]"
             @change="fieldChanged(field)"
-            shapes="circles"
-            :swatches="swatches"
-          />
+            :ref="`field${index}`"
+          >
+            <template v-if="field.name === 'activity_id'">
+              <a-select-option
+                v-for="activity in activities"
+                :key="activity.id"
+              >
+                {{ activity.name }}
+              </a-select-option>
+            </template>
+            <template v-if="field.name === 'day'">
+              <a-select-option v-for="(day, index) in daysOfWeek" :key="index">
+                {{ day.long }}
+              </a-select-option>
+            </template>
+          </a-select>
         </a-form-model-item>
       </template>
     </a-form-model>
@@ -38,113 +52,86 @@
 </template>
 
 <script>
-import VSwatches from "vue-swatches";
+import consts from "@/const";
 export default {
-  name: "ModalActivities",
-  components: {
-    VSwatches,
-  },
+  name: "ModalTemplateJob",
   props: {
     adding: {
       type: Boolean,
       default: true,
     },
+    activities: {
+      type: Array,
+    },
     editableData: Object,
   },
   data() {
     return {
+      daysOfWeek: consts.daysOfWeek,
       form: {
-        name: null,
-        color: null,
+        day: null,
+        activity_id: null,
+        start_time: null,
       },
       title: "",
       layout: {
-        labelCol: { span: 5 },
-        wrapperCol: { span: 19 },
+        labelCol: { span: 8 },
+        wrapperCol: { span: 16 },
       },
       fields: [
         {
-          name: "name",
-          label: "Название",
-          type: "text",
+          name: "day",
+          label: "День недели",
+          type: "select",
           validateStatus: "",
           help: "",
         },
         {
-          name: "color",
-          label: "Цвет",
-          type: "color",
+          name: "activity_id",
+          label: "Вид деятельности",
+          type: "select",
+          validateStatus: "",
+          help: "",
+        },
+        {
+          name: "start_time",
+          label: "Время",
+          type: "time",
           validateStatus: "",
           help: "",
         },
       ],
       rules: {
-        name: [
+        day: [
           {
             trigger: "blur",
             required: true,
-            message: "Пожалуйста, введите название",
+            message: "Пожалуйста, выберите день недели",
           },
         ],
-        color: [
+        activity_id: [
           {
             trigger: "blur",
             required: true,
-            message: "Пожалуйста, введите цвет",
+            message: "Пожалуйста, выберите вид деятельности",
+          },
+        ],
+        start_time: [
+          {
+            trigger: "blur",
+            required: true,
+            message: "Пожалуйста, введите время",
           },
         ],
       },
       loadingButton: false,
-      swatches: [
-        "#5c0011",
-        "#a8071a",
-        "#cf1322",
-        "#ff4d4f",
-        "#ffa39e",
-        "#610b00",
-        "#ad2102",
-        "#fa541c",
-        "#ff9c6e",
-        "#ffbb96",
-        "#612500",
-        "#ad4e00",
-        "#fa8c16",
-        "#ffc069",
-        "#613400",
-        "#ad6800",
-        "#faad14",
-        "#ffd666",
-        "#614700",
-        "#ad8b00",
-        "#fadb14",
-        "#fff566",
-        "#254000",
-        "#5b8c00",
-        "#a0d911",
-        "#d3f261",
-        "#092b00",
-        "#237804",
-        "#52c41a",
-        "#95de64",
-        "#002329",
-        "#006d75",
-        "#08979c",
-        "#36cfc9",
-        "#002766",
-        "#0050b3",
-        "#1890ff",
-        "#69c0ff",
-        "#120338",
-        "#391085",
-        "#722ed1",
-        "#b37feb",
-      ],
     };
   },
   methods: {
     handleCancel() {
-      this.form.name = null;
-      this.form.color = null;
+      this.form.day = null;
+      this.form.activity_id = null;
+      this.form.start_time = null;
       this.$emit("close");
     },
     async handleOk() {
@@ -156,19 +143,18 @@ export default {
           let successMessage = "";
 
           if (this.adding) {
-            dispatchName = "activities/addActivity";
+            dispatchName = "schedule/addJob";
             successCode = 201;
-            successMessage = "Вид деятельности успешно добавлен";
+            successMessage = "Занятие успешно добавлено";
           } else if (!this.adding) {
-            dispatchName = "activities/editActivity";
+            dispatchName = "schedule/editJob";
             successCode = 200;
-            successMessage = "Вид деятельности успешно изменен";
+            successMessage = "Занятие успешно изменено";
           }
           try {
             let res = await this.$store.dispatch(dispatchName, this.form);
             if (res.status === successCode) {
               this.$message.success(successMessage);
-              this.$store.commit("activities/setActivitiesCheckboxes", {});
               this.$emit("closeSuccess");
             } else if (res.status === 400) {
               this.$message.error("Проверьте введённые данные");
@@ -208,16 +194,21 @@ export default {
     },
   },
   created() {
-    this.form.name = null;
-    this.form.color = null;
+    this.form.day = null;
+    this.form.activity_id = null;
+    this.form.start_time = null;
     if (this.adding) {
-      this.title += "Добавление вида деятельности";
+      this.title += "Добавление занятия";
     } else {
-      this.title += "Изменение вида деятельности";
+      this.title += "Изменение занятия";
       this.editableData.id ? (this.form.id = this.editableData.id) : "";
-      this.editableData.name ? (this.form.name = this.editableData.name) : "";
-      this.editableData.color
-        ? (this.form.color = this.editableData.color)
+      if (this.editableData.day || this.editableData.day === 0)
+        this.form.day = this.editableData.day;
+      this.editableData.activity
+        ? (this.form.activity_id = this.editableData.activity.id)
+        : "";
+      this.editableData.start_time
+        ? (this.form.start_time = this.editableData.start_time)
         : "";
     }
     document.addEventListener("keydown", this.keydown);
@@ -227,13 +218,10 @@ export default {
       this.$refs["field0"][0].focus();
     });
   },
+  beforeDestroy() {
+    document.removeEventListener("keydown", this.keydown);
+  }
 };
 </script>
 
-<style lang="sass">
-.vue-swatches__wrapper
-  width: 320px !important
-.modal-activities
-  .ant-modal-body
-    padding-bottom: 0
-</style>
+<style lang="sass"></style>

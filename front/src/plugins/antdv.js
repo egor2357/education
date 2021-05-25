@@ -23,7 +23,11 @@ import {
   List,
   Avatar,
   Checkbox,
-  Radio
+  Radio,
+  Timeline,
+  Spin,
+  Select,
+  Collapse
 } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
@@ -50,6 +54,10 @@ Vue.use(List);
 Vue.use(Avatar);
 Vue.use(Checkbox);
 Vue.use(Radio);
+Vue.use(Timeline);
+Vue.use(Spin);
+Vue.use(Select);
+Vue.use(Collapse);
 
 Vue.prototype.$message = message;
 Vue.prototype.$confirm = Modal.confirm;

@@ -1,22 +1,21 @@
 <template>
   <div>
-    <div style="display: flex;">
+    <div style="display: flex">
       <a-button icon="arrow-left" @click="$emit('goBack')">Назад</a-button>
       <span class="specialist-title">
         <span>Специалист:</span>
-          <b>
-            {{
-              currentUser.surname
-                ? currentUser.name && currentUser.patronymic
-                  ? `${currentUser.surname} ${currentUser.name} ${currentUser.patronymic}`
-                  : currentUser.surname
-                : currentUser.user.username
-            }}
-          </b>
+        <b>
+          {{
+            currentUser.surname
+              ? currentUser.name && currentUser.patronymic
+                ? `${currentUser.surname} ${currentUser.name} ${currentUser.patronymic}`
+                : currentUser.surname
+              : currentUser.user.username
+          }}
+        </b>
       </span>
-
     </div>
-    <a-tabs v-model="activeTab" class="tabs--center">
+    <a-tabs v-model="activeTab" class="specialist-tabs--center">
       <a-tab-pane key="1">
         <span slot="tab">
           <a-icon type="unordered-list" />
@@ -30,17 +29,29 @@
         </span>
       </a-tab-pane>
     </a-tabs>
-    <ActivitiesTypes v-if="activeTab == 1" :activities="activities" />
+    <ActivitiesTypes
+      v-show="activeTab == 1"
+      :activities="activities"
+      :userActivities="currentUser.activities"
+      :specialistId="currentUser.id"
+    />
+    <Skills
+      :specialistSkills="currentUser.skills"
+      :specialistId="currentUser.id"
+      v-show="activeTab == 2"
+    />
   </div>
 </template>
 
 <script>
 import ActivitiesTypes from "@/components/Specialists/ActivitiesTypes";
+import Skills from "@/components/Specialists/Skills";
 import { mapActions, mapGetters } from "vuex";
 export default {
   name: "ActivitySkillTabs",
   components: {
     ActivitiesTypes,
+    Skills,
   },
   props: {
     currentUser: Object,
@@ -73,7 +84,7 @@ export default {
   flex-grow: 1
   text-align: center
   padding-right: 7%
-.tabs--center
-  padding-right: calc(50% - 185px)
-  padding-left: calc(50% - 185px)
+.specialist-tabs--center
+  padding-right: calc(50% - 160px)
+  padding-left: calc(50% - 160px)
 </style>

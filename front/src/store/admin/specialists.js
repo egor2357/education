@@ -13,7 +13,7 @@ const getters = {
 };
 
 const actions = {
-  async fetchSpecialists({commit}) {
+  async fetchSpecialists({ commit }) {
     try {
       let res = await this.$axios.get("/api/specialists/");
       if (res.status === 200) {
@@ -28,11 +28,10 @@ const actions = {
           }
           spec.hasAdditionalActivity = hasAdditional;
         }
-        commit("setSpecialists", res.data)
+        commit("setSpecialists", res.data);
       }
-    }
-    catch (e) {
-      commit("setSpecialists", [])
+    } catch (e) {
+      commit("setSpecialists", []);
     }
   },
   async addSpecialist(context, payload) {
@@ -43,6 +42,24 @@ const actions = {
   },
   async deleteSpecialist(context, id) {
     return deleteAxios(this.$axios, `/api/specialists/${id}/`, {});
+  },
+  async addSpecialistActivity(context, payload) {
+    return post(this.$axios, "/api/specialties/", payload);
+  },
+  async editSpecialistActivity(context, payload) {
+    return put(this.$axios, `/api/specialties/${payload.id}/`, payload);
+  },
+  async deleteSpecialistActivity(context, id) {
+    return deleteAxios(this.$axios, `/api/specialties/${id}/`, {});
+  },
+  async addSpecialistSkill(context, payload) {
+    return post(this.$axios, "/api/competence/", payload);
+  },
+  async editSpecialistSkill(context, payload) {
+    return put(this.$axios, `/api/competence/${payload.id}/`, payload);
+  },
+  async deleteSpecialistSkill(context, id) {
+    return deleteAxios(this.$axios, `/api/competence/${id}/`, {});
   },
 };
 

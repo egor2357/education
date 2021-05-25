@@ -24,12 +24,6 @@
             @change="fieldChanged(field)"
             :ref="`field${index}`"
           />
-          <a-input-number
-            v-else-if="field.type === 'number'"
-            v-model="form[field.name]"
-            @change="fieldChanged(field)"
-            :min="0"
-          />
         </a-form-model-item>
       </template>
     </a-form-model>
@@ -38,14 +32,14 @@
 
 <script>
 export default {
-  name: "ModalSkills",
+  name: "ModalForm",
   props: {
     adding: {
       type: Boolean,
       default: true,
     },
     type: {
-      type: Number,
+      type: [Number, String],
     },
     editableData: Object,
   },
@@ -53,7 +47,6 @@ export default {
     return {
       form: {
         name: null,
-        number: null,
       },
       title: "",
       layout: {
@@ -68,13 +61,6 @@ export default {
           validateStatus: "",
           help: "",
         },
-        {
-          name: "number",
-          label: "Номер",
-          type: "number",
-          validateStatus: "",
-          help: "",
-        },
       ],
       rules: {
         name: [
@@ -84,13 +70,6 @@ export default {
             message: "Пожалуйста, введите название",
           },
         ],
-        number: [
-          {
-            trigger: "blur",
-            required: true,
-            message: "Пожалуйста, введите номер",
-          },
-        ],
       },
       loadingButton: false,
     };
@@ -98,7 +77,6 @@ export default {
   methods: {
     handleCancel() {
       this.form.name = null;
-      this.form.number = null;
       this.$emit("close");
     },
     async handleOk() {
@@ -110,29 +88,21 @@ export default {
           let successMessage = "";
 
           if (this.type === 1 && this.adding) {
-            dispatchName = "skills/addArea";
+            dispatchName = "forms/addForm";
             successCode = 201;
-            successMessage = "Образовательная область успешно добавлена";
+            successMessage = "Форма проведения занятий успешно добавлена";
           } else if (this.type === 1 && !this.adding) {
-            dispatchName = "skills/editArea";
+            dispatchName = "forms/editForm";
             successCode = 200;
-            successMessage = "Образовательная область успешно изменена";
+            successMessage = "Форма проведения занятий успешно изменена";
           } else if (this.type === 2 && this.adding) {
-            dispatchName = "skills/addDirection";
+            dispatchName = "forms/addMethod";
             successCode = 201;
-            successMessage = "Направление развития успешно добавлено";
+            successMessage = "Способ проведения занятий успешно добавлено";
           } else if (this.type === 2 && !this.adding) {
-            dispatchName = "skills/editDirection";
+            dispatchName = "forms/editMethod";
             successCode = 200;
-            successMessage = "Направлние развития успешно изменено";
-          } else if (this.type === 3 && this.adding) {
-            dispatchName = "skills/addSkill";
-            successCode = 201;
-            successMessage = "Навык успешно добавлен";
-          } else if (this.type === 3 && !this.adding) {
-            dispatchName = "skills/editSkill";
-            successCode = 200;
-            successMessage = "Навык успешно изменен";
+            successMessage = "Способ проведения занятий успешно изменено";
           }
           try {
             let res = await this.$store.dispatch(dispatchName, this.form);
@@ -183,31 +153,15 @@ export default {
       this.title += "Изменение ";
       this.editableData.id ? (this.form.id = this.editableData.id) : "";
       this.editableData.name ? (this.form.name = this.editableData.name) : "";
-      this.editableData.number
-        ? (this.form.number = this.editableData.number)
-        : "";
     }
     if (this.type === 1) {
-      this.title += "образовательной области";
-      this.editableData.lastNumberArea
-        ? (this.form.number = this.editableData.lastNumberArea)
-        : "";
+      this.title += "формы проведения занятий";
     } else if (this.type === 2) {
-      this.editableData.areaId
-        ? (this.form.area_id = this.editableData.areaId)
+      this.editableData.form_id
+        ? (this.form.form_id = this.editableData.form_id)
         : "";
-      this.editableData.lastNumberDirection
-        ? (this.form.number = this.editableData.lastNumberDirection)
-        : "";
-      this.title += "направления развития";
-    } else if (this.type === 3) {
-      this.editableData.directionId
-        ? (this.form.direction_id = this.editableData.directionId)
-        : "";
-      this.editableData.lastNumberSkill
-        ? (this.form.number = this.editableData.lastNumberSkill)
-        : "";
-      this.title += "навыка";
+      console.log(this.form);
+      this.title += "способа проведений занятий";
     }
     document.addEventListener("keydown", this.keydown);
   },

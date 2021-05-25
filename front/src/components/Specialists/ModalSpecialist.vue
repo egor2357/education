@@ -18,9 +18,7 @@
           :validateStatus="field.validateStatus"
           :help="field.help"
           v-if="
-            field.name !== 'password' ||
-            adding ||
-            (!adding && displayPassword)
+            field.name !== 'password' || adding || (!adding && displayPassword)
           "
         >
           <a-input
@@ -32,7 +30,13 @@
         </a-form-model-item>
       </template>
       <a-form-model-item v-if="adding === false && !displayPassword">
-        <a-button @click="form.password = null; displayPassword = true">Сменить пароль</a-button>
+        <a-button
+          @click="
+            form.password = null;
+            displayPassword = true;
+          "
+          >Сменить пароль</a-button
+        >
       </a-form-model-item>
     </a-form-model>
   </a-modal>
@@ -50,7 +54,7 @@ export default {
     staffSelected: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   data() {
     return {
@@ -59,7 +63,7 @@ export default {
         surname: null,
         patronymic: null,
         username: null,
-        password: null
+        password: null,
       },
       title: "",
       layout: {
@@ -132,7 +136,6 @@ export default {
             message: "Пожалуйста, введите пароль",
           },
         ],
-
       },
       loadingButton: false,
       displayPassword: false,
@@ -155,14 +158,14 @@ export default {
             dispatchName = "specialists/addSpecialist";
             successCode = 201;
             this.staffSelected
-              ? successMessage = "Администратор успешно добавлен"
-              : successMessage = "Специалист успешно добавлен";
+              ? (successMessage = "Администратор успешно добавлен")
+              : (successMessage = "Специалист успешно добавлен");
           } else if (!this.adding) {
             dispatchName = "specialists/editSpecialist";
             successCode = 200;
             this.staffSelected
-              ? successMessage = "Администратор успешно изменён"
-              : successMessage = "Специалист успешно изменён";
+              ? (successMessage = "Администратор успешно изменён")
+              : (successMessage = "Специалист успешно изменён");
           }
           try {
             let res = await this.$store.dispatch(dispatchName, this.form);
@@ -211,30 +214,32 @@ export default {
         subname: null,
         patronymic: null,
         username: null,
-        password: null
-      }
+        password: null,
+      };
     },
     fillFields(data) {
-      data.id ? this.form.id = data.id : '';
-      data.name ? this.form.name = data.name : '';
-      data.surname ? this.form.surname = data.surname : '';
-      data.patronymic ? this.form.patronymic = data.patronymic : '';
-      data.user.username ? this.form.username = data.user.username : '';
+      data.id ? (this.form.id = data.id) : "";
+      data.name ? (this.form.name = data.name) : "";
+      data.surname ? (this.form.surname = data.surname) : "";
+      data.patronymic ? (this.form.patronymic = data.patronymic) : "";
+      data.user.username ? (this.form.username = data.user.username) : "";
     },
   },
   created() {
     this.clearFields();
     if (this.adding) {
       this.staffSelected
-        ? this.title += "Добавление администратора"
-        : this.title += "Добавление специалиста";
+        ? (this.title += "Добавление администратора")
+        : (this.title += "Добавление специалиста");
     } else {
       this.staffSelected
-        ? this.title += "Изменение администратора"
-        : this.title += "Изменение специалиста";
+        ? (this.title += "Изменение администратора")
+        : (this.title += "Изменение специалиста");
       this.fillFields(this.editableData);
     }
-    this.staffSelected ? this.form.is_staff = true : this.form.is_staff = false;
+    this.staffSelected
+      ? (this.form.is_staff = true)
+      : (this.form.is_staff = false);
     document.addEventListener("keydown", this.keydown);
   },
   mounted() {
@@ -242,6 +247,9 @@ export default {
       this.$refs["field0"][0].focus();
     });
   },
+  beforeDestroy() {
+    document.removeEventListener("keydown", this.keydown);
+  }
 };
 </script>
 

@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import ModalActivities from "@/components/Modals/ModalActivities";
+import ModalActivities from "@/components/ActivitiesTypes/ModalActivities";
 export default {
   name: "TypesList",
   props: {

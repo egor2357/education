@@ -111,13 +111,17 @@
         fetchSpecialists();
       "
     />
-    <ActivitySkillTabs :currentUser="currentUser" v-if="displayTabs" @goBack="displayTabs = false"/>
+    <ActivitySkillTabs
+      :currentUser="currentUser"
+      v-if="displayTabs"
+      @goBack="closeTabs"
+    />
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import ModalSpecialist from "@/components/Modals/ModalSpecialist";
+import ModalSpecialist from "@/components/Specialists/ModalSpecialist";
 import ActivitySkillTabs from "@/components/Specialists/ActivitySkillTabs";
 export default {
   name: "SpecialistsList",
@@ -185,6 +189,12 @@ export default {
       this.currentUser = user;
       this.displayTabs = true;
     },
+    async closeTabs() {
+      this.loading = true;
+      this.displayTabs = false;
+      await this.fetchSpecialists();
+      this.loading = false;
+    },
   },
   computed: {
     ...mapGetters({
@@ -206,6 +216,9 @@ export default {
       .activity-block
         margin: 5px
         padding: 3px
+        -webkit-border-radius: 4px
+        -moz-border-radius: 4px
+        border-radius: 4px
         .activity-label
           margin: 5px
           color: #111111
