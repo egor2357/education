@@ -66,6 +66,27 @@ class Specialist(models.Model):
   role = models.TextField(max_length=200, blank=True, verbose_name='Роль')
   is_active = models.BooleanField(default=True, verbose_name='Активен ли')
 
+  @classmethod
+  def get_available(self, template, date):
+    available_specs_ids = (template.activity.specialty_set.filter(is_main=True)
+                                                            .values_list('specialist_id', flat=True))
+
+    presense_specs_ids = Presence.objects.filter(
+      specialist_id__in=available_specs_ids,
+      date_from__lte=date,
+      date_to__gte=date,
+      is_available=True
+    ).values_list('specialist_id', flat=True)
+
+    specialists = Specialist.objects.filter(pk__in=presense_specs_ids)
+
+    if specialists.exists():
+      specialist = specialists.first()
+    else:
+      specialist = None
+
+    return specialist
+
   class Meta:
     db_table = 'specialist'
     verbose_name = 'Специалист'
