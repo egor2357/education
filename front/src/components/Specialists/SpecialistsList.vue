@@ -121,7 +121,7 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import ModalSpecialist from "@/components/Modals/ModalSpecialist";
+import ModalSpecialist from "@/components/Specialists/ModalSpecialist";
 import ActivitySkillTabs from "@/components/Specialists/ActivitySkillTabs";
 export default {
   name: "SpecialistsList",

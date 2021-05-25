@@ -4,11 +4,15 @@ import deleteAxios from "@/middleware/deleteAxios";
 
 const state = () => ({
   jobs: [],
+  jobsStat: {},
 });
 
 const getters = {
   getJobs(state) {
     return state.jobs;
+  },
+  getJobsStat(state) {
+    return state.jobsStat;
   },
 };
 
@@ -18,6 +22,23 @@ const actions = {
       let res = await this.$axios.get("/api/schedule/");
       if (res.status === 200) {
         commit("setJobs", res.data);
+        let stat = {};
+        stat["sum"] = {count: 0, name: 'Всего', max: 0};
+        for (let job of res.data) {
+          if (stat[job.activity.id]) {
+            stat[job.activity.id].count += 1;
+            stat["sum"].count += 1;
+          } else {
+            stat[job.activity.id] = {
+              name: job.activity.name,
+              count: 1,
+              color: job.activity.color
+            };
+            stat["sum"].count += 1;
+          }
+          if (stat["sum"].max < stat[job.activity.id].count) stat["sum"].max = stat[job.activity.id].count
+        }
+        commit("setJobsStat", stat)
       }
     } catch (e) {
       commit("setJobs", []);
@@ -37,6 +58,9 @@ const actions = {
 const mutations = {
   setJobs(state, payload) {
     state.jobs = payload;
+  },
+  setJobsStat(state, payload) {
+    state.jobsStat = payload;
   },
 };
 

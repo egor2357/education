@@ -133,7 +133,7 @@ export default {
     color: #FFFFFF
     font-size: 1rem
   .job
-    padding: 10px
+    padding: 15px 10px 10px 5px
     .job-card
       padding: 10px
       border-radius: 4px

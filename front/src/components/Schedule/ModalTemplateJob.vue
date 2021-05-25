@@ -23,7 +23,7 @@
             @change="fieldChanged(field)"
             :ref="`field${index}`"
             type="time"
-            style="width: 85px"
+            style="width: 90px"
           />
           <a-select
             v-if="field.type === 'select'"

@@ -2,7 +2,7 @@
   <div style="height: 100%">
     <a-spin :spinning="loading">
       <div class="schedule-label">
-        <span><a-button icon="bar-chart"></a-button></span>
+        <span><a-button icon="bar-chart" @click="displayChart = true"></a-button></span>
         <span class="title">Шаблон расписания занятий</span>
         <span
           ><a-button
@@ -33,18 +33,21 @@
           fetchJobs();
         "
       />
+      <ModalChart v-if="displayChart" @close="displayChart = false"/>
     </a-spin>
   </div>
 </template>
 
 <script>
-import ModalTemplateJob from "@/components/Modals/ModalTemplateJob";
+import ModalTemplateJob from "@/components/Schedule/ModalTemplateJob";
 import Template from "@/components/Schedule/Template";
+import ModalChart from "@/components/Schedule/ModalChart";
 import { mapActions, mapGetters } from "vuex";
 export default {
   components: {
     Template,
     ModalTemplateJob,
+    ModalChart
   },
   name: "Schedule",
   data() {
@@ -53,6 +56,7 @@ export default {
       displayModal: false,
       modalAdding: true,
       modalEditableData: null,
+      displayChart: false,
     };
   },
   async created() {
