@@ -79,6 +79,28 @@ class MethodView(viewsets.ModelViewSet):
   queryset = Method.objects.all()
   serializer_class = MethodSerializer
 
+class JobView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
+  queryset = Job.objects.all()
+  serializer_class = JobSerializer
+  filter_backends = (DjangoFilterBackend,)
+  filterset_class = JobFilter
+
+  @classmethod
+  def get_between(self, start_date, end_date):
+    jobs = Job.objects.filter(date__gte=start_date, date__lte=end_date)
+    job_by_day_dict = {}
+    for job in jobs:
+      key = job.date.strftime('%d.%m.%Y')
+      job_serialized = self.serializer_class(job).data
+      if key not in job_by_day_dict.keys():
+        job_by_day_dict[key] = [job_serialized]
+      else:
+        job_by_day_dict[key].append(job_serialized)
+
+    return job_by_day_dict
+
 class ScheduleView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
