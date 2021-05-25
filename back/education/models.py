@@ -312,10 +312,6 @@ class Option_file(models.Model):
     return self.file.name
 
 class Job(models.Model):
-  option = models.ForeignKey(
-    Option, null=True, blank=True,
-    on_delete=models.SET_NULL, verbose_name='Вариант занятия'
-  )
   specialist = models.ForeignKey(
     Specialist, null=True, blank=True,
     on_delete=models.SET_NULL, verbose_name='Специалист'
@@ -342,16 +338,14 @@ class Job(models.Model):
     ordering = ['date']
 
   def __str__(self):
-    return '{0} {1} с {2}'.format(
-      self.option,
+    return '{0} с {1}'.format(
       self.date.strftime('%m.%d'),
       self.start_time.strftime('%H.%M')
     )
 
 class Job_file(models.Model):
   def get_file_upload_to(instance, filename):
-    return 'job_files/{0}/{1}/{2}/{3}/{4}'.format(
-      instance.job.option.activity.name,
+    return 'job_files/{0}/{1}/{2}/{3}'.format(
       instance.job.date.year,
       instance.job.date.month,
       instance.job.date.day,

@@ -146,7 +146,7 @@ class ScheduleView(viewsets.ModelViewSet):
 
       specialist = Specialist.get_available(template, curr_date)
 
-      new_job = Job(option=None, activity=template.activity,
+      new_job = Job(activity=template.activity,
                     specialist=specialist,
                     schedule=template, date=curr_date,
                     start_time=template.start_time, comment='')
@@ -182,7 +182,7 @@ class ScheduleView(viewsets.ModelViewSet):
 
     specialist = Specialist.get_available(template, date)
 
-    new_job = Job(option=None, activity=template.activity,
+    new_job = Job(activity=template.activity,
                   specialist=specialist,
                   schedule=template, date=date,
                   start_time=template.start_time, comment='')
