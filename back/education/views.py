@@ -90,6 +90,7 @@ class JobView(viewsets.ModelViewSet):
   @classmethod
   def get_between(self, start_date, end_date):
     jobs = Job.objects.filter(date__gte=start_date, date__lte=end_date)
+
     job_by_day_dict = {}
     for job in jobs:
       key = job.date.strftime('%d.%m.%Y')
@@ -99,7 +100,18 @@ class JobView(viewsets.ModelViewSet):
       else:
         job_by_day_dict[key].append(job_serialized)
 
-    return job_by_day_dict
+    jobs_by_day_arr = []
+    curr_date = start_date
+    while curr_date <= end_date:
+      date_str = curr_date.strftime('%d.%m.%Y')
+      obj = {
+        'date': curr_date.isoformat(),
+        'jobs': job_by_day_dict.get(date_str, [])
+      }
+      jobs_by_day_arr.append(obj)
+      curr_date = curr_date + relativedelta(days=1)
+
+    return jobs_by_day_arr
 
 class ScheduleView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
