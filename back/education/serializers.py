@@ -3,9 +3,20 @@ from rest_flex_fields import FlexFieldsModelSerializer
 
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate
+
 from .models import *
 
+import datetime
+
 #create your serializers here.
+
+# /////////////////////////////////////////////////
+
+class OnlyDateSerializer(serializers.Serializer):
+  date = serializers.DateField(initial=datetime.date.today)
+
+# /////////////////////////////////////////////////
+
 class LoginSerializer(serializers.Serializer):
   username = serializers.CharField()
   password = serializers.CharField()
@@ -364,9 +375,6 @@ class Skill_reportSerializer(serializers.ModelSerializer):
       'id', 'job_id', 'skill_id',
       'mark', 'comment'
     )
-
-class WeekJobSerializer(serializers.Serializer):
-  date = serializers.DateField()
 
 class JobSerializer(FlexFieldsModelSerializer):
   option_id = serializers.PrimaryKeyRelatedField(
