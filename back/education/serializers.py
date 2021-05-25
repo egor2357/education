@@ -99,6 +99,14 @@ class PresenceSerializer(serializers.ModelSerializer):
   specialist_id = serializers.PrimaryKeyRelatedField(
     source='specialist', queryset=Specialist.objects.all()
   )
+  date_from = serializers.DateField()
+  date_to = serializers.DateField()
+
+  def validate(self, data):
+    if data['date_to'] < data['date_from']:
+      raise serializers.ValidationError('Дата начала должна быть меньше или равна дате конца')
+    return data
+
   class Meta:
     model = Presence
     fields = (
