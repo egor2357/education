@@ -216,6 +216,9 @@ export default {
       this.$refs["field0"][0].focus();
     });
   },
+  beforeDestroy() {
+    document.removeEventListener("keydown", this.keydown);
+  }
 };
 </script>
 

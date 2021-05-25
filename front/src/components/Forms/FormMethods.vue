@@ -1,7 +1,7 @@
 <template>
   <a-collapse>
     <a-collapse-panel :key="form.id" :header="form.name" v-for="form in forms">
-      <div v-for="method in form.methods" :key="method.id">
+      <div v-for="method in form.methods" :key="method.id" class="method">
         <span>{{ method.name }}</span>
         <span style="float: right">
           <a @click.stop="$emit('displayEdit', 2, method)">Изменить</a>
@@ -82,4 +82,12 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style lang="sass">
+.forms
+  .ant-collapse-content-box
+    padding: 0 10px !important
+    .method
+      padding: 10px 10px
+      &:not(:last-child)
+        border-bottom: 1px solid #d9d9d9
+</style>
