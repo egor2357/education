@@ -28,3 +28,19 @@ class PresenceFilter(FilterSet):
       'interval_start',
       'interval_end'
     ]
+
+class SpecialistFilter(FilterSet):
+  is_active = django_filters.BooleanFilter(
+    label='Активен ли', field_name='is_active',
+    lookup_expr='exact'
+  )
+  is_staff = django_filters.BooleanFilter(
+    label='Администратор ли', field_name='user__is_staff',
+    lookup_expr='exact'
+  )
+  class Meta:
+    model = Specialist
+    fields = [
+      'is_active',
+
+    ]
