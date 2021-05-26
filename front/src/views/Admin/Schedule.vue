@@ -1,6 +1,6 @@
 <template>
-  <div style="height: 100%">
-    <a-spin :spinning="loading">
+  <a-spin :spinning="loading">
+    <div class="schedule">
       <div class="schedule-label">
         <span><a-button icon="bar-chart" @click="displayChart = true"></a-button></span>
         <span class="title">Шаблон расписания занятий</span>
@@ -34,8 +34,8 @@
         "
       />
       <ModalChart v-if="displayChart" @close="displayChart = false"/>
-    </a-spin>
-  </div>
+    </div>
+  </a-spin>
 </template>
 
 <script>
@@ -84,11 +84,16 @@ export default {
 </script>
 
 <style lang="sass">
-.schedule-label
+.schedule
   display: flex
-  margin-bottom: 10px
-  .title
-    flex-grow: 1
-    text-align: center
-    font-size: 1rem
+  flex-direction: column
+  overflow: hidden
+  height: 100%
+  .schedule-label
+    display: flex
+    margin-bottom: 10px
+    .title
+      flex-grow: 1
+      text-align: center
+      font-size: 1rem
 </style>

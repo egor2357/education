@@ -209,4 +209,10 @@ export default {
 .submenu--two-lines
   line-height: 20px
   white-space: normal
+
+.content
+  .ant-spin-nested-loading
+    height: 100%
+  .ant-spin-container
+    height: 100%
 </style>
