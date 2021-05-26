@@ -94,7 +94,7 @@ class JobView(viewsets.ModelViewSet):
                           )
                           .prefetch_related(
                             'job_file_set',
-                            'reports'
+                            'skill_report_set'
                           ))
   serializer_class = JobSerializer
   filter_backends = (DjangoFilterBackend,)

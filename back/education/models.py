@@ -375,6 +375,7 @@ class Job_file(models.Model):
 class Skill_report(models.Model):
   marks = ['Неудовлетворительно', 'Удовлетворительно', 'Хорошо']
   mark_choices = [item for item in enumerate(marks)]
+
   job = models.ForeignKey(
     Job, null=False,
     on_delete=models.CASCADE, verbose_name='Занятие'

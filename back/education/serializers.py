@@ -408,6 +408,7 @@ class JobSerializer(FlexFieldsModelSerializer):
   )
 
   reports = Skill_reportSerializer(
+    source='skill_report_set',
     many=True, read_only=True
   )
   job_files = Job_fileSerializer(
