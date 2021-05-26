@@ -8,8 +8,6 @@ from .models import *
 from .serializers import *
 from .filters import *
 
-from dateutil.relativedelta import relativedelta
-
 from rest_framework.authentication import SessionAuthentication
 class CsrfExemptSessionAuthentication(SessionAuthentication):
   def enforce_csrf(self, request):
@@ -123,7 +121,7 @@ class JobView(viewsets.ModelViewSet):
         'jobs': job_by_day_dict.get(date_str, [])
       }
       jobs_by_day_arr.append(obj)
-      curr_date = curr_date + relativedelta(days=1)
+      curr_date = curr_date + datetime.timedelta(days=1)
 
     return jobs_by_day_arr
 
@@ -143,7 +141,7 @@ class ScheduleView(viewsets.ModelViewSet):
     serializer.is_valid(raise_exception=True)
 
     start_date = serializer.validated_data['date']
-    end_date = start_date + relativedelta(days=7)
+    end_date = start_date + datetime.timedelta(days=7)
 
     jobs = (Job.objects.filter(date__gte=start_date, date__lte=end_date)
                         .exclude(schedule=None))
@@ -153,10 +151,10 @@ class ScheduleView(viewsets.ModelViewSet):
 
     new_jobs = []
     for template in templates:
-      tdelta = start_date.weekday() - template.day
-      if tdelta < 0:
-        tdelta = 7 + tdelta
-      curr_date = start_date + relativedelta(days=tdelta)
+      days = start_date.weekday() - template.day
+      if days < 0:
+        days = 7 + days
+      curr_date = start_date + datetime.timedelta(days=days)
 
       specialist = Specialist.get_available(template, curr_date)
 

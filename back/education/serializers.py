@@ -3,6 +3,7 @@ from rest_flex_fields import FlexFieldsModelSerializer
 
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate
+from django.db.models import Q
 
 from .models import *
 
@@ -99,10 +100,41 @@ class PresenceSerializer(serializers.ModelSerializer):
   specialist_id = serializers.PrimaryKeyRelatedField(
     source='specialist', queryset=Specialist.objects.all()
   )
+  is_available = serializers.BooleanField(read_only=True)
+
+  with_quarantine = serializers.BooleanField(write_only=True)
+  quarantine_days = serializers.IntegerField(
+    required=False,
+    write_only=True, min_value=0
+  )
 
   def validate(self, data):
     if data['date_to'] < data['date_from']:
-      raise serializers.ValidationError('Дата начала должна быть меньше или равна дате конца')
+      raise serializers.ValidationError(
+        'Дата начала должна быть меньше или равна дате конца'
+      )
+
+    quarantine_days = data.get('quarantine_days', 0)
+    tdelta = data['date_to'] - data['date_from']
+    if tdelta.days < quarantine_days:
+      raise serializers.ValidationError(
+        'Количество дней на карантине больше самого срока присутствия'
+      )
+
+    spec_presense_qs = Presence.objects.filter(specialist=data['specialist'])
+    start_clashes_Q = Q(date_from__lte=data['date_from'], date_to__gte=data['date_from'])
+    end_clashes_Q = Q(date_from__lte=data['date_to'], date_to__gte=data['date_to'])
+
+    clashes = spec_presense_qs.filter(start_clashes_Q | end_clashes_Q)
+    if clashes.exists():
+      raise serializers.ValidationError(
+        'Выбранный период пересекается с периодом {0} - {1}'
+        .format(
+          clashes[0].date_from.strftime('%d.%m.%Y'),
+          clashes[0].date_to.strftime('%d.%m.%Y')
+        )
+      )
+
     return data
 
   class Meta:
@@ -110,7 +142,8 @@ class PresenceSerializer(serializers.ModelSerializer):
     fields = (
       'id', 'specialist_id',
       'date_from', 'date_to',
-      'is_available'
+      'is_available',
+      'with_quarantine', 'quarantine_days'
     )
 
 class SpecialistSerializer(FlexFieldsModelSerializer):
