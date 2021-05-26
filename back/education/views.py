@@ -25,7 +25,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 # Create your views here.
 class UserView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
-  queryset = User.objects.all()
+  queryset = User.objects.all().prefetch_related('specialist')
   serializer_class = UserSerializer
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
 
@@ -40,7 +40,8 @@ class UserView(viewsets.ModelViewSet):
 
   @action(
     detail=False, methods=['post',],
-    permission_classes = (permissions.AllowAny,), serializer_class = LoginSerializer
+    permission_classes=(permissions.AllowAny,),
+    serializer_class=LoginSerializer
   )
   def login(self, request, *args, **kwargs):
     serializer = LoginSerializer(data=request.data)
@@ -52,13 +53,16 @@ class UserView(viewsets.ModelViewSet):
 class Educational_areaView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Educational_area.objects.all()
+  queryset = (Educational_area.objects.all()
+                                      .prefetch_related(
+                                        'development_direction_set__skill_set'
+                                      ))
   serializer_class = Educational_areaSerializer
 
 class Development_directionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Development_direction.objects.all()
+  queryset = Development_direction.objects.all().prefetch_related('skill_set')
   serializer_class = Development_directionSerializer
 
 class SkillView(viewsets.ModelViewSet):
@@ -70,7 +74,7 @@ class SkillView(viewsets.ModelViewSet):
 class FormView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Form.objects.all()
+  queryset = Form.objects.all().prefetch_related('method_set')
   serializer_class = FormSerializer
 
 class MethodView(viewsets.ModelViewSet):
@@ -82,14 +86,24 @@ class MethodView(viewsets.ModelViewSet):
 class JobView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
-  queryset = Job.objects.all()
+  queryset = (Job.objects.all()
+                          .select_related(
+                            'activity',
+                            'schedule__activity',
+                            'specialist'
+                          )
+                          .prefetch_related(
+                            'job_file_set',
+                            'reports'
+                          ))
   serializer_class = JobSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = JobFilter
 
   @classmethod
   def get_between(self, start_date, end_date):
-    jobs = Job.objects.filter(date__gte=start_date, date__lte=end_date)
+    jobs = self.queryset
+    jobs = jobs.filter(date__gte=start_date, date__lte=end_date)
 
     job_by_day_dict = {}
     for job in jobs:
@@ -116,7 +130,7 @@ class JobView(viewsets.ModelViewSet):
 class ScheduleView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Schedule.objects.all()
+  queryset = Schedule.objects.all().select_related('activity')
   serializer_class = ScheduleSerializer
 
   @action(
@@ -135,7 +149,7 @@ class ScheduleView(viewsets.ModelViewSet):
                         .exclude(schedule=None))
     jobs_schedule_ids = jobs.values_list('schedule_id', flat=True)
 
-    templates = Schedule.objects.exclude(pk__in=jobs_schedule_ids)
+    templates = self.queryset.exclude(pk__in=jobs_schedule_ids)
 
     new_jobs = []
     for template in templates:
@@ -193,7 +207,7 @@ class ScheduleView(viewsets.ModelViewSet):
 class ActivityView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Activity.objects.all()
+  queryset = Activity.objects.all().prefetch_related('skills')
   serializer_class = ActivitySerializer
 
   @action(detail=True, methods=['get'], serializer_class=Activity_skillSerializer)
@@ -229,7 +243,8 @@ class Option_fileView(viewsets.ModelViewSet):
 class OptionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
-  queryset = Option.objects.all()
+  queryset = (Option.objects.all()
+                            .prefetch_related('option_file_set'))
   serializer_class = OptionSerializer
 
 class PresenceView(viewsets.ModelViewSet):
@@ -241,7 +256,13 @@ class PresenceView(viewsets.ModelViewSet):
 class SpecialistView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Specialist.objects.all()
+  queryset = (Specialist.objects.all()
+                                  .select_related('user')
+                                  .prefetch_related(
+                                    'competence_set__skill',
+                                    'specialty_set__activity',
+                                    'presence_set'
+                                  ))
   serializer_class = SpecialistSerializer
 
   def destroy(self, request, *args, **kwargs):
@@ -273,12 +294,13 @@ class CompetenceView(viewsets.ModelViewSet):
   def get_queryset(self):
     user = self.request.user
     if user.is_staff:
-      return Competence.objects.all()
+      return Competence.objects.all().select_related('skill')
     else:
       if user.specialist is None:
         return Competence.objects.none()
       else:
-        return Competence.objects.filter(specialist=user.specialist)
+        return (Competence.objects.filter(specialist=user.specialist)
+                                  .select_related('skill'))
 
 class SpecialtyView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
@@ -288,9 +310,10 @@ class SpecialtyView(viewsets.ModelViewSet):
   def get_queryset(self):
     user = self.request.user
     if user.is_staff:
-      return Specialty.objects.all()
+      return Specialty.objects.all().select_related('activity')
     else:
       if user.specialist is None:
         return Specialty.objects.none()
       else:
-        return Specialty.objects.filter(specialist=user.specialist)
+        return (Specialty.objects.filter(specialist=user.specialist)
+                                  .select_related('activity'))

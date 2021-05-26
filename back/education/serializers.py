@@ -99,8 +99,6 @@ class PresenceSerializer(serializers.ModelSerializer):
   specialist_id = serializers.PrimaryKeyRelatedField(
     source='specialist', queryset=Specialist.objects.all()
   )
-  date_from = serializers.DateField()
-  date_to = serializers.DateField()
 
   def validate(self, data):
     if data['date_to'] < data['date_from']:
@@ -402,7 +400,7 @@ class JobSerializer(FlexFieldsModelSerializer):
     fields=['id', 'name', 'color']
   )
   schedule_id = serializers.PrimaryKeyRelatedField(
-    source='schedule', queryset=Schedule.objects.all(),
+    source='schedule', queryset=Schedule.objects.all().select_related('activity'),
     write_only=True
   )
   schedule = ScheduleSerializer(
