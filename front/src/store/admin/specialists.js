@@ -13,9 +13,9 @@ const getters = {
 };
 
 const actions = {
-  async fetchSpecialists({ commit }) {
+  async fetchSpecialists({ commit }, params = '') {
     try {
-      let res = await this.$axios.get("/api/specialists/");
+      let res = await this.$axios.get(`/api/specialists/${params}`);
       if (res.status === 200) {
         let hasAdditional = false;
         for (let spec of res.data) {

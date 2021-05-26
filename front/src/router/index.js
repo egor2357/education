@@ -61,6 +61,15 @@ const router = new VueRouter({
       },
     },
     {
+      path: "/chart-available",
+      name: "AvailableChart",
+      component: () => import("@/views/Admin/AvailableChart"),
+      meta: {
+        breadcrumbs: [{ title: "График присутствия специалистов" }],
+        staffOnly: true,
+      },
+    },
+    {
       path: "/404",
       name: "Page404",
       component: () => import("@/views/Page404"),

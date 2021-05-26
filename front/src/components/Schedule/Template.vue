@@ -118,46 +118,46 @@ export default {
   display: flex
   flex-direction: row
   min-height: 100%
-.day
-  flex: 1 1 auto
-  border-right: 1px solid #D9D9D9
-  border-bottom: 1px solid #D9D9D9
-  min-width: 150px
-  max-width: 250px
-  /*&:last-child*/
-    /*min-width: 150px*/
-  &:first-child
-    border-left: 1px solid #D9D9D9
-  .title
-    text-align: center
+  .day
+    flex: 1 1 auto
+    border-right: 1px solid #D9D9D9
     border-bottom: 1px solid #D9D9D9
-    background-color: #FF8D74
-    padding: 10px
-    color: #FFFFFF
-    font-size: 1rem
-    position: sticky
-    top: 0
-    z-index: 2
-  .job
-    padding: 15px 10px 10px 5px
-    /*height: 100%*/
-    .job-card
+    min-width: 150px
+    max-width: 250px
+    /*&:last-child*/
+      /*min-width: 150px*/
+    &:first-child
+      border-left: 1px solid #D9D9D9
+    .title
+      text-align: center
+      border-bottom: 1px solid #D9D9D9
+      background-color: #FF8D74
       padding: 10px
-      border-radius: 4px
-      display: flex
-      flex-wrap: wrap
-      .job-time
-        flex: 0 0 95%
-      .dropdown--hover
-        display: none
-        max-width: 0
-        height: 20px
-        svg
-          transform: rotate(90deg)
-          margin-top: 3px
-      &:hover
+      color: #FFFFFF
+      font-size: 1rem
+      position: sticky
+      top: 0
+      z-index: 2
+    .job
+      padding: 15px 10px 10px 5px
+      /*height: 100%*/
+      .job-card
+        padding: 10px
+        border-radius: 4px
+        display: flex
+        flex-wrap: wrap
+        .job-time
+          flex: 0 0 95%
         .dropdown--hover
-          display: unset
-      .job-name
-        flex: 0 0 100%
+          display: none
+          max-width: 0
+          height: 20px
+          svg
+            transform: rotate(90deg)
+            margin-top: 3px
+        &:hover
+          .dropdown--hover
+            display: unset
+        .job-name
+          flex: 0 0 100%
 </style>

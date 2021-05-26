@@ -8,6 +8,7 @@ import activities from "@/store/admin/activities";
 import specialists from "@/store/admin/specialists";
 import schedule from "@/store/admin/schedule";
 import forms from "@/store/admin/forms";
+import presence from "@/store/admin/presence";
 
 Vue.use(Vuex);
 
@@ -18,7 +19,8 @@ const store = new Vuex.Store({
     activities,
     specialists,
     schedule,
-    forms
+    forms,
+    presence
   },
 });
 store.$axios = axios;

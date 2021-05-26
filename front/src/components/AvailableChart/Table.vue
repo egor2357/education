@@ -1,0 +1,293 @@
+<template>
+  <div class="available-table">
+    <a-table
+      :data-source="data"
+      :pagination="false"
+      size="middle"
+      :loading="loading"
+    >
+      <a-table-column
+        key="name"
+        title="Специалист"
+        data-index="name"
+        fixed="left"
+      />
+      <a-table-column-group>
+        <div slot="title" class="title-month">
+          <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
+          <span class="text">{{ month.name }} {{ year }}</span>
+          <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
+        </div>
+        <a-table-column
+          v-for="day in daysOfMonth"
+          :key="day.num"
+          class="day"
+          align="center"
+          :data-index="day.num"
+          :class="day.weekend ? 'weekend' : ''"
+        >
+          <span slot="title">{{ day.num }}</span>
+          <template slot-scope="text">
+            <div
+              :class="[
+                text.value === true
+                  ? 'available'
+                  : text.value === false
+                  ? 'not-available'
+                  : 'empty',
+                { 'left-border': text.leftBorder },
+                { 'right-border': text.rightBorder },
+              ]"
+            >
+              <div v-if="text.displayDate" style="color: #fff">
+                {{ day.num }}
+              </div>
+              <a-dropdown
+                :trigger="['click']"
+                placement="bottomLeft"
+                v-if="text.displayDropdown"
+              >
+                <a-icon class="icon-button" type="dash"></a-icon>
+                <a-menu slot="overlay">
+                  <a-menu-item key="1"> Изменить </a-menu-item>
+                  <a-menu-item key="2">
+                    <span> Удалить </span>
+                  </a-menu-item>
+                </a-menu>
+              </a-dropdown>
+            </div>
+          </template>
+        </a-table-column>
+      </a-table-column-group>
+    </a-table>
+  </div>
+</template>
+<script>
+import moment from "moment";
+import { mapGetters, mapActions } from "vuex";
+export default {
+  name: "Table",
+  data() {
+    return {
+      data: [],
+      daysOfMonth: [],
+      lastDay: null,
+      loading: true,
+      currentDate: moment(),
+      month: {
+        name: null,
+        value: null,
+      },
+      year: null,
+    };
+  },
+  props: {
+    needUpdate: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  async created() {
+    await this.getDate();
+    await this.fetchSpecialists("?is_staff=false&is_active=true");
+    await this.fetchPresence(
+      `?interval_start=${`${this.year}-${
+        this.month.value + 1
+      }-01`}&interval_end=${`${this.year}-${this.month.value + 1}-${
+        this.lastDay
+      }`}`
+    );
+    await this.prepareData();
+    this.loading = false;
+  },
+  methods: {
+    ...mapActions({
+      fetchPresence: "presence/fetchPresences",
+      fetchSpecialists: "specialists/fetchSpecialists",
+    }),
+    getDate() {
+      let today = this.currentDate;
+      this.month.value = today.month();
+      this.month.name =
+        today.format("MMMM")[0].toUpperCase() + today.format("MMMM").slice(1);
+      this.year = today.year();
+      this.daysOfMonth = [];
+      let startMonth = today.date(1);
+      for (let i = 1; i <= today.daysInMonth(); i++) {
+        this.daysOfMonth.push({
+          num: i,
+          weekend:
+            startMonth.date(i).isoWeekday() === 6 ||
+            startMonth.date(i).isoWeekday() === 7,
+        });
+      }
+      this.lastDay = this.daysOfMonth[this.daysOfMonth.length - 1].num;
+    },
+    async changeMonth(next) {
+      this.loading = true;
+      if (next) {
+        this.currentDate.add(1, "M");
+      } else {
+        this.currentDate.add(-1, "M");
+      }
+      await this.getDate();
+      await this.fetchPresence(
+        `?interval_start=${`${this.year}-${
+          this.month.value + 1
+        }-01`}&interval_end=${`${this.year}-${this.month.value + 1}-${
+          this.lastDay
+        }`}`
+      );
+      await this.prepareData();
+      this.loading = false;
+    },
+    prepareData() {
+      this.data = [];
+      let currentDay = null;
+      let value = null;
+      let dateFrom = null;
+      let dateTo = null;
+      let displayDropdown = false;
+      let displayDate = false;
+      let leftBorder = false;
+      let rightBorder = false;
+      let dataIndex = null;
+      let presenceId = null;
+      for (let specialist of this.specialists) {
+        this.data.push({
+          key: specialist.id,
+          name: `${specialist.surname} ${specialist.name[0]}.${specialist.patronymic[0]}.`,
+        });
+        dataIndex = this.data.length - 1;
+        for (let day of this.daysOfMonth) {
+          value = null;
+          displayDropdown = false;
+          displayDate = false;
+          leftBorder = false;
+          rightBorder = false;
+          presenceId = null;
+          currentDay = moment(
+            `${this.year}-${this.month.value + 1}-${day.num}`
+          );
+          for (let presence of this.presences) {
+            dateFrom = null;
+            dateTo = null;
+            if (presence.specialist_id === specialist.id) {
+              dateFrom = moment(presence.date_from);
+              dateTo = moment(presence.date_to);
+              if (currentDay.isBetween(dateFrom, dateTo, "day", [])) {
+                value = presence.is_available;
+                presenceId = presence.id;
+                if (dateFrom.date() === 1 && currentDay.date() === 1) {
+                  leftBorder = true;
+                  displayDate = true;
+                }
+                if (
+                  dateTo.date() === this.lastDay &&
+                  currentDay.date() === this.lastDay
+                ) {
+                  rightBorder = true;
+                  displayDate = true;
+                }
+                break;
+              }
+            }
+          }
+          this.data[dataIndex][day.num] = {
+            value: value,
+            leftBorder: leftBorder,
+            rightBorder: rightBorder,
+            displayDate: displayDate,
+            displayDropdown: displayDropdown,
+            presenceId: presenceId,
+          };
+        }
+        for (let filledDay of this.daysOfMonth) {
+          if (this.data[dataIndex][filledDay.num].value !== null) {
+            if (
+              this.data[dataIndex][filledDay.num - 1] &&
+              this.data[dataIndex][filledDay.num - 1].value === null
+            ) {
+              this.data[dataIndex][filledDay.num].leftBorder = true;
+              this.data[dataIndex][filledDay.num].displayDate = true;
+            }
+            if (
+              this.data[dataIndex][filledDay.num + 1] &&
+              this.data[dataIndex][filledDay.num + 1].value === null
+            ) {
+              this.data[dataIndex][filledDay.num].rightBorder = true;
+              this.data[dataIndex][filledDay.num].displayDate = true;
+            }
+            if (
+              this.data[dataIndex][filledDay.num + 1] &&
+              this.data[dataIndex][filledDay.num].value === false &&
+              this.data[dataIndex][filledDay.num + 1].value === true
+            ) {
+              this.data[dataIndex][filledDay.num].rightBorder = false;
+              this.data[dataIndex][filledDay.num].displayDate = true;
+              this.data[dataIndex][filledDay.num + 1].displayDate = true;
+            }
+          }
+        }
+      }
+    },
+  },
+  computed: {
+    ...mapGetters({
+      presences: "presence/getPresences",
+      specialists: "specialists/getSpecialists",
+    }),
+  },
+  watch: {
+    async needUpdate(value) {
+      if (value === true) {
+        this.loading = true;
+        await this.fetchPresence(
+          `?interval_start=${`${this.year}-${
+            this.month.value + 1
+          }-01`}&interval_end=${`${this.year}-${this.month.value + 1}-${
+            this.lastDay
+          }`}`
+        );
+        await this.prepareData();
+        this.$emit("successUpdate");
+        this.loading = false;
+      }
+    },
+  },
+};
+</script>
+
+<style lang="sass">
+.available-table
+  .ant-table-scroll
+    overflow: auto
+  .day
+    padding: 0 !important
+    .not-available, .available, .empty
+      padding: 5px
+      width: 100%
+      height: 100%
+      display: inline-block
+      &:empty::before
+        content: "\A0"
+    .not-available
+      background-color: #FFA756
+    .available
+      background-color: #3DC5FF
+    .left-border
+      border-radius: 4px 0 0 4px
+    .right-border
+      border-radius: 0 4px 4px 0
+    .icon-button
+      color: #fff
+      transform: rotate(90deg)
+  thead
+    .day
+      height: 30px
+    .weekend
+      background-color: #C5FF48
+    .title-month
+      .text
+        padding: 0 10px
+</style>

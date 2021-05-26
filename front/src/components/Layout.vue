@@ -137,6 +137,12 @@ export default {
               class: 'submenu--two-lines',
               to: { name: "Forms" },
             },
+            {
+              key: "2.6",
+              title: "График присутствия специалистов",
+              class: 'submenu--two-lines',
+              to: { name: "AvailableChart" },
+            },
           ],
         },
       ],
