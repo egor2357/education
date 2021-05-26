@@ -116,9 +116,10 @@ class PresenceSerializer(serializers.ModelSerializer):
 
     quarantine_days = data.get('quarantine_days', 0)
     tdelta = data['date_to'] - data['date_from']
-    if tdelta.days < quarantine_days:
+    if tdelta.days < quarantine_days + 1:
       raise serializers.ValidationError(
-        'Количество дней на карантине больше самого срока присутствия'
+        'Количество дней на карантине должно быть как' +
+        ' минимум на два дня меньше самого срока присутствия'
       )
 
     spec_presense_qs = Presence.objects.filter(specialist=data['specialist'])
@@ -136,6 +137,40 @@ class PresenceSerializer(serializers.ModelSerializer):
       )
 
     return data
+
+  def create(self, validated_data):
+    with_quarantine = validated_data.pop('with_quarantine', False)
+    quarantine_days = validated_data.pop('quarantine_days', 0)
+
+    date_from = validated_data.pop('date_from')
+    date_to = validated_data.pop('date_to')
+    specialist = validated_data.pop('specialist')
+
+    presence_start = date_from
+
+    if with_quarantine:
+      quarantine_start = date_from
+      quarantine_end = quarantine_start + datetime.timedelta(days=quarantine_days-1)
+      quarantine = Presence(
+        specialist=specialist,
+        date_from=quarantine_start,
+        date_to=quarantine_end,
+        is_available=False
+      )
+      quarantine.save()
+
+      presence_start = quarantine_end + datetime.timedelta(days=1)
+
+    presence = Presence(
+      specialist=specialist,
+      date_from=presence_start,
+      date_to=date_to,
+      is_available=True
+    )
+
+    presence.save()
+
+    return presence
 
   class Meta:
     model = Presence
