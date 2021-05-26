@@ -264,6 +264,8 @@ class SpecialistView(viewsets.ModelViewSet):
                                     'presence_set'
                                   ))
   serializer_class = SpecialistSerializer
+  filter_backends = (DjangoFilterBackend,)
+  filterset_class = SpecialistFilter
 
   def destroy(self, request, *args, **kwargs):
     specialist = self.get_object()
