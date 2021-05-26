@@ -24,6 +24,9 @@ urlpatterns = [
 if settings.DEBUG:
   urlpatterns.append(path('admin/', admin.site.urls))
 
+  import debug_toolbar
+  urlpatterns.append(path(r'__debug__/', include(debug_toolbar.urls)))
+
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
