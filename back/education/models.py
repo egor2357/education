@@ -111,6 +111,10 @@ class Presence(models.Model):
     Specialist, null=False,
     on_delete=models.CASCADE, verbose_name='Специалист'
   )
+  main_interval = models.OneToOneField(
+    'self', null=True, default=None,
+    on_delete=models.CASCADE, verbose_name='Основной период'
+  )
 
   date_from = models.DateField(verbose_name='Первый день')
   date_to = models.DateField(verbose_name='Последний день')

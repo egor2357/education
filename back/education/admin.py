@@ -72,7 +72,11 @@ admin.site.register(Specialist, SpecialistAdmin)
 
 class PresenceAdmin(admin.ModelAdmin):
   list_filter = ('specialist', 'is_available')
-  list_display = ('specialist', 'date_from', 'date_to', 'is_available')
+  list_display = (
+    'specialist', 'main_interval',
+    'date_from', 'date_to',
+    'is_available'
+  )
 
 admin.site.register(Presence, PresenceAdmin)
 

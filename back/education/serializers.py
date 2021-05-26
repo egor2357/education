@@ -100,6 +100,9 @@ class PresenceSerializer(serializers.ModelSerializer):
   specialist_id = serializers.PrimaryKeyRelatedField(
     source='specialist', queryset=Specialist.objects.all()
   )
+  main_interval_id = serializers.PrimaryKeyRelatedField(
+    source='main_interval', read_only=True
+  )
   is_available = serializers.BooleanField(read_only=True)
 
   with_quarantine = serializers.BooleanField(write_only=True)
@@ -114,13 +117,14 @@ class PresenceSerializer(serializers.ModelSerializer):
         'Дата начала должна быть меньше или равна дате конца'
       )
 
-    quarantine_days = data.get('quarantine_days', 0)
-    tdelta = data['date_to'] - data['date_from']
-    if tdelta.days < quarantine_days + 1:
-      raise serializers.ValidationError(
-        'Количество дней на карантине должно быть как' +
-        ' минимум на два дня меньше самого срока присутствия'
-      )
+    if data.get('with_quarantine', False):
+      quarantine_days = data.get('quarantine_days', 0)
+      tdelta = data['date_to'] - data['date_from']
+      if tdelta.days < quarantine_days + 1:
+        raise serializers.ValidationError(
+          'Количество дней на карантине должно быть как' +
+          ' минимум на два дня меньше самого срока присутствия'
+        )
 
     spec_presense_qs = Presence.objects.filter(specialist=data['specialist'])
     start_clashes_Q = Q(date_from__lte=data['date_from'], date_to__gte=data['date_from'])
@@ -148,11 +152,12 @@ class PresenceSerializer(serializers.ModelSerializer):
 
     presence_start = date_from
 
-    if with_quarantine:
+    if with_quarantine and (quarantine_days != 0):
       quarantine_start = date_from
       quarantine_end = quarantine_start + datetime.timedelta(days=quarantine_days-1)
       quarantine = Presence(
         specialist=specialist,
+        main_interval=None,
         date_from=quarantine_start,
         date_to=quarantine_end,
         is_available=False
@@ -163,6 +168,7 @@ class PresenceSerializer(serializers.ModelSerializer):
 
     presence = Presence(
       specialist=specialist,
+      main_interval=None,
       date_from=presence_start,
       date_to=date_to,
       is_available=True
@@ -170,12 +176,18 @@ class PresenceSerializer(serializers.ModelSerializer):
 
     presence.save()
 
+    if with_quarantine and (quarantine_days != 0):
+      quarantine.main_interval = presence
+      quarantine.save()
+
     return presence
 
   class Meta:
     model = Presence
     fields = (
-      'id', 'specialist_id',
+      'id',
+      'specialist_id',
+      'main_interval_id',
       'date_from', 'date_to',
       'is_available',
       'with_quarantine', 'quarantine_days'
