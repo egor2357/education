@@ -12,3 +12,19 @@ class JobFilter(FilterSet):
       'specialist_id': ['exact'],
       'activity_id': ['exact']
     }
+
+class PresenceFilter(FilterSet):
+  interval_start = django_filters.DateFilter(
+    label='Начало интервала', field_name='date_to',
+    lookup_expr='lt', exclude=True
+  )
+  interval_end = django_filters.DateFilter(
+    label='Конец интервала', field_name='date_from',
+    lookup_expr='gt', exclude=True
+  )
+  class Meta:
+    model = Presence
+    fields = [
+      'interval_start',
+      'interval_end'
+    ]

@@ -252,6 +252,8 @@ class PresenceView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated,)
   queryset = Presence.objects.all()
   serializer_class = PresenceSerializer
+  filter_backends = (DjangoFilterBackend,)
+  filterset_class = PresenceFilter
 
 class SpecialistView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
