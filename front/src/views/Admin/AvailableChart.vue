@@ -13,7 +13,7 @@
       >
     </div>
     <div>
-      <Table :needUpdate="needUpdateTable" @successUpdate="needUpdateTable = false" />
+      <Table :needUpdate="needUpdateTable" @successUpdate="needUpdateTable = false" @displayEdit="displayEdit" />
     </div>
     <ModalPeriod
       v-if="displayModal"
@@ -41,6 +41,13 @@ export default {
       modalAdding: true,
       needUpdateTable: false,
     };
+  },
+  methods: {
+    displayEdit(item) {
+      this.modalEditableData = item;
+      this.modalAdding = false;
+      this.displayModal = true;
+    }
   },
 };
 </script>

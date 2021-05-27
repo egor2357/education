@@ -27,35 +27,36 @@
           :class="day.weekend ? 'weekend' : ''"
         >
           <span slot="title">{{ day.num }}</span>
-          <template slot-scope="text">
-            <div
-              :class="[
-                text.value === true
-                  ? 'available'
-                  : text.value === false
-                  ? 'not-available'
-                  : 'empty',
-                { 'left-border': text.leftBorder },
-                { 'right-border': text.rightBorder },
-              ]"
-            >
-              <div v-if="text.displayDate" style="color: #fff">
-                {{ day.num }}
-              </div>
-              <a-dropdown
-                :trigger="['click']"
-                placement="bottomLeft"
-                v-if="text.displayDropdown"
+          <!--:disabled="text.value !== true"-->
+          <template slot-scope="text, record">
+            <a-dropdown :trigger="['click']" placement="bottomLeft">
+              <div
+                :class="[
+                  text.value === true
+                    ? 'available'
+                    : text.value === false
+                    ? 'not-available'
+                    : 'empty',
+                  { 'left-border': text.leftBorder },
+                  { 'right-border': text.rightBorder },
+                ]"
               >
-                <a-icon class="icon-button" type="dash"></a-icon>
-                <a-menu slot="overlay">
-                  <a-menu-item key="1"> Изменить </a-menu-item>
-                  <a-menu-item key="2">
-                    <span> Удалить </span>
-                  </a-menu-item>
-                </a-menu>
-              </a-dropdown>
-            </div>
+                <div v-if="text.displayDate" style="color: #fff">
+                  {{ day.num }}
+                </div>
+              </div>
+              <a-menu slot="overlay">
+                <a-menu-item key="1" @click="$emit('displayEdit', text)">
+                  Изменить
+                </a-menu-item>
+                <a-menu-item
+                  key="2"
+                  @click="displayDeleteConfirm(text, record)"
+                >
+                  <span> Удалить </span>
+                </a-menu-item>
+              </a-menu>
+            </a-dropdown>
           </template>
         </a-table-column>
       </a-table-column-group>
@@ -103,6 +104,7 @@ export default {
   methods: {
     ...mapActions({
       fetchPresence: "presence/fetchPresences",
+      deletePresence: "presence/deletePresence",
       fetchSpecialists: "specialists/fetchSpecialists",
     }),
     getDate() {
@@ -147,27 +149,27 @@ export default {
       let value = null;
       let dateFrom = null;
       let dateTo = null;
-      let displayDropdown = false;
       let displayDate = false;
       let leftBorder = false;
       let rightBorder = false;
       let dataIndex = null;
-      let presenceId = null;
+      let presenceData = null;
       for (let specialist of this.specialists) {
         this.data.push({
           key: specialist.id,
           name: `${specialist.surname} ${specialist.name[0]}.${specialist.patronymic[0]}.`,
+          specialist: specialist,
         });
         dataIndex = this.data.length - 1;
         for (let day of this.daysOfMonth) {
           value = null;
-          displayDropdown = false;
           displayDate = false;
           leftBorder = false;
           rightBorder = false;
-          presenceId = null;
+          presenceData = null;
           currentDay = moment(
-            `${this.year}-${this.month.value + 1}-${day.num}`
+            `${this.year}-${this.month.value + 1}-${day.num}`,
+            "YYYY-MM-DD"
           );
           for (let presence of this.presences) {
             dateFrom = null;
@@ -177,7 +179,7 @@ export default {
               dateTo = moment(presence.date_to);
               if (currentDay.isBetween(dateFrom, dateTo, "day", [])) {
                 value = presence.is_available;
-                presenceId = presence.id;
+                presenceData = presence;
                 if (dateFrom.date() === 1 && currentDay.date() === 1) {
                   leftBorder = true;
                   displayDate = true;
@@ -198,8 +200,7 @@ export default {
             leftBorder: leftBorder,
             rightBorder: rightBorder,
             displayDate: displayDate,
-            displayDropdown: displayDropdown,
-            presenceId: presenceId,
+            presence: presenceData,
           };
         }
         for (let filledDay of this.daysOfMonth) {
@@ -231,6 +232,57 @@ export default {
         }
       }
     },
+    displayDeleteConfirm(item, row) {
+      let that = this;
+      this.$confirm({
+        title: "Подтверждение удаления периода присутствия",
+        content: `Специалист: ${
+          row.specialist.patronymic
+            ? `${row.specialist.surname} ${row.specialist.name} ${row.specialist.patronymic}`
+            : `${row.specialist.surname} ${row.specialist.name}`
+        }
+                  Период присутсвия: ${moment(
+                    item.presence.full_interval.date_from
+                  ).format("DD.MM.YYYY")} - ${moment(
+          item.presence.full_interval.date_to
+        ).format("DD.MM.YYYY")}
+                  Удалить?`,
+        okType: "danger",
+        onOk() {
+          that.deletePresenceRecord(
+            item.presence.main_interval_id === null
+              ? item.presence.id
+              : item.presence.main_interval_id
+          );
+        },
+      });
+    },
+    async deletePresenceRecord(id) {
+      try {
+        let res = await this.deletePresence(id);
+        if (res.status === 204) {
+          this.$message.success("Период присутствия успешно удалён");
+          await this.updateData();
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка");
+      }
+    },
+    async updateData() {
+      this.loading = true;
+      await this.fetchPresence(
+        `?interval_start=${`${this.year}-${
+          this.month.value + 1
+        }-01`}&interval_end=${`${this.year}-${this.month.value + 1}-${
+          this.lastDay
+        }`}`
+      );
+      await this.prepareData();
+      this.$emit("successUpdate");
+      this.loading = false;
+    },
   },
   computed: {
     ...mapGetters({
@@ -241,17 +293,7 @@ export default {
   watch: {
     async needUpdate(value) {
       if (value === true) {
-        this.loading = true;
-        await this.fetchPresence(
-          `?interval_start=${`${this.year}-${
-            this.month.value + 1
-          }-01`}&interval_end=${`${this.year}-${this.month.value + 1}-${
-            this.lastDay
-          }`}`
-        );
-        await this.prepareData();
-        this.$emit("successUpdate");
-        this.loading = false;
+        this.updateData();
       }
     },
   },
@@ -273,12 +315,16 @@ export default {
         content: "\A0"
     .not-available
       background-color: #FFA756
+      cursor: pointer
     .available
       background-color: #3DC5FF
+      cursor: pointer
     .left-border
-      border-radius: 4px 0 0 4px
+      border-top-left-radius: 4px
+      border-bottom-left-radius: 4px
     .right-border
-      border-radius: 0 4px 4px 0
+      border-top-right-radius: 4px
+      border-bottom-right-radius: 4px
     .icon-button
       color: #fff
       transform: rotate(90deg)

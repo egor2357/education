@@ -27,7 +27,9 @@
               v-for="specialist in specialists"
               :key="specialist.id"
             >
-              {{ `${specialist.surname} ${specialist.name}` }}
+              {{ specialist.patronymic ? `${specialist.surname}
+              ${specialist.name[0]}.${specialist.patronymic[0]}` :
+              `${specialist.surname} ${specialist.name[0]}` }}
             </a-select-option>
           </a-select>
           <a-range-picker
@@ -58,6 +60,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+import moment from "moment";
 export default {
   name: "ModalPeriod",
   props: {
@@ -72,6 +75,7 @@ export default {
       form: {
         name: null,
         date: null,
+        specialist_id: null,
         with_quarantine: false,
         quarantine_days: 1,
       },
@@ -137,7 +141,7 @@ export default {
             successCode = 201;
             successMessage = "Период присутствия специалиста успешно добавлен";
           } else if (!this.adding) {
-            dispatchName = "forms/editPresence";
+            dispatchName = "presence/editPresence";
             successCode = 200;
             successMessage = "Период присутствия специалиста успешно изменен";
           }
@@ -155,6 +159,11 @@ export default {
                     field.help = res.data[key];
                   }
                 });
+              }
+              if (res.data['non_field_errors']) {
+                for (let error of res.data['non_field_errors']) {
+                  this.$message.error(error)
+                }
               }
             } else {
               this.$message.error("Произошла ошибка");
@@ -178,7 +187,7 @@ export default {
         if (this.form.date[1])
           this.form.date_to = this.form.date[1].format("YYYY-MM-DD");
         if (this.form.date[0] && this.form.date[1])
-          this.maxDays = this.form.date[1].diff(this.form.date[0], "days") - 2;
+          this.maxDays = this.form.date[1].diff(this.form.date[0], "days") - 1;
       }
     },
     keydown(event) {
@@ -196,8 +205,27 @@ export default {
       this.title += "Добавление периода присутствия специалиста";
     } else {
       this.title += "Изменение периода присутствия специалиста";
-      this.editableData.id ? (this.form.id = this.editableData.id) : "";
-      //добавить специалиста, даты, карантин
+      this.form.id = this.editableData.presence.main_interval_id === null
+              ? this.editableData.presence.id
+              : this.editableData.presence.main_interval_id
+      if (this.editableData.presence.specialist_id) {
+        this.form.specialist_id = this.editableData.presence.specialist_id
+      }
+      if (this.editableData.presence.full_interval.date_from && this.editableData.presence.full_interval.date_to) {
+        this.form.date = [];
+        this.form.date[0] = moment(this.editableData.presence.full_interval.date_from, "YYYY-MM-DD");
+        this.form.date[1] = moment(this.editableData.presence.full_interval.date_to, "YYYY-MM-DD");
+        this.maxDays = this.form.date[1].diff(this.form.date[0], "days") - 1;
+        this.form.date_from = this.editableData.presence.full_interval.date_from;
+        this.form.date_to = this.editableData.presence.full_interval.date_to;
+      }
+      if (this.editableData.presence.full_interval.quarantine_days === 0) {
+        this.form.with_quarantine = false;
+        this.form.quarantine_days = 0;
+      } else {
+        this.form.with_quarantine = true;
+        this.form.quarantine_days = this.editableData.presence.full_interval.quarantine_days;
+      }
     }
     document.addEventListener("keydown", this.keydown);
   },
