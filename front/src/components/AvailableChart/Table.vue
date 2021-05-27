@@ -16,13 +16,11 @@
         title="Специалист"
         data-index="name"
         fixed="left"
-      />
-      <!--<a-table-column-group>-->
-      <!--<div slot="title" class="title-month">-->
-      <!--<a-icon class="icon-button" type="left" @click="changeMonth(false)" />-->
-      <!--<span class="text">{{ month.name }} {{ year }}</span>-->
-      <!--<a-icon class="icon-button" type="right" @click="changeMonth(true)" />-->
-      <!--</div>-->
+      >
+        <template slot-scope="text, record">
+          <Popover :data="record" />
+        </template>
+      </a-table-column>
       <a-table-column
         v-for="day in daysOfMonth"
         :key="day.num"
@@ -65,15 +63,16 @@
           </a-dropdown>
         </template>
       </a-table-column>
-      <!--</a-table-column-group>-->
     </a-table>
   </div>
 </template>
 <script>
 import moment from "moment";
 import { mapGetters, mapActions } from "vuex";
+import Popover from "@/components/AvailableChart/Popover";
 export default {
   name: "Table",
+  components: {Popover},
   data() {
     return {
       data: [],

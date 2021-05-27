@@ -70,6 +70,14 @@ const router = new VueRouter({
       },
     },
     {
+      path: "/developing",
+      name: "Developing",
+      component: () => import("@/views/InDeveloping"),
+      meta: {
+        breadcrumbs: [{ title: "Раздел находится в разработке" }],
+      },
+    },
+    {
       path: "/404",
       name: "Page404",
       component: () => import("@/views/Page404"),
