@@ -1,14 +1,14 @@
 <script>
-import { Bar } from 'vue-chartjs'
+import { Bar, mixins } from "vue-chartjs";
 
 export default {
   extends: Bar,
-  props: ['chartdata', 'options'],
-  mounted () {
-    this.renderChart(this.chartdata, this.options)
-  }
-}
+  props: ["chartData", "options"],
+  mixins: [mixins.reactiveProp],
+  mounted() {
+    this.renderChart(this.chartData, this.options);
+  },
+};
 </script>
 
-<style>
-</style>
+<style></style>
