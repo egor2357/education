@@ -201,6 +201,11 @@ class PresenceSerializer(serializers.ModelSerializer):
 
     return presence
 
+  def update(self, instance, validated_data):
+    instance.delete()
+    return self.create(validated_data)
+
+
   class Meta:
     model = Presence
     fields = (
