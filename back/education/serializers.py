@@ -120,6 +120,25 @@ class PresenceSerializer(serializers.ModelSerializer):
     quarantine_days = 0 if quarantine is None else (quarantine.date_to - quarantine.date_from).days + 1
     return {'date_from': date_from, 'date_to': date_to, 'quarantine_days': quarantine_days}
   full_interval = serializers.SerializerMethodField()
+
+  def check_spec_clashes(self, specialist, date_from, date_to):
+    spec_presense_qs = Presence.objects.filter(specialist=specialist)
+    clashes_qs = spec_presense_qs.exclude(date_to__lt=date_from)
+    clashes_qs = clashes_qs.exclude(date_from__gt=date_to)
+
+    if clashes_qs.exists():
+      raise serializers.ValidationError(
+        {
+          'non_field_errors': [
+            'Выбранный период пересекается с периодом {0} - {1}'
+            .format(
+              clashes_qs[0].date_from.strftime('%d.%m.%Y'),
+              clashes_qs[0].date_to.strftime('%d.%m.%Y')
+            )
+          ]
+        }
+      )
+
   def validate(self, data):
     if data['date_to'] < data['date_from']:
       raise serializers.ValidationError(
@@ -129,25 +148,11 @@ class PresenceSerializer(serializers.ModelSerializer):
     if data.get('with_quarantine', False):
       quarantine_days = data.get('quarantine_days', 0)
       tdelta = data['date_to'] - data['date_from']
-      if tdelta.days < quarantine_days + 1:
+      if tdelta.days < quarantine_days:
         raise serializers.ValidationError(
-          'Количество дней на карантине должно быть как' +
-          ' минимум на два дня меньше самого срока присутствия'
+          'Количество дней на карантине должно быть' +
+          ' меньше самого срока присутствия'
         )
-
-    spec_presense_qs = Presence.objects.filter(specialist=data['specialist'])
-    start_clashes_Q = Q(date_from__lte=data['date_from'], date_to__gte=data['date_from'])
-    end_clashes_Q = Q(date_from__lte=data['date_to'], date_to__gte=data['date_to'])
-
-    clashes = spec_presense_qs.filter(start_clashes_Q | end_clashes_Q)
-    if clashes.exists():
-      raise serializers.ValidationError(
-        'Выбранный период пересекается с периодом {0} - {1}'
-        .format(
-          clashes[0].date_from.strftime('%d.%m.%Y'),
-          clashes[0].date_to.strftime('%d.%m.%Y')
-        )
-      )
 
     return data
 
@@ -158,6 +163,11 @@ class PresenceSerializer(serializers.ModelSerializer):
     date_from = validated_data.pop('date_from')
     date_to = validated_data.pop('date_to')
     specialist = validated_data.pop('specialist')
+
+    self.check_spec_clashes(
+      specialist,
+      date_from, date_to
+    )
 
     presence_start = date_from
 
