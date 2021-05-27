@@ -186,8 +186,9 @@ export default {
           this.form.date_from = this.form.date[0].format("YYYY-MM-DD");
         if (this.form.date[1])
           this.form.date_to = this.form.date[1].format("YYYY-MM-DD");
-        if (this.form.date[0] && this.form.date[1])
+        if (this.form.date[0] && this.form.date[1] && this.form.date[1].diff(this.form.date[0], "days") > 0) {
           this.maxDays = this.form.date[1].diff(this.form.date[0], "days") - 1;
+        }
       }
     },
     keydown(event) {
@@ -215,7 +216,9 @@ export default {
         this.form.date = [];
         this.form.date[0] = moment(this.editableData.presence.full_interval.date_from, "YYYY-MM-DD");
         this.form.date[1] = moment(this.editableData.presence.full_interval.date_to, "YYYY-MM-DD");
-        this.maxDays = this.form.date[1].diff(this.form.date[0], "days") - 1;
+        if (this.form.date[1].diff(this.form.date[0], "days") > 0) {
+          this.maxDays = this.form.date[1].diff(this.form.date[0], "days") - 1;
+        }
         this.form.date_from = this.editableData.presence.full_interval.date_from;
         this.form.date_to = this.editableData.presence.full_interval.date_to;
       }

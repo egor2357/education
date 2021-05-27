@@ -12,6 +12,7 @@
       "
       :scroll="{ y: 'calc(100vh - 310px)' }"
       :loading="tableLoading || tableLoadingActivity"
+      class="table-skill"
     >
       <template slot="area" slot-scope="text">
         <div class="td-label--sticky" v-if="!text.empty" :length="text.length">
@@ -635,22 +636,23 @@ export default {
 </script>
 
 <style lang="sass">
-.td-label--sticky, .skill-label
-  position: -webkit-sticky
-  position: sticky
-  top: 0
-  display: flex
-  .label--justify
-    flex: 0 0 98%
-.ant-table-tbody > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td
-  background-color: unset
-.ant-table-row
-  td
-    vertical-align: baseline
-    &:hover
-      background-color: #e6f7ff !important
+.table-skill
+  .td-label--sticky, .skill-label
+    position: -webkit-sticky
+    position: sticky
+    top: 0
+    display: flex
+    .label--justify
+      flex: 0 0 98%
+  .ant-table-tbody > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td
+    background-color: unset
+  .ant-table-row
+    td
+      vertical-align: baseline
+      &:hover
+        background-color: #e6f7ff !important
 
-.ant-table-row
+.table-skill
   td
     .dropdown--hover
       display: none

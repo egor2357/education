@@ -1,5 +1,10 @@
 <template>
   <div class="available-table">
+    <div class="title-month">
+      <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
+      <span class="text">{{ month.name }} {{ year }}</span>
+      <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
+    </div>
     <a-table
       :data-source="data"
       :pagination="false"
@@ -12,54 +17,55 @@
         data-index="name"
         fixed="left"
       />
-      <a-table-column-group>
-        <div slot="title" class="title-month">
-          <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
-          <span class="text">{{ month.name }} {{ year }}</span>
-          <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
-        </div>
-        <a-table-column
-          v-for="day in daysOfMonth"
-          :key="day.num"
-          class="day"
-          align="center"
-          :data-index="day.num"
-          :class="day.weekend ? 'weekend' : ''"
-        >
-          <span slot="title">{{ day.num }}</span>
-          <!--:disabled="text.value !== true"-->
-          <template slot-scope="text, record">
-            <a-dropdown :trigger="['click']" placement="bottomLeft">
-              <div
-                :class="[
-                  text.value === true
-                    ? 'available'
-                    : text.value === false
-                    ? 'not-available'
-                    : 'empty',
-                  { 'left-border': text.leftBorder },
-                  { 'right-border': text.rightBorder },
-                ]"
-              >
-                <div v-if="text.displayDate" style="color: #fff">
-                  {{ day.num }}
-                </div>
+      <!--<a-table-column-group>-->
+      <!--<div slot="title" class="title-month">-->
+      <!--<a-icon class="icon-button" type="left" @click="changeMonth(false)" />-->
+      <!--<span class="text">{{ month.name }} {{ year }}</span>-->
+      <!--<a-icon class="icon-button" type="right" @click="changeMonth(true)" />-->
+      <!--</div>-->
+      <a-table-column
+        v-for="day in daysOfMonth"
+        :key="day.num"
+        class="day"
+        align="center"
+        :data-index="day.num"
+        :class="day.weekend ? 'weekend' : ''"
+      >
+        <span slot="title">{{ day.num }}</span>
+        <template slot-scope="text, record">
+          <a-dropdown
+            :trigger="['click']"
+            placement="bottomLeft"
+            v-if="text"
+            :disabled="text.value === null"
+          >
+            <div
+              :class="[
+                text.value === true
+                  ? 'available'
+                  : text.value === false
+                  ? 'not-available'
+                  : 'empty',
+                { 'left-border': text.leftBorder },
+                { 'right-border': text.rightBorder },
+              ]"
+            >
+              <div v-if="text.displayDate" style="color: #fff">
+                {{ day.num }}
               </div>
-              <a-menu slot="overlay">
-                <a-menu-item key="1" @click="$emit('displayEdit', text)">
-                  Изменить
-                </a-menu-item>
-                <a-menu-item
-                  key="2"
-                  @click="displayDeleteConfirm(text, record)"
-                >
-                  <span> Удалить </span>
-                </a-menu-item>
-              </a-menu>
-            </a-dropdown>
-          </template>
-        </a-table-column>
-      </a-table-column-group>
+            </div>
+            <a-menu slot="overlay">
+              <a-menu-item key="1" @click="$emit('displayEdit', text)">
+                Изменить
+              </a-menu-item>
+              <a-menu-item key="2" @click="displayDeleteConfirm(text, record)">
+                <span> Удалить </span>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+        </template>
+      </a-table-column>
+      <!--</a-table-column-group>-->
     </a-table>
   </div>
 </template>
@@ -207,14 +213,23 @@ export default {
           if (this.data[dataIndex][filledDay.num].value !== null) {
             if (
               this.data[dataIndex][filledDay.num - 1] &&
-              this.data[dataIndex][filledDay.num - 1].value === null
+              (this.data[dataIndex][filledDay.num - 1].value === null ||
+                (this.data[dataIndex][filledDay.num - 1].value !== null &&
+                  this.data[dataIndex][filledDay.num].presence.id !==
+                    this.data[dataIndex][filledDay.num - 1].presence.id &&
+                  this.data[dataIndex][filledDay.num].presence.id !==
+                    this.data[dataIndex][filledDay.num - 1].presence
+                      .main_interval_id))
             ) {
               this.data[dataIndex][filledDay.num].leftBorder = true;
               this.data[dataIndex][filledDay.num].displayDate = true;
             }
             if (
               this.data[dataIndex][filledDay.num + 1] &&
-              this.data[dataIndex][filledDay.num + 1].value === null
+              (this.data[dataIndex][filledDay.num + 1].value === null ||
+                (this.data[dataIndex][filledDay.num + 1].value !== null &&
+                  this.data[dataIndex][filledDay.num].presence.id !==
+                    this.data[dataIndex][filledDay.num + 1].presence.id))
             ) {
               this.data[dataIndex][filledDay.num].rightBorder = true;
               this.data[dataIndex][filledDay.num].displayDate = true;
@@ -333,7 +348,12 @@ export default {
       height: 30px
     .weekend
       background-color: #C5FF48
-    .title-month
-      .text
-        padding: 0 10px
+.title-month
+  text-align: center
+  margin-bottom: 10px
+  .text
+    padding: 0 10px
+    width: 130px
+    display: inline-block
+    font-size: 1rem
 </style>
