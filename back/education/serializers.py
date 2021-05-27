@@ -111,6 +111,15 @@ class PresenceSerializer(serializers.ModelSerializer):
     write_only=True, min_value=0
   )
 
+  def get_full_interval(self, instance):
+    main_interval = instance.main_interval if instance.main_interval is not None else instance
+
+    quarantine = main_interval.presence if hasattr(main_interval, 'presence') else None
+    date_from = quarantine.date_from if quarantine is not None else main_interval.date_from
+    date_to = main_interval.date_to
+    quarantine_days = 0 if quarantine is None else (quarantine.date_to - quarantine.date_from).days + 1
+    return {'date_from': date_from, 'date_to': date_to, 'quarantine_days': quarantine_days}
+  full_interval = serializers.SerializerMethodField()
   def validate(self, data):
     if data['date_to'] < data['date_from']:
       raise serializers.ValidationError(
@@ -190,6 +199,7 @@ class PresenceSerializer(serializers.ModelSerializer):
       'main_interval_id',
       'date_from', 'date_to',
       'is_available',
+      'full_interval',
       'with_quarantine', 'quarantine_days'
     )
 

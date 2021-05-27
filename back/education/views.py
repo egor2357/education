@@ -248,7 +248,7 @@ class OptionView(viewsets.ModelViewSet):
 class PresenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication, IsAdminOrReadOnly)
   permission_classes = (permissions.IsAuthenticated,)
-  queryset = Presence.objects.all()
+  queryset = Presence.objects.all().select_related('main_interval', 'presence')
   serializer_class = PresenceSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = PresenceFilter
