@@ -3,7 +3,7 @@
     <a-table
       :pagination="false"
       size="middle"
-      :loading="loading"
+      :loading="loading || loadingMain"
       :data-source="data"
       :columns="columns"
       :scroll="{ y: 'calc(100vh - 320px)', x: 'auto' }"
@@ -80,13 +80,20 @@ export default {
     year: {
       type: Number,
     },
+    needUpdate: {
+      type: Boolean,
+      default: false,
+    },
+    loadingMain: {
+      type: Boolean,
+    },
   },
   data() {
     return {
       data: [],
-      loading: false,
+      loading: true,
       activitiesSpecialists: {},
-      columns: [
+      columnsStart: [
         {
           dataIndex: "activity",
           customRender: (text) => {
@@ -132,6 +139,7 @@ export default {
           },
         },
       ],
+      columns: [],
     };
   },
   async created() {
@@ -142,6 +150,7 @@ export default {
   },
   methods: {
     prepareColumns() {
+      this.columns = this.columnsStart.slice();
       for (let day of this.daysOfMonth) {
         this.columns.push({
           title: day.num,
@@ -278,17 +287,34 @@ export default {
                     }
                   }
                 }
+                break;
               }
             }
           }
         }
       }
     },
+    async updateData() {
+      this.loading = true;
+      setTimeout(async () => {
+        await this.prepareColumns();
+        await this.prepareData();
+        this.loading = false;
+      }, 1)
+    },
   },
   computed: {
     ...mapGetters({
       activities: "activities/getActivities",
     }),
+  },
+  watch: {
+    async needUpdate(value) {
+      if (value === true) {
+        await this.updateData();
+        this.$emit('updated');
+      }
+    },
   },
 };
 </script>

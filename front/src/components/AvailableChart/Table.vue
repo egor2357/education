@@ -81,6 +81,9 @@
       :month="month"
       @deleteConfirm="displayDeleteConfirm"
       @displayEdit="$emit('displayEdit', $event)"
+      :needUpdate="needUpdateActivity"
+      @updated="needUpdateActivity = false;"
+      :loadingMain="loading"
     />
   </div>
 </template>
@@ -107,6 +110,7 @@ export default {
       },
       year: null,
       specialist: true,
+      needUpdateActivity: false,
     };
   },
   props: {
@@ -169,6 +173,7 @@ export default {
         }`}`
       );
       await this.prepareData();
+      this.needUpdateActivity = true;
       this.loading = false;
     },
     prepareData() {
@@ -296,6 +301,7 @@ export default {
         if (res.status === 204) {
           this.$message.success("Период присутствия успешно удалён");
           await this.updateData();
+          this.needUpdateActivity = true;
         } else {
           this.$message.error("Произошла ошибка");
         }
@@ -333,7 +339,8 @@ export default {
   watch: {
     async needUpdate(value) {
       if (value === true) {
-        this.updateData();
+        await this.updateData();
+        this.needUpdateActivity = true;
       }
     },
   },
