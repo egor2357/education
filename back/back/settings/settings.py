@@ -74,7 +74,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'education',
         'HOST': '192.168.137.100',
-        'USER': 'postgres'
+        'USER': 'postgres',
+        'ATOMIC_REQUESTS': True,
     }
 }
 
