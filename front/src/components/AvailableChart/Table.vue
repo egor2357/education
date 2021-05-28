@@ -5,74 +5,95 @@
       <span class="text">{{ month.name }} {{ year }}</span>
       <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
     </div>
-    <a-table
-      :data-source="data"
-      :pagination="false"
-      size="middle"
-      :loading="loading"
-    >
-      <a-table-column
-        key="name"
-        title="Специалист"
-        data-index="name"
-        fixed="left"
+    <div v-show="specialist" class="table-presence">
+      <a-table
+        :data-source="data"
+        :pagination="false"
+        size="middle"
+        :loading="loading"
       >
-        <template slot-scope="text, record">
-          <Popover :data="record" />
-        </template>
-      </a-table-column>
-      <a-table-column
-        v-for="day in daysOfMonth"
-        :key="day.num"
-        class="day"
-        align="center"
-        :data-index="day.num"
-        :class="day.weekend ? 'weekend' : ''"
-      >
-        <span slot="title">{{ day.num }}</span>
-        <template slot-scope="text, record">
-          <a-dropdown
-            :trigger="['click']"
-            placement="bottomLeft"
-            v-if="text"
-            :disabled="text.value === null"
-          >
-            <div
-              :class="[
-                text.value === true
-                  ? 'available'
-                  : text.value === false
-                  ? 'not-available'
-                  : 'empty',
-                { 'left-border': text.leftBorder },
-                { 'right-border': text.rightBorder },
-              ]"
+        <a-table-column key="name" data-index="name" fixed="left">
+          <span slot="title">
+            <span>Специалист</span>
+            <a-icon
+              @click="changeSpecialistView"
+              class="icon-button"
+              type="swap"
+              style="padding-left: 10px"
+            />
+          </span>
+          <template slot-scope="text, record">
+            <Popover :data="record" />
+          </template>
+        </a-table-column>
+        <a-table-column
+          v-for="day in daysOfMonth"
+          :key="day.num"
+          class="day"
+          align="center"
+          :data-index="day.num"
+          :class="day.weekend ? 'weekend' : ''"
+        >
+          <span slot="title">{{ day.num }}</span>
+          <template slot-scope="text, record">
+            <a-dropdown
+              :trigger="['click']"
+              placement="bottomLeft"
+              v-if="text"
+              :disabled="text.value === null"
             >
-              <div v-if="text.displayDate" style="color: #fff">
-                {{ day.num }}
+              <div
+                :class="[
+                  text.value === true
+                    ? 'available'
+                    : text.value === false
+                    ? 'not-available'
+                    : 'empty',
+                  { 'left-border': text.leftBorder },
+                  { 'right-border': text.rightBorder },
+                ]"
+              >
+                <div v-if="text.displayDate" style="color: #fff">
+                  {{ day.num }}
+                </div>
               </div>
-            </div>
-            <a-menu slot="overlay">
-              <a-menu-item key="1" @click="$emit('displayEdit', text)">
-                Изменить
-              </a-menu-item>
-              <a-menu-item key="2" @click="displayDeleteConfirm(text, record)">
-                <span> Удалить </span>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
-        </template>
-      </a-table-column>
-    </a-table>
+              <a-menu slot="overlay">
+                <a-menu-item key="1" @click="$emit('displayEdit', text)">
+                  Изменить
+                </a-menu-item>
+                <a-menu-item key="2" @click="displayDeleteConfirm(text, record)">
+                  <span> Удалить </span>
+                </a-menu-item>
+              </a-menu>
+            </a-dropdown>
+          </template>
+        </a-table-column>
+      </a-table>
+    </div>
+
+    <TableActivities
+      v-if="!specialist"
+      @close="specialist = true"
+      :daysOfMonth="daysOfMonth"
+      :specialists="specialists"
+      :presences="presences"
+      :year="year"
+      :month="month"
+      @deleteConfirm="displayDeleteConfirm"
+      @displayEdit="$emit('displayEdit', $event)"
+    />
   </div>
 </template>
 <script>
 import moment from "moment";
 import { mapGetters, mapActions } from "vuex";
 import Popover from "@/components/AvailableChart/Popover";
+import TableActivities from "@/components/AvailableChart/TableActivities";
+import common from "@/mixins/common";
 export default {
   name: "Table",
-  components: {Popover},
+  components: { Popover, TableActivities },
+  mixins: [common],
   data() {
     return {
       data: [],
@@ -85,6 +106,7 @@ export default {
         value: null,
       },
       year: null,
+      specialist: true,
     };
   },
   props: {
@@ -111,6 +133,7 @@ export default {
       fetchPresence: "presence/fetchPresences",
       deletePresence: "presence/deletePresence",
       fetchSpecialists: "specialists/fetchSpecialists",
+      fetchActivities: "activities/fetchActivities",
     }),
     getDate() {
       let today = this.currentDate;
@@ -162,7 +185,7 @@ export default {
       for (let specialist of this.specialists) {
         this.data.push({
           key: specialist.id,
-          name: `${specialist.surname} ${specialist.name[0]}.${specialist.patronymic[0]}.`,
+          name: this.formatSpecialist(specialist),
           specialist: specialist,
         });
         dataIndex = this.data.length - 1;
@@ -250,12 +273,8 @@ export default {
       let that = this;
       this.$confirm({
         title: "Подтверждение удаления периода присутствия",
-        content: `Специалист: ${
-          row.specialist.patronymic
-            ? `${row.specialist.surname} ${row.specialist.name} ${row.specialist.patronymic}`
-            : `${row.specialist.surname} ${row.specialist.name}`
-        }
-                  Период присутсвия: ${moment(
+        content: `Специалист: ${this.formatSpecialistFull(row.specialist)}
+                  Период присутствия: ${moment(
                     item.presence.full_interval.date_from
                   ).format("DD.MM.YYYY")} - ${moment(
           item.presence.full_interval.date_to
@@ -297,6 +316,13 @@ export default {
       this.$emit("successUpdate");
       this.loading = false;
     },
+    changeSpecialistView() {
+      this.loading = true;
+      setTimeout(() => { //поправить
+        this.specialist = !this.specialist;
+        this.loading = false;
+      }, 1)
+    },
   },
   computed: {
     ...mapGetters({
@@ -311,15 +337,22 @@ export default {
       }
     },
   },
+  mounted() {
+    this.fetchActivities();
+  },
 };
 </script>
 
 <style lang="sass">
 .available-table
-  .ant-table-scroll
-    overflow: auto
+  height: 100%
+  display: flex
+  flex-direction: column
+  .ant-table-body
+    overflow: auto !important
   .day
     padding: 0 !important
+    min-width: 30px
     .not-available, .available, .empty
       padding: 5px
       width: 100%

@@ -34,6 +34,16 @@ const actions = {
       commit("setSpecialists", []);
     }
   },
+  async fetchSpecialistsWithoutCommit(context, params = '') {
+    try {
+      let res = await this.$axios.get(`/api/specialists/${params}`);
+      if (res.status === 200) {
+        return {status: 200, data: res.data}
+      }
+    } catch (e) {
+      return e
+    }
+  },
   async addSpecialist(context, payload) {
     return post(this.$axios, "/api/specialists/", payload);
   },

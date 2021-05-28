@@ -7,9 +7,7 @@
         <b>
           {{
             currentUser.surname
-              ? currentUser.name && currentUser.patronymic
-                ? `${currentUser.surname} ${currentUser.name} ${currentUser.patronymic}`
-                : currentUser.surname
+              ? formatSpecialistFull(currentUser)
               : currentUser.user.username
           }}
         </b>
@@ -47,12 +45,14 @@
 import ActivitiesTypes from "@/components/Specialists/ActivitiesTypes";
 import Skills from "@/components/Specialists/Skills";
 import { mapActions, mapGetters } from "vuex";
+import common from "@/mixins/common";
 export default {
   name: "ActivitySkillTabs",
   components: {
     ActivitiesTypes,
     Skills,
   },
+  mixins: [common],
   props: {
     currentUser: Object,
   },

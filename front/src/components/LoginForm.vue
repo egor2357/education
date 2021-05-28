@@ -90,6 +90,7 @@ export default {
         .then((res) => {
           if (res.status === 200) {
             this.$message.success("Вход успешно выполнен");
+            this.$router.push({ name: "Schedule" });
           } else if (res.status === 400) {
             this.$message.error("Проверьте введённые данные");
             displayErrors(this.$message, res.data, this.fields);

@@ -12,7 +12,7 @@
         >Добавить период</a-button
       >
     </div>
-    <div>
+    <div style="overflow: hidden; flex: 1">
       <Table :needUpdate="needUpdateTable" @successUpdate="needUpdateTable = false" @displayEdit="displayEdit" />
     </div>
     <ModalPeriod
@@ -56,6 +56,8 @@ export default {
 .available-block
   display: flex
   flex-direction: column
+  height: 100%
+  overflow: hidden
   .title
     margin-bottom: 10px
     display: flex
@@ -64,4 +66,7 @@ export default {
       text-align: center
       font-size: 1rem
       font-weight: bold
+      padding-left: 120px
+      @media (max-width: 900px)
+        padding-left: 0
 </style>

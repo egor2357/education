@@ -27,9 +27,7 @@
               v-for="specialist in specialists"
               :key="specialist.id"
             >
-              {{ specialist.patronymic ? `${specialist.surname}
-              ${specialist.name[0]}.${specialist.patronymic[0]}` :
-              `${specialist.surname} ${specialist.name[0]}` }}
+              {{formatSpecialist(specialist)}}
             </a-select-option>
           </a-select>
           <a-range-picker
@@ -61,8 +59,10 @@
 <script>
 import { mapGetters } from "vuex";
 import moment from "moment";
+import common from "@/mixins/common";
 export default {
   name: "ModalPeriod",
+  mixins: [common],
   props: {
     adding: {
       type: Boolean,
