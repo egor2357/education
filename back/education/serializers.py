@@ -148,7 +148,7 @@ class PresenceSerializer(serializers.ModelSerializer):
     if data.get('with_quarantine', False):
       quarantine_days = data.get('quarantine_days', 0)
       tdelta = data['date_to'] - data['date_from']
-      if tdelta.days < quarantine_days:
+      if tdelta.days <= quarantine_days:
         raise serializers.ValidationError(
           'Количество дней на карантине должно быть' +
           ' меньше самого срока присутствия'
@@ -204,7 +204,6 @@ class PresenceSerializer(serializers.ModelSerializer):
   def update(self, instance, validated_data):
     instance.delete()
     return self.create(validated_data)
-
 
   class Meta:
     model = Presence
