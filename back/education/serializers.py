@@ -379,7 +379,8 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
       'skills', 'activities',
       'presence',
       'user',
-      'username', 'password', 'is_staff'
+      'username', 'password', 'is_staff',
+      '__str__'
     )
     expandable_fields = {
       'activities': ActivitySerializer,

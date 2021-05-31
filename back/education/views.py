@@ -256,12 +256,13 @@ class PresenceView(viewsets.ModelViewSet):
 class SpecialistView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = (Specialist.objects.all()
+  queryset = (Specialist.objects.all().filter(is_active=True)
                                   .select_related('user')
                                   .prefetch_related(
                                     'competence_set__skill',
                                     'specialty_set__activity',
-                                    'presence_set'
+                                    'presence_set__presence',
+                                    'presence_set__main_interval'
                                   ))
   serializer_class = SpecialistSerializer
   filter_backends = (DjangoFilterBackend,)
