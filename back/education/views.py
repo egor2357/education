@@ -275,7 +275,8 @@ class SpecialistView(viewsets.ModelViewSet):
     specialist.save()
     if not (user is None):
       user.delete()
-    return Response(SpecialistSerializer(specialist).data)
+    specialist.refresh_from_db()
+    return Response(SpecialistSerializer(specialist).data, status=204)
 
 class Job_fileView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
