@@ -36,9 +36,7 @@
               <template slot="title">
                 <span class="specialist-label">{{
                   item.surname
-                    ? item.name && item.patronymic
-                      ? `${item.surname} ${item.name} ${item.patronymic}`
-                      : item.surname
+                    ? formatSpecialistFull(item)
                     : item.user.username
                 }}</span>
               </template>
@@ -123,12 +121,14 @@
 import { mapActions, mapGetters } from "vuex";
 import ModalSpecialist from "@/components/Specialists/ModalSpecialist";
 import ActivitySkillTabs from "@/components/Specialists/ActivitySkillTabs";
+import common from "@/mixins/common";
 export default {
   name: "SpecialistsList",
   components: {
     ModalSpecialist,
     ActivitySkillTabs,
   },
+  mixins: [common],
   data() {
     return {
       loading: false,
@@ -154,9 +154,7 @@ export default {
       this.$confirm({
         title: `Вы действительно хотите удалить специалиста ${
           item.surname
-            ? item.name && item.patronymic
-              ? `${item.surname} ${item.name} ${item.patronymic}`
-              : item.surname
+            ? this.formatSpecialistFull(item)
             : item.user.username
         }?`,
         content: ``,

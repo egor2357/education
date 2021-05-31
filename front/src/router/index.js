@@ -61,6 +61,31 @@ const router = new VueRouter({
       },
     },
     {
+      path: "/chart-available",
+      name: "AvailableChart",
+      component: () => import("@/views/Admin/AvailableChart"),
+      meta: {
+        breadcrumbs: [{ title: "График присутствия специалистов" }],
+        staffOnly: true,
+      },
+    },
+    {
+      path: "/developing",
+      name: "Developing",
+      component: () => import("@/views/InDeveloping"),
+      meta: {
+        breadcrumbs: [{ title: "Раздел находится в разработке" }],
+      },
+    },
+    {
+      path: "/",
+      name: "Developing",
+      component: () => import("@/views/InDeveloping"),
+      meta: {
+        breadcrumbs: [{ title: "Раздел находится в разработке" }],
+      },
+    },
+    {
       path: "/404",
       name: "Page404",
       component: () => import("@/views/Page404"),
@@ -86,7 +111,7 @@ function checkIsAuth(name) {
   } else if (!store.getters["auth/getIsAuth"] && name === "Login") {
     return true;
   } else if (store.getters["auth/getIsAuth"] && name === "Login") {
-    return false;
+    router.push("/schedule");
   } else {
     return true;
   }

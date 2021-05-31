@@ -27,7 +27,9 @@ import {
   Timeline,
   Spin,
   Select,
-  Collapse
+  Collapse,
+  DatePicker,
+  Popover
 } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
@@ -58,6 +60,8 @@ Vue.use(Timeline);
 Vue.use(Spin);
 Vue.use(Select);
 Vue.use(Collapse);
+Vue.use(DatePicker);
+Vue.use(Popover);
 
 Vue.prototype.$message = message;
 Vue.prototype.$confirm = Modal.confirm;

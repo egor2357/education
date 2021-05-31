@@ -7,7 +7,7 @@
     width="700px"
     :dialog-style="{ top: '40px' }"
   >
-    <BarChart :options="chartOptions" :chartdata="chartData" />
+    <BarChart ref="chart" :options="chartOptions" :chartData="chartData" />
     <a-divider />
     <div style="text-align: center">
       <span
@@ -35,7 +35,7 @@ export default {
         maintainAspectRatio: false,
         scales: {
           yAxes: [
-            { ticks: { beginAtZero: true, min: 0, max: 10, stepSize: 1 } }
+            { ticks: { beginAtZero: true, min: 0, max: 10, stepSize: 1 } },
           ],
         },
       },
@@ -51,7 +51,6 @@ export default {
       this.chartData.datasets = [];
       for (let key in this.stat) {
         if (key !== "sum") {
-          //this.chartData.labels.push(this.stat[key].name)
           this.chartData.datasets.push({
             label: this.stat[key].name,
             backgroundColor: `${this.stat[key].color}99`,
@@ -61,6 +60,11 @@ export default {
       }
       this.chartOptions.scales.yAxes[0].ticks.max = this.stat["sum"].max + 1;
     },
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.$refs.chart.renderChart(this.chartData, this.chartOptions);
+    });
   },
   computed: {
     ...mapGetters({
