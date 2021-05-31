@@ -119,7 +119,7 @@ export default {
           icon: "schedule",
           title: "Занятия",
           key: "1",
-          to: { name: "Developing" },
+          to: { name: "JobSchedule" },
           childrens: [],
         },
         {

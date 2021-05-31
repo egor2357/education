@@ -93,6 +93,14 @@ const router = new VueRouter({
         breadcrumbs: [{ title: "Страница не найдена" }],
       },
     },
+    {
+      path: "/job-schedule",
+      name: "JobSchedule",
+      component: () => import("@/views/JobSchedule"),
+      meta: {
+        breadcrumbs: [{ title: "Расписание занятий" }],
+      },
+    },
   ],
 });
 
