@@ -36,7 +36,7 @@
               { 'no-date': !text.displayDate },
             ]"
           >
-            <div v-if="text.displayDate" style="color: #000">
+            <div v-if="text.displayDate" style="color: #fff">
               {{ text.day }}
             </div>
           </div>
