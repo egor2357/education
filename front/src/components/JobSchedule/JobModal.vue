@@ -4,7 +4,7 @@
     cancelText="Отмена"
     :visible="true"
     :title="title"
-    @cancel="handleCancel"
+    @cancel="$emit('closeModal')"
     @ok="handleOk"
     @confirmLoading="loadingButton">
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
@@ -139,14 +139,6 @@ export default {
     }
   },
   methods: {
-    handleCancel() {
-      this.form.date = null;
-      this.form.activity_id = null;
-      this.form.activity_id = null;
-      this.form.start_time = null;
-      this.$emit("closeModal");
-    },
-
     async handleOk() {
       this.loadingButton = true;
       this.$refs.form.validate(async (valid) => {
@@ -203,34 +195,17 @@ export default {
     },
   },
   created() {
-    this.form.date = null;
-    this.form.activity_id = null;
-    this.form.specialist_id = null;
-    this.form.start_time = null;
-
     if (this.editableData) {
       this.title = "Изменение занятия";
-      // this.form.id = this.editableData.id
-      // this.form.date = this.editableData.date
-      // this.form.activity_id = this.editableData.activity_id
-      // this.form.id = this.editableData.id
-      // this.form.id = this.editableData.id
-      // this.form.id = this.editableData.id
+      this.form.id = this.editableData.id
+      this.form.date = this.editableData.date
+      this.form.activity_id = this.editableData.activity_id
+      this.form.specialist_id = this.editableData.specialist_id
+      this.form.start_time = this.editableData.start_time
     } else {
       this.title = "Добавление занятия";
-      // this.editableData.id ? (this.form.id = this.editableData.id) : "";
-      // if (this.editableData.date || this.editableData.date === 0)
-      //   this.form.date = this.editableData.date;
-      // this.editableData.activity
-      //   ? (this.form.activity_id = this.editableData.activity.id)
-      //   : "";
-      // this.editableData.start_time
-      //   ? (this.form.start_time = this.editableData.start_time)
-      //   : "";
     }
     document.addEventListener("keydown", this.keydown);
-  },
-  mounted() {
   },
   beforeDestroy() {
     document.removeEventListener("keydown", this.keydown);
