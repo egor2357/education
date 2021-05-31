@@ -5,9 +5,13 @@ import deleteAxios from "@/middleware/deleteAxios";
 const state = () => ({
   activities: [],
   activitiesCheckboxes: {},
+  fetched: false,
 });
 
 const getters = {
+  getFetched(state) {
+    return state.fetched;
+  },
   getActivities(state) {
     return state.activities;
   },
@@ -21,11 +25,11 @@ const actions = {
     try {
       let res = await this.$axios.get("/api/activities/");
       if (res.status === 200) {
-        commit("setActivities", res.data)
+        commit("setActivities", res.data);
       }
     }
     catch (e) {
-      commit("setActivities", [])
+      commit("setActivities", []);
     }
   },
   async addActivity(context, payload) {
@@ -48,6 +52,7 @@ const actions = {
 const mutations = {
   setActivities(state, payload) {
     state.activities = payload;
+    state.fetched = true;
   },
   setActivitiesCheckboxes(state, payload) {
     state.activitiesCheckboxes = payload;
