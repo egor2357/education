@@ -112,6 +112,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 #Django Rest Framework settings
 
 REST_FRAMEWORK = {
+    'DATE_INPUT_FORMATS': ['iso-8601', '%Y-%m-%dT%H:%M:%S.%f%z']
 }
 
 LOGIN_REDIRECT_URL = '/'
