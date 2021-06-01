@@ -490,7 +490,7 @@ class Skill_reportSerializer(serializers.ModelSerializer):
 class JobSerializer(FlexFieldsModelSerializer):
   specialist_id = serializers.PrimaryKeyRelatedField(
     source='specialist', queryset=Specialist.objects.all(),
-    required=False, write_only=True
+    required=False, write_only=True, allow_null=True
   )
   specialist = SpecialistSerializer(
     read_only=True,
@@ -506,7 +506,7 @@ class JobSerializer(FlexFieldsModelSerializer):
   )
   schedule_id = serializers.PrimaryKeyRelatedField(
     source='schedule', queryset=Schedule.objects.all().select_related('activity'),
-    write_only=True
+    write_only=True, required=False, allow_null=True
   )
   schedule = ScheduleSerializer(
     read_only=True,

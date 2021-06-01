@@ -317,7 +317,7 @@ class Option_file(models.Model):
 
 class Job(models.Model):
   specialist = models.ForeignKey(
-    Specialist, null=True, blank=True,
+    Specialist, null=True, default=None, blank=True,
     on_delete=models.SET_NULL, verbose_name='Специалист'
   )
   activity = models.ForeignKey(
@@ -325,7 +325,7 @@ class Job(models.Model):
     on_delete=models.CASCADE, verbose_name='Вид деятельности'
   )
   schedule = models.ForeignKey(
-    Schedule, null=True,
+    Schedule, null=True, default=None, blank=True,
     on_delete=models.SET_NULL, verbose_name='Шаблон занятия'
   )
 
