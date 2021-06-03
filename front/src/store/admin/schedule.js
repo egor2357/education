@@ -5,6 +5,7 @@ import deleteAxios from "@/middleware/deleteAxios";
 const state = () => ({
   jobs: [],
   jobsStat: {},
+  fetched: false,
 });
 
 const getters = {
@@ -13,6 +14,9 @@ const getters = {
   },
   getJobsStat(state) {
     return state.jobsStat;
+  },
+  getFetched(state) {
+    return state.fetched;
   },
 };
 
@@ -58,6 +62,7 @@ const actions = {
 const mutations = {
   setJobs(state, payload) {
     state.jobs = payload;
+    state.fetched = true;
   },
   setJobsStat(state, payload) {
     state.jobsStat = payload;
