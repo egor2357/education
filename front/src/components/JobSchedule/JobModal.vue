@@ -4,7 +4,7 @@
     cancelText="Отмена"
     :visible="true"
     :title="title"
-    @cancel="closeModal(false)"
+    @cancel="closeModal(null)"
     @ok="handleOk"
     @confirmLoading="loadingButton">
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
@@ -46,6 +46,7 @@
         <a-input
           v-model="form.start_time"
           type="time"
+          format="HH:SS"
           @change="fieldChanged('start_time')"
         />
       </a-form-model-item>
@@ -170,8 +171,8 @@ export default {
       this.fields[field_key].help = "";
     },
 
-    closeModal(isSuccess){
-      this.$emit('closeModal', isSuccess);
+    closeModal(jobDate=null){
+      this.$emit('closeModal', jobDate);
     },
 
     async handleOk() {
@@ -194,7 +195,7 @@ export default {
 
             if (res.status === successCode) {
               this.$message.success(successMessage);
-              this.closeModal(true);
+              this.closeModal(this.form.date);
             } else if (res.status === 400) {
               this.$message.error("Проверьте введённые данные");
               for (let key in res.data) {
@@ -229,8 +230,8 @@ export default {
       this.title = "Изменение занятия";
       this.form.id = this.editableData.id
       this.form.date = this.editableData.date
-      this.form.activity_id = this.editableData.activity_id
-      this.form.specialist_id = this.editableData.specialist_id
+      this.form.activity_id = this.editableData.activity.id
+      this.form.specialist_id = this.editableData.specialist.id
       this.form.start_time = this.editableData.start_time
     } else {
       this.title = "Добавление занятия";
