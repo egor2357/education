@@ -8,7 +8,7 @@ class JobFilter(FilterSet):
   class Meta:
     model = Job
     fields = {
-      'date': ['gt', 'lt', 'exact'],
+      'date': ['gte', 'lte', 'gt', 'lt', 'exact'],
       'specialist_id': ['exact'],
       'activity_id': ['exact']
     }
