@@ -32,48 +32,31 @@
 
       <div class="job-schedule__calendar">
         <div class="job-schedule__calendar__week">
-          <div class="job-schedule__calendar__date" v-for="item, index in 7" :key="index">
+          <div class="job-schedule__calendar__date" v-for="weekday, index in momentDateArr" :key="index">
             <div class="job-schedule__calendar__date-title">
-              {{ daysOfWeek[index].long }}
+              <div class="job-schedule__calendar__date-title-day">
+                <div>
+                  {{ weekday.format("D") }}
+                </div>
+                <div>
+                  {{ weekday.format("MMM") }}
+                </div>
+              </div>
+              <div class="job-schedule__calendar__date-title-weekday">
+                  {{ weekday.format("dd").toUpperCase() }}
+              </div>
             </div>
-            <div class="job-schedule__calendar__job">
+            <div class="job-schedule__calendar__jobs">
               <a-timeline>
-                <template v-for="job in jobs">
-                  <a-timeline-item
-                    v-if="index === job.day"
-                    :color="job.activity.color"
-                    :key="job.id"
-                  >
-                    <div
-                      class="job-card"
-                      :style="{
-                        'background-color': `${job.activity.color}4d`,
-                        border: `1px solid ${job.activity.color}99`,
-                      }"
-                    >
-                      <div class="job-time">{{ formatTime(job.start_time) }}</div>
-                      <a-dropdown
-                        :trigger="['click']"
-                        placement="bottomLeft"
-                        class="dropdown--hover"
-                      >
-                        <a-icon class="icon-button" type="dash"></a-icon>
-                        <a-menu slot="overlay">
-                          <a-menu-item key="1" @click="openModalEdit(job)">
-                            Изменить
-                          </a-menu-item>
-                          <a-menu-item
-                            key="2"
-                            @click="displayConfirmDelete(job, index)"
-                          >
-                            <span> Удалить </span>
-                          </a-menu-item>
-                        </a-menu>
-                      </a-dropdown>
-                      <div class="job-name">{{ job.activity.name }}</div>
-                    </div>
-                  </a-timeline-item>
-                </template>
+                <a-timeline-item v-for="job in thisDateJobs(weekday.format('YYYY-MM-DD'))"
+                  :color="job.activity.color"
+                  :key="job.id">
+                  <job-card :job="job"
+                    @deleteJob="deleteJob($event)"
+                    @editJob="openModal($event)">
+
+                  </job-card>
+                </a-timeline-item>
               </a-timeline>
             </div>
           </div>
@@ -84,7 +67,7 @@
         :activities="activities"
         :specialists="specialists"
         :editableData="modalEditableData"
-        @closeModal="closeModal"
+        @closeModal="closeModal($event)"
       />
     </div>
   </a-spin>
@@ -92,18 +75,17 @@
 
 <script>
 import JobModal from "@/components/JobSchedule/JobModal";
+import JobCard from "@/components/JobSchedule/JobCard";
 import { mapActions, mapGetters } from "vuex";
 import consts from "@/const";
-import datetime from "@/mixins/datetime";
 import moment from "moment";
+// import post from "@/middleware/post";
 
 export default {
   components: {
     JobModal,
+    JobCard,
   },
-  mixins: [
-    datetime
-  ],
   name: "JobSchedule",
   data() {
     return {
@@ -133,6 +115,7 @@ export default {
     this.loading = true;
     await Promise.all(fetches);
     this.loading = false;
+
   },
   methods: {
     ...mapActions({
@@ -144,12 +127,35 @@ export default {
       this.modalEditableData = job;
       this.displayModal = true;
     },
-    closeModal(){
+    closeModal(jobDate=null){
       this.displayModal = false;
+      let isBetween = moment(jobDate).isBetween(
+        this.momentDateArr[0],
+        this.momentDateArr[this.momentDateArr.length-1],
+        undefined,
+        "[]"
+      );
+      if (jobDate && isBetween) {
+        this.fetchJobs();
+      }
     },
 
     async fetchJobs(){
-
+      try {
+        this.loading = true;
+        let firstQParameter = `date__gte=${this.momentDateArr[0].format("YYYY-MM-DD")}`;
+        let secondQParameter = `date__lte=${this.momentDateArr[this.momentDateArr.length-1].format("YYYY-MM-DD")}`;
+        let res = await this.$axios.get(`/api/jobs/?${firstQParameter}&${secondQParameter}`);
+        if (res.status === 200) {
+          this.jobs = res.data;
+        } else {
+          this.$message.error("Произошла ошибка при загрузке занятий");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка при загрузке занятий");
+      } finally {
+        this.loading = false;
+      }
     },
 
     switchDates(isForward){
@@ -160,41 +166,35 @@ export default {
         newMomentFrom = newMomentFrom.subtract(7, 'days');
       }
       this.dateFrom = newMomentFrom.toDate();
+      this.fetchJobs();
     },
 
-    displayConfirmDelete({ id, activity, start_time }, index) {
-      let that = this;
-      this.$confirm({
-        title: `Занятие "${activity.name}" (${
-          this.daysOfWeek[index].long
-        }, ${this.formatTime(start_time)}) будет удалено.`,
-        content: "Продолжить?",
-        okType: "danger",
-        onOk() {
-          that.deleteRecord(id);
-        },
-      });
-    },
-    async deleteRecord(id) {
-      try {
-        this.loading = true;
-        let res = await this.deleteJob(id);
-        if (res.status === 204) {
-          this.$message.success("Занятие успешно удалено из шаблона");
-          await this.fetchJobs();
-        } else {
-          this.$message.error("Произошла ошибка");
-        }
-      } catch (e) {
-        this.$message.error("Произошла ошибка");
-      } finally {
-        this.loading = false;
-      }
+    async deleteJob(id){
+      console.log(id);
+      // try {
+      //   this.loading = true;
+      //   let res = await this.deleteJob(id);
+      //   if (res.status === 204) {
+      //     this.$message.success("Занятие успешно удалено из шаблона");
+      //     await this.fetchJobs();
+      //   } else {
+      //     this.$message.error("Произошла ошибка");
+      //   }
+      // } catch (e) {
+      //   this.$message.error("Произошла ошибка");
+      // } finally {
+      //   this.loading = false;
+      // }
     },
 
     async setForTheWeek(){
 
     },
+    thisDateJobs(currDateString) {
+      return this.jobs.filter((job)=>{
+        return job.date == currDateString;
+      })
+    }
   },
   computed: {
     ...mapGetters({
@@ -204,21 +204,21 @@ export default {
       activitiesFetched: "activities/getFetched",
     }),
 
-    dateArr(){
+    momentDateArr(){
       let momentFrom = moment(this.dateFrom).clone().weekday(0);
       let currMoment = momentFrom.clone();
       let momentTo = currMoment.clone().weekday(6);
 
       let dateArray = [];
       while (currMoment <= momentTo) {
-          dateArray.push( currMoment.toDate() )
+          dateArray.push(currMoment.clone())
           currMoment = currMoment.add(1, 'days');
       }
       return dateArray;
     },
     dateIntervalString(){
-      let momentFrom = moment(this.dateArr[0]);
-      let momentTo = moment(this.dateArr[this.dateArr.length-1]);
+      let momentFrom = this.momentDateArr[0];
+      let momentTo = this.momentDateArr[this.momentDateArr.length-1];
       return `${momentFrom.format("D MMMM")} - ${momentTo.format("D MMMM")}`;
     },
   },
@@ -282,38 +282,23 @@ export default {
         text-align: center
         border-bottom: 1px solid #D9D9D9
         background-color: #1890ff
-        padding: 10px
         color: #FFFFFF
         font-size: 1rem
         position: sticky
         top: 0
         z-index: 2
-
-    &__job
-      padding: 15px 10px 10px 5px
-
-      .job-card
-        padding: 10px
-        border-radius: 4px
         display: flex
-        flex-wrap: wrap
+        flex-direction: row
+        align-items: center
+        &-day
+          margin: 4px 10px 4px 30px
+          font-size: 18px
+        &-weekday
+          font-size: 34px
+          font-weight: bold
+          text-align: center
+          flex: 1
 
-        .job-time
-          flex: 0 0 95%
-
-        .dropdown--hover
-          display: none
-          max-width: 0
-          height: 20px
-
-          svg
-            transform: rotate(90deg)
-            margin-top: 3px
-
-        &:hover
-          .dropdown--hover
-            display: unset
-
-        .job-name
-          flex: 0 0 100%
+    &__jobs
+      padding: 15px 10px 10px 5px
 </style>
