@@ -97,8 +97,10 @@ class Specialist(models.Model):
     res = ''
     if (self.surname):
       res += self.surname
-      if (self.name and self.patronymic):
-        res += ' {0}. {1}.'.format(self.name[0], self.patronymic[0])
+      if self.name:
+        res += ' {0}.'.format(self.name[0])
+      if self.patronymic:
+        res += ' {0}.'.format(self.patronymic[0])
     elif self.user:
       res = self.user.login
     else:
