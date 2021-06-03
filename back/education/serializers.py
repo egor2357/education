@@ -494,7 +494,7 @@ class JobSerializer(FlexFieldsModelSerializer):
   )
   specialist = SpecialistSerializer(
     read_only=True,
-    fields=['id', 'surname', 'name', 'patronymic', 'role']
+    fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
   )
   activity_id = serializers.PrimaryKeyRelatedField(
     source='activity', queryset=Activity.objects.all(),
