@@ -33,7 +33,8 @@
       <div class="job-schedule__calendar">
         <div class="job-schedule__calendar__week">
           <div class="job-schedule__calendar__date" v-for="weekday, index in momentDateArr" :key="index">
-            <div class="job-schedule__calendar__date-title">
+            <div class="job-schedule__calendar__date-title"
+                :class="{'weekend': weekday.isoWeekday() > 5}">
               <div class="job-schedule__calendar__date-title-day">
                 <div>
                   {{ weekday.format("D") }}
@@ -62,6 +63,15 @@
           </div>
         </div>
       </div>
+
+      <div>
+        <a-checkbox class="job-schedule__switcher"
+          :checked="isScheduleVisible"
+          @change="isScheduleVisible = !isScheduleVisible">
+          Показывать шаблон расписания
+        </a-checkbox>
+      </div>
+
       <job-modal
         v-if="displayModal"
         :activities="activities"
@@ -79,7 +89,7 @@ import JobCard from "@/components/JobSchedule/JobCard";
 import { mapActions, mapGetters } from "vuex";
 import consts from "@/const";
 import moment from "moment";
-// import post from "@/middleware/post";
+import deleteAxios from "@/middleware/deleteAxios";
 
 export default {
   components: {
@@ -99,6 +109,8 @@ export default {
       daysOfWeek: consts.daysOfWeek,
 
       jobs: [],
+
+      isScheduleVisible: true,
     };
   },
   async created() {
@@ -110,6 +122,10 @@ export default {
     if (!this.specialistsFetched) {
       fetches.push(this.fetchSpecialists());
     }
+    if (!this.scheduleFetched) {
+      fetches.push(this.fetchSchedule());
+    }
+
     fetches.push(this.fetchJobs())
 
     this.loading = true;
@@ -121,6 +137,7 @@ export default {
     ...mapActions({
       fetchSpecialists: "specialists/fetchSpecialists",
       fetchActivities: "activities/fetchActivities",
+      fetchSchedule: "schedule/fetchJobs",
     }),
 
     openModal(job=null) {
@@ -170,21 +187,20 @@ export default {
     },
 
     async deleteJob(id){
-      console.log(id);
-      // try {
-      //   this.loading = true;
-      //   let res = await this.deleteJob(id);
-      //   if (res.status === 204) {
-      //     this.$message.success("Занятие успешно удалено из шаблона");
-      //     await this.fetchJobs();
-      //   } else {
-      //     this.$message.error("Произошла ошибка");
-      //   }
-      // } catch (e) {
-      //   this.$message.error("Произошла ошибка");
-      // } finally {
-      //   this.loading = false;
-      // }
+      try {
+        this.loading = true;
+        let res = await deleteAxios(this.$axios, `/api/jobs/${id}/`, {});
+        if (res.status === 204) {
+          this.$message.success("Занятие успешно удалено");
+          await this.fetchJobs();
+        } else {
+          this.$message.error("Произошла ошибка при удалении занятия");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка при удалении занятия");
+      } finally {
+        this.loading = false;
+      }
     },
 
     async setForTheWeek(){
@@ -202,6 +218,8 @@ export default {
       specialistsFetched: "activities/getFetched",
       activities: "activities/getActivities",
       activitiesFetched: "activities/getFetched",
+      schedule: "schedule/getJobs",
+      scheduleFetched: "schedule/getFetched",
     }),
 
     momentDateArr(){
@@ -301,4 +319,6 @@ export default {
 
     &__jobs
       padding: 15px 10px 10px 5px
+  &__switcher
+    margin-top: 10px
 </style>

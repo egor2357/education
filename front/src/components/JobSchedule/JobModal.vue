@@ -17,14 +17,14 @@
           placeholder="Выберите дату"
           format="DD.MM.YYYY"
           style="width: 100%;"
-          @change="fieldChanged('date')"
+          @change="fieldChanged($event, 'date')"
         />
       </a-form-model-item>
 
       <a-form-model-item prop="activity_id" label="Вид деятельности" key="activity_id"
         :validateStatus="fields['activity_id'].validateStatus" :help="fields['activity_id'].help">
         <a-select v-model="form.activity_id"
-          @change="form.specialist_id=null; fieldChanged('activity_id')">
+          @change="form.specialist_id=null; fieldChanged($event, 'activity_id')">
           <a-select-option v-for="activity in activities" :key="activity.id">
             {{ activity.name }}
           </a-select-option>
@@ -34,7 +34,8 @@
       <a-form-model-item prop="specialist_id" label="Специалист" key="specialist_id"
         :validateStatus="fields['specialist_id'].validateStatus" :help="fields['specialist_id'].help">
         <a-select v-model="form.specialist_id"
-          @change="fieldChanged('specialist_id')">
+          :allowClear="true"
+          @change="fieldChanged($event, 'specialist_id')">
           <a-select-option v-for="specialist in filteredSpecialists" :key="specialist.id">
             {{ specialist.__str__ }}
           </a-select-option>
@@ -47,7 +48,7 @@
           v-model="form.start_time"
           type="time"
           format="HH:SS"
-          @change="fieldChanged('start_time')"
+          @change="fieldChanged($event, 'start_time')"
         />
       </a-form-model-item>
 
@@ -166,7 +167,10 @@ export default {
     }
   },
   methods: {
-    fieldChanged(field_key) {
+    fieldChanged(val, field_key) {
+      if (field_key == 'specialist_id' && val == undefined) {
+        this.form.specialist_id = null;
+      }
       this.fields[field_key].validateStatus = "";
       this.fields[field_key].help = "";
     },
@@ -231,7 +235,11 @@ export default {
       this.form.id = this.editableData.id
       this.form.date = this.editableData.date
       this.form.activity_id = this.editableData.activity.id
-      this.form.specialist_id = this.editableData.specialist.id
+      if (this.editableData.specialist) {
+        this.form.specialist_id = this.editableData.specialist.id
+      } else {
+        this.form.specialist_id = null;
+      }
       this.form.start_time = this.editableData.start_time
     } else {
       this.title = "Добавление занятия";
