@@ -23,9 +23,6 @@
     </a-dropdown>
 
     <div class="job__activity">
-      <div class="job__activity-label">
-        Вид деятельности:
-      </div>
       <div class="job__activity-name">
         {{ job.activity.name }}
       </div>
@@ -90,7 +87,7 @@ export default {
 
 <style lang="sass">
 .job
-  padding: 10px
+  padding: 5px 10px
   border-radius: 4px
   display: flex
   flex-wrap: wrap
