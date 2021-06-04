@@ -341,7 +341,7 @@ class Job(models.Model):
     db_table = 'job'
     verbose_name = 'Занятие'
     verbose_name_plural = 'Занятия'
-    ordering = ['date']
+    ordering = ['date', 'start_time']
 
   def __str__(self):
     return '{0} с {1}'.format(
