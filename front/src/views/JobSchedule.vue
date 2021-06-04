@@ -9,23 +9,30 @@
         </div>
 
         <div class="job-schedule__header__options">
-          <div class="job-schedule__header__options-navigate">
-            <a-icon class="icon-button job-schedule__header__options-navigate-to_left"
-              type="left" @click="switchDates(false)"/>
-            <div class="job-schedule__header__options-navigate-interval">
-              {{dateIntervalString}}
+
+          <div class="job-schedule__header__options__first-block">
+            <div class="job-schedule__header__options-navigate">
+              <a-icon class="icon-button job-schedule__header__options-navigate-to_left"
+                type="left" @click="switchDates(false)"/>
+              <div class="job-schedule__header__options-navigate-interval">
+                {{dateIntervalString}}
+              </div>
+              <a-icon class="icon-button job-schedule__header__options-navigate-to_right"
+              type="right" @click="switchDates(true)"/>
             </div>
-            <a-icon class="icon-button job-schedule__header__options-navigate-to_right"
-            type="right" @click="switchDates(true)"/>
+            <a-button
+              :disabled="!remainingSchedule.length"
+              class="job-schedule__header__options-fill_button"
+              icon="block" @click="setForTheWeek">
+              Применить шаблон расписания
+            </a-button>
           </div>
-          <a-button class="job-schedule__header__options-fill_button"
-            icon="block" @click="setForTheWeek">
-            Применить шаблон расписания
-          </a-button>
+
           <a-button class="job-schedule__header__options-add_button"
             icon="plus" @click="openModal(null)">
             Добавить занятие
           </a-button>
+
         </div>
 
       </div>
@@ -49,15 +56,35 @@
             </div>
             <div class="job-schedule__calendar__jobs">
               <a-timeline>
-                <a-timeline-item v-for="job in thisDateJobs(weekday.format('YYYY-MM-DD'))"
-                  :color="job.activity.color"
-                  :key="job.id">
-                  <job-card :job="job"
-                    @deleteJob="deleteJob($event)"
-                    @editJob="openModal($event)">
-
-                  </job-card>
-                </a-timeline-item>
+                <template v-for="item, index in thisDateJobsNSchedule(weekday)">
+                  <a-timeline-item v-if="'schedule' in item"
+                    :key="index"
+                    :color="item.activity.color">
+                    <job-card :job="item"
+                      @deleteJob="deleteJob($event)"
+                      @editJob="openModal($event)">
+                    </job-card>
+                  </a-timeline-item>
+                  <a-timeline-item v-else
+                    :key="index"
+                    :color="'#ccc'">
+                    <div class="job-schedule__calendar__template">
+                      <div class="job-schedule__calendar__template-time">
+                        {{ item.start_time.substr(0, 5) }}
+                      </div>
+                      <div class="job-schedule__calendar__template-activity-name">
+                        {{ item.activity.name }}
+                      </div>
+                      <div class="job-schedule__calendar__template-overlay">
+                        <a-button type="primary"
+                          class="job-schedule__calendar__template-overlay__button"
+                          @click="setForTheDay(item.id, weekday)">
+                          Применить
+                        </a-button>
+                      </div>
+                    </div>
+                  </a-timeline-item>
+                </template>
               </a-timeline>
             </div>
           </div>
@@ -90,6 +117,7 @@ import { mapActions, mapGetters } from "vuex";
 import consts from "@/const";
 import moment from "moment";
 import deleteAxios from "@/middleware/deleteAxios";
+import post from "@/middleware/post";
 
 export default {
   components: {
@@ -204,13 +232,62 @@ export default {
     },
 
     async setForTheWeek(){
-
+      try {
+        this.loading = true;
+        let res = await post(this.$axios, `/api/schedule/set_for_the_week/`, {date: this.dateFrom});
+        if (res.status === 200) {
+          this.$message.success("Занятия по шаблону на неделю успешно созданы");
+          await this.fetchJobs();
+        } else {
+          this.$message.error("Произошла ошибка при создании занятий по шаблону на неделю");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка при создании занятий по шаблону на неделю");
+      } finally {
+        this.loading = false;
+      }
     },
-    thisDateJobs(currDateString) {
+    async setForTheDay(scheduleId, currDateMoment){
+      try {
+        this.loading = true;
+        let res = await post(this.$axios, `/api/schedule/${scheduleId}/set_for_the_day/`, {date: currDateMoment.toDate()});
+        if (res.status === 200) {
+          this.$message.success("Занятие по шаблону успешно применено");
+          await this.fetchJobs();
+        } else {
+          this.$message.error("Произошла ошибка при создании занятия по шаблону");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка при создании занятия по шаблону");
+      } finally {
+        this.loading = false;
+      }
+    },
+    thisDateJobs(currDateMoment) {
+      let currDateString = currDateMoment.format('YYYY-MM-DD');
       return this.jobs.filter((job)=>{
         return job.date == currDateString;
-      })
-    }
+      });
+    },
+    thisDayRemainingSchedule(currDateMoment) {
+      let day = currDateMoment.weekday();
+      return this.remainingSchedule.filter((schedule)=>{
+        return schedule.day == day;
+      });
+    },
+    thisDateJobsNSchedule(currDateMoment) {
+      let jobs = this.thisDateJobs(currDateMoment);
+      if (this.isScheduleVisible) {
+        let templates = this.thisDayRemainingSchedule(currDateMoment);
+        return jobs.concat(templates).sort((first, second)=>{
+          return moment(first.start_time, "hh:mm:ss") - moment(second.start_time, "hh:mm:ss");
+        });
+      } else {
+        return jobs;
+      }
+
+    },
+
   },
   computed: {
     ...mapGetters({
@@ -239,6 +316,18 @@ export default {
       let momentTo = this.momentDateArr[this.momentDateArr.length-1];
       return `${momentFrom.format("D MMMM")} - ${momentTo.format("D MMMM")}`;
     },
+    jobSheduleIndexes(){
+      return this.jobs.map((job)=>{
+        if (job.schedule) {
+          return job.schedule.id;
+        }
+      });
+    },
+    remainingSchedule(){
+      return this.schedule.filter((schedule)=>{
+        return !this.jobSheduleIndexes.includes(schedule.id);
+      });
+    },
   },
 };
 </script>
@@ -263,12 +352,17 @@ export default {
       align-items: center
       justify-content: space-between
       margin-bottom: 10px
+      &__first-block
+        display: flex
+        flex-direction: row
+        align-items: center
       &-navigate
         font-size: 20px
         display: flex
         flex-direction: row
         align-items: center
         justify-content: center
+        margin-right: 20px
         &-to_left
           margin-right: 10px
         &-interval
@@ -299,8 +393,8 @@ export default {
       &-title
         text-align: center
         border-bottom: 1px solid #D9D9D9
-        background-color: #1890ff
-        color: #FFFFFF
+        border-top: 1px solid #D9D9D9
+        background-color: #f4f4f4
         font-size: 1rem
         position: sticky
         top: 0
@@ -316,9 +410,41 @@ export default {
           font-weight: bold
           text-align: center
           flex: 1
+        &.weekend
+          .job-schedule__calendar__date-title-weekday
+            color: #f55
 
     &__jobs
       padding: 15px 10px 10px 5px
+
+    &__template
+      padding: 5px 10px
+      border-radius: 4px
+      display: flex
+      flex-wrap: wrap
+      background-color: #f9f9f9
+      border: 1px solid #cccccc
+      position: relative
+      &-time
+        flex: 0 0 95%
+        color: #0b0b0b
+      &-activity-name
+        color: #0b0b0b
+      &:hover &-overlay
+        display: flex
+      &-overlay
+        display: none
+        position: absolute
+        top: 0
+        border-radius: 4px
+        left: 0
+        width: 100%
+        height: 100%
+        justify-content: center
+        align-items: center
+        background-color: #ffffffc2
+        &__button
+
   &__switcher
     margin-top: 10px
 </style>
