@@ -292,9 +292,6 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
     source='competence_set', many=True, read_only=True,
     fields=['skill', 'coefficient', 'id']
   )
-  presence = PresenceSerializer(
-    source='presence_set', many=True, read_only=True
-  )
 
   is_active = serializers.BooleanField(required=False, read_only=True)
 
@@ -377,7 +374,6 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
       'patronymic', 'role',
       'is_active',
       'skills', 'activities',
-      'presence',
       'user',
       'username', 'password', 'is_staff',
       '__str__'
