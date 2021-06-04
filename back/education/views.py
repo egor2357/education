@@ -141,7 +141,10 @@ class ScheduleView(viewsets.ModelViewSet):
     serializer.is_valid(raise_exception=True)
 
     start_date = serializer.validated_data['date']
-    end_date = start_date + datetime.timedelta(days=7)
+    if start_date.weekday() != 0:
+      return Response(data={}, status=400)
+
+    end_date = start_date + datetime.timedelta(days=6)
 
     jobs = (Job.objects.filter(date__gte=start_date, date__lte=end_date)
                         .exclude(schedule=None))
@@ -151,10 +154,7 @@ class ScheduleView(viewsets.ModelViewSet):
 
     new_jobs = []
     for template in templates:
-      days = start_date.weekday() - template.day
-      if days < 0:
-        days = 7 + days
-      curr_date = start_date + datetime.timedelta(days=days)
+      curr_date = start_date + datetime.timedelta(days=template.day)
 
       specialist = Specialist.get_available(template, curr_date)
 
@@ -166,7 +166,8 @@ class ScheduleView(viewsets.ModelViewSet):
 
     Job.objects.bulk_create(new_jobs)
 
-    return Response(JobView.get_between(start_date, end_date))
+    return Response(data={}, status=200)
+    # return Response(JobView.get_between(start_date, end_date))
 
   @action(
     detail=True, methods=['post'],
