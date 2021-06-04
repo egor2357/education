@@ -24,7 +24,7 @@
       <a-form-model-item prop="activity_id" label="Вид деятельности" key="activity_id"
         :validateStatus="fields['activity_id'].validateStatus" :help="fields['activity_id'].help">
         <a-select v-model="form.activity_id"
-          @change="form.specialist_id=null; fieldChanged($event, 'activity_id')">
+          @change="fieldChanged($event, 'activity_id')">
           <a-select-option v-for="activity in activities" :key="activity.id">
             {{ activity.name }}
           </a-select-option>
@@ -34,6 +34,7 @@
       <a-form-model-item prop="specialist_id" label="Специалист" key="specialist_id"
         :validateStatus="fields['specialist_id'].validateStatus" :help="fields['specialist_id'].help">
         <a-select v-model="form.specialist_id"
+          :disabled="!form.activity_id || !form.date"
           :allowClear="true"
           @change="fieldChanged($event, 'specialist_id')">
           <a-select-option v-for="specialist in filteredSpecialists" :key="specialist.id">
@@ -61,6 +62,7 @@
 import consts from "@/const";
 import post from "@/middleware/post";
 import put from "@/middleware/put";
+import moment from "moment";
 
 export default {
   name: "ModalTemplateJob",
@@ -140,10 +142,20 @@ export default {
           },
         ],
       },
+
+      dayPresense: [],
+
       loadingButton: false,
     };
   },
   computed: {
+    availableSpecialistsIds(){
+      return this.dayPresense.map((item)=>{
+        if (item.is_available) {
+          return item.specialist_id;
+        }
+      });
+    },
     filteredSpecialists(){
       let curr_activity_id = this.form.activity_id;
 
@@ -156,6 +168,10 @@ export default {
           return false;
         }
 
+        if (!this.availableSpecialistsIds.includes(item.id)) {
+          return false;
+        }
+
         for (let activity of item.activities) {
           if (curr_activity_id == activity.activity.id) {
             return true;
@@ -164,12 +180,30 @@ export default {
 
         return false;
       });
-    }
+    },
   },
   methods: {
-    fieldChanged(val, field_key) {
+    async fieldChanged(val, field_key) {
       if (field_key == 'specialist_id' && val == undefined) {
         this.form.specialist_id = null;
+      }
+      if (field_key == 'activity_id') {
+        this.form.specialist_id=null;
+      }
+      if (field_key == 'date') {
+        try{
+          let dateStr = moment(this.form.date).format("YYYY-MM-DD");
+          let res = await this.$axios.get(`/api/presence/?interval_start=${dateStr}&interval_end=${dateStr}`);
+          if (res.status == 200) {
+            this.dayPresense = res.data;
+          } else {
+            this.$message.error("Ошибка при получении присутствия специалистов");
+            return;
+          }
+        } catch {
+          this.$message.error("Ошибка при получении присутствия специалистов");
+          return;
+        }
       }
       this.fields[field_key].validateStatus = "";
       this.fields[field_key].help = "";
