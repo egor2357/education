@@ -70,38 +70,7 @@ export default {
   async created() {
   },
   methods: {
-    displayConfirmDelete({ id, activity, start_time }, index) {
-      let that = this;
-      this.$confirm({
-        title: `Занятие "${activity.name}" (${
-          this.daysOfWeek[index].long
-        }, ${this.formatTime(start_time)}) будет удалено.`,
-        content: "Продолжить?",
-        okType: "danger",
-        onOk() {
-          that.deleteRecord(id);
-        },
-      });
-    },
-    async deleteRecord(id) {
-      try {
-        this.$emit("startLoading");
-        let res = await this.deleteJob(id);
-        if (res.status === 204) {
-          this.$message.success("Занятие успешно удалено из шаблона");
-          await this.fetchJobs();
-        } else {
-          this.$message.error("Произошла ошибка");
-        }
-      } catch (e) {
-        this.$message.error("Произошла ошибка");
-      } finally {
-        this.$emit("endLoading");
-      }
-    },
-    openModalEdit(job) {
-      this.$emit("openModalEdit", job);
-    },
+
   },
   computed: {
   },
