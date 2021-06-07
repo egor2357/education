@@ -143,14 +143,14 @@ export default {
         ],
       },
 
-      dayPresense: [],
+      dayPresence: [],
 
       loadingButton: false,
     };
   },
   computed: {
     availableSpecialistsIds(){
-      return this.dayPresense.map((item)=>{
+      return this.dayPresence.map((item)=>{
         if (item.is_available) {
           return item.specialist_id;
         }
@@ -183,19 +183,12 @@ export default {
     },
   },
   methods: {
-    async fieldChanged(val, field_key) {
-      if (field_key == 'specialist_id' && val == undefined) {
-        this.form.specialist_id = null;
-      }
-      if (field_key == 'activity_id') {
-        this.form.specialist_id=null;
-      }
-      if (field_key == 'date') {
-        try{
+    async fetchDayPresence(){
+      try{
           let dateStr = moment(this.form.date).format("YYYY-MM-DD");
           let res = await this.$axios.get(`/api/presence/?interval_start=${dateStr}&interval_end=${dateStr}`);
           if (res.status == 200) {
-            this.dayPresense = res.data;
+            this.dayPresence = res.data;
           } else {
             this.$message.error("Ошибка при получении присутствия специалистов");
             return;
@@ -204,6 +197,18 @@ export default {
           this.$message.error("Ошибка при получении присутствия специалистов");
           return;
         }
+      },
+
+    async fieldChanged(val, field_key) {
+      if (field_key == 'date') {
+        this.form.specialist_id=null;
+        await this.fetchDayPresence();
+      }
+      if (field_key == 'activity_id') {
+        this.form.specialist_id=null;
+      }
+      if (field_key == 'specialist_id' && val == undefined) {
+        this.form.specialist_id = null;
       }
       this.fields[field_key].validateStatus = "";
       this.fields[field_key].help = "";
@@ -268,6 +273,7 @@ export default {
       this.title = "Изменение занятия";
       this.form.id = this.editableData.id
       this.form.date = this.editableData.date
+      this.fetchDayPresence();
       this.form.activity_id = this.editableData.activity.id
       if (this.editableData.specialist) {
         this.form.specialist_id = this.editableData.specialist.id
