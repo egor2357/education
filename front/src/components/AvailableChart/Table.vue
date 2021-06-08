@@ -1,104 +1,57 @@
 <template>
   <div class="available-table">
+    <transition name="fade">
+      <div class="preloader-overlay" v-if="loading">
+        <span class="ant-spin-dot ant-spin-dot-spin">
+          <i class="ant-spin-dot-item"></i>
+          <i class="ant-spin-dot-item"></i>
+          <i class="ant-spin-dot-item"></i>
+          <i class="ant-spin-dot-item"></i>
+        </span>
+      </div>
+    </transition>
     <div class="title-month">
+      <a-button
+        class="button"
+        type="link"
+        icon="swap"
+        @click="specialist = !specialist"
+        >Изменить представление</a-button
+      >
       <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
       <span class="text">{{ month.name }} {{ year }}</span>
       <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
     </div>
-    <div v-show="specialist" class="table-presence">
-      <a-table
-        :data-source="data"
-        :pagination="false"
-        size="middle"
-        :loading="loading"
-      >
-        <a-table-column key="name" data-index="name" fixed="left">
-          <span slot="title">
-            <span>Специалист</span>
-            <a-icon
-              @click="changeSpecialistView"
-              class="icon-button"
-              type="swap"
-              style="padding-left: 10px"
-            />
-          </span>
-          <template slot-scope="text, record">
-            <Popover :data="record" />
-          </template>
-        </a-table-column>
-        <a-table-column
-          v-for="day in daysOfMonth"
-          :key="day.num"
-          class="day"
-          align="center"
-          :data-index="day.num"
-          :class="day.weekend ? 'weekend' : ''"
-        >
-          <span slot="title">{{ day.num }}</span>
-          <template slot-scope="text, record">
-            <a-dropdown
-              :trigger="['click']"
-              placement="bottomLeft"
-              v-if="text"
-              :disabled="text.value === null"
-            >
-              <div
-                :class="[
-                  text.value === true
-                    ? 'available'
-                    : text.value === false
-                    ? 'not-available'
-                    : 'empty',
-                  { 'left-border': text.leftBorder },
-                  { 'right-border': text.rightBorder },
-                ]"
-              >
-                <div v-if="text.displayDate" style="color: #fff">
-                  {{ day.num }}
-                </div>
-              </div>
-              <a-menu slot="overlay">
-                <a-menu-item key="1" @click="$emit('displayEdit', text)">
-                  Изменить
-                </a-menu-item>
-                <a-menu-item key="2" @click="displayDeleteConfirm(text, record)">
-                  <span> Удалить </span>
-                </a-menu-item>
-              </a-menu>
-            </a-dropdown>
-          </template>
-        </a-table-column>
-      </a-table>
+    <div class="table-presence">
+      <presence-chart v-if="specialist"
+        :tableData="tableData"
+        :daysInMonth="daysOfMonth"
+        @displayEdit="$emit('displayEdit', $event)"
+        @displayDeleteConfirm="displayDeleteConfirm($event)"
+      />
+      <activity-presence-chart v-else
+        :tableData="tableData"
+        :daysInMonth="daysOfMonth"
+        :activities="activities"
+        @displayEdit="$emit('displayEdit', $event)"
+        @displayDeleteConfirm="displayDeleteConfirm($event)"
+      />
     </div>
-
-    <TableActivities
-      v-if="!specialist"
-      @close="specialist = true"
-      :daysOfMonth="daysOfMonth"
-      :specialists="specialists"
-      :presences="presences"
-      :year="year"
-      :month="month"
-      @deleteConfirm="displayDeleteConfirm"
-      @displayEdit="$emit('displayEdit', $event)"
-      :needUpdate="needUpdateActivity"
-      @updated="needUpdateActivity = false;"
-      :loadingMain="loading"
-    />
   </div>
 </template>
 <script>
 import moment from "moment";
 import { mapGetters, mapActions } from "vuex";
-import Popover from "@/components/AvailableChart/Popover";
-import TableActivities from "@/components/AvailableChart/TableActivities";
+import PresenceChart from "@/components/AvailableChart/PresenceChart";
+import ActivityPresenceChart from "@/components/AvailableChart/ActivityPresenceChart";
 import common from "@/mixins/common";
 export default {
   name: "Table",
-  components: { Popover, TableActivities },
+  components: { PresenceChart, ActivityPresenceChart },
   mixins: [common],
   data() {
     return {
+      tableData: {specialists: []},
       data: [],
       daysOfMonth: [],
       lastDay: null,
@@ -110,7 +63,6 @@ export default {
       },
       year: null,
       specialist: true,
-      needUpdateActivity: false,
     };
   },
   props: {
@@ -129,7 +81,7 @@ export default {
         this.lastDay
       }`}`
     );
-    await this.prepareData();
+    await this.makeTableData();
     this.loading = false;
   },
   methods: {
@@ -164,6 +116,7 @@ export default {
       } else {
         this.currentDate.add(-1, "M");
       }
+      await this.clearSpecialistsPresent();
       await this.getDate();
       await this.fetchPresence(
         `?interval_start=${`${this.year}-${
@@ -172,125 +125,110 @@ export default {
           this.lastDay
         }`}`
       );
-      await this.prepareData();
-      this.needUpdateActivity = true;
+      await this.makeTableData();
       this.loading = false;
     },
-    prepareData() {
-      this.data = [];
-      let currentDay = null;
-      let value = null;
-      let dateFrom = null;
-      let dateTo = null;
-      let displayDate = false;
-      let leftBorder = false;
-      let rightBorder = false;
-      let dataIndex = null;
-      let presenceData = null;
-      for (let specialist of this.specialists) {
-        this.data.push({
-          key: specialist.id,
-          name: this.formatSpecialist(specialist),
-          specialist: specialist,
-        });
-        dataIndex = this.data.length - 1;
-        for (let day of this.daysOfMonth) {
-          value = null;
-          displayDate = false;
-          leftBorder = false;
-          rightBorder = false;
-          presenceData = null;
-          currentDay = moment(
-            `${this.year}-${this.month.value + 1}-${day.num}`,
-            "YYYY-MM-DD"
-          );
-          for (let presence of this.presences) {
-            dateFrom = null;
-            dateTo = null;
-            if (presence.specialist_id === specialist.id) {
-              dateFrom = moment(presence.date_from);
-              dateTo = moment(presence.date_to);
-              if (currentDay.isBetween(dateFrom, dateTo, "day", [])) {
-                value = presence.is_available;
-                presenceData = presence;
-                if (dateFrom.date() === 1 && currentDay.date() === 1) {
-                  leftBorder = true;
-                  displayDate = true;
-                }
-                if (
-                  dateTo.date() === this.lastDay &&
-                  currentDay.date() === this.lastDay
-                ) {
-                  rightBorder = true;
-                  displayDate = true;
-                }
-                break;
-              }
-            }
-          }
-          this.data[dataIndex][day.num] = {
-            value: value,
-            leftBorder: leftBorder,
-            rightBorder: rightBorder,
-            displayDate: displayDate,
-            presence: presenceData,
-          };
+    clearSpecialistsPresent(){
+      this.tableData.specialists.forEach(item => item.presence = {});
+    },
+    makeTableData(){
+      let today = this.currentDate;
+      let firstDateOfMonth = today.clone().startOf('month');
+      let lastDateOfMonth = today.clone().endOf('month');
+      this.tableData.specialists = this.specialists.map((spec) => {
+        return {
+          id: spec.id,
+          fullName: spec.__str__,
+          activities: spec.activities,
+          hasAdditionalActivity: spec.hasAdditionalActivity,
+          presence: {}
         }
-        for (let filledDay of this.daysOfMonth) {
-          if (this.data[dataIndex][filledDay.num].value !== null) {
-            if (
-              this.data[dataIndex][filledDay.num - 1] &&
-              (this.data[dataIndex][filledDay.num - 1].value === null ||
-                (this.data[dataIndex][filledDay.num - 1].value !== null &&
-                  this.data[dataIndex][filledDay.num].presence.id !==
-                    this.data[dataIndex][filledDay.num - 1].presence.id &&
-                  this.data[dataIndex][filledDay.num].presence.id !==
-                    this.data[dataIndex][filledDay.num - 1].presence
-                      .main_interval_id))
-            ) {
-              this.data[dataIndex][filledDay.num].leftBorder = true;
-              this.data[dataIndex][filledDay.num].displayDate = true;
+      });
+      for (let presence of this.presences)
+      {
+        let sp = this.tableData.specialists.find(item => item.id == presence.specialist_id);
+        if (sp)
+        {
+          let firstDayOfInterval = null;
+          let lastDayOfInterval = null;
+          let dateFrom = moment(presence.full_interval.date_from);
+          let dateTo = moment(presence.full_interval.date_to);
+
+          let hasStart = false;
+          let hasEnd = false;
+          let quarantineDaysCount = 0;
+          let labledDays = [];
+          if (presence.main_interval_id) //это карантин
+          {
+            quarantineDaysCount = presence.full_interval.quarantine_days;
+            if (moment(presence.date_from) < firstDateOfMonth) //и он не полностью попадает в месяц (начинается раньше)
+            {
+              quarantineDaysCount -= firstDateOfMonth.diff(dateFrom, 'days');
             }
-            if (
-              this.data[dataIndex][filledDay.num + 1] &&
-              (this.data[dataIndex][filledDay.num + 1].value === null ||
-                (this.data[dataIndex][filledDay.num + 1].value !== null &&
-                  this.data[dataIndex][filledDay.num].presence.id !==
-                    this.data[dataIndex][filledDay.num + 1].presence.id))
-            ) {
-              this.data[dataIndex][filledDay.num].rightBorder = true;
-              this.data[dataIndex][filledDay.num].displayDate = true;
+            if (moment(presence.date_to) > lastDateOfMonth) //и он не полностью попадает в месяц (заканчивается позже)
+            {
+              quarantineDaysCount -= moment(presence.date_to).diff(lastDateOfMonth, 'days');
             }
-            if (
-              this.data[dataIndex][filledDay.num + 1] &&
-              this.data[dataIndex][filledDay.num].value === false &&
-              this.data[dataIndex][filledDay.num + 1].value === true
-            ) {
-              this.data[dataIndex][filledDay.num].rightBorder = false;
-              this.data[dataIndex][filledDay.num].displayDate = true;
-              this.data[dataIndex][filledDay.num + 1].displayDate = true;
+            quarantineDaysCount = Math.max(0, quarantineDaysCount);
+            if (quarantineDaysCount)
+              labledDays.push(quarantineDaysCount, quarantineDaysCount + 1);
+          }
+          if (dateFrom < firstDateOfMonth)
+          {
+            firstDayOfInterval = 1;
+            if (moment(presence.date_from).date() == 1)
+              labledDays.push(1);
+          }
+          else
+          {
+            firstDayOfInterval = dateFrom.date();
+            hasStart = true;
+            labledDays.push(1);
+          }
+          if (dateTo > lastDateOfMonth)
+          {
+            lastDayOfInterval = today.daysInMonth();
+          }
+          else
+          {
+            lastDayOfInterval = dateTo.date();
+            hasEnd = true;
+            labledDays.push(lastDayOfInterval - firstDayOfInterval + 1);
+          }
+          if (presence.main_interval_id || !sp.presence[presence.id])
+          {
+            let intervalId = presence.main_interval_id || presence.id;
+            sp.presence[intervalId] = {
+              id: intervalId,
+              dayFrom: firstDayOfInterval,
+              daysCount: lastDayOfInterval - firstDayOfInterval + 1,
+              hasStart: hasStart,
+              hasEnd: hasEnd,
+              quarantineDaysCount: quarantineDaysCount,
+              labledDays: labledDays,
+              editableData: presence
             }
           }
         }
       }
     },
-    displayDeleteConfirm(item, row) {
-      let that = this;
+    displayDeleteConfirm(data){
+      let that = this
       this.$confirm({
         title: "Подтверждение удаления периода присутствия",
-        content: `Специалист: ${this.formatSpecialistFull(row.specialist)}
+        content: `Специалист: ${data.specialist}
                   Период присутствия: ${moment(
-                    item.presence.full_interval.date_from
+                    data.presence.full_interval.date_from
                   ).format("DD.MM.YYYY")} - ${moment(
-          item.presence.full_interval.date_to
+          data.presence.full_interval.date_to
         ).format("DD.MM.YYYY")}
                   Удалить?`,
         okType: "danger",
         onOk() {
           that.deletePresenceRecord(
-            item.presence.main_interval_id === null
-              ? item.presence.id
-              : item.presence.main_interval_id
+            data.presence.main_interval_id === null
+              ? data.presence.id
+              : data.presence.main_interval_id
           );
         },
       });
@@ -301,7 +239,6 @@ export default {
         if (res.status === 204) {
           this.$message.success("Период присутствия успешно удалён");
           await this.updateData();
-          this.needUpdateActivity = true;
         } else {
           this.$message.error("Произошла ошибка");
         }
@@ -318,29 +255,23 @@ export default {
           this.lastDay
         }`}`
       );
-      await this.prepareData();
+      await this.makeTableData();
       this.$emit("successUpdate");
       this.loading = false;
-    },
-    changeSpecialistView() {
-      this.loading = true;
-      setTimeout(() => { //поправить
-        this.specialist = !this.specialist;
-        this.loading = false;
-      }, 1)
     },
   },
   computed: {
     ...mapGetters({
       presences: "presence/getPresences",
       specialists: "specialists/getSpecialists",
+      activities: "activities/getActivities"
     }),
   },
   watch: {
     async needUpdate(value) {
       if (value === true) {
         await this.updateData();
-        this.needUpdateActivity = true;
+        // this.needUpdateActivity = true;
       }
     },
   },
@@ -352,9 +283,28 @@ export default {
 
 <style lang="sass">
 .available-table
-  height: 100%
+  max-height: 100%
   display: flex
   flex-direction: column
+  position: relative
+
+  .preloader-overlay
+    position: absolute
+    z-index: 4
+    height: 100%
+    width: 100%
+    background: rgba(255,255,255, 0.7)
+    opacity: 1
+
+    .ant-spin-dot
+      top: 50%
+      left: 50%
+      margin: -10px
+
+  .table-presence
+    flex: 1
+    display: flex
+    overflow: hidden
   .ant-table-body
     overflow: auto !important
   .day
@@ -390,9 +340,17 @@ export default {
 .title-month
   text-align: center
   margin-bottom: 10px
+  position: relative
+  .button
+    position: absolute
+    left: 0
   .text
     padding: 0 10px
     width: 130px
     display: inline-block
     font-size: 1rem
+.fade-enter-active, .fade-leave-active
+  transition: opacity 0.2s
+.fade-enter, .fade-leave-to
+  opacity: 0
 </style>
