@@ -427,9 +427,9 @@ export default {
       position: relative
       &-time
         flex: 0 0 95%
-        color: #0b0b0b
+        color: #999
       &-activity-name
-        color: #0b0b0b
+        color: #999
       &:hover &-overlay
         display: flex
       &-overlay
