@@ -108,8 +108,8 @@ class Option_fileAdmin(admin.ModelAdmin):
 admin.site.register(Option_file, Option_fileAdmin)
 
 class OptionAdmin(admin.ModelAdmin):
-  search_fields = ('caption',)
-  list_display = ('specialist', 'activity', 'caption')
+  search_fields = ('topic', 'comment')
+  list_display = ('specialist', 'activity', 'topic')
   list_filter = ('specialist', 'activity')
   filter_horizontal = ('skills',)
   inlines = (Option_fileInline,)
@@ -136,8 +136,8 @@ class Skill_reportAdmin(admin.ModelAdmin):
 admin.site.register(Skill_report, Skill_reportAdmin)
 
 class JobAdmin(admin.ModelAdmin):
-  search_fields = ('comment',)
-  list_display = ('activity', 'date', 'specialist', 'schedule', 'start_time', 'comment')
+  search_fields = ('topic', 'comment')
+  list_display = ('activity', 'date', 'specialist', 'schedule', 'start_time', 'topic')
   list_filter = ('schedule',)
   inlines = (Job_fileInline, Skill_reportInline)
   date_hierarchy = 'date'

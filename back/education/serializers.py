@@ -453,7 +453,8 @@ class OptionSerializer(serializers.ModelSerializer):
   class Meta:
     model = Option
     fields = (
-      'id', 'caption',
+      'id', 'topic',
+      'comment',
       'method_id', 'specialist_id',
       'activity_id', 'option_files'
     )
@@ -525,7 +526,8 @@ class JobSerializer(FlexFieldsModelSerializer):
       'schedule_id', 'schedule',
       'reports',
       'job_files',
-      'date', 'start_time', 'comment',
+      'date', 'start_time',
+      'comment', 'topic'
     )
 
 class Skill_reportSerializer(FlexFieldsModelSerializer):
