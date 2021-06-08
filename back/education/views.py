@@ -290,6 +290,8 @@ class Skill_reportView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated,)
   queryset = Skill_report.objects.all()
   serializer_class = Skill_reportSerializer
+  filter_backends = (DjangoFilterBackend,)
+  filterset_class = Skill_reportFilter
 
 class CompetenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
