@@ -61,7 +61,7 @@
                     {{ area.number }}.{{ direction.number }}.{{ skill.number }}. {{ skill.name }}
                   </div>
                   <div class="skill-development__body__table-count">
-                    Количество
+                    {{ skill.id in reportsCountById ? reportsCountById[skill.id] : 0 }}
                   </div>
 
                 </div>
@@ -107,6 +107,9 @@ export default {
       loading: true,
 
       dateRange: this.dateRangeInit,
+
+      reportsCountById: {},
+
     };
   },
   async created() {
@@ -115,6 +118,8 @@ export default {
     if (!this.areasFetched) {
       fetches.push(this.fetchAreas());
     }
+
+    fetches.push(this.fetchSkillReports());
 
     this.loading = true;
     await Promise.all(fetches);
@@ -126,28 +131,41 @@ export default {
       fetchAreas: "skills/fetchAreas",
     }),
 
-    // async fetchJobs(){
-    //   try {
-    //     this.loading = true;
-    //     let firstQParameter = `date__gte=${this.momentDateArr[0].format("YYYY-MM-DD")}`;
-    //     let secondQParameter = `date__lte=${this.momentDateArr[this.momentDateArr.length-1].format("YYYY-MM-DD")}`;
-    //     let res = await this.$axios.get(`/api/jobs/?${firstQParameter}&${secondQParameter}`);
-    //     if (res.status === 200) {
-    //       this.jobs = res.data;
-    //     } else {
-    //       this.$message.error("Произошла ошибка при загрузке занятий");
-    //     }
-    //   } catch (e) {
-    //     this.$message.error("Произошла ошибка при загрузке занятий");
-    //   } finally {
-    //     this.loading = false;
-    //   }
-    // },
+    setReportsCountById(reports){
+      this.reportsCountById = {};
+      for (let report of reports) {
+        if (report.skill_id in this.reportsCountById) {
+          this.reportsCountById[report.skill_id] += 1;
+        } else {
+          this.reportsCountById[report.skill_id] = 1;
+        }
+      }
+    },
+    async fetchSkillReports(){
+      try {
+        this.loading = true;
+        let firstQParameter = `date_from=${this.dateRange[0].format("YYYY-MM-DD")}`;
+        let secondQParameter = `date__to=${this.dateRange[1].format("YYYY-MM-DD")}`;
+        let thirdQParameter = `is_affected=true`;
+        let QParameters = `?${firstQParameter}&${secondQParameter}&${thirdQParameter}`;
+        let res = await this.$axios.get(`/api/skill_reports/${QParameters}`);
+        if (res.status === 200) {
+          this.setReportsCountById(res.data);
+        } else {
+          this.$message.error("Произошла ошибка при загрузке отчетов");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка при загрузке отчетов");
+      } finally {
+        this.loading = false;
+      }
+    },
     goToSkill(skillId){
       this.$router.push({name: "SkillDetails", params: {id: skillId}})
     },
     dateRangeChange(value){
       this.$emit("changeRange", value);
+      this.fetchSkillReports();
     },
   },
   computed: {
