@@ -20,7 +20,7 @@
                 <div class="presence-interval"
                   v-for="interval in specialist.presence"
                   :key="interval.id"
-                  :class="{start: interval.hasStart, end: interval.hasEnd}"
+                  :class="{start: interval.hasStart, end: interval.hasEnd, additional: !specialist.isMainActivity}"
                   :style="{
                             width: interval.daysCount*100/daysInMonth.length+'%',
                             left: (interval.dayFrom-1)*100/daysInMonth.length+'%'
@@ -86,9 +86,10 @@
           specialist.activities.forEach(specialistActivity => {
             let activityItem = result.find(item => item.id == specialistActivity.activity.id);
             if (activityItem)
-              activityItem.specialists.push({id: specialist.id, fullName: specialist.fullName, presence: specialist.presence});
+              activityItem.specialists.push({id: specialist.id, fullName: specialist.fullName, isMainActivity: specialistActivity.is_main, presence: specialist.presence});
           })
-        })
+        });
+        result.forEach(activity => {activity.specialists.sort(a => !a.isMainActivity)})
         return result;
       }
     }
@@ -211,10 +212,14 @@
         color: #fff
 
         &.quarantine
-          background: #FFA756
+          background: #cfcfcf
 
         &.available
           background: #3DC5FF
+
+      .additional
+        .available
+          background: #ff9b9b
 
       &.start
         border-top-left-radius: 4px

@@ -161,7 +161,7 @@
         color: #fff
 
         &.quarantine
-          background: #FFA756
+          background: #cfcfcf
 
         &.available
           background: #3DC5FF
