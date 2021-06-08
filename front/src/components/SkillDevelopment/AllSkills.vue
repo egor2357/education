@@ -35,7 +35,7 @@
 
             <div class="skill-development__body__table-areas">
             <div class="skill-development__body__table-area-row"
-              v-for="area in areas" :key="area.id">
+              v-for="area in filteredAreas" :key="area.id">
 
 
               <div class="skill-development__body__table-area">
@@ -155,6 +155,15 @@ export default {
       areasFetched: "skills/getFetched",
       areas: "skills/getAreas",
     }),
+    filteredAreas(){
+      return this.areas.filter((area)=>{
+        for (let direction of area.development_directions) {
+          if (direction.skills.length) {
+            return true;
+          }
+        }
+      });
+    },
   },
 
 };
