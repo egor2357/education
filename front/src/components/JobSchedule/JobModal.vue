@@ -226,6 +226,7 @@ export default {
             let successCode = 0;
             let res = null;
             let successMessage = "";
+            this.form.date = this.form.date.format("YYYY-MM-DD");
             if (this.form.id) {
               successCode = 200;
               successMessage = "Занятие успешно изменено";
@@ -238,7 +239,7 @@ export default {
 
             if (res.status === successCode) {
               this.$message.success(successMessage);
-              this.closeModal(this.form.date);
+              this.closeModal(moment(this.form.date, "YYYY-MM-DD"));
             } else if (res.status === 400) {
               this.$message.error("Проверьте введённые данные");
               for (let key in res.data) {
@@ -251,6 +252,7 @@ export default {
           } catch (e) {
             this.$message.error("Произошла ошибка");
           } finally {
+            this.form.date = moment(this.form.date, "YYYY-MM-DD");
             this.loadingButton = false;
           }
         } else {
@@ -272,7 +274,7 @@ export default {
     if (this.editableData) {
       this.title = "Изменение занятия";
       this.form.id = this.editableData.id
-      this.form.date = this.editableData.date
+      this.form.date = moment(this.editableData.date, "YYYY-MM-DD");
       this.fetchDayPresence();
       this.form.activity_id = this.editableData.activity.id
       if (this.editableData.specialist) {
