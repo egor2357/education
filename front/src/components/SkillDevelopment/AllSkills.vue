@@ -57,7 +57,7 @@
                   v-for="skill in direction.skills" :key="skill.id">
 
                   <div class="skill-development__body__table-skill">
-                    <span class="skill-development__body__table-skill-link"
+                    <span :class="{'skill-development__body__table-skill-link': reportsCountById[skill.id]}"
                       @click="goToSkill(skill.id)">
                       {{ area.number }}.{{ direction.number }}.{{ skill.number }}. {{ skill.name }}
                     </span>
@@ -163,7 +163,9 @@ export default {
       }
     },
     goToSkill(skillId){
-      this.$router.push({name: "SkillDetails", params: {id: skillId}})
+      if (this.reportsCountById[skillId]) {
+        this.$router.push({name: "SkillDetails", params: {id: skillId}})
+      }
     },
     dateRangeChange(value){
       this.$emit("changeRange", value);
@@ -228,7 +230,10 @@ export default {
         flex: 1
         flex-direction: row
         background-color: #f4f4f4
-
+        color: rgba(0, 0, 0, 0.85)
+        div
+          display: flex
+          align-items: center
       &-body
         display: flex
         flex: 1
