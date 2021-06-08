@@ -10,17 +10,19 @@
         </span>
       </div>
     </transition>
-    <div class="title-month">
+    <div class="top-bar">
       <a-button
-        class="button"
         type="link"
         icon="swap"
         @click="specialist = !specialist"
         >Изменить представление</a-button
       >
-      <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
-      <span class="text">{{ month.name }} {{ year }}</span>
-      <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
+      <div class="month-container">
+        <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
+        <span class="text">{{ month.name }} {{ year }}</span>
+        <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
+      </div>
+      <a-button @click="$emit('onAddPeriod')">Добавить период</a-button>
     </div>
     <div class="table-presence">
       <presence-chart v-if="specialist"
@@ -337,13 +339,13 @@ export default {
       height: 30px
     .weekend
       background-color: #C5FF48
-.title-month
-  text-align: center
+.top-bar
   margin-bottom: 10px
-  position: relative
-  .button
-    position: absolute
-    left: 0
+  display: flex
+  .month-container
+    flex: 1
+    text-align: center
+    padding-right: 70px
   .text
     padding: 0 10px
     width: 130px

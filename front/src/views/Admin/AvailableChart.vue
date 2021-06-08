@@ -1,19 +1,8 @@
 <template>
   <div class="available-block">
-    <div class="title">
-      <span class="text">График присутствия специалистов</span>
-      <a-button
-        class="button"
-        @click="
-          modalAdding = true;
-          modalEditableData = {};
-          displayModal = true;
-        "
-        >Добавить период</a-button
-      >
-    </div>
+    <div class="title">График присутствия специалистов</div>
     <div style="overflow: hidden; flex: 1">
-      <Table :needUpdate="needUpdateTable" @successUpdate="needUpdateTable = false" @displayEdit="displayEdit" />
+      <Table :needUpdate="needUpdateTable" @successUpdate="needUpdateTable = false" @displayEdit="displayEdit" @onAddPeriod="onAddPeriod"/>
     </div>
     <ModalPeriod
       v-if="displayModal"
@@ -47,6 +36,11 @@ export default {
       this.modalEditableData = item;
       this.modalAdding = false;
       this.displayModal = true;
+    },
+    onAddPeriod(){
+      this.modalAdding = true;
+      this.modalEditableData = {};
+      this.displayModal = true;
     }
   },
 };
@@ -60,13 +54,7 @@ export default {
   overflow: hidden
   .title
     margin-bottom: 10px
-    display: flex
-    .text
-      flex: 1
-      text-align: center
-      font-size: 1rem
-      font-weight: bold
-      padding-left: 120px
-      @media (max-width: 900px)
-        padding-left: 0
+    text-align: center
+    font-size: 1rem
+    font-weight: bold
 </style>
