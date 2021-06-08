@@ -44,3 +44,24 @@ class SpecialistFilter(FilterSet):
       'is_active',
 
     ]
+
+class Skill_reportFilter(FilterSet):
+  date_from = django_filters.DateFilter(
+    label='Начало интервала', field_name='job',
+    lookup_expr='date__gte',
+  )
+  date_to = django_filters.DateFilter(
+    label='Конец интервала', field_name='job',
+    lookup_expr='date__lte',
+  )
+  is_affected = django_filters.BooleanFilter(
+    label='Затронут ли навык', field_name='mark',
+    lookup_expr='isnull', exclude=True,
+  )
+  class Meta:
+    model = Skill_report
+    fields = [
+      'date_from',
+      'date_to',
+      'is_affected',
+    ]
