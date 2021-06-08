@@ -469,13 +469,14 @@ class Job_fileSerializer(serializers.ModelSerializer):
       'file'
     )
 
-class Skill_reportSerializer(serializers.ModelSerializer):
+class Skill_reportSerializer(FlexFieldsModelSerializer):
   job_id = serializers.PrimaryKeyRelatedField(
     source='job', queryset=Job.objects.all()
   )
   skill_id = serializers.PrimaryKeyRelatedField(
     source='skill', queryset=Skill.objects.all()
   )
+
   class Meta:
     model = Skill_report
     fields = (
@@ -525,4 +526,28 @@ class JobSerializer(FlexFieldsModelSerializer):
       'reports',
       'job_files',
       'date', 'start_time', 'comment',
+    )
+
+class Skill_reportSerializer(FlexFieldsModelSerializer):
+  job_id = serializers.PrimaryKeyRelatedField(
+    source='job', queryset=Job.objects.all()
+  )
+  skill_id = serializers.PrimaryKeyRelatedField(
+    source='skill', queryset=Skill.objects.all()
+  )
+
+  job = JobSerializer(
+    read_only=True,
+    omit=['schedule', 'reports', 'job_files']
+  )
+  skill = SkillSerializer(read_only=True)
+
+
+  class Meta:
+    model = Skill_report
+    fields = (
+      'id',
+      'job_id', 'skill_id',
+      'job', 'skill',
+      'mark', 'comment'
     )
