@@ -4,12 +4,16 @@ import deleteAxios from "@/middleware/deleteAxios";
 
 const state = () => ({
   areas: [],
+  fetched: false,
 });
 
 const getters = {
   getAreas(state) {
     return state.areas;
-  }
+  },
+  getFetched(state) {
+    return state.fetched;
+  },
 };
 
 const actions = {
@@ -56,6 +60,7 @@ const actions = {
 const mutations = {
   setAreas(state, payload) {
     state.areas = payload;
+    state.fetched = true;
   }
 };
 
