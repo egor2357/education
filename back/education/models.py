@@ -391,7 +391,10 @@ class Skill_report(models.Model):
     on_delete=models.CASCADE, verbose_name='Навык'
   )
 
-  mark = models.PositiveSmallIntegerField(choices=mark_choices, verbose_name='Успешность оттачивания навыка')
+  mark = models.PositiveSmallIntegerField(
+    null=True, blank=True, default=None,
+    choices=mark_choices,
+    verbose_name='Успешность оттачивания навыка')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
   class Meta:
