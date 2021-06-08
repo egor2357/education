@@ -101,6 +101,31 @@ const router = new VueRouter({
         breadcrumbs: [{ title: "Расписание занятий" }],
       },
     },
+    {
+      path: "/skill-development",
+      component: () => import("@/views/SkillDevelopment"),
+      meta: {
+        breadcrumbs: [{ title: "Развитие навыков" }],
+      },
+      children: [
+        {
+          path: "/",
+          name: "AllSkills",
+          component: () => import("@/components/SkillDevelopment/AllSkills"),
+          meta: {
+            breadcrumbs: [{ title: "Все навыки" }],
+          },
+        },
+        {
+          path: ":id",
+          name: "SkillDetails",
+          component: () => import("@/components/SkillDevelopment/SkillDetails"),
+          meta: {
+            breadcrumbs: [{ title: "Конкретный навык" }],
+          },
+        },
+      ]
+    },
   ],
 });
 

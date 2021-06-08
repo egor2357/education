@@ -126,7 +126,7 @@ export default {
           icon: "rise",
           title: "Развитие навыков",
           key: "2",
-          to: { name: "Developing" },
+          to: { name: "AllSkills" },
           childrens: [],
         },
         {
