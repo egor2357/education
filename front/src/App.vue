@@ -39,6 +39,12 @@ export default {
 </script>
 
 <style lang="sass">
+html
+  min-height: 600px
+
+#app
+  height: 100%
+  overflow: hidden
 .icon-button
   &:hover
     cursor: pointer
@@ -56,7 +62,4 @@ export default {
   &.ant-menu-inline
     &.ant-menu-sub
       box-shadow: none !important
-
-.content
-  height: calc(100vh - 150px)
 </style>
