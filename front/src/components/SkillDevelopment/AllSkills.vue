@@ -56,9 +56,11 @@
                 <div class="skill-development__body__table-skill-row"
                   v-for="skill in direction.skills" :key="skill.id">
 
-                  <div class="skill-development__body__table-skill skill-header"
-                    @click="goToSkill(skill.id)">
-                    {{ area.number }}.{{ direction.number }}.{{ skill.number }}. {{ skill.name }}
+                  <div class="skill-development__body__table-skill">
+                    <span class="skill-development__body__table-skill-link"
+                      @click="goToSkill(skill.id)">
+                      {{ area.number }}.{{ direction.number }}.{{ skill.number }}. {{ skill.name }}
+                    </span>
                   </div>
                   <div class="skill-development__body__table-count">
                     {{ skill.id in reportsCountById ? reportsCountById[skill.id] : 0 }}
@@ -252,7 +254,7 @@ export default {
         padding: 10px 15px
         border-right: 1px solid #ccc
         border-bottom: 1px solid #ccc
-        &.skill-header
+        &-link
           color: #1890ff
           transition: all .3s cubic-bezier(.645,.045,.355,1)
           cursor: pointer
