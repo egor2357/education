@@ -8,13 +8,17 @@
         </div>
 
         <div class="skill-details__header__options">
-          <a-button
-            icon="left" @click="goBack">Назад</a-button>
-          <div>{{ skillReports[0].skill.name }}</div>
-          <div class="skill-details__header__date-range">
-            <span class="skill-details__header__date-range__label">Период:</span>
+          <div class="skill-details__header__options__back">
+            <a-button icon="left" @click="goBack">Назад</a-button>
+          </div>
+          <div class="skill-details__header__options__title"
+            v-if="skillReports.length">
+            {{ skillReports[0].skill.name }}
+          </div>
+          <div class="skill-details__header__options__date-range">
+            <span class="skill-details__header__options__date-range__label">Период:</span>
             <a-range-picker
-              class="skill-details__header__date-range__input"
+              class="skill-details__header__options__date-range__input"
               v-model="dateRange"
               @change="dateRangeChange"
               format="DD.MM.YYYY"
@@ -153,12 +157,26 @@ export default {
       align-items: center
       justify-content: space-between
       margin-bottom: 10px
-    &__date-range
-      display: flex
-      flex-direction: row
-      align-items: center
-      &__label
-        margin-right: 10px
+      &__back
+        display: flex
+        flex-direction: row
+        justify-content: flex-start
+        flex: 1
+      &__title
+        display: flex
+        flex-direction: row
+        justify-content: center
+        flex: 1
+        font-size: 20px
+      &__date-range
+        display: flex
+        flex-direction: row
+        flex: 1
+        align-items: center
+        justify-content: flex-end
+        &__label
+          margin-right: 10px
+
   &__body
     &__table
       display: flex
