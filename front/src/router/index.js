@@ -12,7 +12,6 @@ const router = new VueRouter({
       name: "Login",
       component: () => import("@/views/Login"),
       meta: {
-        breadcrumbs: [],
       },
     },
     {
@@ -20,7 +19,6 @@ const router = new VueRouter({
       name: "Skills",
       component: () => import("@/components/TableSkill"),
       meta: {
-        breadcrumbs: [{ title: "Навыки" }],
         staffOnly: true,
       },
     },
@@ -29,7 +27,6 @@ const router = new VueRouter({
       name: "ActivitiesTypes",
       component: () => import("@/views/Admin/ActivitiesTypes"),
       meta: {
-        breadcrumbs: [{ title: "Вид деятельности / навыки" }],
         staffOnly: true,
       },
     },
@@ -38,7 +35,6 @@ const router = new VueRouter({
       name: "Specialists",
       component: () => import("@/views/Admin/Specialists"),
       meta: {
-        breadcrumbs: [{ title: "Специалисты" }],
         staffOnly: true,
       },
     },
@@ -47,7 +43,6 @@ const router = new VueRouter({
       name: "Schedule",
       component: () => import("@/views/Admin/Schedule"),
       meta: {
-        breadcrumbs: [{ title: "Шаблон расписания занятий" }],
         staffOnly: true,
       },
     },
@@ -56,7 +51,6 @@ const router = new VueRouter({
       name: "Forms",
       component: () => import("@/views/Admin/Forms"),
       meta: {
-        breadcrumbs: [{ title: "Формы и способы проведения занятий" }],
         staffOnly: true,
       },
     },
@@ -65,7 +59,6 @@ const router = new VueRouter({
       name: "AvailableChart",
       component: () => import("@/views/Admin/AvailableChart"),
       meta: {
-        breadcrumbs: [{ title: "График присутствия специалистов" }],
         staffOnly: true,
       },
     },
@@ -74,7 +67,6 @@ const router = new VueRouter({
       name: "Developing",
       component: () => import("@/views/InDeveloping"),
       meta: {
-        breadcrumbs: [{ title: "Раздел находится в разработке" }],
       },
     },
     {
@@ -82,7 +74,6 @@ const router = new VueRouter({
       name: "Developing",
       component: () => import("@/views/InDeveloping"),
       meta: {
-        breadcrumbs: [{ title: "Раздел находится в разработке" }],
       },
     },
     {
@@ -90,7 +81,6 @@ const router = new VueRouter({
       name: "Page404",
       component: () => import("@/views/Page404"),
       meta: {
-        breadcrumbs: [{ title: "Страница не найдена" }],
       },
     },
     {
@@ -98,14 +88,12 @@ const router = new VueRouter({
       name: "JobSchedule",
       component: () => import("@/views/JobSchedule"),
       meta: {
-        breadcrumbs: [{ title: "Расписание занятий" }],
       },
     },
     {
       path: "/skill-development",
       component: () => import("@/views/SkillDevelopment"),
       meta: {
-        breadcrumbs: [{ title: "Развитие навыков" }],
       },
       children: [
         {
@@ -113,7 +101,6 @@ const router = new VueRouter({
           name: "AllSkills",
           component: () => import("@/components/SkillDevelopment/AllSkills"),
           meta: {
-            breadcrumbs: [{ title: "Все навыки" }],
           },
         },
         {
@@ -121,7 +108,6 @@ const router = new VueRouter({
           name: "SkillDetails",
           component: () => import("@/components/SkillDevelopment/SkillDetails"),
           meta: {
-            breadcrumbs: [{ title: "Конкретный навык" }],
           },
         },
       ]
