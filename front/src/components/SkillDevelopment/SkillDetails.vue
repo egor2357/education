@@ -53,6 +53,8 @@ export default {
       loading: true,
 
       dateRange: this.dateRangeInit,
+
+      skillReports: [],
     };
   },
   computed: {
@@ -64,10 +66,36 @@ export default {
     },
     dateRangeChange(value){
       this.$emit("changeRange", value);
-    }
+    },
+    async fetchSkillReports(){
+      try {
+        this.loading = true;
+        let firstQParameter = `date_from=${this.dateRange[0].format("YYYY-MM-DD")}`;
+        let secondQParameter = `date__to=${this.dateRange[1].format("YYYY-MM-DD")}`;
+        let thirdQParameter = `is_affected=true`;
+        let fourthQParameter = `skill_id=${this.$route.params.id}`;
+        let QParameters = `?${firstQParameter}&${secondQParameter}&${thirdQParameter}&${fourthQParameter}`;
+        let res = await this.$axios.get(`/api/skill_reports/${QParameters}`);
+        if (res.status === 200) {
+          this.skillReports = res.data;
+        } else {
+          this.$message.error("Произошла ошибка при загрузке отчетов");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка при загрузке отчетов");
+      } finally {
+        this.loading = false;
+      }
+    },
   },
-  created() {
+  async created() {
+    let fetches = []
 
+    fetches.push(this.fetchSkillReports());
+
+    this.loading = true;
+    await Promise.all(fetches);
+    this.loading = false;
   },
   beforeDestroy() {
 
