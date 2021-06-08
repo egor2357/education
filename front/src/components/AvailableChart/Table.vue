@@ -1,45 +1,37 @@
 <template>
-  <div class="available-table">
-    <transition name="fade">
-      <div class="preloader-overlay" v-if="loading">
-        <span class="ant-spin-dot ant-spin-dot-spin">
-          <i class="ant-spin-dot-item"></i>
-          <i class="ant-spin-dot-item"></i>
-          <i class="ant-spin-dot-item"></i>
-          <i class="ant-spin-dot-item"></i>
-        </span>
+  <a-spin :spinning="loading">
+    <div class="available-table">
+      <div class="top-bar">
+        <a-button
+          type="link"
+          icon="swap"
+          @click="specialist = !specialist"
+          >Изменить представление</a-button
+        >
+        <div class="month-container">
+          <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
+          <span class="text">{{ month.name }} {{ year }}</span>
+          <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
+        </div>
+        <a-button @click="$emit('onAddPeriod')">Добавить период</a-button>
       </div>
-    </transition>
-    <div class="top-bar">
-      <a-button
-        type="link"
-        icon="swap"
-        @click="specialist = !specialist"
-        >Изменить представление</a-button
-      >
-      <div class="month-container">
-        <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
-        <span class="text">{{ month.name }} {{ year }}</span>
-        <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
+      <div class="table-presence">
+        <presence-chart v-if="specialist"
+          :tableData="tableData"
+          :daysInMonth="daysOfMonth"
+          @displayEdit="$emit('displayEdit', $event)"
+          @displayDeleteConfirm="displayDeleteConfirm($event)"
+        />
+        <activity-presence-chart v-else
+          :tableData="tableData"
+          :daysInMonth="daysOfMonth"
+          :activities="activities"
+          @displayEdit="$emit('displayEdit', $event)"
+          @displayDeleteConfirm="displayDeleteConfirm($event)"
+        />
       </div>
-      <a-button @click="$emit('onAddPeriod')">Добавить период</a-button>
     </div>
-    <div class="table-presence">
-      <presence-chart v-if="specialist"
-        :tableData="tableData"
-        :daysInMonth="daysOfMonth"
-        @displayEdit="$emit('displayEdit', $event)"
-        @displayDeleteConfirm="displayDeleteConfirm($event)"
-      />
-      <activity-presence-chart v-else
-        :tableData="tableData"
-        :daysInMonth="daysOfMonth"
-        :activities="activities"
-        @displayEdit="$emit('displayEdit', $event)"
-        @displayDeleteConfirm="displayDeleteConfirm($event)"
-      />
-    </div>
-  </div>
+  </a-spin>
 </template>
 <script>
 import moment from "moment";
@@ -273,7 +265,6 @@ export default {
     async needUpdate(value) {
       if (value === true) {
         await this.updateData();
-        // this.needUpdateActivity = true;
       }
     },
   },
@@ -290,55 +281,11 @@ export default {
   flex-direction: column
   position: relative
 
-  .preloader-overlay
-    position: absolute
-    z-index: 4
-    height: 100%
-    width: 100%
-    background: rgba(255,255,255, 0.7)
-    opacity: 1
-
-    .ant-spin-dot
-      top: 50%
-      left: 50%
-      margin: -10px
-
   .table-presence
     flex: 1
     display: flex
     overflow: hidden
-  .ant-table-body
-    overflow: auto !important
-  .day
-    padding: 0 !important
-    min-width: 30px
-    .not-available, .available, .empty
-      padding: 5px
-      width: 100%
-      height: 100%
-      display: inline-block
-      &:empty::before
-        content: "\A0"
-    .not-available
-      background-color: #FFA756
-      cursor: pointer
-    .available
-      background-color: #3DC5FF
-      cursor: pointer
-    .left-border
-      border-top-left-radius: 4px
-      border-bottom-left-radius: 4px
-    .right-border
-      border-top-right-radius: 4px
-      border-bottom-right-radius: 4px
-    .icon-button
-      color: #fff
-      transform: rotate(90deg)
-  thead
-    .day
-      height: 30px
-    .weekend
-      background-color: #C5FF48
+
 .top-bar
   margin-bottom: 10px
   display: flex
@@ -346,13 +293,13 @@ export default {
     flex: 1
     text-align: center
     padding-right: 70px
+    font-size: 18px
+    line-height: 18px
+    cursor: default
   .text
     padding: 0 10px
     width: 130px
     display: inline-block
     font-size: 1rem
-.fade-enter-active, .fade-leave-active
-  transition: opacity 0.2s
-.fade-enter, .fade-leave-to
-  opacity: 0
+
 </style>
