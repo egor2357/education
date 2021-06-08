@@ -10,7 +10,7 @@
         <div class="skill-details__header__options">
           <a-button
             icon="left" @click="goBack">Назад</a-button>
-          <div></div>
+          <div>{{ skillReports[0].skill.name }}</div>
           <div class="skill-details__header__date-range">
             <span class="skill-details__header__date-range__label">Период:</span>
             <a-range-picker
@@ -26,7 +26,32 @@
       </div>
 
       <div class="skill-details__body">
-
+        <div class="skill-details__body__table">
+          <div class="skill-details__body__table-header">
+            <div class="skill-details__body__table-date">Дата занятия</div>
+            <div class="skill-details__body__table-activity">Вид деятельности</div>
+            <div class="skill-details__body__table-specialist">Специалист</div>
+            <div class="skill-details__body__table-job">Занятие</div>
+          </div>
+          <div class="skill-details__body__table-body">
+            <div class="skill-details__body__table-row"
+              v-for="skillReport in skillReports" :key="skillReport.id">
+              <div class="skill-details__body__table-date">
+                {{ skillReport.job.date | toRuDateString }}
+              </div>
+              <div class="skill-details__body__table-activity">
+                <div :style="{
+                  'background-color': `${skillReport.job.activity.color}10`,
+                  border: `1px solid ${skillReport.job.activity.color}99`,
+                }">
+                  {{ skillReport.job.activity.name }}
+                </div>
+              </div>
+              <div class="skill-details__body__table-specialist">{{ skillReport.job.specialist.__str__ }}</div>
+              <div class="skill-details__body__table-job">Подробности занятия</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </a-spin>
@@ -59,6 +84,11 @@ export default {
   },
   computed: {
 
+  },
+  filters: {
+    toRuDateString(value){
+      return moment(value).format("DD.MM.YYYY");
+    }
   },
   methods: {
     goBack(){
@@ -123,4 +153,57 @@ export default {
       align-items: center
       justify-content: space-between
       margin-bottom: 10px
+    &__date-range
+      display: flex
+      flex-direction: row
+      align-items: center
+      &__label
+        margin-right: 10px
+  &__body
+    &__table
+      display: flex
+      flex: 1
+      flex-direction: column
+      border-left: 1px solid #ccc
+      border-top: 1px solid #ccc
+      &-header
+        display: flex
+        flex: 1
+        flex-direction: row
+        background-color: #f4f4f4
+        color: rgba(0, 0, 0, 0.85)
+        div
+          display: flex
+          align-items: center
+      &-body
+        display: flex
+        flex: 1
+        flex-direction: column
+      &-row
+        display: flex
+        flex: 1
+        flex-direction: row
+      &-date, &-specialist
+        min-width: 200px
+        width: 200px
+        padding: 10px 15px
+        border-right: 1px solid #ccc
+        border-bottom: 1px solid #ccc
+      &-activity
+        min-width: 200px
+        width: 200px
+        padding: 10px 15px
+        border-right: 1px solid #ccc
+        border-bottom: 1px solid #ccc
+        div
+          padding: 2px 4px
+          text-align: center
+          border-radius: 4px
+      &-job
+        min-width: 200px
+        flex: 1
+        padding: 10px 15px
+        border-right: 1px solid #ccc
+        border-bottom: 1px solid #ccc
+
 </style>
