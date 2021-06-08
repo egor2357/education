@@ -58,10 +58,15 @@ class Skill_reportFilter(FilterSet):
     label='Затронут ли навык', field_name='mark',
     lookup_expr='isnull', exclude=True,
   )
+  skill_id = django_filters.NumberFilter(
+    label='Идентификатор наавыка', field_name='skill_id',
+    lookup_expr='exact'
+  )
   class Meta:
     model = Skill_report
     fields = [
       'date_from',
       'date_to',
       'is_affected',
+      'skill_id',
     ]
