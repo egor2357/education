@@ -29,7 +29,8 @@ import {
   Select,
   Collapse,
   DatePicker,
-  Popover
+  Popover,
+  TreeSelect,
 } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
@@ -62,6 +63,7 @@ Vue.use(Select);
 Vue.use(Collapse);
 Vue.use(DatePicker);
 Vue.use(Popover);
+Vue.use(TreeSelect);
 
 Vue.prototype.$message = message;
 Vue.prototype.$confirm = Modal.confirm;
