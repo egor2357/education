@@ -177,7 +177,7 @@ export default {
       let isBetween = moment(jobDate).isBetween(
         this.momentDateArr[0],
         this.momentDateArr[this.momentDateArr.length-1],
-        undefined,
+        'day',
         "[]"
       );
       if (jobDate && isBetween) {
