@@ -278,7 +278,7 @@ class Option(models.Model):
 
   skills = models.ManyToManyField(Skill, verbose_name='Развиваемые на занятии навыки')
 
-  topic = models.TextField(max_length=200, blank=True, verbose_name='Тема занятия')
+  topic = models.TextField(max_length=200, verbose_name='Тема занятия')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
   class Meta:
@@ -346,7 +346,7 @@ class Job(models.Model):
   date = models.DateField(verbose_name='Дата проведения')
   start_time = models.TimeField(verbose_name='Время начала')
 
-  topic = models.TextField(max_length=200, blank=True, verbose_name='Тема занятия')
+  topic = models.TextField(max_length=200, verbose_name='Тема занятия')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
   class Meta:
