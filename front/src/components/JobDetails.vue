@@ -136,11 +136,14 @@ export default {
     ...mapGetters({
       areasFetched: "skills/getFetched",
       areas: "skills/getAreas",
+      formsFetched: "forms/getFetched",
+      forms: "forms/getForms",
     }),
   },
   methods: {
     ...mapActions({
       fetchAreas: "skills/fetchAreas",
+      fetchForms: "forms/fetchForms",
     }),
 
     goBack(){
@@ -172,6 +175,9 @@ export default {
 
     if (!this.areasFetched) {
       fetches.push(this.fetchAreas());
+    }
+    if (!this.formsFetched) {
+      fetches.push(this.fetchForms());
     }
 
     fetches.push(this.fetchJob());
