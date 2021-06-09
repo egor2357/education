@@ -88,7 +88,8 @@ class JobView(viewsets.ModelViewSet):
                           .select_related(
                             'activity',
                             'schedule__activity',
-                            'specialist'
+                            'specialist',
+                            'method__form'
                           )
                           .prefetch_related(
                             'job_file_set',

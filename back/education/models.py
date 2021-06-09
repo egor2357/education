@@ -331,6 +331,10 @@ class Job(models.Model):
     Schedule, null=True, default=None, blank=True,
     on_delete=models.SET_NULL, verbose_name='Шаблон занятия'
   )
+  method = models.ForeignKey(
+    Method, null=True, default=None, blank=True,
+    on_delete=models.SET_NULL, verbose_name='Способ'
+  )
 
   reports = models.ManyToManyField('Skill', through='Skill_report', verbose_name='Отчеты по навыкам')
 

@@ -509,6 +509,13 @@ class JobSerializer(FlexFieldsModelSerializer):
   schedule = ScheduleSerializer(
     read_only=True,
   )
+  method_id = serializers.PrimaryKeyRelatedField(
+    source='method', queryset=Method.objects.all(),
+    write_only=True, required=False, allow_null=True
+  )
+  method = MethodSerializer(
+    read_only=True,
+  )
 
   reports = Skill_reportSerializer(
     source='skill_report_set',
@@ -527,7 +534,8 @@ class JobSerializer(FlexFieldsModelSerializer):
       'reports',
       'job_files',
       'date', 'start_time',
-      'comment', 'topic'
+      'comment', 'topic',
+      'method_id', 'method',
     )
 
 class Skill_reportSerializer(FlexFieldsModelSerializer):
@@ -543,7 +551,6 @@ class Skill_reportSerializer(FlexFieldsModelSerializer):
     omit=['schedule', 'reports', 'job_files']
   )
   skill = SkillSerializer(read_only=True)
-
 
   class Meta:
     model = Skill_report
