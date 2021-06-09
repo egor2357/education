@@ -411,10 +411,14 @@ class MethodSerializer(serializers.ModelSerializer):
   form_id = serializers.PrimaryKeyRelatedField(
     source='form', queryset=Form.objects.all()
   )
+  def get_form_name(self, instance):
+    return instance.form.name
+  form_name = serializers.SerializerMethodField()
   class Meta:
     model = Method
     fields = (
-      'id', 'form_id',
+      'id',
+      'form_id', 'form_name',
       'name',
     )
 
