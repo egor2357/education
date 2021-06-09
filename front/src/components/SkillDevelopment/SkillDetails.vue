@@ -39,7 +39,8 @@
           </div>
           <div class="skill-details__body__table-body">
             <div class="skill-details__body__table-row"
-              v-for="skillReport in skillReports" :key="skillReport.id">
+              v-for="skillReport in skillReports" :key="skillReport.id"
+              @click="goToJob(skillReport.job)">
               <div class="skill-details__body__table-date">
                 {{ skillReport.job.date | toRuDateString }}
               </div>
@@ -81,9 +82,11 @@
 
 <script>
 import moment from "moment";
+import getColorByMark from "@/mixins/getColorByMark"
 
 export default {
   name: "SkillDetails",
+  mixins: [getColorByMark],
   props: {
     dateRangeInit: {
       type: Array,
@@ -139,15 +142,11 @@ export default {
         this.loading = false;
       }
     },
-    getColorByMark(mark){
-      if (mark==0) {
-        return "#ff1f1f";
-      } else if (mark==1) {
-        return "#f2ef0f";
-      } else {
-        return "#00ac00";
+    goToJob(job) {
+      if (job){
+        this.$router.push({name: "JobDetails", params: {id: job.id}});
       }
-    },
+    }
   },
   async created() {
     let fetches = []
