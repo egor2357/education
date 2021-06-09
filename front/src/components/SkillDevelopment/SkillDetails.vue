@@ -51,8 +51,26 @@
                   {{ skillReport.job.activity.name }}
                 </div>
               </div>
-              <div class="skill-details__body__table-specialist">{{ skillReport.job.specialist.__str__ }}</div>
-              <div class="skill-details__body__table-job">Подробности занятия</div>
+              <div class="skill-details__body__table-specialist">
+                {{ skillReport.job.specialist ? skillReport.job.specialist.__str__ : ""}}
+              </div>
+              <div class="skill-details__body__table-job">
+                <div class="skill-details__body__table-job__text">
+                  <div class="skill-details__body__table-job__topic">{{ skillReport.job.topic }}</div>
+                  <div class="skill-details__body__table-job__form"
+                    v-if="skillReport.job.method">
+                    {{ skillReport.job.method.form_name }}
+                  </div>
+                  <div class="skill-details__body__table-job__method"
+                    v-if="skillReport.job.method">
+                    {{ skillReport.job.method.name }}
+                  </div>
+                </div>
+                <div class="skill-details__body__table-job__mark"
+                  :style="{'background-color': getColorByMark(skillReport.mark)}">
+                </div>
+
+              </div>
             </div>
           </div>
         </div>
@@ -119,6 +137,15 @@ export default {
         this.$message.error("Произошла ошибка при загрузке отчетов");
       } finally {
         this.loading = false;
+      }
+    },
+    getColorByMark(mark){
+      if (mark==0) {
+        return "#ff1f1f";
+      } else if (mark==1) {
+        return "#f2ef0f";
+      } else {
+        return "#00ac00";
       }
     },
   },
@@ -201,6 +228,11 @@ export default {
         display: flex
         flex: 1
         flex-direction: row
+        background: white
+        transition: background 0.3s
+        &:hover
+          background: #e6f7ff
+          cursor: pointer
       &-date, &-specialist
         min-width: 200px
         width: 200px
@@ -218,10 +250,27 @@ export default {
           text-align: center
           border-radius: 4px
       &-job
-        min-width: 200px
+        display: flex
+        flex-direction: row
         flex: 1
+        min-width: 200px
         padding: 10px 15px
         border-right: 1px solid #ccc
         border-bottom: 1px solid #ccc
+        &__text
+          display: flex
+          flex-direction: row
+          flex: 1
+        &__mark
+          height: 26px
+          width: 26px
+          border-radius: 13px
+          box-shadow: 0 1px 3px 1px #dedede
+        &__topic
+          margin-right: 10px
+          font-weight: bold
+        &__form
+          margin-right: 10px
+
 
 </style>
