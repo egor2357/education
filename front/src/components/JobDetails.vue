@@ -14,10 +14,10 @@
           </div>
           <div class="job-details__header-title__date">
             <div class="job-details__header-title__date-day">
-              {{ job.dateMoment.format("D MMMM") }}
+              {{ jobDateMoment.format("D MMMM") }}
             </div>
             <div class="job-details__header-title__date-weekday">
-              {{ job.dateMoment.format("dddd") }}
+              {{ jobDateMoment.format("dddd") }}
             </div>
           </div>
           <div class="job-details__header-title__specialist">
@@ -40,20 +40,20 @@
 
       <div class="job-details__body" v-if="job">
 
-        <a-form-model :model="job" v-bind="layout" :rules="rules" ref="jobForm">
+        <a-form-model :model="form" v-bind="layout" :rules="rules" ref="jobForm">
 
           <a-form-model-item prop="topic" label="Тема занятия" key="topic"
             :validateStatus="fields['topic'].validateStatus" :help="fields['topic'].help">
-            <a-input v-model="job.topic" />
+            <a-input v-model="form.topic" />
           </a-form-model-item>
 
           <a-form-model-item prop="reports" label="Навыки" key="reports"
             :validateStatus="fields['reports'].validateStatus" :help="fields['reports'].help">
             <a-tree-select
-              v-model="job.skills"
+              :value="form.reports"
+              @change="setReports"
               placeholder="Выберите навыки"
-              allow-clear multiple
-              >
+              allow-clear multiple>
               <a-tree-select-node v-for="area in areas"
                 :key="'area'+area.id"
                 :value="'area'+area.id"
@@ -66,13 +66,43 @@
                   :title="direction.name">
                   <a-tree-select-node v-for="skill in direction.skills"
                     :key="'skill'+skill.id"
-                    :value="skill.id"
+                    :value="''+skill.id"
                     :title="skill.name"
                     :isLeaf="true">
                   </a-tree-select-node>
                 </a-tree-select-node>
               </a-tree-select-node>
             </a-tree-select>
+          </a-form-model-item>
+
+          <a-form-model-item prop="form_id" label="Форма проведения занятия" key="form"
+            :validateStatus="fields['form_id'].validateStatus" :help="fields['form_id'].help">
+            <a-select v-model="form.form_id"
+              allow-clear
+              @change="fieldChanged($event, 'form_id')">
+              <a-select-option v-for="form in forms" :key="form.id">
+                {{ form.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-model-item>
+
+          <a-form-model-item prop="method_id" label="Метод проведения занятия" key="method_id"
+            :validateStatus="fields['method_id'].validateStatus" :help="fields['method_id'].help">
+            <a-select v-model="form.method_id"
+              :disabled="!form.form_id"
+              allow-clear
+              @change="fieldChanged($event, 'method_id')">
+              <a-select-option v-for="method in methods" :key="method.id">
+                {{ method.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-model-item>
+
+          <a-form-model-item prop="comment" label="Дополнительная информация по занятию" key="comment">
+            <a-input v-model="form.comment"
+              allow-clear
+              :auto-size="{minRows: 4, maxRows: 8}"
+              type="textarea"/>
           </a-form-model-item>
 
         </a-form-model>
@@ -97,6 +127,13 @@ export default {
       loading: true,
 
       job: null,
+      form: {
+        topic: '',
+        reports: [],
+        form_id: null,
+        method_id: null,
+        comment: '',
+      },
 
       isJobWindow: true,
       layout: {
@@ -110,6 +147,18 @@ export default {
           help: "",
         },
         'reports': {
+          validateStatus: "",
+          help: "",
+        },
+        'form_id': {
+          validateStatus: "",
+          help: "",
+        },
+        'method_id': {
+          validateStatus: "",
+          help: "",
+        },
+        'comment': {
           validateStatus: "",
           help: "",
         },
@@ -129,6 +178,27 @@ export default {
             message: "Пожалуйста, выберите затрагиваемые навыки",
           },
         ],
+        form_id: [
+          {
+            trigger: "change",
+            required: false,
+            message: "Пожалуйста, выберите форму проведения занятия",
+          },
+        ],
+        method_id: [
+          {
+            trigger: "change",
+            required: false,
+            message: "Пожалуйста, выберите метод проведения занятия",
+          },
+        ],
+        comment: [
+          {
+            trigger: "change",
+            required: false,
+            message: "Пожалуйста, введите дополнительную информацию",
+          },
+        ],
       },
     };
   },
@@ -139,12 +209,37 @@ export default {
       formsFetched: "forms/getFetched",
       forms: "forms/getForms",
     }),
+
+    methods(){
+      for (let form of this.forms) {
+        if (form.id == this.form.form_id) {
+          return form.methods.slice();
+        }
+      }
+      return [];
+    },
   },
   methods: {
     ...mapActions({
       fetchAreas: "skills/fetchAreas",
       fetchForms: "forms/fetchForms",
     }),
+
+    fieldChanged(value, key){
+      console.log(value);
+      if (key == "form_id") {
+        this.form.method_id = null;
+      }
+      this.fields[key].validateStatus = "";
+      this.fields[key].help = "";
+    },
+
+    setReports(values, labels){
+      this.form.reports.splice(0);
+      for (let value of values) {
+        this.form.reports.push(value);
+      }
+    },
 
     goBack(){
       this.$router.go(-1);
@@ -156,10 +251,17 @@ export default {
         let res = await this.$axios.get(`/api/jobs/${jobId}`);
         if (res.status === 200) {
           this.job = res.data;
-          this.job.dateMoment = moment(this.job.date, "YYYY-MM-DD");
-          this.job.skills = this.job.reports.map((report)=>{
-            return report.skill_id;
+
+          this.jobDateMoment = moment(this.job.date, "YYYY-MM-DD");
+
+          this.form.topic = this.job.topic
+          this.form.reports = this.job.reports.map((report)=>{
+            return String(report.skill_id);
           });
+          this.form.form_id = this.job.method ? this.job.method.form_id : null;
+          this.form.method_id = this.job.method ? this.job.method.id : null;
+          this.form.comment = this.job.comment;
+
         } else {
           this.$message.error("Произошла ошибка при загрузке занятия");
         }
