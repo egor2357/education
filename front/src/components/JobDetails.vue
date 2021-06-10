@@ -66,7 +66,7 @@
                   :title="direction.name">
                   <a-tree-select-node v-for="skill in direction.skills"
                     :key="'skill'+skill.id"
-                    :value="''+skill.id"
+                    :value="skill.id"
                     :title="skill.name"
                     :isLeaf="true">
                   </a-tree-select-node>
@@ -98,14 +98,32 @@
             </a-select>
           </a-form-model-item>
 
-          <a-form-model-item prop="comment" label="Дополнительная информация по занятию" key="comment">
+          <a-form-model-item prop="comment" label="Дополнительная информация по занятию" key="comment"
+            :validateStatus="fields['comment'].validateStatus" :help="fields['comment'].help">
             <a-input v-model="form.comment"
               allow-clear
-              :auto-size="{minRows: 4, maxRows: 8}"
+              :auto-size="{minRows: 4, maxRows: 6}"
               type="textarea"/>
           </a-form-model-item>
 
+          <a-form-model-item prop="job_files" label="Прикрепленные файлы" key="job_files"
+            :validateStatus="fields['job_files'].validateStatus" :help="fields['job_files'].help">
+            <a-upload
+              multiple
+              list-type="picture"
+              :default-file-list="form.job_files"
+              class="job-details__body__form-files"
+            >
+              <a-button> <a-icon type="upload" /> Прикрепить файл </a-button>
+            </a-upload>
+          </a-form-model-item>
+
+          <a-form-model-item class="job-details__body__form-ok"
+            :wrapper-col="{offset: 6}">
+            <a-button icon="check" type="primary" @click="saveJob">Сохранить параметры занятия</a-button>
+          </a-form-model-item>
         </a-form-model>
+
 
       </div>
     </div>
@@ -133,6 +151,7 @@ export default {
         form_id: null,
         method_id: null,
         comment: '',
+        job_files: [],
       },
 
       isJobWindow: true,
@@ -159,6 +178,10 @@ export default {
           help: "",
         },
         'comment': {
+          validateStatus: "",
+          help: "",
+        },
+        'job_files': {
           validateStatus: "",
           help: "",
         },
@@ -197,6 +220,13 @@ export default {
             trigger: "change",
             required: false,
             message: "Пожалуйста, введите дополнительную информацию",
+          },
+        ],
+        job_files: [
+          {
+            trigger: "change",
+            required: false,
+            message: "Пожалуйста, выберите файлы",
           },
         ],
       },
@@ -244,6 +274,23 @@ export default {
     goBack(){
       this.$router.go(-1);
     },
+    setJobFormData(job) {
+      this.form.topic = job.topic
+      this.form.reports = job.reports.map((report)=>{
+        return report.skill_id;
+      });
+      this.form.form_id = job.method ? job.method.form_id : null;
+      this.form.method_id = job.method ? this.job.method.id : null;
+      this.form.comment = job.comment;
+      this.form.job_files = job.job_files.map((job_file)=>{
+        return {
+          uid: job_file.id,
+          name: 'yyy.png',
+          status: 'done',
+          url: job_file.file,
+        };
+      });
+    },
     async fetchJob(){
       try {
         this.loading = true;
@@ -251,17 +298,8 @@ export default {
         let res = await this.$axios.get(`/api/jobs/${jobId}`);
         if (res.status === 200) {
           this.job = res.data;
-
           this.jobDateMoment = moment(this.job.date, "YYYY-MM-DD");
-
-          this.form.topic = this.job.topic
-          this.form.reports = this.job.reports.map((report)=>{
-            return String(report.skill_id);
-          });
-          this.form.form_id = this.job.method ? this.job.method.form_id : null;
-          this.form.method_id = this.job.method ? this.job.method.id : null;
-          this.form.comment = this.job.comment;
-
+          this.setJobFormData(this.job);
         } else {
           this.$message.error("Произошла ошибка при загрузке занятия");
         }
@@ -270,6 +308,9 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    async saveJob(){
+
     },
   },
   async created() {
@@ -355,6 +396,22 @@ export default {
         justify-content: flex-start
 
   &__body
+
+.job-details__body__form-files
+  display: flex
+  flex-direction: column
+  max-height: 200px
+  .ant-upload-list
+    display: flex
+    flex: 1
+    flex-direction: row
+    flex-wrap: wrap
+    overflow-y: auto
+    .ant-upload-list-item
+      min-width: 200px
+      margin-right: 8px
+
+
 
 
 </style>
