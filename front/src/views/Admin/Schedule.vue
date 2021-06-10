@@ -1,20 +1,21 @@
 <template>
   <a-spin :spinning="loading">
     <div class="schedule">
-      <div class="schedule-label">
-        <span><a-button icon="bar-chart" @click="displayChart = true"></a-button></span>
+      <div class="top-bar">
+        <div class="top-bar__side-block left">
+          <a-button icon="bar-chart" @click="displayChart = true">Статистика</a-button>
+        </div>
         <span class="title">Шаблон расписания занятий</span>
-        <span
-          ><a-button
+        <div class="top-bar__side-block right">
+          <a-button
             icon="plus"
             @click="
               displayModal = true;
               modalAdding = true;
               modalEditableData = null;
             "
-            >Добавить занятие</a-button
-          ></span
-        >
+            >Добавить занятие</a-button>
+        </div>
       </div>
       <Template
         @startLoading="loading = true"
@@ -89,11 +90,14 @@ export default {
   flex-direction: column
   overflow: hidden
   height: 100%
-  .schedule-label
+  .top-bar
     display: flex
     margin-bottom: 10px
+    .top-bar__side-block
+      flex: 1
+      &.right
+        text-align: right
     .title
-      flex-grow: 1
       text-align: center
       font-size: 1rem
 </style>

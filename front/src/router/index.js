@@ -17,7 +17,8 @@ const router = new VueRouter({
     {
       path: "/skills",
       name: "Skills",
-      component: () => import("@/components/TableSkill"),
+      // component: () => import("@/components/TableSkill"),
+      component: () => import("@/views/Admin/SkillsStructure"),
       meta: {
         staffOnly: true,
       },

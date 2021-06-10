@@ -56,5 +56,4 @@ export default {
     margin-bottom: 10px
     text-align: center
     font-size: 1rem
-    font-weight: bold
 </style>

@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <div class="activities-types-container">
     <a-list
       :loading="loading"
       item-layout="horizontal"
       :data-source="activities"
-      class="types-list"
+      class="activities-types-container__list"
     >
       <a-list-item
         slot="renderItem"
@@ -146,14 +146,14 @@ export default {
 </script>
 
 <style lang="sass">
-.types-list
-  padding-right: calc(50% - 400px)
-  padding-left: calc(50% - 400px)
-  overflow-y: auto
-  @media (max-height: 1300px)
-    max-height: 70vh
-  @media (max-height: 800px)
-    max-height: 60vh
+.activities-types-container
+  flex: 1
+  overflow: auto
+
+  &__list
+    max-width: 900px
+    margin: 0 auto
+
   .type-color
     width: 32px
     height: 32px

@@ -122,9 +122,10 @@
       display: flex
       border-bottom: 1px solid #e8e8e8
       align-items: center
+      transition: background .3s
 
     &__table-body-row:hover
-      background: #def
+      background: #e6f7ff
 
     &__table-body-specialist-cell
       width: 250px
