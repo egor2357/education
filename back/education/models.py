@@ -68,11 +68,14 @@ class Specialist(models.Model):
 
   @classmethod
   def get_available(self, template, date):
-    available_specs_ids = (template.activity.specialty_set.filter(is_main=True)
-                                                            .values_list('specialist_id', flat=True))
+    available_specs = template.activity.specialty_set.values_list('specialist_id', 'is_main')
+    available_specs_list = list(available_specs)
+    all_specs_ids = [spec[0] for spec in available_specs_list]
+    main_specs_ids = [spec[0] for spec in available_specs_list if spec[1]]
+    add_specs_ids = [spec[0] for spec in available_specs_list if not spec[1]]
 
     presense_specs_ids = Presence.objects.filter(
-      specialist_id__in=available_specs_ids,
+      specialist_id__in=all_specs_ids,
       date_from__lte=date,
       date_to__gte=date,
       is_available=True
@@ -80,8 +83,10 @@ class Specialist(models.Model):
 
     specialists = Specialist.objects.filter(pk__in=presense_specs_ids)
 
-    if specialists.exists():
-      specialist = specialists.first()
+    if specialists.filter(pk__in=main_specs_ids).exists():
+      specialist = specialists.filter(pk__in=main_specs_ids).first()
+    elif specialists.filter(pk__in=add_specs_ids).exists():
+      specialist = specialists.filter(pk__in=add_specs_ids).first()
     else:
       specialist = None
 
@@ -273,7 +278,8 @@ class Option(models.Model):
 
   skills = models.ManyToManyField(Skill, verbose_name='Развиваемые на занятии навыки')
 
-  caption = models.TextField(max_length=200, blank=True, verbose_name='Подпись')
+  topic = models.TextField(max_length=200, verbose_name='Тема занятия')
+  comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
   class Meta:
     db_table = 'option'
@@ -330,11 +336,17 @@ class Job(models.Model):
     Schedule, null=True, default=None, blank=True,
     on_delete=models.SET_NULL, verbose_name='Шаблон занятия'
   )
+  method = models.ForeignKey(
+    Method, null=True, default=None, blank=True,
+    on_delete=models.SET_NULL, verbose_name='Способ'
+  )
 
   reports = models.ManyToManyField('Skill', through='Skill_report', verbose_name='Отчеты по навыкам')
 
   date = models.DateField(verbose_name='Дата проведения')
   start_time = models.TimeField(verbose_name='Время начала')
+
+  topic = models.TextField(max_length=200, verbose_name='Тема занятия')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
   class Meta:

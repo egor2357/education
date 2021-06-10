@@ -84,10 +84,7 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-// import consts from "@/const";
 import moment from "moment";
-// import deleteAxios from "@/middleware/deleteAxios";
-// import post from "@/middleware/post";
 
 export default {
   components: {

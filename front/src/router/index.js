@@ -85,11 +85,26 @@ const router = new VueRouter({
       },
     },
     {
-      path: "/job-schedule",
-      name: "JobSchedule",
-      component: () => import("@/views/JobSchedule"),
+      path: "/jobs",
+      component: () => import("@/views/Jobs"),
       meta: {
       },
+      children: [
+        {
+          path: "/",
+          name: "JobSchedule",
+          component: () => import("@/components/JobSchedule/JobSchedule"),
+          meta: {
+          },
+        },
+        {
+          path: ":id",
+          name: "JobDetails",
+          component: () => import("@/components/JobDetails"),
+          meta: {
+          },
+        },
+      ]
     },
     {
       path: "/skill-development",

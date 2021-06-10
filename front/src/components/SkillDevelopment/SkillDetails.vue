@@ -8,13 +8,17 @@
         </div>
 
         <div class="skill-details__header__options">
-          <a-button
-            icon="left" @click="goBack">Назад</a-button>
-          <div>{{ skillReports[0].skill.name }}</div>
-          <div class="skill-details__header__date-range">
-            <span class="skill-details__header__date-range__label">Период:</span>
+          <div class="skill-details__header__options__back">
+            <a-button icon="left" @click="goBack">Назад</a-button>
+          </div>
+          <div class="skill-details__header__options__title"
+            v-if="skillReports.length">
+            {{ skillReports[0].skill.name }}
+          </div>
+          <div class="skill-details__header__options__date-range">
+            <span class="skill-details__header__options__date-range__label">Период:</span>
             <a-range-picker
-              class="skill-details__header__date-range__input"
+              class="skill-details__header__options__date-range__input"
               v-model="dateRange"
               @change="dateRangeChange"
               format="DD.MM.YYYY"
@@ -35,7 +39,8 @@
           </div>
           <div class="skill-details__body__table-body">
             <div class="skill-details__body__table-row"
-              v-for="skillReport in skillReports" :key="skillReport.id">
+              v-for="skillReport in skillReports" :key="skillReport.id"
+              @click="goToJob(skillReport.job)">
               <div class="skill-details__body__table-date">
                 {{ skillReport.job.date | toRuDateString }}
               </div>
@@ -47,8 +52,26 @@
                   {{ skillReport.job.activity.name }}
                 </div>
               </div>
-              <div class="skill-details__body__table-specialist">{{ skillReport.job.specialist.__str__ }}</div>
-              <div class="skill-details__body__table-job">Подробности занятия</div>
+              <div class="skill-details__body__table-specialist">
+                {{ skillReport.job.specialist ? skillReport.job.specialist.__str__ : ""}}
+              </div>
+              <div class="skill-details__body__table-job">
+                <div class="skill-details__body__table-job__text">
+                  <div class="skill-details__body__table-job__topic">{{ skillReport.job.topic }}</div>
+                  <div class="skill-details__body__table-job__form"
+                    v-if="skillReport.job.method">
+                    {{ skillReport.job.method.form_name }}
+                  </div>
+                  <div class="skill-details__body__table-job__method"
+                    v-if="skillReport.job.method">
+                    {{ skillReport.job.method.name }}
+                  </div>
+                </div>
+                <div class="skill-details__body__table-job__mark"
+                  :style="{'background-color': getColorByMark(skillReport.mark)}">
+                </div>
+
+              </div>
             </div>
           </div>
         </div>
@@ -59,9 +82,11 @@
 
 <script>
 import moment from "moment";
+import getColorByMark from "@/mixins/getColorByMark"
 
 export default {
   name: "SkillDetails",
+  mixins: [getColorByMark],
   props: {
     dateRangeInit: {
       type: Array,
@@ -92,7 +117,7 @@ export default {
   },
   methods: {
     goBack(){
-      this.$router.go(-1);
+      this.$router.push({name: "AllSkills"});
     },
     dateRangeChange(value){
       this.$emit("changeRange", value);
@@ -117,6 +142,11 @@ export default {
         this.loading = false;
       }
     },
+    goToJob(job) {
+      if (job){
+        this.$router.push({name: "JobDetails", params: {id: job.id}});
+      }
+    }
   },
   async created() {
     let fetches = []
@@ -153,12 +183,26 @@ export default {
       align-items: center
       justify-content: space-between
       margin-bottom: 10px
-    &__date-range
-      display: flex
-      flex-direction: row
-      align-items: center
-      &__label
-        margin-right: 10px
+      &__back
+        display: flex
+        flex-direction: row
+        justify-content: flex-start
+        flex: 1
+      &__title
+        display: flex
+        flex-direction: row
+        justify-content: center
+        flex: 1
+        font-size: 20px
+      &__date-range
+        display: flex
+        flex-direction: row
+        flex: 1
+        align-items: center
+        justify-content: flex-end
+        &__label
+          margin-right: 10px
+
   &__body
     &__table
       display: flex
@@ -183,6 +227,11 @@ export default {
         display: flex
         flex: 1
         flex-direction: row
+        background: white
+        transition: background 0.3s
+        &:hover
+          background: #e6f7ff
+          cursor: pointer
       &-date, &-specialist
         min-width: 200px
         width: 200px
@@ -200,10 +249,27 @@ export default {
           text-align: center
           border-radius: 4px
       &-job
-        min-width: 200px
+        display: flex
+        flex-direction: row
         flex: 1
+        min-width: 200px
         padding: 10px 15px
         border-right: 1px solid #ccc
         border-bottom: 1px solid #ccc
+        &__text
+          display: flex
+          flex-direction: row
+          flex: 1
+        &__mark
+          height: 26px
+          width: 26px
+          border-radius: 13px
+          box-shadow: 0 1px 3px 1px #dedede
+        &__topic
+          margin-right: 10px
+          font-weight: bold
+        &__form
+          margin-right: 10px
+
 
 </style>

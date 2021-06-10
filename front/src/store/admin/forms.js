@@ -4,11 +4,15 @@ import deleteAxios from "@/middleware/deleteAxios";
 
 const state = () => ({
   forms: [],
+  fetched: false,
 });
 
 const getters = {
   getForms(state) {
     return state.forms;
+  },
+  getFetched(state) {
+    return state.fetched;
   },
 };
 
@@ -46,6 +50,7 @@ const actions = {
 const mutations = {
   setForms(state, payload) {
     state.forms = payload;
+    state.fetched = true;
   },
 };
 
