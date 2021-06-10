@@ -1,6 +1,22 @@
 <template>
   <div class="forms">
-    <div class="title">Формы и способы проведения занятий</div>
+    <div class="top-bar">
+      <div class="placeholder"></div>
+      <div class="title">Формы и способы проведения занятий</div>
+      <div class="add-button">
+        <a-button
+          type="secondary"
+          icon="plus"
+          @click="
+            displayModal = true;
+            modalEditableData = {};
+            modalAdding = true;
+            modalType = 1;
+          "
+          >Добавить форму</a-button>
+      </div>
+    </div>
+
     <div class="block">
       <FormMethods
         class="block-collapse"
@@ -8,19 +24,6 @@
         @displayAdd="displayAdd"
         @displayEdit="displayEdit"
       />
-    </div>
-    <div class="add-button">
-      <a-button
-        type="primary"
-        icon="plus"
-        @click="
-          displayModal = true;
-          modalEditableData = {};
-          modalAdding = true;
-          modalType = 1;
-        "
-        >Добавить форму</a-button
-      >
     </div>
     <ModalForms
       v-if="displayModal"
@@ -79,17 +82,28 @@ export default {
 
 <style lang="sass">
 .forms
+  height: 100%
+  display: flex
+  flex-direction: column
+  .top-bar
+    display: flex
+    margin-bottom: 10px
+
+    .placeholder
+      flex: 1
+
+    .add-button
+      flex: 1
+      display: flex
+      justify-content: flex-end
+
   .title
     text-align: center
     font-size: 1rem
-    font-weight: bold
-    margin-bottom: 20px
+    margin: 0 10px
   .block
     overflow-y: auto
-    @media (max-height: 1300px)
-      max-height: 70vh
-    @media (max-height: 800px)
-      max-height: 60vh
+    flex: 1
     .block-collapse
       margin-right: 250px
       margin-left: 250px
@@ -99,7 +113,4 @@ export default {
       @media (max-width: 900px)
         margin-right: 0
         margin-left: 0
-  .add-button
-    margin-top: 10px
-    text-align: center
 </style>

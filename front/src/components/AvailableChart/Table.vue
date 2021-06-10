@@ -13,7 +13,7 @@
           <span class="text">{{ month.name }} {{ year }}</span>
           <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
         </div>
-        <a-button @click="$emit('onAddPeriod')">Добавить период</a-button>
+        <a-button icon="plus" @click="$emit('onAddPeriod')">Добавить период</a-button>
       </div>
       <div class="table-presence">
         <presence-chart v-if="specialist"

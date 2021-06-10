@@ -1,5 +1,6 @@
 import post from "@/middleware/post";
 import put from "@/middleware/put";
+import patch from "@/middleware/patch";
 import deleteAxios from "@/middleware/deleteAxios";
 
 const state = () => ({
@@ -32,7 +33,7 @@ const actions = {
     return post(this.$axios, "/api/educational_areas/", payload);
   },
   async editArea(context, payload) {
-    return put(this.$axios, `/api/educational_areas/${payload.id}/`, payload);
+    return patch(this.$axios, `/api/educational_areas/${payload.id}/`, payload);
   },
   async deleteArea(context, id) {
     return deleteAxios(this.$axios, `/api/educational_areas/${id}/`, {});
@@ -41,7 +42,7 @@ const actions = {
     return post(this.$axios, "/api/development_directions/", payload);
   },
   async editDirection(context, payload) {
-    return put(this.$axios, `/api/development_directions/${payload.id}/`, payload);
+    return patch(this.$axios, `/api/development_directions/${payload.id}/`, payload);
   },
   async deleteDirection(context, id) {
     return deleteAxios(this.$axios, `/api/development_directions/${id}/`, {});
@@ -50,7 +51,7 @@ const actions = {
     return post(this.$axios, "/api/skills/", payload);
   },
   async editSkill(context, payload) {
-    return put(this.$axios, `/api/skills/${payload.id}/`, payload);
+    return patch(this.$axios, `/api/skills/${payload.id}/`, payload);
   },
   async deleteSkill(context, id) {
     return deleteAxios(this.$axios, `/api/skills/${id}/`, {});

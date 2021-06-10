@@ -170,12 +170,13 @@
       display: flex
       align-items: center
       border-bottom: 1px solid #e8e8e8
+      transition: background .3s
 
       &:last-child
         border-bottom: 0 none
 
     &__specialist-presence-row:hover
-      background: #def
+      background: #e6f7ff
 
     &__specialist-cell
       width: 200px

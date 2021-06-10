@@ -1,12 +1,10 @@
 <template>
-  <div class="table-skills-specialists">
-    <TableSkill
-      :readOnly="true"
-      :specialists="true"
-      :specialistSkills="specialistSkills"
-      :specialistId="specialistId"
-    />
-  </div>
+  <TableSkill
+    :readOnly="true"
+    :specialists="true"
+    :specialistSkills="specialistSkills"
+    :specialistId="specialistId"
+  />
 </template>
 
 <script>
@@ -28,8 +26,5 @@ export default {
 </script>
 
 <style lang="sass">
-.table-skills-specialists
-  .ant-table-body
-    max-height: calc(-350px + 100vh) !important
-    margin-bottom: 1px
+
 </style>

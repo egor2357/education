@@ -1,7 +1,9 @@
 <template>
-  <div>
-    <div style="display: flex">
-      <a-button icon="arrow-left" @click="$emit('goBack')">Назад</a-button>
+  <div class="specialist-container">
+    <div class="top-bar">
+      <div class="top-bar__side-block">
+        <a-button icon="arrow-left" @click="$emit('goBack')">Назад</a-button>
+      </div>
       <span class="specialist-title">
         <span>Специалист:</span>
         <b>
@@ -12,21 +14,24 @@
           }}
         </b>
       </span>
+      <div class="top-bar__side-block"></div>
     </div>
-    <a-tabs v-model="activeTab" class="specialist-tabs--center">
-      <a-tab-pane key="1">
-        <span slot="tab">
-          <a-icon type="unordered-list" />
-          Виды деятельности
-        </span>
-      </a-tab-pane>
-      <a-tab-pane key="2">
-        <span slot="tab">
-          <a-icon type="share-alt" />
-          Навыки
-        </span>
-      </a-tab-pane>
-    </a-tabs>
+    <div class="specialist-tabs-container">
+      <a-tabs v-model="activeTab">
+        <a-tab-pane key="1">
+          <span slot="tab">
+            <a-icon type="unordered-list" />
+            Виды деятельности
+          </span>
+        </a-tab-pane>
+        <a-tab-pane key="2">
+          <span slot="tab">
+            <a-icon type="share-alt" />
+            Навыки
+          </span>
+        </a-tab-pane>
+      </a-tabs>
+    </div>
     <ActivitiesTypes
       v-show="activeTab == 1"
       :activities="activities"
@@ -80,11 +85,22 @@ export default {
 </script>
 
 <style lang="sass">
+.specialist-container
+  display: flex
+  flex-direction: column
+  flex: 1
+  overflow: hidden
+
+  .top-bar
+    display: flex
+
+  .top-bar__side-block
+    flex: 1
+
 .specialist-title
-  flex-grow: 1
   text-align: center
-  padding-right: 7%
-.specialist-tabs--center
-  padding-right: calc(50% - 160px)
-  padding-left: calc(50% - 160px)
+
+.specialist-tabs-container
+  display: flex
+  justify-content: center
 </style>

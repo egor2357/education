@@ -57,13 +57,13 @@ export default {
       },
       title: "",
       layout: {
-        labelCol: { span: 5 },
-        wrapperCol: { span: 19 },
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
       },
       fields: [
         {
           name: "name",
-          label: "Название",
+          label: "Наименование",
           type: "text",
           validateStatus: "",
           help: "",
@@ -81,7 +81,7 @@ export default {
           {
             trigger: "blur",
             required: true,
-            message: "Пожалуйста, введите название",
+            message: "Пожалуйста, введите наименование",
           },
         ],
         number: [

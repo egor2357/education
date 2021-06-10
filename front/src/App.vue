@@ -41,6 +41,7 @@ export default {
 <style lang="sass">
 html
   min-height: 600px
+  min-width: 1300px
 
 #app
   height: 100%
