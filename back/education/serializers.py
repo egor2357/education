@@ -7,6 +7,7 @@ from django.db.models import Q
 
 from .models import *
 
+import os
 import datetime
 
 #create your serializers here.
@@ -467,11 +468,15 @@ class Job_fileSerializer(serializers.ModelSerializer):
   job_id = serializers.PrimaryKeyRelatedField(
     source='job', queryset=Job.objects.all()
   )
+
+  def get_name(self, instance):
+    return os.path.split(instance.file.name)[-1]
+  name = serializers.SerializerMethodField()
   class Meta:
     model = Job_file
     fields = (
       'id', 'job_id',
-      'file'
+      'file', 'name',
     )
 
 class Skill_reportSerializer(FlexFieldsModelSerializer):
@@ -523,7 +528,7 @@ class JobSerializer(FlexFieldsModelSerializer):
 
   reports = Skill_reportSerializer(
     source='skill_report_set',
-    many=True, read_only=True
+    many=True, read_only=True,
   )
   job_files = Job_fileSerializer(
     source='job_file_set', many=True, read_only=True
