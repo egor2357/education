@@ -99,6 +99,49 @@ class JobView(viewsets.ModelViewSet):
   filter_backends = (DjangoFilterBackend,)
   filterset_class = JobFilter
 
+  def partial_update(self, request, pk=None):
+    job = self.get_object()
+    data = request.data
+    print(data)
+
+    if 'files' in request.data:
+      files = request.data.get('files', '')
+      files = files.split(',') if files else []
+      curr_job_files_ids = list(job.job_file_set.all().values_list('id', flat=True))
+      files_to_save = []
+      remaining_files = []
+      for file in files:
+        if file in request.FILES:
+          file_data = request.FILES[file]
+          files_to_save.append(Job_file(job=job, file=file_data))
+        else:
+          remaining_files.append(int(file))
+      Job_file.objects.exclude(pk__in=remaining_files).delete()
+      Job_file.objects.bulk_create(files_to_save)
+
+    if 'reports' in request.data:
+      skills = request.data.get('reports', '')
+      skills = [int(report) for report in skills.split(',')] if skills else []
+      curr_skill_reports_ids = list(job.skill_report_set.all().values_list('skill_id', flat=True))
+      skills_to_save = []
+      remaining_skills = []
+      for skill in skills:
+        if skill not in curr_skill_reports_ids:
+          skills_to_save.append(Skill_report(job=job, skill_id=skill))
+        else:
+          remaining_skills.append(skill)
+      Skill_report.objects.exclude(job=job, skill_id__in=remaining_skills).delete()
+      Skill_report.objects.bulk_create(skills_to_save)
+
+    serializer = JobSerializer(job, data=request.data, partial=True)
+    if serializer.is_valid(raise_exception=True):
+      serializer.save()
+      job.refresh_from_db()
+      serializer = JobSerializer(job)
+
+    return Response(serializer.data)
+
+
   @classmethod
   def get_between(self, start_date, end_date):
     jobs = self.queryset

@@ -103,6 +103,7 @@
             <a-input v-model="form.comment"
               allow-clear
               :auto-size="{minRows: 4, maxRows: 6}"
+              @change="fieldChanged($event, 'comment')"
               type="textarea"/>
           </a-form-model-item>
 
@@ -112,6 +113,8 @@
               multiple
               list-type="picture"
               :default-file-list="form.job_files"
+              :remove="handleRemoveJobFile"
+              :before-upload="beforeUploadJobFile"
               class="job-details__body__form-files"
             >
               <a-button> <a-icon type="upload" /> Прикрепить файл </a-button>
@@ -134,6 +137,7 @@
 import moment from "moment";
 import getColorByMark from "@/mixins/getColorByMark"
 import { mapActions, mapGetters } from "vuex";
+import patch from "@/middleware/patch";
 
 export default {
   name: "JobDetails",
@@ -256,7 +260,6 @@ export default {
     }),
 
     fieldChanged(value, key){
-      console.log(value);
       if (key == "form_id") {
         this.form.method_id = null;
       }
@@ -269,23 +272,26 @@ export default {
       for (let value of values) {
         this.form.reports.push(value);
       }
+      this.fieldChanged(values, 'reports');
     },
 
     goBack(){
       this.$router.go(-1);
     },
     setJobFormData(job) {
-      this.form.topic = job.topic
+      this.form.topic = job.topic;
+      this.form.reports.splice(0);
       this.form.reports = job.reports.map((report)=>{
         return report.skill_id;
       });
       this.form.form_id = job.method ? job.method.form_id : null;
-      this.form.method_id = job.method ? this.job.method.id : null;
+      this.form.method_id = job.method ? job.method.id : null;
       this.form.comment = job.comment;
+      this.form.job_files.splice(0);
       this.form.job_files = job.job_files.map((job_file)=>{
         return {
           uid: job_file.id,
-          name: 'yyy.png',
+          name: job_file.name,
           status: 'done',
           url: job_file.file,
         };
@@ -310,7 +316,69 @@ export default {
       }
     },
     async saveJob(){
+      this.loading = true;
+      this.$refs.jobForm.validate(async (valid) => {
+        if (valid) {
+          try {
 
+            const formData = new FormData();
+            formData.append('topic', this.form.topic);
+            formData.append('reports', this.form.reports);
+            // if (this.form.method_id) {
+              formData.append('method_id', this.form.method_id);
+            // }
+            formData.append('comment', this.form.comment);
+
+            let allFilesIds = [];
+            this.form.job_files.forEach((file) => {
+              allFilesIds.push(file.uid);
+              if (file.status != "done") {
+                formData.append(file.uid, file);
+              }
+            });
+            formData.append('files', allFilesIds);
+
+            let res = await patch(this.$axios, `/api/jobs/${this.$route.params.id}/`, formData);
+            if (res.status === 200) {
+              this.$message.success("Параметры занятия сохранены");
+              this.job = res.data;
+              this.setJobFormData(this.job);
+            } else if (res.status === 400) {
+              this.$message.error("Проверьте введённые данные");
+              for (let key in res.data) {
+                this.fields[key].validateStatus = "error";
+                this.fields[key].help = res.data[key];
+              }
+            } else {
+              this.$message.error("Произошла ошибка");
+            }
+          } catch (e) {
+            this.$message.error("Произошла ошибка");
+          } finally {
+            this.loading = false;
+          }
+        } else {
+          return false;
+        }
+      });
+    },
+
+    handleRemoveJobFile(file) {
+      const index = this.form.job_files.indexOf(file);
+      const newFileList = this.form.job_files.slice();
+      newFileList.splice(index, 1);
+      this.form.job_files = newFileList;
+    },
+    beforeUploadJobFile(file) {
+      this.form.job_files = [...this.form.job_files, file];
+      return false;
+    },
+    handleUploadJobfile() {
+      const formData = new FormData();
+      this.form.job_files.forEach((file) => {
+        formData.append('files[]', file);
+      });
+      this.loading = true;
     },
   },
   async created() {
