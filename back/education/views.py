@@ -100,9 +100,8 @@ class JobView(viewsets.ModelViewSet):
   filterset_class = JobFilter
 
   def partial_update(self, request, pk=None):
+    #Требует FormData для передачи файлов
     job = self.get_object()
-    data = request.data
-    print(data)
 
     if 'files' in request.data:
       files = request.data.get('files', '')

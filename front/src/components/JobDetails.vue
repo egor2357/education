@@ -288,14 +288,14 @@ export default {
       this.form.method_id = job.method ? job.method.id : null;
       this.form.comment = job.comment;
       this.form.job_files.splice(0);
-      this.form.job_files = job.job_files.map((job_file)=>{
-        return {
+      for (let job_file of job.job_files) {
+        this.form.job_files.push({
           uid: job_file.id,
           name: job_file.name,
           status: 'done',
           url: job_file.file,
-        };
-      });
+        });
+      }
     },
     async fetchJob(){
       try {
@@ -324,9 +324,7 @@ export default {
             const formData = new FormData();
             formData.append('topic', this.form.topic);
             formData.append('reports', this.form.reports);
-            // if (this.form.method_id) {
-              formData.append('method_id', this.form.method_id);
-            // }
+            formData.append('method_id', this.form.method_id ? this.form.method_id : '');
             formData.append('comment', this.form.comment);
 
             let allFilesIds = [];
@@ -341,8 +339,7 @@ export default {
             let res = await patch(this.$axios, `/api/jobs/${this.$route.params.id}/`, formData);
             if (res.status === 200) {
               this.$message.success("Параметры занятия сохранены");
-              this.job = res.data;
-              this.setJobFormData(this.job);
+              await this.fetchJob();
             } else if (res.status === 400) {
               this.$message.error("Проверьте введённые данные");
               for (let key in res.data) {
@@ -372,13 +369,6 @@ export default {
     beforeUploadJobFile(file) {
       this.form.job_files = [...this.form.job_files, file];
       return false;
-    },
-    handleUploadJobfile() {
-      const formData = new FormData();
-      this.form.job_files.forEach((file) => {
-        formData.append('files[]', file);
-      });
-      this.loading = true;
     },
   },
   async created() {
