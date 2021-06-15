@@ -349,6 +349,8 @@ class Job(models.Model):
   topic = models.TextField(max_length=200, verbose_name='Тема занятия')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
+  report_comment = models.TextField(blank=True, verbose_name='Комментарий по результатам занятия')
+
   class Meta:
     db_table = 'job'
     verbose_name = 'Занятие'

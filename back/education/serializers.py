@@ -563,6 +563,7 @@ class JobSerializer(FlexFieldsModelSerializer):
       'date', 'start_time',
       'comment', 'topic',
       'method_id', 'method',
+      'report_comment',
     )
 
 class Skill_reportSerializer(FlexFieldsModelSerializer):
