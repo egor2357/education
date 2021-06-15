@@ -491,7 +491,6 @@ class Skill_reportSerializer(FlexFieldsModelSerializer):
     model = Skill_report
     fields = (
       'id', 'job_id', 'skill_id',
-      'mark', 'comment'
     )
 
 class JobSerializer(FlexFieldsModelSerializer):
@@ -567,5 +566,5 @@ class Skill_reportSerializer(FlexFieldsModelSerializer):
       'id',
       'job_id', 'skill_id',
       'job', 'skill',
-      'mark', 'comment'
+      'mark',
     )
