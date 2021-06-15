@@ -132,6 +132,12 @@ class JobView(viewsets.ModelViewSet):
       Skill_report.objects.exclude(job=job, skill_id__in=remaining_skills).delete()
       Skill_report.objects.bulk_create(skills_to_save)
 
+    if 'marks' in request.data:
+      marks = request.data.get('marks', [])
+      for mark in marks:
+        Skill_report.objects.filter(pk=mark['id']).update(mark=mark['mark'])
+
+
     serializer = JobSerializer(job, data=request.data, partial=True)
     if serializer.is_valid(raise_exception=True):
       serializer.save()

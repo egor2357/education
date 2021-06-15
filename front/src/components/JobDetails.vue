@@ -40,6 +40,7 @@
 
       <div class="job-details__body" v-if="job">
 
+        <template v-if="isJobWindow">
         <a-form-model :model="form" v-bind="layout" :rules="rules" ref="jobForm">
 
           <a-form-model-item prop="topic" label="Тема занятия" key="topic"
@@ -126,6 +127,34 @@
             <a-button icon="check" type="primary" @click="saveJob">Сохранить параметры занятия</a-button>
           </a-form-model-item>
         </a-form-model>
+        </template>
+
+        <template v-else>
+          <div class="job-details__wrapper">
+            <div class="job-details__label" v-if="reportForm.marks.length">Уровень освоения</div>
+            <div class="job-details__reports">
+              <div class="job-details__report" v-for="report in reportForm.marks" :key="report.id">
+                <div class="job-details__report-name">
+                  {{ report.skill.area_number }}.{{ report.skill.direction_number }}. {{ report.skill.name }}
+                </div>
+                <div class="job-details__report-marks">
+                  <div class="job-details__report-mark" v-for="i in 3" :key="i"
+                    :class="{'current': report.mark == i-1}"
+                    :style="{'background-color': getColorByMark(i-1)}"
+                    @click="setReportMark(report, i-1)">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <a-input v-model="reportForm.report_comment"
+              class="job-details__report_comment"
+              allow-clear
+              placeholder="Результат проведения занятия"
+              :auto-size="{minRows: 4, maxRows: 10}"
+              type="textarea"/>
+            <a-button icon="check" type="primary" @click="saveReport">Сохранить отчет</a-button>
+          </div>
+        </template>
 
 
       </div>
@@ -158,7 +187,13 @@ export default {
         job_files: [],
       },
 
+      reportForm: {
+        marks: [],
+        report_comment: '',
+      },
+
       isJobWindow: true,
+
       layout: {
         labelCol: { span: 6 },
         wrapperCol: { span: 14 },
@@ -234,6 +269,7 @@ export default {
           },
         ],
       },
+
     };
   },
   computed: {
@@ -296,6 +332,9 @@ export default {
           url: job_file.file,
         });
       }
+
+      this.reportForm.marks = job.reports.slice();
+      this.reportForm.report_comment = job.report_comment;
     },
     async fetchJob(){
       try {
@@ -358,6 +397,33 @@ export default {
           return false;
         }
       });
+    },
+
+
+    setReportMark(report, mark) {
+      if (report.mark == mark) {
+        report.mark = null;
+      } else {
+        report.mark = mark;
+      }
+    },
+    async saveReport(){
+      this.loading = true;
+      try{
+        let res = await patch(this.$axios, `/api/jobs/${this.$route.params.id}/`, this.reportForm);
+        if (res.status === 200) {
+          this.$message.success("Отчет сохранен");
+          await this.fetchJob();
+        } else if (res.status === 400) {
+          this.$message.error("Проверьте введённые данные");
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка");
+      } finally {
+        this.loading = false;
+      }
     },
 
     handleRemoveJobFile(file) {
@@ -428,8 +494,6 @@ export default {
           color: rgba(0, 0, 0, 0.85)
           font-size: 20px
           line-height: 22px
-          &:first-letter
-            font-weight: bold
         &-weekday
           font-size: 18px
           line-height: 20px
@@ -455,19 +519,70 @@ export default {
 
   &__body
 
-.job-details__body__form-files
-  display: flex
-  flex-direction: column
-  max-height: 200px
-  .ant-upload-list
+  &__body__form-files
     display: flex
-    flex: 1
-    flex-direction: row
-    flex-wrap: wrap
+    flex-direction: column
+    max-height: 200px
+    .ant-upload-list
+      display: flex
+      flex: 1
+      flex-direction: row
+      flex-wrap: wrap
+      overflow-y: auto
+      .ant-upload-list-item
+        min-width: 200px
+        margin-right: 8px
+
+
+  &__wrapper
+    display: flex
+    flex-direction: column
+    padding: 0 20%
+    align-items: flex-end
+  &__label
+    font-size: 18px
+    font-weight: bold
+    margin-bottom: 16px
+  &__reports
+    display: flex
+    width: 100%
+    flex-direction: column
+    margin-bottom: 10px
+    max-height: 400px
     overflow-y: auto
-    .ant-upload-list-item
-      min-width: 200px
-      margin-right: 8px
+
+  &__report
+    display: flex
+    flex-direction: row
+    align-items: center
+    justify-content: space-between
+    margin-bottom: 10px
+    padding-bottom: 10px
+    border-bottom: 1px solid #e8e8e8
+    &-name
+      padding-left: 10px
+      font-size: 18px
+    &-marks
+      display: flex
+      flex-direction: row
+    &-mark
+      height: 40px
+      width: 40px
+      border-radius: 20px
+      background: #ccc
+      box-shadow: 0 1px 3px 1px #dedede
+      margin-right: 10px
+      cursor: pointer
+      opacity: 0.2
+      transition: 0.2s ease-out
+      &:hover
+        opacity: 1
+      &.current
+        opacity: 1
+
+  &__report_comment
+    margin-bottom: 24px
+
 
 
 
