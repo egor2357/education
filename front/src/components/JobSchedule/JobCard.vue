@@ -1,5 +1,6 @@
 <template>
   <div class="job"
+    @click="goToJob(job)"
     :style="{
       'background-color': `${job.activity.color}10`,
       border: `1px solid ${job.activity.color}99`,
@@ -10,7 +11,8 @@
       placement="bottomLeft"
       class="dropdown--hover">
 
-      <a-icon class="icon-button" type="dash"></a-icon>
+      <a-icon class="icon-button" type="dash"
+        @click.stop></a-icon>
       <a-menu slot="overlay">
         <a-menu-item key="1" @click="openModalEdit(job)">
           Изменить
@@ -74,6 +76,11 @@ export default {
     },
     openModalEdit(job) {
       this.$emit("editJob", job);
+    },
+    goToJob(job){
+      if (job){
+        this.$router.push({name: "JobDetails", params: {id: job.id}});
+      }
     }
   },
   created() {
@@ -91,6 +98,8 @@ export default {
   border-radius: 4px
   display: flex
   flex-wrap: wrap
+  &:hover
+    cursor: pointer
 
   &__time
     flex: 0 0 95%

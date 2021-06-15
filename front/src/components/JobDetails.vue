@@ -22,7 +22,7 @@
           </div>
           <div class="job-details__header-title__specialist">
             <div class="job-details__header-title__specialist-label">Специалист:</div>
-            <div class="job-details__header-title__specialist-name">{{ job.specialist.__str__ }}</div>
+            <div class="job-details__header-title__specialist-name">{{ job.specialist ? job.specialist.__str__ : "Не назначен"}}</div>
           </div>
         </div>
 
