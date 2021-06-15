@@ -53,9 +53,23 @@ class SkillSerializer(FlexFieldsModelSerializer):
   direction_id = serializers.PrimaryKeyRelatedField(
     source='direction', queryset=Development_direction.objects.all()
   )
+  def get_area_number(self, instance):
+    return instance.direction.area.number
+  area_number = serializers.SerializerMethodField()
+
+  def get_direction_number(self, instance):
+    return instance.direction.number
+  direction_number = serializers.SerializerMethodField()
+
   class Meta:
     model = Skill
-    fields = ('id', 'name', 'number', 'direction_id')
+    fields = (
+      'id',
+      'name', 'number',
+      'direction_id',
+      'direction_number',
+      'area_number'
+    )
 
 class Activity_skillSerializer(serializers.ModelSerializer):
   skill_id = serializers.PrimaryKeyRelatedField(
@@ -487,10 +501,15 @@ class Skill_reportSerializer(FlexFieldsModelSerializer):
     source='skill', queryset=Skill.objects.all()
   )
 
+  skill = SkillSerializer(read_only=True)
+
   class Meta:
     model = Skill_report
     fields = (
-      'id', 'job_id', 'skill_id',
+      'id',
+      'job_id',
+      'skill_id', 'skill',
+      'mark',
     )
 
 class JobSerializer(FlexFieldsModelSerializer):
@@ -558,13 +577,14 @@ class Skill_reportSerializer(FlexFieldsModelSerializer):
     read_only=True,
     omit=['schedule', 'reports', 'job_files']
   )
+
   skill = SkillSerializer(read_only=True)
 
   class Meta:
     model = Skill_report
     fields = (
       'id',
-      'job_id', 'skill_id',
-      'job', 'skill',
+      'job_id', 'job',
+      'skill_id', 'skill',
       'mark',
     )

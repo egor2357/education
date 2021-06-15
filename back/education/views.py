@@ -66,7 +66,7 @@ class Development_directionView(viewsets.ModelViewSet):
 class SkillView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Skill.objects.all()
+  queryset = Skill.objects.all().select_related('direction__area')
   serializer_class = SkillSerializer
 
 class FormView(viewsets.ModelViewSet):
@@ -93,7 +93,7 @@ class JobView(viewsets.ModelViewSet):
                           )
                           .prefetch_related(
                             'job_file_set',
-                            'skill_report_set'
+                            'skill_report_set__skill'
                           ))
   serializer_class = JobSerializer
   filter_backends = (DjangoFilterBackend,)
@@ -331,7 +331,13 @@ class Job_fileView(viewsets.ModelViewSet):
 class Skill_reportView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
-  queryset = Skill_report.objects.all()
+  queryset = (Skill_report.objects.all()
+                                  .select_related(
+                                    'skill__direction__area',
+                                    'job__activity',
+                                    'job__method__form'
+                                  )
+                                  )
   serializer_class = Skill_reportSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = Skill_reportFilter
