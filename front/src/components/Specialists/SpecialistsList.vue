@@ -45,7 +45,7 @@
                 <a-divider type="vertical" />
                 <a @click="displayDelete(item)">Удалить</a>
                 <br />
-                <a v-if="!staffSelected" @click="displayActivitySkill(item)">
+                <a v-if="!staffSelected" @click="displayActivitySkill(item.id)">
                   Виды деятельности / навыки
                 </a>
               </div>
@@ -148,13 +148,12 @@ export default {
     };
   },
   async created() {
-    await this.fetchSpecialists();
-    this.fetchActivities();
+    if (!this.specialistsFetched)
+      await this.fetchSpecialists();
   },
   methods: {
     ...mapActions({
       fetchSpecialists: "specialists/fetchSpecialists",
-      fetchActivities: "activities/fetchActivities",
     }),
     displayDelete(item) {
       let that = this;
@@ -190,20 +189,18 @@ export default {
         this.loading = false;
       }
     },
-    displayActivitySkill(user) {
-      this.currentUser = user;
+    displayActivitySkill(userId) {
+      this.currentUser = this.specialists.find(user => user.id == userId) || {};
       this.displayTabs = true;
     },
     async closeTabs() {
-      this.loading = true;
       this.displayTabs = false;
-      await this.fetchSpecialists();
-      this.loading = false;
     },
   },
   computed: {
     ...mapGetters({
       specialists: "specialists/getSpecialists",
+      specialistsFetched: "specialists/getFetched"
     }),
   },
 };
