@@ -32,24 +32,24 @@
         </a-tab-pane>
       </a-tabs>
     </div>
-    <ActivitiesTypes
-      v-show="activeTab == 1"
-      :activities="activities"
-      :userActivities="currentUser.activities"
-      :specialistId="currentUser.id"
-    />
-    <Skills
-      :specialistSkills="currentUser.skills"
-      :specialistId="currentUser.id"
-      v-show="activeTab == 2"
-    />
+    <div class="specialist-tab-content">
+      <ActivitiesTypes
+        v-show="activeTab == 1"
+        :userActivities="currentUser.activities"
+        :specialistId="currentUser.id"
+      />
+      <Skills
+        :specialistSkills="currentUser.skills"
+        :specialistId="currentUser.id"
+        v-show="activeTab == 2"
+      />
+    </div>
   </div>
 </template>
 
 <script>
 import ActivitiesTypes from "@/components/Specialists/ActivitiesTypes";
 import Skills from "@/components/Specialists/Skills";
-import { mapActions, mapGetters } from "vuex";
 import common from "@/mixins/common";
 export default {
   name: "ActivitySkillTabs",
@@ -64,22 +64,7 @@ export default {
   data() {
     return {
       activeTab: "1",
-      loadingList: true,
     };
-  },
-  async created() {
-    await this.fetchActivities();
-    this.loadingList = false;
-  },
-  methods: {
-    ...mapActions({
-      fetchActivities: "activities/fetchActivities",
-    }),
-  },
-  computed: {
-    ...mapGetters({
-      activities: "activities/getActivities",
-    }),
   },
 };
 </script>
@@ -103,4 +88,8 @@ export default {
 .specialist-tabs-container
   display: flex
   justify-content: center
+
+.specialist-tab-content
+  flex: 1
+  overflow: hidden
 </style>

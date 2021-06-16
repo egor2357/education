@@ -12,6 +12,16 @@ const getters = {
   getAreas(state) {
     return state.areas;
   },
+  getFilteresAreas(state) {
+    return state.areas.map(area => {
+      return {
+        id: area.id,
+        name: area.name,
+        number: area.number,
+        development_directions: area.development_directions.filter(direction => direction.skills.length)
+      }
+    }).filter(area => area.development_directions.length);
+  },
   getFetched(state) {
     return state.fetched;
   },
@@ -22,11 +32,11 @@ const actions = {
     try {
       let res = await this.$axios.get("/api/educational_areas/");
       if (res.status === 200) {
-        commit("setAreas", res.data)
+        commit("setAreas", {data: res.data, success: true})
       }
     }
     catch (e) {
-      commit("setAreas", [])
+      commit("setAreas", {data: [], success: false});
     }
   },
   async addArea(context, payload) {
@@ -60,9 +70,9 @@ const actions = {
 
 const mutations = {
   setAreas(state, payload) {
-    state.areas = payload;
-    state.fetched = true;
-  }
+    state.areas = payload.data;
+    state.fetched = payload.success;
+  },
 };
 
 export default {

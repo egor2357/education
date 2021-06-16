@@ -3,24 +3,24 @@
     <a-list
       :loading="loading"
       item-layout="horizontal"
-      :data-source="activities"
+      :data-source="handledActivities"
       class="activities-types-container__list"
     >
       <a-list-item
         slot="renderItem"
-        slot-scope="item, index"
-        style="height: 75px"
+        slot-scope="item"
+        style="min-height: 75px"
       >
         <div slot="actions">
           <a-checkbox
             style="margin-right: 15px"
-            v-model="checkboxes[index]"
-            @change="checkboxChanged($event, index, item)"
+            :checked="item.isForUser"
+            @change="checkboxChanged($event, item)"
           />
           <a-radio-group
-            v-model="radios[index]"
-            :disabled="!checkboxes[index]"
-            @change="radioChanged(index, item)"
+            :value="item.isMain"
+            :disabled="!item.linkId"
+            @change="radioChanged(item)"
           >
             <a-radio-button :value="true"> Основной </a-radio-button>
             <a-radio-button :value="false"> Дополнительный </a-radio-button>
@@ -40,13 +40,10 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 export default {
   name: "ActivitiesTypes",
   props: {
-    activities: {
-      type: Array,
-    },
     userActivities: {
       type: Array,
     },
@@ -58,19 +55,44 @@ export default {
       modalAdding: true,
       modalEditableData: null,
       loading: false,
-      checkboxes: [],
-      radios: [],
-      specialtyLinks: [],
     };
   },
-  created() {
-    this.prepareData();
+  computed: {
+    ...mapGetters({
+      activities: "activities/getActivities",
+      activitiesFetched: "activities/getFetched"
+    }),
+    handledUserActivities(){
+      let res = {};
+      this.userActivities.forEach(activity => res[activity.activity.id] = {linkId: activity.id, isMain: activity.is_main});
+      return res;
+    },
+    handledActivities(){
+      return this.activities.map((activity) => {
+        return {
+          id: activity.id,
+          name: activity.name,
+          color: activity.color,
+          isForUser: !!this.handledUserActivities[activity.id],
+          isMain: !!this.handledUserActivities[activity.id] && this.handledUserActivities[activity.id].isMain,
+          linkId: !!this.handledUserActivities[activity.id] && this.handledUserActivities[activity.id].linkId
+        }
+      });
+    }
+  },
+  async created() {
+    if (!this.activitiesFetched)
+    {
+      this.loading = true;
+      await this.fetchActivities();
+      this.loading = false;
+    }
   },
   methods: {
-    async checkboxChanged(event, index, item) {
+    async checkboxChanged(event, item) {
+      this.loading = true;
       if (event.target.checked === false) {
-        this.radios[index] = true;
-        let res = await this.deleteActivity(this.specialtyLinks[index]);
+        let res = await this.deleteActivity({linkId: item.linkId, specialistId: this.specialistId});
         if (res.status === 204) {
           this.$message.success(
             "Вид деятельности у специалиста успешно удалён"
@@ -79,64 +101,40 @@ export default {
           this.$message.error("Произошла ошибка");
         }
       } else {
-        if (this.specialtyLinks[index] === null) {
-          let res = await this.addActivity({
-            activity_id: item.id,
-            specialist_id: this.specialistId,
-            is_main: this.radios[index],
-          });
-          if (res.status === 201) {
-            this.$message.success(
-              "Вид деятельности у специалиста успешно добавлен"
-            );
-            this.specialtyLinks[index] = res.data.id;
-          } else {
-            this.$message.error("Произошла ошибка");
-          }
-        }
-      }
-    },
-    async radioChanged(index, item) {
-      if (this.specialtyLinks[index] !== null) {
-        let res = await this.editActivity({
-          id: this.specialtyLinks[index],
+        let res = await this.addActivity({
           activity_id: item.id,
           specialist_id: this.specialistId,
-          is_main: this.radios[index],
+          is_main: true,
         });
-        if (res.status === 200) {
+        if (res.status === 201) {
           this.$message.success(
-            "Вид деятельности у специалиста успешно изменён"
+            "Вид деятельности у специалиста успешно добавлен"
           );
         } else {
           this.$message.error("Произошла ошибка");
         }
       }
+      this.loading = false;
     },
-    prepareData() {
-      this.checkboxes = [];
-      this.radios = [];
-      let activityInUser = false;
-      let activityIsMain = true;
-      let specialtyLink = null;
-      this.activities.forEach((activity) => {
-        activityInUser = false;
-        activityIsMain = true;
-        specialtyLink = null;
-        for (let userActivity of this.userActivities) {
-          if (activity.id === userActivity.activity.id) {
-            activityInUser = true;
-            activityIsMain = userActivity.is_main;
-            specialtyLink = userActivity.id;
-            break;
-          }
-        }
-        this.checkboxes.push(activityInUser);
-        this.radios.push(activityIsMain);
-        this.specialtyLinks.push(specialtyLink);
+    async radioChanged(item) {
+      this.loading = true;
+      let res = await this.editActivity({
+        linkId: item.linkId,
+        specialistId: this.specialistId,
+        isMain: !item.isMain,
       });
+      this.loading = false;
+      if (res.status === 200) {
+        this.$message.success(
+          "Вид деятельности у специалиста успешно изменён"
+        );
+      } else {
+        this.$message.error("Произошла ошибка");
+      }
+
     },
     ...mapActions({
+      fetchActivities: "activities/fetchActivities",
       addActivity: "specialists/addSpecialistActivity",
       editActivity: "specialists/editSpecialistActivity",
       deleteActivity: "specialists/deleteSpecialistActivity",
@@ -147,7 +145,7 @@ export default {
 
 <style lang="sass">
 .activities-types-container
-  flex: 1
+  height: 100%
   overflow: auto
 
   &__list
