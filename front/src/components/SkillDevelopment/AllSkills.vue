@@ -35,7 +35,7 @@
 
             <div class="skill-development__body__table-areas">
             <div class="skill-development__body__table-area-row"
-              v-for="area in filteredAreas" :key="area.id">
+              v-for="area in areas" :key="area.id">
 
 
               <div class="skill-development__body__table-area">
@@ -172,21 +172,8 @@ export default {
   computed: {
     ...mapGetters({
       areasFetched: "skills/getFetched",
-      areas: "skills/getAreas",
+      areas: "skills/getFilteredAreas",
     }),
-
-    filteredAreas(){
-      return this.areas
-      .map((area)=>{
-        return {
-          id: area.id,
-          name: area.name,
-          number: area.number,
-          development_directions: area.development_directions.filter(direction=>direction.skills.length)
-        };
-      })
-      .filter((area)=>area.development_directions.length);
-    },
   },
 
 };
