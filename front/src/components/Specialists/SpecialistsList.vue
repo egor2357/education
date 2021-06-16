@@ -148,8 +148,9 @@ export default {
     };
   },
   async created() {
-    if (!this.specialistsFetched)
-      await this.fetchSpecialists();
+    this.loading = true;
+    await this.fetchSpecialists();
+    this.loading = false;
   },
   methods: {
     ...mapActions({

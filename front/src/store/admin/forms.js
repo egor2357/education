@@ -21,10 +21,10 @@ const actions = {
     try {
       let res = await this.$axios.get("/api/forms/");
       if (res.status === 200) {
-        commit("setForms", res.data);
+        commit("setForms", {data: res.data, success: true});
       }
     } catch (e) {
-      commit("setForms", []);
+      commit("setForms", {data: [], success: false});
     }
   },
   async addForm(context, payload) {
@@ -49,8 +49,8 @@ const actions = {
 
 const mutations = {
   setForms(state, payload) {
-    state.forms = payload;
-    state.fetched = true;
+    state.forms = payload.data;
+    state.fetched = payload.success;
   },
 };
 

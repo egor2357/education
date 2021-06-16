@@ -50,12 +50,9 @@ export default {
     };
   },
   async created() {
-    if (!this.fetched)
-    {
-      this.loading = true;
-      await this.fetchAreas();
-      this.loading = false;
-    }
+    this.loading = true;
+    await this.fetchAreas();
+    this.loading = false;
   },
   methods: {
     ...mapActions({

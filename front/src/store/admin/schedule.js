@@ -25,7 +25,7 @@ const actions = {
     try {
       let res = await this.$axios.get("/api/schedule/");
       if (res.status === 200) {
-        commit("setJobs", res.data);
+        commit("setJobs", {data: res.data, success: true});
         let stat = {};
         stat["sum"] = {count: 0, name: 'Всего', max: 0};
         for (let job of res.data) {
@@ -45,7 +45,7 @@ const actions = {
         commit("setJobsStat", stat)
       }
     } catch (e) {
-      commit("setJobs", []);
+      commit("setJobs", {data: [], success: false});
     }
   },
   async addJob(context, payload) {
@@ -61,8 +61,8 @@ const actions = {
 
 const mutations = {
   setJobs(state, payload) {
-    state.jobs = payload;
-    state.fetched = true;
+    state.jobs = payload.data;
+    state.fetched = payload.success;
   },
   setJobsStat(state, payload) {
     state.jobsStat = payload;
