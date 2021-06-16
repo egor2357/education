@@ -166,47 +166,38 @@ const router = new VueRouter({
   ],
 });
 
-function check404(name) {
-  if (name === null) {
-    router.push("/404/");
-    return false;
-  }
-  return true;
-}
-
-function checkIsAuth(name) {
-  if (!store.getters["auth/getIsAuth"] && name !== "Login") {
-    router.push("/login/");
-    return false;
-  } else if (!store.getters["auth/getIsAuth"] && name === "Login") {
-    return true;
-  } else if (store.getters["auth/getIsAuth"] && name === "Login") {
-    router.push("/schedule");
-  } else {
-    return true;
-  }
-}
 
 router.beforeEach(async (to, from, next) => {
   if (store.getters["auth/getIsAuth"] === null) {
-    await store
-      .dispatch("auth/checkUser")
-      .then(() => {
-        let res1 = check404(to.name);
-        if (res1) {
-          let res2 = checkIsAuth(to.name);
-          if (res2) {
-            next();
-          }
-        }
-      })
-      .catch(() => {});
+    await store.dispatch("auth/checkUser");
+  }
+
+  let isAuth = false;
+  isAuth = store.getters["auth/getIsAuth"];
+
+  if (!isAuth) {
+    if (to.name == "Login") {
+      next();
+    } else {
+      next({name: "Login"});
+    }
   } else {
-    let res1 = check404(to.name);
-    if (res1) {
-      let res2 = checkIsAuth(to.name);
-      if (res2) {
+    let userInfo = store.getters["auth/getUserInfo"];
+    if (to.name == null) {
+      next({name: "Page404"});
+    } else {
+      if (!to.meta.staffOnly && !to.meta.specOnly) {
         next();
+      } else if (to.meta.staffOnly) {
+        if (userInfo.staff) {
+          next();
+        }
+      } else if (to.meta.specOnly) {
+        if (!userInfo.staff) {
+          next();
+        }
+      } else {
+        next({name: "Page404"});
       }
     }
   }
