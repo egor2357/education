@@ -75,6 +75,8 @@ export default {
         this.lastDay
       }`}`
     );
+    if (!this.activitiesFetched)
+      await this.fetchActivities();
     await this.makeTableData();
     this.loading = false;
   },
@@ -258,7 +260,8 @@ export default {
     ...mapGetters({
       presences: "presence/getPresences",
       specialists: "specialists/getSpecialists",
-      activities: "activities/getActivities"
+      activities: "activities/getActivities",
+      activitiesFetched: "activities/getFetched"
     }),
   },
   watch: {
@@ -267,9 +270,6 @@ export default {
         await this.updateData();
       }
     },
-  },
-  mounted() {
-    this.fetchActivities();
   },
 };
 </script>

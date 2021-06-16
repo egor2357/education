@@ -25,11 +25,11 @@ const actions = {
     try {
       let res = await this.$axios.get("/api/activities/");
       if (res.status === 200) {
-        commit("setActivities", res.data);
+        commit("setActivities", {data: res.data, success: true});
       }
     }
     catch (e) {
-      commit("setActivities", []);
+      commit("setActivities", {data: [], success: false});
     }
   },
   async addActivity(context, payload) {
@@ -51,8 +51,8 @@ const actions = {
 
 const mutations = {
   setActivities(state, payload) {
-    state.activities = payload;
-    state.fetched = true;
+    state.activities = payload.data;
+    state.fetched = payload.success;
   },
   setActivitiesCheckboxes(state, payload) {
     state.activitiesCheckboxes = payload;

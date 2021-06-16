@@ -61,9 +61,12 @@ export default {
     };
   },
   async created() {
-    this.loading = true;
-    await this.fetchActivities();
-    this.loading = false;
+    if (!this.activitiesFetched)
+    {
+      this.loading = true;
+      await this.fetchActivities();
+      this.loading = false;
+    }
   },
   methods: {
     ...mapActions({
@@ -79,6 +82,7 @@ export default {
   computed: {
     ...mapGetters({
       activities: "activities/getActivities",
+      activitiesFetched: "activities/getFetched"
     }),
   },
 };
