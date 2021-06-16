@@ -45,7 +45,63 @@
           </div>
         </div>
       </div>
+      <a-divider orientation="left" v-else>
+        Специалист не преподает ни одного вида деятельности
+      </a-divider>
       <div class="specialist-profile__header">Развиваемые навыки</div>
+      <div class="specialist-profile__competence" v-if="competence.length">
+        <div class="specialist-profile__table">
+          <div class="specialist-profile__table-header">
+            <div class="specialist-profile__table-area">Образовательная область</div>
+            <div class="specialist-profile__table-direction">Направление развития</div>
+            <div class="specialist-profile__table-skill">Навык</div>
+          </div>
+          <div class="specialist-profile__table-body">
+
+            <div class="specialist-profile__table-areas">
+            <div class="specialist-profile__table-area-row"
+              v-for="area in areas" :key="area.id">
+
+
+              <div class="specialist-profile__table-area">
+                {{ area.number }}. {{ area.name }}
+              </div>
+
+              <div class="specialist-profile__table-directions"
+                v-if="area.development_directions.length">
+              <div class="specialist-profile__table-direction-row"
+                v-for="direction in area.development_directions" :key="direction.id">
+
+                <div class="specialist-profile__table-direction">
+                  {{ area.number }}.{{ direction.number }}. {{ direction.name }}
+                </div>
+
+                <div class="specialist-profile__table-skills"
+                  v-if="direction.skills.length">
+                <div class="specialist-profile__table-skill-row"
+                  v-for="skill in direction.skills" :key="skill.id">
+
+                  <div class="specialist-profile__table-skill">
+                    <span>
+                      {{ area.number }}.{{ direction.number }}.{{ skill.number }}. {{ skill.name }}
+                    </span>
+                  </div>
+
+                </div>
+                </div>
+
+              </div>
+              </div>
+
+            </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <a-divider orientation="left" v-else>
+        Специалист не развивает ни одного навыка
+      </a-divider>
     </div>
   </a-spin>
 </template>
@@ -63,6 +119,7 @@ export default {
 
       userData: null,
       specialties: [],
+      competence: [],
     };
   },
   async created() {
@@ -73,6 +130,7 @@ export default {
     }
     fetches.push(this.fetchUserData());
     fetches.push(this.fetchSpecialties());
+    fetches.push(this.fetchCompetence());
 
 
     this.loading = true;
@@ -88,12 +146,12 @@ export default {
         if (res.status === 200) {
           this.userData = res.data;
         } else if (res.status === 400) {
-          this.$message.error("Ошибка при загрузке данных пользователя");
+          this.$message.error("Ошибка при загрузке данных специалиста");
         } else {
-          this.$message.error("Ошибка при загрузке данных пользователя");
+          this.$message.error("Ошибка при загрузке данных специалиста");
         }
       } catch (e) {
-        this.$message.error("Ошибка при загрузке данных пользователя");
+        this.$message.error("Ошибка при загрузке данных специалиста");
       } finally {
         this.loading = false;
       }
@@ -105,12 +163,29 @@ export default {
         if (res.status === 200) {
           this.specialties = res.data;
         } else if (res.status === 400) {
-          this.$message.error("Ошибка при загрузке видов деятельности пользователя");
+          this.$message.error("Ошибка при загрузке видов деятельности специалиста");
         } else {
-          this.$message.error("Ошибка при загрузке видов деятельности пользователя");
+          this.$message.error("Ошибка при загрузке видов деятельности специалиста");
         }
       } catch (e) {
-        this.$message.error("Ошибка при загрузке видов деятельности пользователя");
+        this.$message.error("Ошибка при загрузке видов деятельности специалиста");
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchCompetence(){
+      try {
+        let res = await this.$axios.get("/api/competence/");
+        if (res.status === 200) {
+          this.competence = res.data;
+        } else if (res.status === 400) {
+          this.$message.error("Ошибка при загрузке навыков специалиста");
+        } else {
+          this.$message.error("Ошибка при загрузке навыков специалиста");
+        }
+      } catch (e) {
+        this.$message.error("Ошибка при загрузке навыков специалиста");
       } finally {
         this.loading = false;
       }
@@ -173,6 +248,53 @@ export default {
           .activity-label
             margin: 5px
             color: #111111
+
+    &__table
+      display: flex
+      flex: 1
+      flex-direction: column
+      border-left: 1px solid #ccc
+      border-top: 1px solid #ccc
+      &-header
+        display: flex
+        flex: 1
+        flex-direction: row
+        background-color: #f4f4f4
+        color: rgba(0, 0, 0, 0.85)
+        div
+          display: flex
+          align-items: center
+      &-body
+        display: flex
+        flex: 1
+        flex-direction: column
+
+      &-areas, &-directions, &-skills
+        display: flex
+        flex: 1
+        flex-direction: column
+      &-area-row, &-direction-row, &-skill-row
+        display: flex
+        flex: 1
+        flex-direction: row
+      &-area, &-direction, &-count
+        min-width: 200px
+        width: 200px
+        padding: 10px 15px
+        border-right: 1px solid #ccc
+        border-bottom: 1px solid #ccc
+      &-skill
+        min-width: 200px
+        flex: 1
+        padding: 10px 15px
+        border-right: 1px solid #ccc
+        border-bottom: 1px solid #ccc
+        &-link
+          color: #1890ff
+          transition: all .3s cubic-bezier(.645,.045,.355,1)
+          cursor: pointer
+          &:hover
+            color: #40a9ff
 
 
 
