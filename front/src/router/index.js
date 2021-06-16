@@ -155,7 +155,7 @@ const router = new VueRouter({
       ]
     },
     {
-      path: "/specialist-profile ",
+      path: "/specialist-profile",
       name: "SpecialistProfile",
       component: () => import("@/components/SpecialistProfile/SpecialistProfile"),
       meta: {
