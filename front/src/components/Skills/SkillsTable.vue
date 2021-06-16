@@ -140,6 +140,20 @@ export default {
     overflow: auto
     height: 100%
 
+  .skill-table__cell
+    transition: background 0.3s
+    cursor: default
+
+    &.area
+      width: 20%
+
+    &.direction
+      border-left: 1px solid #e8e8e8
+
+    &.skill
+      border-left: 1px solid #e8e8e8
+      flex: 1
+
   .skill-table__header
     display: flex
     border: 1px solid #e8e8e8
@@ -150,24 +164,16 @@ export default {
     line-height: 20px
     height: 42px
 
-  .skill-table__cell
-    transition: background 0.3s
-    cursor: default
-
-    &.area
-      width: 200px
-
-    &.direction
-      width: 250px
-      border-left: 1px solid #e8e8e8
-
-    &.skill
-      flex: 1
+    .skill-table__cell.direction
+      width: 20%
       border-left: 1px solid #e8e8e8
 
   .skill-table__body
     border: 1px solid #e8e8e8
     border-top: 0 none
+
+    .skill-table__cell.direction
+      width: 25%
 
     .skill-table__cell:hover
       background: #e6f7ff
