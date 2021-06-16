@@ -174,14 +174,18 @@ export default {
       areasFetched: "skills/getFetched",
       areas: "skills/getAreas",
     }),
+
     filteredAreas(){
-      return this.areas.filter((area)=>{
-        for (let direction of area.development_directions) {
-          if (direction.skills.length) {
-            return true;
-          }
-        }
-      });
+      return this.areas
+      .map((area)=>{
+        return {
+          id: area.id,
+          name: area.name,
+          number: area.number,
+          development_directions: area.development_directions.filter(direction=>direction.skills.length)
+        };
+      })
+      .filter((area)=>area.development_directions.length);
     },
   },
 

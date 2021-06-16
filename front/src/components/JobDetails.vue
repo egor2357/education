@@ -22,7 +22,7 @@
           </div>
           <div class="job-details__header-title__specialist">
             <div class="job-details__header-title__specialist-label">Специалист:</div>
-            <div class="job-details__header-title__specialist-name">{{ job.specialist.__str__ }}</div>
+            <div class="job-details__header-title__specialist-name">{{ job.specialist ? job.specialist.__str__ : "Не назначен"}}</div>
           </div>
         </div>
 
@@ -40,6 +40,7 @@
 
       <div class="job-details__body" v-if="job">
 
+        <template v-if="isJobWindow">
         <a-form-model :model="form" v-bind="layout" :rules="rules" ref="jobForm">
 
           <a-form-model-item prop="topic" label="Тема занятия" key="topic"
@@ -66,7 +67,7 @@
                   :title="direction.name">
                   <a-tree-select-node v-for="skill in direction.skills"
                     :key="'skill'+skill.id"
-                    :value="''+skill.id"
+                    :value="skill.id"
                     :title="skill.name"
                     :isLeaf="true">
                   </a-tree-select-node>
@@ -98,14 +99,63 @@
             </a-select>
           </a-form-model-item>
 
-          <a-form-model-item prop="comment" label="Дополнительная информация по занятию" key="comment">
+          <a-form-model-item prop="comment" label="Дополнительная информация по занятию" key="comment"
+            :validateStatus="fields['comment'].validateStatus" :help="fields['comment'].help">
             <a-input v-model="form.comment"
               allow-clear
-              :auto-size="{minRows: 4, maxRows: 8}"
+              :auto-size="{minRows: 4, maxRows: 6}"
+              @change="fieldChanged($event, 'comment')"
               type="textarea"/>
           </a-form-model-item>
 
+          <a-form-model-item prop="job_files" label="Прикрепленные файлы" key="job_files"
+            :validateStatus="fields['job_files'].validateStatus" :help="fields['job_files'].help">
+            <a-upload
+              multiple
+              list-type="picture"
+              :default-file-list="form.job_files"
+              :remove="handleRemoveJobFile"
+              :before-upload="beforeUploadJobFile"
+              class="job-details__body__form-files"
+            >
+              <a-button> <a-icon type="upload" /> Прикрепить файл </a-button>
+            </a-upload>
+          </a-form-model-item>
+
+          <a-form-model-item class="job-details__body__form-ok"
+            :wrapper-col="{offset: 6}">
+            <a-button icon="check" type="primary" @click="saveJob">Сохранить параметры занятия</a-button>
+          </a-form-model-item>
         </a-form-model>
+        </template>
+
+        <template v-else>
+          <div class="job-details__wrapper">
+            <div class="job-details__label" v-if="reportForm.marks.length">Уровень освоения</div>
+            <div class="job-details__reports">
+              <div class="job-details__report" v-for="report in reportForm.marks" :key="report.id">
+                <div class="job-details__report-name">
+                  {{ report.skill.area_number }}.{{ report.skill.direction_number }}. {{ report.skill.name }}
+                </div>
+                <div class="job-details__report-marks">
+                  <div class="job-details__report-mark" v-for="i in 3" :key="i"
+                    :class="{'current': report.mark == i-1}"
+                    :style="{'background-color': getColorByMark(i-1)}"
+                    @click="setReportMark(report, i-1)">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <a-input v-model="reportForm.report_comment"
+              class="job-details__report_comment"
+              allow-clear
+              placeholder="Результат проведения занятия"
+              :auto-size="{minRows: 4, maxRows: 10}"
+              type="textarea"/>
+            <a-button icon="check" type="primary" @click="saveReport">Сохранить отчет</a-button>
+          </div>
+        </template>
+
 
       </div>
     </div>
@@ -116,6 +166,7 @@
 import moment from "moment";
 import getColorByMark from "@/mixins/getColorByMark"
 import { mapActions, mapGetters } from "vuex";
+import patch from "@/middleware/patch";
 
 export default {
   name: "JobDetails",
@@ -133,9 +184,16 @@ export default {
         form_id: null,
         method_id: null,
         comment: '',
+        job_files: [],
+      },
+
+      reportForm: {
+        marks: [],
+        report_comment: '',
       },
 
       isJobWindow: true,
+
       layout: {
         labelCol: { span: 6 },
         wrapperCol: { span: 14 },
@@ -159,6 +217,10 @@ export default {
           help: "",
         },
         'comment': {
+          validateStatus: "",
+          help: "",
+        },
+        'job_files': {
           validateStatus: "",
           help: "",
         },
@@ -199,7 +261,15 @@ export default {
             message: "Пожалуйста, введите дополнительную информацию",
           },
         ],
+        job_files: [
+          {
+            trigger: "change",
+            required: false,
+            message: "Пожалуйста, выберите файлы",
+          },
+        ],
       },
+
     };
   },
   computed: {
@@ -226,7 +296,6 @@ export default {
     }),
 
     fieldChanged(value, key){
-      console.log(value);
       if (key == "form_id") {
         this.form.method_id = null;
       }
@@ -239,10 +308,33 @@ export default {
       for (let value of values) {
         this.form.reports.push(value);
       }
+      this.fieldChanged(values, 'reports');
     },
 
     goBack(){
       this.$router.go(-1);
+    },
+    setJobFormData(job) {
+      this.form.topic = job.topic;
+      this.form.reports.splice(0);
+      this.form.reports = job.reports.map((report)=>{
+        return report.skill_id;
+      });
+      this.form.form_id = job.method ? job.method.form_id : null;
+      this.form.method_id = job.method ? job.method.id : null;
+      this.form.comment = job.comment;
+      this.form.job_files.splice(0);
+      for (let job_file of job.job_files) {
+        this.form.job_files.push({
+          uid: job_file.id,
+          name: job_file.name,
+          status: 'done',
+          url: job_file.file,
+        });
+      }
+
+      this.reportForm.marks = job.reports.slice();
+      this.reportForm.report_comment = job.report_comment;
     },
     async fetchJob(){
       try {
@@ -251,17 +343,8 @@ export default {
         let res = await this.$axios.get(`/api/jobs/${jobId}`);
         if (res.status === 200) {
           this.job = res.data;
-
           this.jobDateMoment = moment(this.job.date, "YYYY-MM-DD");
-
-          this.form.topic = this.job.topic
-          this.form.reports = this.job.reports.map((report)=>{
-            return String(report.skill_id);
-          });
-          this.form.form_id = this.job.method ? this.job.method.form_id : null;
-          this.form.method_id = this.job.method ? this.job.method.id : null;
-          this.form.comment = this.job.comment;
-
+          this.setJobFormData(this.job);
         } else {
           this.$message.error("Произошла ошибка при загрузке занятия");
         }
@@ -270,6 +353,88 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    async saveJob(){
+      this.$refs.jobForm.validate(async (valid) => {
+        if (valid) {
+          try {
+            this.loading = true;
+
+            const formData = new FormData();
+            formData.append('topic', this.form.topic);
+            formData.append('reports', this.form.reports);
+            formData.append('method_id', this.form.method_id ? this.form.method_id : '');
+            formData.append('comment', this.form.comment);
+
+            let allFilesIds = [];
+            this.form.job_files.forEach((file) => {
+              allFilesIds.push(file.uid);
+              if (file.status != "done") {
+                formData.append(file.uid, file);
+              }
+            });
+            formData.append('files', allFilesIds);
+
+            let res = await patch(this.$axios, `/api/jobs/${this.$route.params.id}/`, formData);
+            if (res.status === 200) {
+              this.$message.success("Параметры занятия сохранены");
+              await this.fetchJob();
+            } else if (res.status === 400) {
+              this.$message.error("Проверьте введённые данные");
+              for (let key in res.data) {
+                this.fields[key].validateStatus = "error";
+                this.fields[key].help = res.data[key];
+              }
+            } else {
+              this.$message.error("Произошла ошибка");
+            }
+          } catch (e) {
+            this.$message.error("Произошла ошибка");
+          } finally {
+            this.loading = false;
+          }
+        } else {
+          return false;
+        }
+      });
+    },
+
+
+    setReportMark(report, mark) {
+      if (report.mark == mark) {
+        report.mark = null;
+      } else {
+        report.mark = mark;
+      }
+    },
+    async saveReport(){
+      this.loading = true;
+      try{
+        let res = await patch(this.$axios, `/api/jobs/${this.$route.params.id}/`, this.reportForm);
+        if (res.status === 200) {
+          this.$message.success("Отчет сохранен");
+          await this.fetchJob();
+        } else if (res.status === 400) {
+          this.$message.error("Проверьте введённые данные");
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка");
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    handleRemoveJobFile(file) {
+      const index = this.form.job_files.indexOf(file);
+      const newFileList = this.form.job_files.slice();
+      newFileList.splice(index, 1);
+      this.form.job_files = newFileList;
+    },
+    beforeUploadJobFile(file) {
+      this.form.job_files = [...this.form.job_files, file];
+      return false;
     },
   },
   async created() {
@@ -329,8 +494,6 @@ export default {
           color: rgba(0, 0, 0, 0.85)
           font-size: 20px
           line-height: 22px
-          &:first-letter
-            font-weight: bold
         &-weekday
           font-size: 18px
           line-height: 20px
@@ -355,6 +518,73 @@ export default {
         justify-content: flex-start
 
   &__body
+
+  &__body__form-files
+    display: flex
+    flex-direction: column
+    max-height: 200px
+    .ant-upload-list
+      display: flex
+      flex: 1
+      flex-direction: row
+      flex-wrap: wrap
+      overflow-y: auto
+      .ant-upload-list-item
+        min-width: 200px
+        margin-right: 8px
+
+
+  &__wrapper
+    display: flex
+    flex-direction: column
+    padding: 0 20%
+    align-items: flex-end
+  &__label
+    font-size: 18px
+    font-weight: bold
+    margin-bottom: 16px
+  &__reports
+    display: flex
+    width: 100%
+    flex-direction: column
+    margin-bottom: 10px
+    max-height: 400px
+    overflow-y: auto
+
+  &__report
+    display: flex
+    flex-direction: row
+    align-items: center
+    justify-content: space-between
+    margin-bottom: 10px
+    padding-bottom: 10px
+    border-bottom: 1px solid #e8e8e8
+    &-name
+      padding-left: 10px
+      font-size: 18px
+    &-marks
+      display: flex
+      flex-direction: row
+    &-mark
+      height: 40px
+      width: 40px
+      border-radius: 20px
+      background: #ccc
+      box-shadow: 0 1px 3px 1px #dedede
+      margin-right: 10px
+      cursor: pointer
+      opacity: 0.2
+      transition: 0.2s ease-out
+      &:hover
+        opacity: 1
+      &.current
+        opacity: 1
+
+  &__report_comment
+    margin-bottom: 24px
+
+
+
 
 
 </style>

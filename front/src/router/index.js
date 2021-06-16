@@ -12,6 +12,8 @@ const router = new VueRouter({
       name: "Login",
       component: () => import("@/views/Login"),
       meta: {
+        staffOnly: false,
+        specOnly: false,
       },
     },
     {
@@ -21,6 +23,7 @@ const router = new VueRouter({
       component: () => import("@/views/Admin/SkillsStructure"),
       meta: {
         staffOnly: true,
+        specOnly: false,
       },
     },
     {
@@ -29,6 +32,7 @@ const router = new VueRouter({
       component: () => import("@/views/Admin/ActivitiesTypes"),
       meta: {
         staffOnly: true,
+        specOnly: false,
       },
     },
     {
@@ -37,6 +41,7 @@ const router = new VueRouter({
       component: () => import("@/views/Admin/Specialists"),
       meta: {
         staffOnly: true,
+        specOnly: false,
       },
     },
     {
@@ -45,6 +50,7 @@ const router = new VueRouter({
       component: () => import("@/views/Admin/Schedule"),
       meta: {
         staffOnly: true,
+        specOnly: false,
       },
     },
     {
@@ -53,6 +59,7 @@ const router = new VueRouter({
       component: () => import("@/views/Admin/Forms"),
       meta: {
         staffOnly: true,
+        specOnly: false,
       },
     },
     {
@@ -61,6 +68,7 @@ const router = new VueRouter({
       component: () => import("@/views/Admin/AvailableChart"),
       meta: {
         staffOnly: true,
+        specOnly: false,
       },
     },
     {
@@ -68,6 +76,8 @@ const router = new VueRouter({
       name: "Developing",
       component: () => import("@/views/InDeveloping"),
       meta: {
+        staffOnly: false,
+        specOnly: false,
       },
     },
     {
@@ -75,6 +85,8 @@ const router = new VueRouter({
       name: "Developing",
       component: () => import("@/views/InDeveloping"),
       meta: {
+        staffOnly: false,
+        specOnly: false,
       },
     },
     {
@@ -82,12 +94,16 @@ const router = new VueRouter({
       name: "Page404",
       component: () => import("@/views/Page404"),
       meta: {
+        staffOnly: false,
+        specOnly: false,
       },
     },
     {
       path: "/jobs",
       component: () => import("@/views/Jobs"),
       meta: {
+        staffOnly: false,
+        specOnly: false,
       },
       children: [
         {
@@ -95,6 +111,8 @@ const router = new VueRouter({
           name: "JobSchedule",
           component: () => import("@/components/JobSchedule/JobSchedule"),
           meta: {
+            staffOnly: false,
+            specOnly: false,
           },
         },
         {
@@ -102,6 +120,8 @@ const router = new VueRouter({
           name: "JobDetails",
           component: () => import("@/components/JobDetails"),
           meta: {
+            staffOnly: false,
+            specOnly: false,
           },
         },
       ]
@@ -110,6 +130,8 @@ const router = new VueRouter({
       path: "/skill-development",
       component: () => import("@/views/SkillDevelopment"),
       meta: {
+        staffOnly: false,
+        specOnly: false,
       },
       children: [
         {
@@ -117,6 +139,8 @@ const router = new VueRouter({
           name: "AllSkills",
           component: () => import("@/components/SkillDevelopment/AllSkills"),
           meta: {
+            staffOnly: false,
+            specOnly: false,
           },
         },
         {
@@ -124,54 +148,56 @@ const router = new VueRouter({
           name: "SkillDetails",
           component: () => import("@/components/SkillDevelopment/SkillDetails"),
           meta: {
+            staffOnly: false,
+            specOnly: false,
           },
         },
       ]
     },
+    {
+      path: "/specialist-profile ",
+      name: "SpecialistProfile",
+      component: () => import("@/components/SpecialistProfile/SpecialistProfile"),
+      meta: {
+        staffOnly: false,
+        specOnly: true,
+      },
+    },
   ],
 });
 
-function check404(name) {
-  if (name === null) {
-    router.push("/404/");
-    return false;
-  }
-  return true;
-}
-
-function checkIsAuth(name) {
-  if (!store.getters["auth/getIsAuth"] && name !== "Login") {
-    router.push("/login/");
-    return false;
-  } else if (!store.getters["auth/getIsAuth"] && name === "Login") {
-    return true;
-  } else if (store.getters["auth/getIsAuth"] && name === "Login") {
-    router.push("/schedule");
-  } else {
-    return true;
-  }
-}
 
 router.beforeEach(async (to, from, next) => {
   if (store.getters["auth/getIsAuth"] === null) {
-    await store
-      .dispatch("auth/checkUser")
-      .then(() => {
-        let res1 = check404(to.name);
-        if (res1) {
-          let res2 = checkIsAuth(to.name);
-          if (res2) {
-            next();
-          }
-        }
-      })
-      .catch(() => {});
+    await store.dispatch("auth/checkUser");
+  }
+
+  let isAuth = false;
+  isAuth = store.getters["auth/getIsAuth"];
+
+  if (!isAuth) {
+    if (to.name == "Login") {
+      next();
+    } else {
+      next({name: "Login"});
+    }
   } else {
-    let res1 = check404(to.name);
-    if (res1) {
-      let res2 = checkIsAuth(to.name);
-      if (res2) {
+    let userInfo = store.getters["auth/getUserInfo"];
+    if (to.name == null) {
+      next({name: "Page404"});
+    } else {
+      if (!to.meta.staffOnly && !to.meta.specOnly) {
         next();
+      } else if (to.meta.staffOnly) {
+        if (userInfo.staff) {
+          next();
+        }
+      } else if (to.meta.specOnly) {
+        if (!userInfo.staff) {
+          next();
+        }
+      } else {
+        next({name: "Page404"});
       }
     }
   }

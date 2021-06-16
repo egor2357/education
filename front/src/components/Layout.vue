@@ -16,11 +16,13 @@
         <template v-for="item in menu">
           <a-sub-menu
             :key="item.key"
-            v-if="
-              (item.childrens.length > 0 && !item.staffOnly) ||
-              (item.staffOnly && userInfo.staff)
-            "
-          >
+            v-if="(item.childrens.length)
+                    &&
+                  (!item.staffOnly && !item.specOnly)
+                    ||
+                  (item.staffOnly && userInfo.staff)
+                    ||
+                  (item.specOnly && !userInfo.staff)">
             <span slot="title">
               <a-icon :type="item.icon" />
               <span>{{ item.title }}</span>
@@ -51,10 +53,8 @@
             <p style="margin-bottom: 0; min-width: 120px; text-align: center">
               {{ userInfo.name }}
             </p>
-            <p
-              style="text-align: center; font-size: 0.8rem; font-weight: bold"
-              v-if="userInfo.staff"
-            >
+            <p style="text-align: center; font-size: 0.8rem; font-weight: bold"
+              v-if="userInfo.staff">
               Администратор
             </p>
           </div>
@@ -87,6 +87,8 @@ export default {
           icon: "schedule",
           title: "Занятия",
           key: "1",
+          staffOnly: false,
+          specOnly: false,
           to: { name: "JobSchedule" },
           childrens: [],
         },
@@ -94,46 +96,68 @@ export default {
           icon: "rise",
           title: "Развитие навыков",
           key: "2",
+          staffOnly: false,
+          specOnly: false,
           to: { name: "AllSkills" },
           childrens: [],
         },
         {
-          icon: "tool",
+          icon: "setting",
           key: "3",
           title: "Настройки",
           staffOnly: true,
+          specOnly: false,
           childrens: [
             {
-              key: "2.1",
+              key: "3.1",
               title: "Структура навыков",
               to: { name: "Skills" },
             },
             {
-              key: "2.2",
+              key: "3.2",
               title: "Виды деятельности",
               to: { name: "ActivitiesTypes" },
             },
             {
-              key: "2.3",
+              key: "3.3",
               title: "Пользователи",
               to: { name: "Specialists" },
             },
             {
-              key: "2.4",
+              key: "3.4",
               title: "Расписание",
               to: { name: "Schedule" },
             },
             {
-              key: "2.5",
+              key: "3.5",
               title: "Формы и способы занятий",
               class: "submenu--two-lines",
               to: { name: "Forms" },
             },
             {
-              key: "2.6",
+              key: "3.6",
               title: "График присутствия специалистов",
               class: "submenu--two-lines",
               to: { name: "AvailableChart" },
+            },
+          ],
+        },
+        {
+          icon: "user",
+          title: "Личный кабинет",
+          key: "4",
+          staffOnly: false,
+          specOnly: true,
+          childrens: [
+            {
+              key: "4.1",
+              title: "Профиль",
+              to: { name: "SpecialistProfile" },
+            },
+            {
+              key: "4.2",
+              title: "Планы занятий",
+              to: { name: "Options" },
             },
           ],
         },

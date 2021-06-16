@@ -66,7 +66,7 @@ class Development_directionView(viewsets.ModelViewSet):
 class SkillView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Skill.objects.all()
+  queryset = Skill.objects.all().select_related('direction__area')
   serializer_class = SkillSerializer
 
 class FormView(viewsets.ModelViewSet):
@@ -93,11 +93,61 @@ class JobView(viewsets.ModelViewSet):
                           )
                           .prefetch_related(
                             'job_file_set',
-                            'skill_report_set'
+                            'skill_report_set__skill'
                           ))
   serializer_class = JobSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = JobFilter
+
+  def partial_update(self, request, pk=None):
+    #Требует FormData для передачи файлов
+    job = self.get_object()
+
+    if 'files' in request.data:
+      files = request.data.get('files', '')
+      files = files.split(',') if files else []
+      curr_job_files_ids = list(job.job_file_set.all().values_list('id', flat=True))
+      files_to_save = []
+      remaining_files = []
+      for file in files:
+        if file in request.FILES:
+          file_data = request.FILES[file]
+          files_to_save.append(Job_file(job=job, file=file_data))
+        else:
+          remaining_files.append(int(file))
+      Job_file.objects.exclude(pk__in=remaining_files).delete()
+      Job_file.objects.bulk_create(files_to_save)
+
+    if 'reports' in request.data:
+      skills = request.data.get('reports', '')
+      skills = [int(report) for report in skills.split(',')] if skills else []
+      curr_skill_reports_ids = list(job.skill_report_set.all().values_list('skill_id', flat=True))
+      skills_to_save = []
+      remaining_skills = []
+      for skill in skills:
+        if skill not in curr_skill_reports_ids:
+          skills_to_save.append(Skill_report(job=job, skill_id=skill))
+        else:
+          remaining_skills.append(skill)
+
+      skill_reports_qs = job.skill_report_set.all()
+      skill_reports_qs.exclude(skill_id__in=remaining_skills).delete()
+      Skill_report.objects.bulk_create(skills_to_save)
+
+    if 'marks' in request.data:
+      marks = request.data.get('marks', [])
+      for mark in marks:
+        Skill_report.objects.filter(pk=mark['id']).update(mark=mark['mark'])
+
+
+    serializer = JobSerializer(job, data=request.data, partial=True)
+    if serializer.is_valid(raise_exception=True):
+      serializer.save()
+      job.refresh_from_db()
+      serializer = JobSerializer(job)
+
+    return Response(serializer.data)
+
 
   @classmethod
   def get_between(self, start_date, end_date):
@@ -289,7 +339,13 @@ class Job_fileView(viewsets.ModelViewSet):
 class Skill_reportView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
-  queryset = Skill_report.objects.all()
+  queryset = (Skill_report.objects.all()
+                                  .select_related(
+                                    'skill__direction__area',
+                                    'job__activity',
+                                    'job__method__form'
+                                  )
+                                  )
   serializer_class = Skill_reportSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = Skill_reportFilter
