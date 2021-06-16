@@ -144,7 +144,7 @@ export default {
       try {
         this.loading = true;
         let firstQParameter = `date_from=${this.dateRange[0].format("YYYY-MM-DD")}`;
-        let secondQParameter = `date__to=${this.dateRange[1].format("YYYY-MM-DD")}`;
+        let secondQParameter = `date_to=${this.dateRange[1].format("YYYY-MM-DD")}`;
         let thirdQParameter = `is_affected=true`;
         let QParameters = `?${firstQParameter}&${secondQParameter}&${thirdQParameter}`;
         let res = await this.$axios.get(`/api/skill_reports/${QParameters}`);
