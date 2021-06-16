@@ -346,7 +346,7 @@ class Job(models.Model):
   date = models.DateField(verbose_name='Дата проведения')
   start_time = models.TimeField(verbose_name='Время начала')
 
-  topic = models.TextField(max_length=200, verbose_name='Тема занятия')
+  topic = models.TextField(blank=True, max_length=200, verbose_name='Тема занятия')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
   report_comment = models.TextField(blank=True, verbose_name='Комментарий по результатам занятия')
