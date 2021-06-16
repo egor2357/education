@@ -84,7 +84,7 @@ export default {
     ...mapGetters({
       areas: "skills/getAreas",
       areasFetched: "skills/getFetched",
-      filteredAreas: "skills/getFilteresAreas"
+      filteredAreas: "skills/getFilteredAreas"
     })
   },
   async created() {

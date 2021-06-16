@@ -12,7 +12,7 @@ const getters = {
   getAreas(state) {
     return state.areas;
   },
-  getFilteresAreas(state) {
+  getFilteredAreas(state) {
     return state.areas.map(area => {
       return {
         id: area.id,
