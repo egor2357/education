@@ -355,10 +355,10 @@ export default {
       }
     },
     async saveJob(){
-      this.loading = true;
       this.$refs.jobForm.validate(async (valid) => {
         if (valid) {
           try {
+            this.loading = true;
 
             const formData = new FormData();
             formData.append('topic', this.form.topic);

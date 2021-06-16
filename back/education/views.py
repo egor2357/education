@@ -129,7 +129,9 @@ class JobView(viewsets.ModelViewSet):
           skills_to_save.append(Skill_report(job=job, skill_id=skill))
         else:
           remaining_skills.append(skill)
-      Skill_report.objects.exclude(job=job, skill_id__in=remaining_skills).delete()
+
+      skill_reports_qs = job.skill_report_set.all()
+      skill_reports_qs.exclude(skill_id__in=remaining_skills).delete()
       Skill_report.objects.bulk_create(skills_to_save)
 
     if 'marks' in request.data:
