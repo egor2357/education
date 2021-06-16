@@ -49,6 +49,18 @@ class LoginSerializer(serializers.Serializer):
 
     return {'user': user}
 
+class FilteredSkillListSerializer(serializers.ListSerializer):
+  def to_representation(self, data):
+    user=self.context['request'].user
+    qs = Skill.objects.none()
+    if user.is_staff:
+      qs =  data
+    else:
+      if user.specialist is not None:
+        qs = data.filter(competence__specialist=user.specialist)
+
+    return super(FilteredSkillListSerializer, self).to_representation(qs)
+
 class SkillSerializer(FlexFieldsModelSerializer):
   direction_id = serializers.PrimaryKeyRelatedField(
     source='direction', queryset=Development_direction.objects.all()
@@ -70,6 +82,7 @@ class SkillSerializer(FlexFieldsModelSerializer):
       'direction_number',
       'area_number'
     )
+    list_serializer_class = FilteredSkillListSerializer
 
 class Activity_skillSerializer(serializers.ModelSerializer):
   skill_id = serializers.PrimaryKeyRelatedField(
@@ -399,6 +412,18 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
       'presence': PresenceSerializer,
     }
 
+class FilteredDevelopment_directionListSerializer(serializers.ListSerializer):
+  def to_representation(self, data):
+    user=self.context['request'].user
+    qs = Development_direction.objects.none()
+    if user.is_staff:
+      qs =  data
+    else:
+      if user.specialist is not None:
+        qs = data.filter(skill__competence__specialist=user.specialist)
+
+    return super(FilteredDevelopment_directionListSerializer, self).to_representation(qs)
+
 class Development_directionSerializer(serializers.ModelSerializer):
   area_id = serializers.PrimaryKeyRelatedField(
     source='area', queryset=Educational_area.objects.all()
@@ -413,14 +438,28 @@ class Development_directionSerializer(serializers.ModelSerializer):
       'skills',
       'name', 'number',
     )
+    list_serializer_class = FilteredDevelopment_directionListSerializer
+
+class FilteredEducational_areaListSerializer(serializers.ListSerializer):
+  def to_representation(self, data):
+    user=self.context['request'].user
+    qs = Educational_area.objects.none()
+    if user.is_staff:
+      qs = data
+    else:
+      if user.specialist is not None:
+        qs = data.filter(development_direction__skill__competence__specialist=user.specialist)
+
+    return super(FilteredEducational_areaListSerializer, self).to_representation(qs)
 
 class Educational_areaSerializer(serializers.ModelSerializer):
   development_directions = Development_directionSerializer(
-    source='development_direction_set', many=True, read_only=True
+    source='development_direction_set', many=True, read_only=True,
   )
   class Meta:
     model = Educational_area
     fields = ('id', 'name', 'number', 'development_directions')
+    list_serializer_class = FilteredEducational_areaListSerializer
 
 class MethodSerializer(serializers.ModelSerializer):
   form_id = serializers.PrimaryKeyRelatedField(
