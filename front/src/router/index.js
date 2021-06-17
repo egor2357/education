@@ -163,6 +163,15 @@ const router = new VueRouter({
         specOnly: true,
       },
     },
+    {
+      path: "/job-options",
+      name: "JobOptions",
+      component: () => import("@/views/JobOptions"),
+      meta: {
+        staffOnly: false,
+        specOnly: true,
+      },
+    },
   ],
 });
 

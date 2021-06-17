@@ -35,7 +35,7 @@
 
             <div class="skill-development__body__table-areas">
             <div class="skill-development__body__table-area-row"
-              v-for="area in filteredAreas" :key="area.id">
+              v-for="area in areas" :key="area.id">
 
 
               <div class="skill-development__body__table-area">
@@ -144,7 +144,7 @@ export default {
       try {
         this.loading = true;
         let firstQParameter = `date_from=${this.dateRange[0].format("YYYY-MM-DD")}`;
-        let secondQParameter = `date__to=${this.dateRange[1].format("YYYY-MM-DD")}`;
+        let secondQParameter = `date_to=${this.dateRange[1].format("YYYY-MM-DD")}`;
         let thirdQParameter = `is_affected=true`;
         let QParameters = `?${firstQParameter}&${secondQParameter}&${thirdQParameter}`;
         let res = await this.$axios.get(`/api/skill_reports/${QParameters}`);
@@ -172,21 +172,8 @@ export default {
   computed: {
     ...mapGetters({
       areasFetched: "skills/getFetched",
-      areas: "skills/getAreas",
+      areas: "skills/getFilteredAreas",
     }),
-
-    filteredAreas(){
-      return this.areas
-      .map((area)=>{
-        return {
-          id: area.id,
-          name: area.name,
-          number: area.number,
-          development_directions: area.development_directions.filter(direction=>direction.skills.length)
-        };
-      })
-      .filter((area)=>area.development_directions.length);
-    },
   },
 
 };

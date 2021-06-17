@@ -57,6 +57,10 @@
               v-if="userInfo.staff">
               Администратор
             </p>
+            <p style="text-align: center; font-size: 0.8rem; font-weight: bold"
+              v-else>
+              Специалист
+            </p>
           </div>
           <a-icon
             class="icon-button icon-exit"
@@ -157,7 +161,7 @@ export default {
             {
               key: "4.2",
               title: "Планы занятий",
-              to: { name: "Options" },
+              to: { name: "JobOptions" },
             },
           ],
         },
@@ -233,6 +237,8 @@ export default {
   padding: 10px 15px
   display: flex
   justify-content: flex-end
+  .icon-exit svg
+    transform: rotate(180deg)
 .submenu--two-lines
   line-height: 20px
   white-space: normal
