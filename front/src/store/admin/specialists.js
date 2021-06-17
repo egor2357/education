@@ -105,6 +105,10 @@ const actions = {
 };
 
 const mutations = {
+  clear(state){
+    state.specialists = [];
+    state.fetched = false;
+  },
   setSpecialists(state, payload) {
     state.specialists = payload.data;
     state.fetched = payload.success;

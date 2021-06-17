@@ -170,8 +170,17 @@ export default {
     };
   },
   methods: {
+    clearStore(){
+      this.$store.commit("activities/clear");
+      this.$store.commit("forms/clear");
+      this.$store.commit("presence/clear");
+      this.$store.commit("presence/schedule");
+      this.$store.commit("presence/skills");
+      this.$store.commit("presence/specialists");
+    },
     async logout() {
       await this.$store.dispatch("auth/logout");
+      this.clearStore();
       this.$router.push("/login/");
     },
   },

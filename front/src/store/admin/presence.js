@@ -36,6 +36,9 @@ const actions = {
 };
 
 const mutations = {
+  clear(state){
+    state.presences = [];
+  },
   setPresences(state, payload) {
     state.presences = payload;
   },
