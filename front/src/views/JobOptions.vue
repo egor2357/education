@@ -11,9 +11,21 @@
           </a-tab-pane>
         </a-tabs>
       </div>
-      <div>
-        <div v-for="option in currentActivityOptions" :key="option.id">
-          <job-option :option="option"/>
+      <div class="job-options__cards">
+        <div class="job-options__card" v-for="option in currentActivityOptions" :key="option.id">
+          <job-option :option="option">
+            <a-divider type="vertical" />
+            <div class="job-option-header-actions">
+              <div class="job-option-header-action"
+                @click="editOption(option)">
+                Изменить
+              </div>
+              <div class="job-option-header-action"
+                @click="deleteOption(option)">
+                Удалить
+              </div>
+            </div>
+          </job-option>
         </div>
       </div>
 
@@ -77,6 +89,13 @@ export default {
       }
     },
 
+    editOption(option){
+      console.log(option.topic);
+    },
+    deleteOption(option){
+      console.log(option.topic);
+    },
+
     ...mapActions({
       fetchActivities: "activities/fetchActivities",
     }),
@@ -109,4 +128,15 @@ export default {
     &__tabs
       display: flex
       justify-content: center
+    &__cards
+      display: flex
+      flex-direction: column
+      flex: 1
+      overflow-y: auto
+      margin-top: 10px
+      width: 900px
+      margin: 10px auto
+
+    &__card
+      position: relative
 </style>
