@@ -289,7 +289,7 @@ class Option(models.Model):
 
   def __str__(self):
     return '{0} ({1}, {2})'.format(
-      self.caption,
+      self.topic,
       self.specialist,
       self.activity
     )
@@ -299,7 +299,7 @@ class Option_file(models.Model):
     return 'option_files/{0}/{1}/{2}/{3}'.format(
       instance.option.activity.name,
       instance.option.specialist,
-      instance.option.caption,
+      instance.option.topic,
       filename
     )
 

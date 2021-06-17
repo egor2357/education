@@ -297,8 +297,17 @@ class ActivityView(viewsets.ModelViewSet):
 class Option_fileView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
-  queryset = Option_file.objects.all()
   serializer_class = Option_fileSerializer
+
+  def get_queryset(self):
+    user = self.request.user
+    if user.is_staff:
+      return Option_file.objects.all()
+    else:
+      if user.specialist is None:
+        return Option_file.objects.none()
+      else:
+        return Option_file.objects.filter(option__specialist=user.specialist)
 
 class OptionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
