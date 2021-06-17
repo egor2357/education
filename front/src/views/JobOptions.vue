@@ -1,7 +1,15 @@
 <template>
   <a-spin :spinning="loading">
     <div class="job-options">
-      <div class="job-options__header">Планы занятий</div>
+      <div class="job-options__header">
+        <div class="job-options__header-filler"></div>
+        <div>Планы занятий</div>
+        <div class="job-options__header-filler">
+          <a-button @click="showModal()">
+            <a-icon type="plus"/>Добавить план занятия
+          </a-button>
+        </div>
+      </div>
       <div class="job-options__tabs">
         <a-tabs v-model="activeTab">
           <a-tab-pane v-for="activity in activities" :key="activity.id">
@@ -50,6 +58,8 @@ export default {
 
       options: [],
 
+      isModalVisible: false,
+
     };
   },
   async created() {
@@ -89,11 +99,22 @@ export default {
       }
     },
 
+
+    showModal(){
+      this.isModalVisible = true;
+    },
+    closeModal(){
+      this.isModalVisible = false;
+    },
+
+    createOption(){
+
+    },
     editOption(option){
-      console.log(option.topic);
+
     },
     deleteOption(option){
-      console.log(option.topic);
+
     },
 
     ...mapActions({
@@ -122,9 +143,15 @@ export default {
     height: 100%
     overflow: hidden
     &__header
-      text-align: center
-      font-size: 16px
+      display: flex
+      flex-direction: row
+      align-items: center
       margin-bottom: 10px
+      font-size: 16px
+      &-filler
+        flex: 1
+        text-align: right
+
     &__tabs
       display: flex
       justify-content: center
