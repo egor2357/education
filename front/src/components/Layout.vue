@@ -161,7 +161,7 @@ export default {
             {
               key: "4.2",
               title: "Планы занятий",
-              to: { name: "Options" },
+              to: { name: "JobOptions" },
             },
           ],
         },
