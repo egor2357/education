@@ -11,6 +11,11 @@
           </a-tab-pane>
         </a-tabs>
       </div>
+      <div>
+        <div v-for="option in currentActivityOptions" :key="option.id">
+          <job-option :option="option"/>
+        </div>
+      </div>
 
     </div>
   </a-spin>
@@ -18,9 +23,11 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
+import JobOption from "@/components/JobOptions/JobOption";
 
 export default {
   components: {
+    JobOption
   },
   name: "JobOptions",
   data() {
@@ -28,6 +35,8 @@ export default {
       loading: true,
 
       activeTab: null,
+
+      options: [],
 
     };
   },
@@ -37,6 +46,8 @@ export default {
     if (!this.activitiesFetched) {
       fetches.push(this.fetchActivities());
     }
+
+    fetches.push(this.fetchOptions());
 
     this.loading = true;
     await Promise.all(fetches);
@@ -48,23 +59,23 @@ export default {
 
   },
   methods: {
-    // async fetchUserData(){
-    //   try {
-    //     this.loading = true;
-    //     let res = await this.$axios.get("/api/users/current");
-    //     if (res.status === 200) {
-    //       this.userData = res.data;
-    //     } else if (res.status === 400) {
-    //       this.$message.error("Ошибка при загрузке данных специалиста");
-    //     } else {
-    //       this.$message.error("Ошибка при загрузке данных специалиста");
-    //     }
-    //   } catch (e) {
-    //     this.$message.error("Ошибка при загрузке данных специалиста");
-    //   } finally {
-    //     this.loading = false;
-    //   }
-    // },
+    async fetchOptions(){
+      try {
+        this.loading = true;
+        let res = await this.$axios.get("/api/options");
+        if (res.status === 200) {
+          this.options = res.data;
+        } else if (res.status === 400) {
+          this.$message.error("Ошибка при загрузке планов занятий специалиста");
+        } else {
+          this.$message.error("Ошибка при загрузке планов занятий специалиста");
+        }
+      } catch (e) {
+        this.$message.error("Ошибка при загрузке планов занятий специалиста");
+      } finally {
+        this.loading = false;
+      }
+    },
 
     ...mapActions({
       fetchActivities: "activities/fetchActivities",
@@ -75,6 +86,12 @@ export default {
       activitiesFetched: "activities/getFetched",
       activities: "activities/getActivities",
     }),
+
+    currentActivityOptions(){
+      return this.options.filter((option)=>{
+        return option.activity_id == this.activeTab;
+      })
+    }
   },
 };
 </script>
