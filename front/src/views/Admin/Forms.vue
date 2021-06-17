@@ -88,6 +88,7 @@ export default {
   .top-bar
     display: flex
     margin-bottom: 10px
+    line-height: 32px
 
     .placeholder
       flex: 1

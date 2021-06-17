@@ -97,6 +97,8 @@ export default {
   .top-bar
     display: flex
     margin-bottom: 10px
+    line-height: 32px
+
     .top-bar__side-block
       flex: 1
       &.right

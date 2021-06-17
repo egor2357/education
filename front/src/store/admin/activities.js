@@ -41,11 +41,17 @@ const actions = {
   async deleteActivity(context, id) {
     return deleteAxios(this.$axios, `/api/activities/${id}/`, {});
   },
-  async addLinkSkill(context, payload) {
-    return put(this.$axios, `/api/activities/${payload.activityId}/skills/`, {skill_id: payload.skillId});
+  async addLinkSkill({commit}, payload) {
+    let res = await put(this.$axios, `/api/activities/${payload.activityId}/skills/`, {skill_id: payload.skillId});
+    if (res.status === 200)
+      commit("updateActivitySkills", {activityId: payload.activityId, skills: res.data.skills});
+    return res;
   },
-  async deleteLinkSkill(context, payload) {
-    return deleteAxios(this.$axios, `/api/activities/${payload.activityId}/skills/`, {skill_id: payload.skillId});
+  async deleteLinkSkill({commit}, payload) {
+    let res = await deleteAxios(this.$axios, `/api/activities/${payload.activityId}/skills/`, {skill_id: payload.skillId});
+    if (res.status === 200)
+      commit("updateActivitySkills", {activityId: payload.activityId, skills: res.data.skills});
+    return res;
   }
 };
 
@@ -56,6 +62,12 @@ const mutations = {
   },
   setActivitiesCheckboxes(state, payload) {
     state.activitiesCheckboxes = payload;
+  },
+  updateActivitySkills(state, payload)
+  {
+    let activity = state.activities.find(activity => activity.id == payload.activityId);
+    if (activity)
+      activity.skills = payload.skills;
   }
 };
 
