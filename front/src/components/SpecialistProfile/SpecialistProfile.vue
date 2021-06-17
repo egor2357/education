@@ -55,6 +55,7 @@
             <div class="specialist-profile__table-area">Образовательная область</div>
             <div class="specialist-profile__table-direction">Направление развития</div>
             <div class="specialist-profile__table-skill">Навык</div>
+            <div class="specialist-profile__table-coefficient">Коэффициент</div>
           </div>
           <div class="specialist-profile__table-body">
 
@@ -86,6 +87,7 @@
                       {{ area.number }}.{{ direction.number }}.{{ skill.number }}. {{ skill.name }}
                     </span>
                   </div>
+                  <div class="specialist-profile__table-coefficient">{{ coefficientBySkillId[skill.id] }}</div>
 
                 </div>
                 </div>
@@ -120,6 +122,7 @@ export default {
       userData: null,
       specialties: [],
       competence: [],
+      coefficientBySkillId: {},
     };
   },
   async created() {
@@ -174,11 +177,18 @@ export default {
       }
     },
 
+    setCoefficientBySkillId(competence){
+      for (let comp of competence) {
+        this.coefficientBySkillId[comp.skill_id] = comp.coefficient;
+      }
+    },
+
     async fetchCompetence(){
       try {
         let res = await this.$axios.get("/api/competence/");
         if (res.status === 200) {
           this.competence = res.data;
+          this.setCoefficientBySkillId(res.data);
         } else if (res.status === 400) {
           this.$message.error("Ошибка при загрузке навыков специалиста");
         } else {
@@ -277,7 +287,7 @@ export default {
         display: flex
         flex: 1
         flex-direction: row
-      &-area, &-direction, &-count
+      &-area, &-direction, &-coefficient
         min-width: 200px
         width: 200px
         padding: 10px 15px
