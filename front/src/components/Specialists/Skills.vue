@@ -15,7 +15,7 @@
           <div class="table-cell">Коэффициент развития</div>
         </div>
       </div>
-      <div class="table-body">
+      <div class="table-body" v-if="filteredAreas.length">
         <div class="table-row" v-for="area in filteredAreas" :key="area.id">
           <div class="table-row__column table-row__column_area">
             <div class="table-cell">{{[area.number, area.name].join('. ')}}</div>
@@ -54,18 +54,18 @@
           </div>
         </div>
       </div>
+      <div class="no-data" v-else>
+        <a-empty :image="simpleImage"/>
+      </div>
     </div>
   </a-spin>
 </template>
 
 <script>
-import TableSkill from "@/components/TableSkill";
 import { mapActions, mapGetters } from "vuex";
+import { Empty } from 'ant-design-vue';
 export default {
   name: "Skills",
-  components: {
-    TableSkill,
-  },
   data(){
     return {
       loading: false,
@@ -95,6 +95,9 @@ export default {
       this.loading = false;
     }
     this.makeSkillsData();
+  },
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   methods: {
     ...mapActions({
@@ -210,50 +213,56 @@ export default {
       width: 120px
       border-left: 1px solid #e8e8e8
 
-  .table-cell
-    padding: 10px 15px
-    display: flex
-    align-items: center
-    min-height: 52px
-
-  .table-body
-    border: 1px solid #e8e8e8
-    border-top: 0 none
-
-    .table-row
-      border-top: 1px solid #e8e8e8
+    .table-cell
+      padding: 10px 15px
       display: flex
+      align-items: center
+      min-height: 52px
+      word-break: break-word
 
-    .table-row__column
-      .table-cell
-        position: sticky
-        z-index: 1
-        top: 50px
-
-    .table-row__container
-      flex: 1
-
-    .table-row:first-child
+    .table-body
+      border: 1px solid #e8e8e8
       border-top: 0 none
 
-    .table-row__column_area
-      width: 20%
+      .table-row
+        border-top: 1px solid #e8e8e8
+        display: flex
 
-    .table-row__column_direction
-      width: 25%
-      border-left: 1px solid #e8e8e8
+      .table-row__column
+        .table-cell
+          position: sticky
+          z-index: 1
+          top: 50px
 
-    .table-row__column_skill
-      flex: 1
-      border-left: 1px solid #e8e8e8
+      .table-row__container
+        flex: 1
 
-    .table-row__column_coefficient
-      width: 120px
-      border-left: 1px solid #e8e8e8
+      .table-row:first-child
+        border-top: 0 none
 
-    .skill-coefficient
-      width: 60px
-      margin-left: 10px
+      .table-row__column_area
+        width: 20%
+
+      .table-row__column_direction
+        width: 25%
+        border-left: 1px solid #e8e8e8
+
+      .table-row__column_skill
+        flex: 1
+        border-left: 1px solid #e8e8e8
+
+      .table-row__column_coefficient
+        width: 120px
+        border-left: 1px solid #e8e8e8
+
+      .skill-coefficient
+        width: 60px
+        margin-left: 10px
+
+    .no-data
+      padding: 50px 0
+      border: 1px solid #e8e8e8
+      border-top: 0 none
 
 
 </style>

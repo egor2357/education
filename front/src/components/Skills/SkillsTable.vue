@@ -107,10 +107,14 @@
         </div>
       </div>
     </div>
+    <div class="skill-table__no-data" v-else>
+      <a-empty :image="simpleImage"/>
+    </div>
   </div>
 </template>
 
 <script>
+import { Empty } from 'ant-design-vue';
 export default {
   name: "SkillsTable",
   props: {
@@ -129,9 +133,9 @@ export default {
     return {
     }
   },
-  methods: {
-
-  }
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
+  },
 }
 </script>
 
@@ -216,6 +220,11 @@ export default {
         position: absolute
         right: 5px
         cursor: pointer
+
+  .skill-table__no-data
+    padding: 50px 0
+    border: 1px solid #e8e8e8
+    border-top: 0 none
 
 
 

@@ -165,6 +165,7 @@ export default {
     .top-bar
       display: flex
       margin-bottom: 10px
+      line-height: 32px
 
       .title
         font-size: 1rem

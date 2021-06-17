@@ -289,6 +289,8 @@ export default {
 .top-bar
   margin-bottom: 10px
   display: flex
+  line-height: 32px
+
   .month-container
     flex: 1
     text-align: center
@@ -296,6 +298,8 @@ export default {
     font-size: 18px
     line-height: 18px
     cursor: default
+    line-height: 32px
+
   .text
     padding: 0 10px
     width: 130px
