@@ -318,13 +318,15 @@ class OptionView(viewsets.ModelViewSet):
     user = self.request.user
     if user.is_staff:
       return (Option.objects.all()
-                            .prefetch_related('option_file_set'))
+                            .prefetch_related('option_file_set')
+                            .select_related('method__form'))
     else:
       if user.specialist is None:
         return Option.objects.none()
       else:
         return (Option.objects.filter(specialist=user.specialist)
-                              .prefetch_related('option_file_set'))
+                              .prefetch_related('option_file_set')
+                              .select_related('method__form'))
 
 class PresenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication, IsAdminOrReadOnly)
