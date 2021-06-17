@@ -303,9 +303,19 @@ class Option_fileView(viewsets.ModelViewSet):
 class OptionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
-  queryset = (Option.objects.all()
-                            .prefetch_related('option_file_set'))
   serializer_class = OptionSerializer
+
+  def get_queryset(self):
+    user = self.request.user
+    if user.is_staff:
+      return (Option.objects.all()
+                            .prefetch_related('option_file_set'))
+    else:
+      if user.specialist is None:
+        return Option.objects.none()
+      else:
+        return (Option.objects.filter(specialist=user.specialist)
+                              .prefetch_related('option_file_set'))
 
 class PresenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication, IsAdminOrReadOnly)
