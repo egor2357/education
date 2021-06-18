@@ -1,27 +1,22 @@
 <template>
   <a-spin :spinning="loading">
     <div class="available-table">
-      <div class="top-bar">
-        <a-button
-          type="link"
-          icon="swap"
-          @click="specialist = !specialist"
-          >Изменить представление</a-button
-        >
-        <div class="month-container">
-          <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
-          <span class="text">{{ month.name }} {{ year }}</span>
-          <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
-        </div>
-        <a-button icon="plus" @click="$emit('onAddPeriod')">Добавить период</a-button>
+
+      <div class="month-container">
+        <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
+        <span class="text">{{ month.name }} {{ year }}</span>
+        <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
       </div>
+
       <div class="table-presence">
-        <presence-chart v-if="specialist"
+
+        <presence-chart v-if="specialistMode"
           :tableData="tableData"
           :daysInMonth="daysOfMonth"
           @displayEdit="$emit('displayEdit', $event)"
           @displayDeleteConfirm="displayDeleteConfirm($event)"
         />
+
         <activity-presence-chart v-else
           :tableData="tableData"
           :daysInMonth="daysOfMonth"
@@ -29,6 +24,7 @@
           @displayEdit="$emit('displayEdit', $event)"
           @displayDeleteConfirm="displayDeleteConfirm($event)"
         />
+
       </div>
     </div>
   </a-spin>
@@ -64,6 +60,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    specialistMode: {
+      type: Boolean,
+      default: true
+    }
   },
   async created() {
     await this.getDate();
@@ -286,24 +286,19 @@ export default {
     display: flex
     overflow: hidden
 
-.top-bar
-  margin-bottom: 10px
-  display: flex
-  line-height: 32px
 
   .month-container
-    flex: 1
     text-align: center
-    padding-right: 70px
     font-size: 18px
     line-height: 18px
     cursor: default
     line-height: 32px
+    margin-bottom: 10px
 
-  .text
-    padding: 0 10px
-    width: 130px
-    display: inline-block
-    font-size: 1rem
+    .text
+      padding: 0 10px
+      width: 130px
+      display: inline-block
+      font-size: 1rem
 
 </style>
