@@ -29,7 +29,7 @@
               </div>
               <a-divider type="vertical" />
               <div class="job-option-header-action"
-                @click="deleteOption(option)">
+                @click="showDeleteConfirm(option)">
                 Удалить
               </div>
             </div>
@@ -42,16 +42,17 @@
 
     </div>
 
-    <option-modal
+    <job-option-modal
       v-if="displayModal"
-      :editableData="modalEditableData"
+      :activity="currentActivity"
+      :option="modalEditableData"
       @closeModal="closeModal($event)"
     />
   </a-spin>
 </template>
 
 <script>
-import JobOptionModal from "@/components/JobSchedule/JobModal";
+import JobOptionModal from "@/components/JobOptions/JobOptionModal";
 import { mapActions, mapGetters } from "vuex";
 import deleteAxios from "@/middleware/deleteAxios";
 import JobOption from "@/components/JobOptions/JobOption";
@@ -74,7 +75,6 @@ export default {
       displayModal: false,
 
       modalEditableData: null,
-
     };
   },
   beforeCreate() {
@@ -178,7 +178,13 @@ export default {
       return this.options.filter((option)=>{
         return option.activity_id == this.activeTab;
       })
-    }
+    },
+
+    currentActivity(){
+      return this.activities.find((activity)=>{
+        return activity.id == this.activeTab;
+      })
+    },
   },
 };
 </script>

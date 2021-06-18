@@ -2,25 +2,92 @@
   <a-modal
     okText="Сохранить"
     cancelText="Отмена"
+    width="900px"
     :visible="true"
     :title="title"
-    @cancel="closeModal(null)"
+    @cancel="closeModal(false)"
     @ok="handleOk"
     @confirmLoading="loadingButton">
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
-
-<!--       <a-form-model-item prop="date" label="Дата" key="date"
-        :validateStatus="fields['date'].validateStatus" :help="fields['date'].help">
-        <a-date-picker
-          v-model="form.date"
-          type="date"
-          placeholder="Выберите дату"
-          format="DD.MM.YYYY"
-          style="width: 100%;"
-          @change="fieldChanged($event, 'date')"
-        />
+      <a-form-model-item prop="topic" label="Тема занятия" key="topic"
+        :validateStatus="fields['topic'].validateStatus" :help="fields['topic'].help">
+        <a-input v-model="form.topic" />
       </a-form-model-item>
- -->
+
+      <a-form-model-item prop="skills" label="Навыки" key="skills"
+        :validateStatus="fields['skills'].validateStatus" :help="fields['skills'].help">
+        <a-tree-select
+          :value="form.skills"
+          @change="setSkills"
+          :dropdownStyle="{'max-height': '500px', 'overflow-y': 'auto'}"
+          placeholder="Выберите навыки"
+          allow-clear multiple>
+          <a-tree-select-node v-for="area in areas"
+            :key="'area'+area.id"
+            :value="'area'+area.id"
+            :selectable="false"
+            :title="area.name">
+            <a-tree-select-node v-for="direction in area.development_directions"
+              :key="'direction'+direction.id"
+              :value="'direction'+direction.id"
+              :selectable="false"
+              :title="direction.name">
+              <a-tree-select-node v-for="skill in direction.skills"
+                :key="'skill'+skill.id"
+                :value="skill.id"
+                :title="skill.name"
+                :isLeaf="true">
+              </a-tree-select-node>
+            </a-tree-select-node>
+          </a-tree-select-node>
+        </a-tree-select>
+      </a-form-model-item>
+
+      <a-form-model-item prop="form_id" label="Форма проведения занятия" key="form"
+        :validateStatus="fields['form_id'].validateStatus" :help="fields['form_id'].help">
+        <a-select v-model="form.form_id"
+          allow-clear
+          @change="fieldChanged($event, 'form_id')">
+          <a-select-option v-for="form in forms" :key="form.id">
+            {{ form.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-model-item>
+
+      <a-form-model-item prop="method_id" label="Способ проведения занятия" key="method_id"
+        :validateStatus="fields['method_id'].validateStatus" :help="fields['method_id'].help">
+        <a-select v-model="form.method_id"
+          :disabled="!form.form_id"
+          allow-clear
+          @change="fieldChanged($event, 'method_id')">
+          <a-select-option v-for="method in methods" :key="method.id">
+            {{ method.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-model-item>
+
+      <a-form-model-item prop="comment" label="Дополнительная информация по занятию" key="comment"
+        :validateStatus="fields['comment'].validateStatus" :help="fields['comment'].help">
+        <a-input v-model="form.comment"
+          allow-clear
+          :auto-size="{minRows: 4, maxRows: 6}"
+          @change="fieldChanged($event, 'comment')"
+          type="textarea"/>
+      </a-form-model-item>
+
+      <a-form-model-item prop="option_files" label="Прикрепленные файлы" key="option_files"
+        :validateStatus="fields['option_files'].validateStatus" :help="fields['option_files'].help">
+        <a-upload
+          multiple
+          list-type="picture"
+          :default-file-list="form.option_files"
+          :remove="handleRemoveOptionFile"
+          :before-upload="beforeUploadOptionFile"
+          class="option-details__body__form-files"
+        >
+          <a-button> <a-icon type="upload" /> Прикрепить файл </a-button>
+        </a-upload>
+      </a-form-model-item>
     </a-form-model>
 
   </a-modal>
@@ -28,99 +95,206 @@
 
 <script>
 import consts from "@/const";
+import { mapActions, mapGetters } from "vuex";
 import post from "@/middleware/post";
 import put from "@/middleware/put";
+import patch from "@/middleware/patch";
 
 export default {
   name: "JobOptionModal",
   props: {
-    editableData: {
+    activity: {
+      type: Object,
+      default: null,
+    },
+    option: {
       type: Object,
       default: null,
     }
   },
   data() {
     return {
-      form: {
-      },
       title: "",
+      form: {
+        topic: '',
+        skills: [],
+        form_id: null,
+        method_id: null,
+        comment: '',
+        option_files: [],
+      },
       layout: {
         labelCol: { span: 8 },
         wrapperCol: { span: 16 },
       },
       fields: {
-        // 'date': {
-        //   validateStatus: "",
-        //   help: "",
-        // },
+        'topic': {
+          validateStatus: "",
+          help: "",
+        },
+        'skills': {
+          validateStatus: "",
+          help: "",
+        },
+        'form_id': {
+          validateStatus: "",
+          help: "",
+        },
+        'method_id': {
+          validateStatus: "",
+          help: "",
+        },
+        'comment': {
+          validateStatus: "",
+          help: "",
+        },
+        'option_files': {
+          validateStatus: "",
+          help: "",
+        },
       },
       rules: {
-        // date: [
-        //   {
-        //     trigger: "change",
-        //     required: true,
-        //     message: "Пожалуйста, выберите дату",
-        //   },
-        // ],
+        topic: [
+          {
+            trigger: "change",
+            required: true,
+            message: "Пожалуйста, введите название темы",
+          },
+        ],
+        skills: [
+          {
+            trigger: "change",
+            required: false,
+            message: "Пожалуйста, выберите затрагиваемые навыки",
+          },
+        ],
+        form_id: [
+          {
+            trigger: "change",
+            required: false,
+            message: "Пожалуйста, выберите форму проведения занятия",
+          },
+        ],
+        method_id: [
+          {
+            trigger: "change",
+            required: false,
+            message: "Пожалуйста, выберите способ проведения занятия",
+          },
+        ],
+        comment: [
+          {
+            trigger: "change",
+            required: false,
+            message: "Пожалуйста, введите дополнительную информацию",
+          },
+        ],
+        option_files: [
+          {
+            trigger: "change",
+            required: false,
+            message: "Пожалуйста, выберите файлы",
+          },
+        ],
       },
 
       loadingButton: false,
     };
   },
   computed: {
-
+    ...mapGetters({
+      areasFetched: "skills/getFetched",
+      areas: "skills/getAreas",
+      formsFetched: "forms/getFetched",
+      forms: "forms/getForms",
+    }),
+    methods(){
+      for (let form of this.forms) {
+        if (form.id == this.form.form_id) {
+          return form.methods.slice();
+        }
+      }
+      return [];
+    },
   },
   methods: {
+    ...mapActions({
+      fetchAreas: "skills/fetchAreas",
+      fetchForms: "forms/fetchForms",
+    }),
+
     async fieldChanged(val, field_key) {
+      if (field_key == "form_id") {
+        this.form.method_id = null;
+      }
+
       this.fields[field_key].validateStatus = "";
       this.fields[field_key].help = "";
     },
 
-    closeModal(jobDate=null){
-      this.$emit('closeModal', jobDate);
+    closeModal(result=false){
+      this.$emit('closeModal', result);
     },
 
     async handleOk() {
-      this.loadingButton = true;
-      // this.$refs.form.validate(async (valid) => {
-      //   if (valid) {
-      //     try {
-      //       let successCode = 0;
-      //       let res = null;
-      //       let successMessage = "";
-      //       this.form.date = this.form.date.format("YYYY-MM-DD");
-      //       if (this.form.id) {
-      //         successCode = 200;
-      //         successMessage = "Занятие успешно изменено";
-      //         res = await put(this.$axios, `/api/jobs/${this.form.id}/`, this.form);
-      //       } else {
-      //         successCode = 201;
-      //         successMessage = "Занятие успешно добавлено";
-      //         res = await post(this.$axios, "/api/jobs/", this.form);
-      //       }
+      this.$refs.form.validate(async (valid) => {
+        if (valid) {
+          try {
+            this.loading = true;
 
-      //       if (res.status === successCode) {
-      //         this.$message.success(successMessage);
-      //         this.closeModal(moment(this.form.date, "YYYY-MM-DD"));
-      //       } else if (res.status === 400) {
-      //         this.$message.error("Проверьте введённые данные");
-      //         for (let key in res.data) {
-      //           this.fields[key].validateStatus = "error";
-      //           this.fields[key].help = res.data[key];
-      //         }
-      //       } else {
-      //         this.$message.error("Произошла ошибка");
-      //       }
-      //     } catch (e) {
-      //       this.$message.error("Произошла ошибка");
-      //     } finally {
-      //       this.form.date = moment(this.form.date, "YYYY-MM-DD");
-      //       this.loadingButton = false;
-      //     }
-      //   } else {
-      //     return false;
-      //   }
-      // });
+            const formData = new FormData();
+            formData.append('topic', this.form.topic);
+            formData.append('skills', this.form.skills);
+            formData.append('method_id', this.form.method_id ? this.form.method_id : '');
+            formData.append('comment', this.form.comment);
+
+            let allFilesIds = [];
+            this.form.option_files.forEach((file) => {
+              allFilesIds.push(file.uid);
+              if (file.status != "done") {
+                formData.append(file.uid, file);
+              }
+            });
+            formData.append('files', allFilesIds);
+
+            let res = await patch(this.$axios, `/api/options/${this.$route.params.id}/`, formData);
+            if (res.status === 200) {
+              this.$message.success("Параметры занятия сохранены");
+            } else if (res.status === 400) {
+              this.$message.error("Проверьте введённые данные");
+              for (let key in res.data) {
+                this.fields[key].validateStatus = "error";
+                this.fields[key].help = res.data[key];
+              }
+            } else {
+              this.$message.error("Произошла ошибка");
+            }
+          } catch (e) {
+            this.$message.error("Произошла ошибка");
+          } finally {
+            this.loading = false;
+          }
+        } else {
+          return false;
+        }
+      });
+    },
+    setSkills(values, labels){
+      this.form.skills.splice(0);
+      for (let value of values) {
+        this.form.skills.push(value);
+      }
+      this.fieldChanged(values, 'skills');
+    },
+    handleRemoveOptionFile(file) {
+      const index = this.form.option_files.indexOf(file);
+      const newFileList = this.form.option_files.slice();
+      newFileList.splice(index, 1);
+      this.form.option_files = newFileList;
+    },
+    beforeUploadOptionFile(file) {
+      this.form.option_files = [...this.form.option_files, file];
+      return false;
     },
     keydown(event) {
       if (
@@ -132,11 +306,39 @@ export default {
       }
     },
   },
-  created() {
-    if (this.editableData) {
+  async created() {
+    console.log(this.activity);
+    let fetches = [];
+    if (!this.areasFetched) {
+      fetches.push(this.fetchAreas());
+    }
+    if (!this.formsFetched) {
+      fetches.push(this.fetchForms());
+    }
+
+    this.loading = true;
+    await Promise.all(fetches);
+    this.loading = false;
+
+    if (this.option) {
       this.title = "Изменение плана занятия";
-      // this.form.id = this.editableData.id
-      // this.form.date = moment(this.editableData.date, "YYYY-MM-DD");
+      this.form.topic = this.option.topic;
+      this.form.skills.splice(0);
+      this.form.skills = this.option.skills.map((skill)=>{
+        return skill.id;
+      });
+      this.form.form_id = this.option.method ? this.option.method.form_id : null;
+      this.form.method_id = this.option.method ? this.option.method.id : null;
+      this.form.comment = this.option.comment;
+      this.form.option_files.splice(0);
+      for (let option_file of this.option.option_files) {
+        this.form.option_files.push({
+          uid: option_file.id,
+          name: option_file.name,
+          status: 'done',
+          url: option_file.file,
+        });
+      }
     } else {
       this.title = "Добавление плана занятия";
     }
@@ -148,4 +350,20 @@ export default {
 };
 </script>
 
-<style lang="sass"></style>
+<style lang="sass">
+.option-details
+  &__body__form-files
+    display: flex
+    flex-direction: column
+    max-height: 200px
+    .ant-upload-list
+      display: flex
+      flex: 1
+      flex-direction: row
+      flex-wrap: wrap
+      overflow-y: auto
+      .ant-upload-list-item
+        min-width: 200px
+        margin-right: 8px
+
+</style>

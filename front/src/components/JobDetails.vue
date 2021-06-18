@@ -439,7 +439,7 @@ export default {
     },
   },
   async created() {
-    let fetches = []
+    let fetches = [];
 
     if (!this.areasFetched) {
       fetches.push(this.fetchAreas());
