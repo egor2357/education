@@ -174,9 +174,9 @@ export default {
       this.$store.commit("activities/clear");
       this.$store.commit("forms/clear");
       this.$store.commit("presence/clear");
-      this.$store.commit("presence/schedule");
-      this.$store.commit("presence/skills");
-      this.$store.commit("presence/specialists");
+      this.$store.commit("schedule/clear");
+      this.$store.commit("skills/clear");
+      this.$store.commit("specialists/clear");
     },
     async logout() {
       await this.$store.dispatch("auth/logout");
