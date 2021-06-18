@@ -2,8 +2,7 @@
   <div class="specialist-presence">
     <div class="top-bar">
       <div class="top-bar__side-block left">
-        <a-button type="link" icon="swap" @click="specialistMode = !specialistMode">Изменить представление</a-button
-        >
+        <a-button type="link" icon="swap" @click="specialistMode = !specialistMode">Изменить представление</a-button>
       </div>
       <div class="title">График присутствия специалистов</div>
       <div class="top-bar__side-block right">
