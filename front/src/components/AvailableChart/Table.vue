@@ -112,7 +112,7 @@ export default {
       } else {
         this.currentDate.add(-1, "M");
       }
-      await this.clearSpecialistsPresent();
+      await this.clearSpecialistsPresence();
       await this.getDate();
       await this.fetchPresence(
         `?interval_start=${`${this.year}-${
@@ -124,7 +124,7 @@ export default {
       await this.makeTableData();
       this.loading = false;
     },
-    clearSpecialistsPresent(){
+    clearSpecialistsPresence(){
       this.tableData.specialists.forEach(item => item.presence = {});
     },
     makeTableData(){
