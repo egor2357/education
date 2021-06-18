@@ -41,17 +41,26 @@
       </div>
 
     </div>
+
+    <option-modal
+      v-if="displayModal"
+      :editableData="modalEditableData"
+      @closeModal="closeModal($event)"
+    />
   </a-spin>
 </template>
 
 <script>
+import JobOptionModal from "@/components/JobSchedule/JobModal";
 import { mapActions, mapGetters } from "vuex";
+import deleteAxios from "@/middleware/deleteAxios";
 import JobOption from "@/components/JobOptions/JobOption";
 import { Empty } from 'ant-design-vue';
 
 export default {
   components: {
-    JobOption
+    JobOption,
+    JobOptionModal,
   },
   name: "JobOptions",
   data() {
@@ -62,7 +71,9 @@ export default {
 
       options: [],
 
-      isModalVisible: false,
+      displayModal: false,
+
+      modalEditableData: null,
 
     };
   },
@@ -107,11 +118,26 @@ export default {
     },
 
 
-    showModal(){
-      this.isModalVisible = true;
+    showModal(option=null){
+      this.displayModal = true;
+      this.modalEditableData = option;
     },
     closeModal(){
-      this.isModalVisible = false;
+      this.displayModal = false;
+      this.modalEditableData = null;
+    },
+
+    showDeleteConfirm(option) {
+      let component = this;
+      let confirmObject = {
+        title: `План занятия "${option.topic}" будет удален.`,
+        content: "Продолжить?",
+        okType: "danger",
+        onOk() {
+          component.deleteOption(option.id);
+        },
+      }
+      this.$confirm(confirmObject);
     },
 
     createOption(){
@@ -120,8 +146,22 @@ export default {
     editOption(option){
 
     },
-    deleteOption(option){
 
+    async deleteOption(optionId){
+      try {
+        this.loading = true;
+        let res = await deleteAxios(this.$axios, `/api/options/${optionId}/`, {});
+        if (res.status === 204) {
+          this.$message.success("План занятия успешн удален");
+          await this.fetchOptions();
+        } else {
+          this.$message.error("Произошла ошибка при удалении плана занятия");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка при удалении плана занятия");
+      } finally {
+        this.loading = false;
+      }
     },
 
     ...mapActions({
