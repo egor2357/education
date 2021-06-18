@@ -321,7 +321,7 @@ export default {
     this.loading = false;
 
     if (this.option) {
-      this.title = "Изменение плана занятия";
+      this.title = `${this.activity.name} | Изменение плана занятия`;
       this.form.topic = this.option.topic;
       this.form.skills.splice(0);
       this.form.skills = this.option.skills.map((skill)=>{
@@ -340,7 +340,7 @@ export default {
         });
       }
     } else {
-      this.title = "Добавление плана занятия";
+      this.title = `${this.activity.name} | Добавление плана занятия`;
     }
     document.addEventListener("keydown", this.keydown);
   },
