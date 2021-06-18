@@ -82,21 +82,7 @@ const router = new VueRouter({
     },
     {
       path: "/",
-      name: "Developing",
-      component: () => import("@/views/InDeveloping"),
-      meta: {
-        staffOnly: false,
-        specOnly: false,
-      },
-    },
-    {
-      path: "/404",
-      name: "Page404",
-      component: () => import("@/views/Page404"),
-      meta: {
-        staffOnly: false,
-        specOnly: false,
-      },
+      redirect: '/jobs'
     },
     {
       path: "/jobs",
@@ -170,6 +156,15 @@ const router = new VueRouter({
       meta: {
         staffOnly: false,
         specOnly: true,
+      },
+    },
+    {
+      path: "*",
+      name: "Page404",
+      component: () => import("@/views/Page404"),
+      meta: {
+        staffOnly: false,
+        specOnly: false,
       },
     },
   ],
