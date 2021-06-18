@@ -488,16 +488,24 @@ class Option_fileSerializer(serializers.ModelSerializer):
   option_id = serializers.PrimaryKeyRelatedField(
     source='option', queryset=Option.objects.all()
   )
+
+  def get_name(self, instance):
+    return os.path.split(instance.file.name)[-1]
+  name = serializers.SerializerMethodField()
   class Meta:
     model = Option_file
     fields = (
       'id', 'option_id',
       'file',
+      'name',
     )
 
 class OptionSerializer(serializers.ModelSerializer):
   method_id = serializers.PrimaryKeyRelatedField(
     source='method', queryset=Method.objects.all(), required=False
+  )
+  method = MethodSerializer(
+    read_only=True,
   )
   activity_id = serializers.PrimaryKeyRelatedField(
     source='activity', queryset=Activity.objects.all()
@@ -508,13 +516,17 @@ class OptionSerializer(serializers.ModelSerializer):
   option_files = Option_fileSerializer(
     source='option_file_set', many=True, read_only=True
   )
+  skills = SkillSerializer(read_only=True, many=True)
+
   class Meta:
     model = Option
     fields = (
       'id', 'topic',
       'comment',
       'method_id', 'specialist_id',
-      'activity_id', 'option_files'
+      'activity_id', 'option_files',
+      'skills',
+      'method',
     )
 
 class Job_fileSerializer(serializers.ModelSerializer):

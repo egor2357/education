@@ -56,6 +56,11 @@ const actions = {
 };
 
 const mutations = {
+  clear(state){
+    state.activities = [];
+    state.activitiesCheckboxes = {};
+    state.fetched = false;
+  },
   setActivities(state, payload) {
     state.activities = payload.data;
     state.fetched = payload.success;

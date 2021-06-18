@@ -48,6 +48,10 @@ const actions = {
 };
 
 const mutations = {
+  clear(state){
+    state.forms = [];
+    state.fetched = false;
+  },
   setForms(state, payload) {
     state.forms = payload.data;
     state.fetched = payload.success;

@@ -60,6 +60,11 @@ const actions = {
 };
 
 const mutations = {
+  clear(state){
+    state.jobs = [];
+    state.jobsStat = {};
+    state.fetched = false;
+  },
   setJobs(state, payload) {
     state.jobs = payload.data;
     state.fetched = payload.success;

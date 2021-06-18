@@ -69,6 +69,10 @@ const actions = {
 };
 
 const mutations = {
+  clear(state){
+    state.areas = [];
+    state.fetched = false;
+  },
   setAreas(state, payload) {
     state.areas = payload.data;
     state.fetched = payload.success;

@@ -62,6 +62,7 @@
               <a-tree-select
                 :value="form.reports"
                 @change="setReports"
+                :dropdownStyle="{'max-height': '500px', 'overflow-y': 'auto'}"
                 placeholder="Выберите навыки"
                 allow-clear multiple>
                 <a-tree-select-node v-for="area in areas"
@@ -96,7 +97,7 @@
               </a-select>
             </a-form-model-item>
 
-            <a-form-model-item prop="method_id" label="Метод проведения занятия" key="method_id"
+            <a-form-model-item prop="method_id" label="Способ проведения занятия" key="method_id"
               :validateStatus="fields['method_id'].validateStatus" :help="fields['method_id'].help">
               <a-select v-model="form.method_id"
                 :disabled="!form.form_id"
@@ -254,7 +255,7 @@ export default {
           {
             trigger: "change",
             required: false,
-            message: "Пожалуйста, выберите метод проведения занятия",
+            message: "Пожалуйста, выберите способ проведения занятия",
           },
         ],
         comment: [
