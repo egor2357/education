@@ -106,7 +106,6 @@ class JobView(viewsets.ModelViewSet):
     if 'files' in request.data:
       files = request.data.get('files', '')
       files = files.split(',') if files else []
-      curr_job_files_ids = list(job.job_file_set.all().values_list('id', flat=True))
       files_to_save = []
       remaining_files = []
       for file in files:
@@ -115,7 +114,7 @@ class JobView(viewsets.ModelViewSet):
           files_to_save.append(Job_file(job=job, file=file_data))
         else:
           remaining_files.append(int(file))
-      Job_file.objects.exclude(pk__in=remaining_files).delete()
+      job.job_file_set.exclude(pk__in=remaining_files).delete()
       Job_file.objects.bulk_create(files_to_save)
 
     if 'reports' in request.data:
@@ -313,6 +312,68 @@ class OptionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
   serializer_class = OptionSerializer
+
+  def partial_update(self, request, pk=None):
+    #Требует FormData для передачи файлов
+    option = self.get_object()
+
+    if 'files' in request.data:
+      files = request.data.get('files', '')
+      files = files.split(',') if files else []
+      files_to_save = []
+      remaining_files = []
+      for file in files:
+        if file in request.FILES:
+          file_data = request.FILES[file]
+          files_to_save.append(Option_file(option=option, file=file_data))
+        else:
+          remaining_files.append(int(file))
+      option.option_file_set.exclude(pk__in=remaining_files).delete()
+      Option_file.objects.bulk_create(files_to_save)
+
+    if 'skills' in request.data:
+      skills = request.data.get('skills', '')
+      skills = [int(report) for report in skills.split(',')] if skills else []
+      skills = Skill.objects.filter(pk__in=skills)
+      option.skills.clear()
+      option.skills.set(skills)
+
+    serializer = OptionSerializer(option, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid(raise_exception=True):
+      serializer.save()
+      option.refresh_from_db()
+      serializer = OptionSerializer(option, context={'request': request})
+
+    return Response(serializer.data)
+
+  def create(self, request, pk=None):
+    #Требует FormData для передачи файлов
+
+    serializer = OptionSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid(raise_exception=True):
+      option = serializer.save()
+
+    option.specialist = request.user.specialist
+
+    if 'files' in request.data:
+      files = request.data.get('files', '')
+      files = files.split(',') if files else []
+      files_to_save = []
+      for file in files:
+        if file in request.FILES:
+          file_data = request.FILES[file]
+          files_to_save.append(Option_file(option=option, file=file_data))
+      Option_file.objects.bulk_create(files_to_save)
+
+    if 'skills' in request.data:
+      skills = request.data.get('skills', '')
+      skills = [int(report) for report in skills.split(',')] if skills else []
+      skills = Skill.objects.filter(pk__in=skills)
+      option.skills.set(skills)
+
+    option.save()
+    option.refresh_from_db()
+    return Response(OptionSerializer(option, context={'request': request}).data, status=201)
 
   def get_queryset(self):
     user = self.request.user

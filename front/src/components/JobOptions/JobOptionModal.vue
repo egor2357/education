@@ -243,6 +243,8 @@ export default {
             this.loading = true;
 
             const formData = new FormData();
+            formData.append('activity_id', this.activity.id);
+
             formData.append('topic', this.form.topic);
             formData.append('skills', this.form.skills);
             formData.append('method_id', this.form.method_id ? this.form.method_id : '');
@@ -257,9 +259,23 @@ export default {
             });
             formData.append('files', allFilesIds);
 
-            let res = await patch(this.$axios, `/api/options/${this.$route.params.id}/`, formData);
-            if (res.status === 200) {
-              this.$message.success("Параметры занятия сохранены");
+            let successCode = 0;
+            let res = null;
+            let successMessage = "";
+
+            if (this.option) {
+              successCode = 200;
+              successMessage = "Параметры плана занятия сохранены";
+              res = await patch(this.$axios, `/api/options/${this.option.id}/`, formData);
+            } else {
+              successCode = 201;
+              successMessage = "План занятия успешно добавлен";
+              res = await post(this.$axios, `/api/options/`, formData);
+            }
+
+            if (res.status === successCode) {
+              this.$message.success(successMessage);
+              this.closeModal(true);
             } else if (res.status === 400) {
               this.$message.error("Проверьте введённые данные");
               for (let key in res.data) {

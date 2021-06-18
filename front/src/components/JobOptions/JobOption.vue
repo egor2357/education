@@ -81,6 +81,7 @@ $border-color: #e8e8e8
   border: 1px solid $border-color
   border-radius: 4px
   transition: 0.2s ease-out
+  margin-bottom: 10px
   &:hover
     box-shadow: 0px 1px 3px 1px #dedede
 

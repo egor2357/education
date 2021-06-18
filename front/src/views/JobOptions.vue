@@ -122,9 +122,12 @@ export default {
       this.displayModal = true;
       this.modalEditableData = option;
     },
-    closeModal(){
+    closeModal(result){
       this.displayModal = false;
       this.modalEditableData = null;
+      if (result) {
+        this.fetchOptions();
+      }
     },
 
     showDeleteConfirm(option) {
