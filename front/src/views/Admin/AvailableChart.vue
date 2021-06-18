@@ -1,8 +1,21 @@
 <template>
-  <div class="available-block">
-    <div class="title">График присутствия специалистов</div>
+  <div class="specialist-presence">
+    <div class="top-bar">
+      <div class="top-bar__side-block left">
+        <a-button type="link" icon="swap" @click="specialistMode = !specialistMode">Изменить представление</a-button>
+      </div>
+      <div class="title">График присутствия специалистов</div>
+      <div class="top-bar__side-block right">
+        <a-button icon="plus" @click="onAddPeriod">Добавить период</a-button>
+      </div>
+    </div>
     <div style="overflow: hidden; flex: 1">
-      <Table :needUpdate="needUpdateTable" @successUpdate="needUpdateTable = false" @displayEdit="displayEdit" @onAddPeriod="onAddPeriod"/>
+      <Table
+        :needUpdate="needUpdateTable"
+        :specialistMode="specialistMode"
+        @successUpdate="needUpdateTable = false"
+        @displayEdit="displayEdit"
+      />
     </div>
     <ModalPeriod
       v-if="displayModal"
@@ -29,6 +42,7 @@ export default {
       modalEditableData: {},
       modalAdding: true,
       needUpdateTable: false,
+      specialistMode: true
     };
   },
   methods: {
@@ -47,13 +61,25 @@ export default {
 </script>
 
 <style lang="sass">
-.available-block
+.specialist-presence
   display: flex
   flex-direction: column
   height: 100%
   overflow: hidden
-  .title
+
+  .top-bar
+    display: flex
     margin-bottom: 10px
-    text-align: center
-    font-size: 1rem
+    line-height: 32px
+
+    .title
+      font-size: 1rem
+      text-align: center
+      margin: 0 10px
+
+  .top-bar__side-block
+    flex: 1
+
+    &.right
+      text-align: right
 </style>

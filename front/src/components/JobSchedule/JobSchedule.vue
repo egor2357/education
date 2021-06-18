@@ -2,39 +2,32 @@
   <a-spin :spinning="loading">
     <div class="job-schedule">
 
-      <div class="job-schedule__header">
-
-        <div class="job-schedule__header-title">
-          Календарь занятий
+      <div class="top-bar">
+        <div class="top-bar__side-block left">
+          <a-button
+            :disabled="!remainingSchedule.length"
+            class="job-schedule__header__options-fill_button"
+            icon="block" @click="setForTheWeek">
+            Применить шаблон расписания
+          </a-button>
         </div>
-
-        <div class="job-schedule__header__options">
-
-          <div class="job-schedule__header__options__first-block">
-            <div class="job-schedule__header__options-navigate">
-              <a-icon class="icon-button job-schedule__header__options-navigate-to_left"
-                type="left" @click="switchDates(false)"/>
-              <div class="job-schedule__header__options-navigate-interval">
-                {{dateIntervalString}}
-              </div>
-              <a-icon class="icon-button job-schedule__header__options-navigate-to_right"
-              type="right" @click="switchDates(true)"/>
-            </div>
-            <a-button
-              :disabled="!remainingSchedule.length"
-              class="job-schedule__header__options-fill_button"
-              icon="block" @click="setForTheWeek">
-              Применить шаблон расписания
-            </a-button>
-          </div>
-
+        <div class="title">Календарь занятий</div>
+        <div class="top-bar__side-block right">
           <a-button class="job-schedule__header__options-add_button"
             icon="plus" @click="openModal(null)">
             Добавить занятие
           </a-button>
-
         </div>
+      </div>
 
+      <div class="job-schedule__interval">
+        <a-icon class="icon-button job-schedule__interval-shift job-schedule__interval-shift_left"
+          type="left" @click="switchDates(false)"/>
+        <div class="job-schedule__interval-label">
+          {{dateIntervalString}}
+        </div>
+        <a-icon class="icon-button job-schedule__interval-shift job-schedule__interval-shift_right"
+        type="right" @click="switchDates(true)"/>
       </div>
 
       <div class="job-schedule__calendar">
@@ -338,39 +331,34 @@ export default {
   flex-direction: column
   overflow: hidden
   height: 100%
-  &__header
+
+  .top-bar
     display: flex
-    flex-direction: column
-    &-title
-      flex-grow: 1
-      text-align: center
+    margin-bottom: 10px
+    line-height: 32px
+
+    .title
       font-size: 1rem
-      margin-bottom: 10px
-    &__options
-      display: flex
-      flex-direction: row
-      align-items: center
-      justify-content: space-between
-      margin-bottom: 10px
-      &__first-block
-        display: flex
-        flex-direction: row
-        align-items: center
-      &-navigate
-        font-size: 20px
-        display: flex
-        flex-direction: row
-        align-items: center
-        justify-content: center
-        margin-right: 20px
-        &-to_left
-          margin-right: 10px
-        &-interval
-          min-width: 250px
-          text-align: center
-        &-to_right
-          margin-left: 10px
-      &-button
+      text-align: center
+      margin: 0 10px
+
+  .top-bar__side-block
+    flex: 1
+
+    &.right
+      text-align: right
+
+  .job-schedule__interval
+    display: flex
+    justify-content: center
+    font-size: 20px
+    align-items: center
+    margin-bottom: 10px
+
+  .job-schedule__interval-label
+    min-width: 250px
+    text-align: center
+
   &__calendar
     overflow: auto
     flex: 1

@@ -3,135 +3,141 @@
     <div class="job-details">
       <div class="job-details__header">
 
-        <div class="job-details__header-title" v-if="job">
-          <div class="job-details__header-title__activity">
-            <div :style="{
-              'background-color': `${job.activity.color}10`,
-              border: `1px solid ${job.activity.color}99`,
-            }">
-              {{ job.activity.name }}
-            </div>
-          </div>
-          <div class="job-details__header-title__date">
-            <div class="job-details__header-title__date-day">
-              {{ jobDateMoment.format("D MMMM") }}
-            </div>
-            <div class="job-details__header-title__date-weekday">
-              {{ jobDateMoment.format("dddd") }}
-            </div>
-          </div>
-          <div class="job-details__header-title__specialist">
-            <div class="job-details__header-title__specialist-label">Специалист:</div>
-            <div class="job-details__header-title__specialist-name">{{ job.specialist ? job.specialist.__str__ : "Не назначен"}}</div>
-          </div>
-        </div>
-
-        <div class="job-details__header__options">
-          <div class="job-details__header__options__back">
+        <div class="job-details__header-title">
+          <div class="job-details__header-left-block">
             <a-button icon="left" @click="goBack">Назад</a-button>
           </div>
-          <a-radio-group v-model="isJobWindow">
-            <a-radio-button :value="true">Параметры занятия</a-radio-button>
-            <a-radio-button :value="false">Отчет</a-radio-button>
-          </a-radio-group>
+          <div class="job-details__header-center-block" v-if="job">
+            <div class="job-details__header-title__activity">
+              <div :style="{
+                'background-color': `${job.activity.color}10`,
+                border: `1px solid ${job.activity.color}99`,
+              }">
+                {{ job.activity.name }}
+              </div>
+            </div>
+            <div class="job-details__header-title__date">
+              <div class="job-details__header-title__date-day">
+                {{ jobDateMoment.format("D MMMM") }}
+              </div>
+              <div class="job-details__header-title__date-weekday">
+                {{ jobDateMoment.format("dddd") }}
+              </div>
+            </div>
+            <div class="job-details__header-title__specialist">
+              <div class="job-details__header-title__specialist-label">Специалист:</div>
+              <div class="job-details__header-title__specialist-name">{{ job.specialist ? job.specialist.__str__ : "Не назначен"}}</div>
+            </div>
+          </div>
+          <div class="job-details__header-right-block"></div>
         </div>
-
       </div>
 
-      <div class="job-details__body" v-if="job">
+      <div class="job-details__content">
+        <div class="job-details__tabs-holder">
+          <a-tabs v-model="activeTab" class="job-details__tabs">
+            <a-tab-pane key="1">
+              <span slot="tab">
+                <a-icon type="setting" />
+                Параметры занятия
+              </span>
+            </a-tab-pane>
+            <a-tab-pane key="2">
+              <span slot="tab">
+                <a-icon type="carry-out" />
+                Отчет
+              </span>
+            </a-tab-pane>
+          </a-tabs>
+        </div>
+        <div class="job-details__tab_content">
+          <a-form-model v-if="activeTab == 1" :model="form" v-bind="layout" :rules="rules" ref="jobForm">
+            <a-form-model-item prop="topic" label="Тема занятия" key="topic"
+              :validateStatus="fields['topic'].validateStatus" :help="fields['topic'].help">
+              <a-input v-model="form.topic" />
+            </a-form-model-item>
 
-        <template v-if="isJobWindow">
-        <a-form-model :model="form" v-bind="layout" :rules="rules" ref="jobForm">
-
-          <a-form-model-item prop="topic" label="Тема занятия" key="topic"
-            :validateStatus="fields['topic'].validateStatus" :help="fields['topic'].help">
-            <a-input v-model="form.topic" />
-          </a-form-model-item>
-
-          <a-form-model-item prop="reports" label="Навыки" key="reports"
-            :validateStatus="fields['reports'].validateStatus" :help="fields['reports'].help">
-            <a-tree-select
-              :value="form.reports"
-              @change="setReports"
-              :dropdownStyle="{'max-height': '500px', 'overflow-y': 'auto'}"
-              placeholder="Выберите навыки"
-              allow-clear multiple>
-              <a-tree-select-node v-for="area in areas"
-                :key="'area'+area.id"
-                :value="'area'+area.id"
-                :selectable="false"
-                :title="area.name">
-                <a-tree-select-node v-for="direction in area.development_directions"
-                  :key="'direction'+direction.id"
-                  :value="'direction'+direction.id"
+            <a-form-model-item prop="reports" label="Навыки" key="reports"
+              :validateStatus="fields['reports'].validateStatus" :help="fields['reports'].help">
+              <a-tree-select
+                :value="form.reports"
+                @change="setReports"
+                :dropdownStyle="{'max-height': '500px', 'overflow-y': 'auto'}"
+                placeholder="Выберите навыки"
+                allow-clear multiple>
+                <a-tree-select-node v-for="area in areas"
+                  :key="'area'+area.id"
+                  :value="'area'+area.id"
                   :selectable="false"
-                  :title="direction.name">
-                  <a-tree-select-node v-for="skill in direction.skills"
-                    :key="'skill'+skill.id"
-                    :value="skill.id"
-                    :title="skill.name"
-                    :isLeaf="true">
+                  :title="area.name">
+                  <a-tree-select-node v-for="direction in area.development_directions"
+                    :key="'direction'+direction.id"
+                    :value="'direction'+direction.id"
+                    :selectable="false"
+                    :title="direction.name">
+                    <a-tree-select-node v-for="skill in direction.skills"
+                      :key="'skill'+skill.id"
+                      :value="skill.id"
+                      :title="skill.name"
+                      :isLeaf="true">
+                    </a-tree-select-node>
                   </a-tree-select-node>
                 </a-tree-select-node>
-              </a-tree-select-node>
-            </a-tree-select>
-          </a-form-model-item>
+              </a-tree-select>
+            </a-form-model-item>
 
-          <a-form-model-item prop="form_id" label="Форма проведения занятия" key="form"
-            :validateStatus="fields['form_id'].validateStatus" :help="fields['form_id'].help">
-            <a-select v-model="form.form_id"
-              allow-clear
-              @change="fieldChanged($event, 'form_id')">
-              <a-select-option v-for="form in forms" :key="form.id">
-                {{ form.name }}
-              </a-select-option>
-            </a-select>
-          </a-form-model-item>
+            <a-form-model-item prop="form_id" label="Форма проведения занятия" key="form"
+              :validateStatus="fields['form_id'].validateStatus" :help="fields['form_id'].help">
+              <a-select v-model="form.form_id"
+                allow-clear
+                @change="fieldChanged($event, 'form_id')">
+                <a-select-option v-for="form in forms" :key="form.id">
+                  {{ form.name }}
+                </a-select-option>
+              </a-select>
+            </a-form-model-item>
 
-          <a-form-model-item prop="method_id" label="Способ проведения занятия" key="method_id"
-            :validateStatus="fields['method_id'].validateStatus" :help="fields['method_id'].help">
-            <a-select v-model="form.method_id"
-              :disabled="!form.form_id"
-              allow-clear
-              @change="fieldChanged($event, 'method_id')">
-              <a-select-option v-for="method in methods" :key="method.id">
-                {{ method.name }}
-              </a-select-option>
-            </a-select>
-          </a-form-model-item>
+            <a-form-model-item prop="method_id" label="Способ проведения занятия" key="method_id"
+              :validateStatus="fields['method_id'].validateStatus" :help="fields['method_id'].help">
+              <a-select v-model="form.method_id"
+                :disabled="!form.form_id"
+                allow-clear
+                @change="fieldChanged($event, 'method_id')">
+                <a-select-option v-for="method in methods" :key="method.id">
+                  {{ method.name }}
+                </a-select-option>
+              </a-select>
+            </a-form-model-item>
 
-          <a-form-model-item prop="comment" label="Дополнительная информация по занятию" key="comment"
-            :validateStatus="fields['comment'].validateStatus" :help="fields['comment'].help">
-            <a-input v-model="form.comment"
-              allow-clear
-              :auto-size="{minRows: 4, maxRows: 6}"
-              @change="fieldChanged($event, 'comment')"
-              type="textarea"/>
-          </a-form-model-item>
+            <a-form-model-item prop="comment" label="Описание" key="comment"
+              :validateStatus="fields['comment'].validateStatus" :help="fields['comment'].help">
+              <a-input v-model="form.comment"
+                allow-clear
+                :auto-size="{minRows: 4, maxRows: 6}"
+                @change="fieldChanged($event, 'comment')"
+                type="textarea"/>
+            </a-form-model-item>
 
-          <a-form-model-item prop="job_files" label="Прикрепленные файлы" key="job_files"
-            :validateStatus="fields['job_files'].validateStatus" :help="fields['job_files'].help">
-            <a-upload
-              multiple
-              list-type="picture"
-              :default-file-list="form.job_files"
-              :remove="handleRemoveJobFile"
-              :before-upload="beforeUploadJobFile"
-              class="job-details__body__form-files"
-            >
-              <a-button> <a-icon type="upload" /> Прикрепить файл </a-button>
-            </a-upload>
-          </a-form-model-item>
+            <a-form-model-item prop="job_files" label="Прикрепленные файлы" key="job_files"
+              :validateStatus="fields['job_files'].validateStatus" :help="fields['job_files'].help">
+              <a-upload
+                multiple
+                list-type="picture"
+                :default-file-list="form.job_files"
+                :remove="handleRemoveJobFile"
+                :before-upload="beforeUploadJobFile"
+                class="job-details__body__form-files"
+              >
+                <a-button> <a-icon type="upload" /> Прикрепить файл </a-button>
+              </a-upload>
+            </a-form-model-item>
 
-          <a-form-model-item class="job-details__body__form-ok"
-            :wrapper-col="{offset: 6}">
-            <a-button icon="check" type="primary" @click="saveJob">Сохранить параметры занятия</a-button>
-          </a-form-model-item>
-        </a-form-model>
-        </template>
-
-        <template v-else>
-          <div class="job-details__wrapper">
+            <a-form-model-item class="job-details__body__form-ok"
+              :wrapper-col="{offset: 6}">
+              <a-button icon="check" type="primary" @click="saveJob">Сохранить параметры занятия</a-button>
+            </a-form-model-item>
+          </a-form-model>
+          <div v-if="activeTab == 2" class="job-details__wrapper">
             <div class="job-details__label" v-if="reportForm.marks.length">Уровень освоения</div>
             <div class="job-details__reports">
               <div class="job-details__report" v-for="report in reportForm.marks" :key="report.id">
@@ -155,9 +161,7 @@
               type="textarea"/>
             <a-button icon="check" type="primary" @click="saveReport">Сохранить отчет</a-button>
           </div>
-        </template>
-
-
+        </div>
       </div>
     </div>
   </a-spin>
@@ -177,6 +181,7 @@ export default {
   data() {
     return {
       loading: true,
+      activeTab: '1',
 
       job: null,
       form: {
@@ -192,8 +197,6 @@ export default {
         marks: [],
         report_comment: '',
       },
-
-      isJobWindow: true,
 
       layout: {
         labelCol: { span: 6 },
@@ -466,17 +469,13 @@ export default {
   flex-direction: column
   overflow: hidden
   height: 100%
+
   &__header
     display: flex
     flex-direction: column
     &-title
       display: flex
-      flex-direction: row
-      justify-content: center
-      align-items: center
       flex: 1
-      text-align: center
-      font-size: 1rem
       margin-bottom: 10px
       &__activity
         display: flex
@@ -584,7 +583,31 @@ export default {
   &__report_comment
     margin-bottom: 24px
 
+.job-details__header-left-block
+  flex: 1
 
+.job-details__header-center-block
+  display: flex
+  justify-content: center
+  align-items: center
+  font-size: 1rem
+
+.job-details__header-right-block
+  flex: 1
+
+.job-details__content
+  display: flex
+  flex-direction: column
+  flex: 1
+  overflow: hidden
+
+.job-details__tabs-holder
+  display: flex
+  justify-content: center
+
+.job-details__tab_content
+  flex: 1
+  overflow: auto
 
 
 

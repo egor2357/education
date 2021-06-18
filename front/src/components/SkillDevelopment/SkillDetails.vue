@@ -1,78 +1,66 @@
 <template>
   <a-spin :spinning="loading">
     <div class="skill-details">
-      <div class="skill-details__header">
 
-        <div class="skill-details__header-title">
-          Развитие навыка
+      <div class="top-bar">
+        <div class="top-bar__side-block left">
+          <a-button icon="left" @click="goBack">Назад</a-button>
         </div>
-
-        <div class="skill-details__header__options">
-          <div class="skill-details__header__options__back">
-            <a-button icon="left" @click="goBack">Назад</a-button>
-          </div>
-          <div class="skill-details__header__options__title"
-            v-if="skillReports.length">
-            {{ skillReports[0].skill.name }}
-          </div>
-          <div class="skill-details__header__options__date-range">
-            <span class="skill-details__header__options__date-range__label">Период:</span>
-            <a-range-picker
-              class="skill-details__header__options__date-range__input"
-              v-model="dateRange"
-              @change="dateRangeChange"
-              format="DD.MM.YYYY"
-              :allowClear="false"
-              separator="-"/>
-          </div>
+        <div class="title">Развитие навыка</div>
+        <div class="top-bar__side-block right">
+          <span class="date-range-label">Период:</span>
+          <a-range-picker
+            class="date-range-input"
+            v-model="dateRange"
+            @change="dateRangeChange"
+            format="DD.MM.YYYY"
+            :allowClear="false"
+            separator="-"/>
         </div>
-
       </div>
 
-      <div class="skill-details__body">
-        <div class="skill-details__body__table">
-          <div class="skill-details__body__table-header">
-            <div class="skill-details__body__table-date">Дата занятия</div>
-            <div class="skill-details__body__table-activity">Вид деятельности</div>
-            <div class="skill-details__body__table-specialist">Специалист</div>
-            <div class="skill-details__body__table-job">Занятие</div>
-          </div>
-          <div class="skill-details__body__table-body">
-            <div class="skill-details__body__table-row"
-              v-for="skillReport in skillReports" :key="skillReport.id"
-              @click="goToJob(skillReport.job)">
-              <div class="skill-details__body__table-date">
-                {{ skillReport.job.date | toRuDateString }}
-              </div>
-              <div class="skill-details__body__table-activity">
-                <div :style="{
-                  'background-color': `${skillReport.job.activity.color}10`,
-                  border: `1px solid ${skillReport.job.activity.color}99`,
-                }">
-                  {{ skillReport.job.activity.name }}
-                </div>
-              </div>
-              <div class="skill-details__body__table-specialist">
-                {{ skillReport.job.specialist ? skillReport.job.specialist.__str__ : ""}}
-              </div>
-              <div class="skill-details__body__table-job">
-                <div class="skill-details__body__table-job__text">
-                  <div class="skill-details__body__table-job__topic">{{ skillReport.job.topic }}</div>
-                  <div class="skill-details__body__table-job__form"
-                    v-if="skillReport.job.method">
-                    {{ skillReport.job.method.form_name }}
-                  </div>
-                  <div class="skill-details__body__table-job__method"
-                    v-if="skillReport.job.method">
-                    {{ skillReport.job.method.name }}
-                  </div>
-                </div>
-                <div class="skill-details__body__table-job__mark"
-                  :style="{'background-color': getColorByMark(skillReport.mark)}">
-                </div>
+      <div v-if="skillReports.length" class="skill-name">{{ skillReports[0].skill.name }}</div>
 
+      <div class="table-holder">
+        <div class="table-header">
+          <div class="table-cell table-cell_date">Дата занятия</div>
+          <div class="table-cell table-cell_activity">Вид деятельности</div>
+          <div class="table-cell table-cell_specialist">Специалист</div>
+          <div class="table-cell table-cell_job">Сведения о занятии</div>
+        </div>
+        <div class="table-body" v-if="skillReports.length">
+          <div class="table-row" v-for="skillReport in skillReports" :key="skillReport.id" @click="goToJob(skillReport.job)">
+            <div class="table-cell table-cell_date">
+              {{ skillReport.job.date | toRuDateString }}
+            </div>
+            <div class="table-cell table-cell_activity">
+              <div :style="{
+                'background-color': `${skillReport.job.activity.color}10`,
+                border: `1px solid ${skillReport.job.activity.color}99`,
+              }" class="table-cell__activity-name">
+                {{ skillReport.job.activity.name }}
               </div>
             </div>
+            <div class="table-cell table-cell_specialist">
+              {{ skillReport.job.specialist ? skillReport.job.specialist.__str__ : ""}}
+            </div>
+            <div class="table-cell table-cell_job">
+              <div class="job">
+                <div class="job__topic">{{ skillReport.job.topic }}</div>
+                <div class="job__form"
+                  v-if="skillReport.job.method">
+                  {{ skillReport.job.method.form_name }}
+                </div>
+                <div class="job__method"
+                  v-if="skillReport.job.method">
+                  {{ skillReport.job.method.name }}
+                </div>
+              </div>
+              <div class="job__mark"
+                :style="{'background-color': getColorByMark(skillReport.mark)}">
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -164,112 +152,125 @@ export default {
 </script>
 
 <style lang="sass">
+$border-color: #e8e8e8
+
 .skill-details
   display: flex
   flex-direction: column
   overflow: hidden
   height: 100%
-  &__header
+
+  .top-bar
     display: flex
-    flex-direction: column
-    &-title
-      flex-grow: 1
-      text-align: center
+    line-height: 32px
+
+    .title
       font-size: 1rem
-      margin-bottom: 10px
-    &__options
+      text-align: center
+      margin: 0 10px
+
+  .top-bar__side-block
+    flex: 1
+
+    &.right
+      text-align: right
+      white-space: nowrap
+
+    .date-range-label
+      margin-right: 10px
+
+    .date-range-input
+      width: 200px
+
+  .skill-name
+    max-width: 900px
+    text-align: center
+    margin: 0 auto 10px
+    font-size: 20px
+    line-height: 32px
+
+  .table-holder
+    overflow: auto
+    flex: 1
+
+  .table-header
+    display: flex
+    align-items: center
+    background: #fafafa
+    border: 1px solid $border-color
+    overflow: hidden
+    line-height: 15px
+    z-index: 1
+    position: sticky
+    top: 0
+
+  .table-cell
+    padding: 10px 15px
+    display: flex
+    align-items: center
+    min-height: 52px
+    word-break: break-word
+
+  .table-cell_date
+    width: 150px
+
+  .table-cell_activity
+    width: 200px
+    border-left: 1px solid $border-color
+
+  .table-cell_specialist
+    width: 200px
+    border-left: 1px solid $border-color
+
+  .table-cell_job
+    flex: 1
+    border-left: 1px solid $border-color
+
+  .table-body
+    border: 1px solid $border-color
+    border-top: 0 none
+
+  .table-row
+    display: flex
+
+  .table-row
+    border-top: 1px solid $border-color
+    cursor: pointer
+
+  .table-row:first-child
+    border-top: 0 none
+
+  .table-row:hover
+    background: #e6f7ff
+
+  .table-cell__activity-name
+    padding: 2px 5px
+    border-radius: 4px
+    flex: 1
+    text-align: center
+
+
+  .job
+    display: flex
+    flex-direction: row
+    flex: 1
+    min-width: 200px
+    padding: 10px 15px
+
+    &__text
       display: flex
       flex-direction: row
-      align-items: center
-      justify-content: space-between
-      margin-bottom: 10px
-      &__back
-        display: flex
-        flex-direction: row
-        justify-content: flex-start
-        flex: 1
-      &__title
-        display: flex
-        flex-direction: row
-        justify-content: center
-        flex: 1
-        font-size: 20px
-      &__date-range
-        display: flex
-        flex-direction: row
-        flex: 1
-        align-items: center
-        justify-content: flex-end
-        &__label
-          margin-right: 10px
-
-  &__body
-    &__table
-      display: flex
       flex: 1
-      flex-direction: column
-      border-left: 1px solid #ccc
-      border-top: 1px solid #ccc
-      &-header
-        display: flex
-        flex: 1
-        flex-direction: row
-        background-color: #f4f4f4
-        color: rgba(0, 0, 0, 0.85)
-        div
-          display: flex
-          align-items: center
-      &-body
-        display: flex
-        flex: 1
-        flex-direction: column
-      &-row
-        display: flex
-        flex: 1
-        flex-direction: row
-        background: white
-        transition: background 0.3s
-        &:hover
-          background: #e6f7ff
-          cursor: pointer
-      &-date, &-specialist
-        min-width: 200px
-        width: 200px
-        padding: 10px 15px
-        border-right: 1px solid #ccc
-        border-bottom: 1px solid #ccc
-      &-activity
-        min-width: 200px
-        width: 200px
-        padding: 10px 15px
-        border-right: 1px solid #ccc
-        border-bottom: 1px solid #ccc
-        div
-          padding: 2px 4px
-          text-align: center
-          border-radius: 4px
-      &-job
-        display: flex
-        flex-direction: row
-        flex: 1
-        min-width: 200px
-        padding: 10px 15px
-        border-right: 1px solid #ccc
-        border-bottom: 1px solid #ccc
-        &__text
-          display: flex
-          flex-direction: row
-          flex: 1
-        &__mark
-          height: 26px
-          width: 26px
-          border-radius: 13px
-          box-shadow: 0 1px 3px 1px #dedede
-        &__topic
-          margin-right: 10px
-          font-weight: bold
-        &__form
-          margin-right: 10px
+    &__mark
+      height: 26px
+      width: 26px
+      border-radius: 13px
+      box-shadow: 0 1px 3px 1px #dedede
+    &__topic
+      margin-right: 10px
+      font-weight: bold
+    &__form
+      margin-right: 10px
 
 
 </style>

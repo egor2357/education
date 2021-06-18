@@ -98,8 +98,10 @@ export default {
   border-radius: 4px
   display: flex
   flex-wrap: wrap
+  transition: box-shadow ease-out .3s
   &:hover
     cursor: pointer
+    box-shadow: 0 0 2px 1px rgba(0,0,0,.15)
 
   &__time
     flex: 0 0 95%
