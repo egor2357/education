@@ -1,81 +1,67 @@
 <template>
   <a-spin :spinning="loading">
     <div class="skill-development">
-      <div class="skill-development__header">
 
-        <div class="skill-development__header-title">
-          Развитие навыков
+      <div class="top-bar">
+        <div class="top-bar__side-block left"></div>
+        <div class="title">Развитие навыков</div>
+        <div class="top-bar__side-block right">
+          <span class="date-range-label">Период:</span>
+          <a-range-picker
+            class="date-range-input"
+            v-model="dateRange"
+            @change="dateRangeChange"
+            format="DD.MM.YYYY"
+            :allowClear="false"
+            separator="-"/>
         </div>
-
-        <div class="skill-development__header__options">
-          <div></div>
-          <div class="skill-development__header__date-range">
-            <span class="skill-development__header__date-range__label">Период:</span>
-            <a-range-picker
-              class="skill-development__header__date-range__input"
-              v-model="dateRange"
-              @change="dateRangeChange"
-              format="DD.MM.YYYY"
-              :allowClear="false"
-              separator="-"/>
-          </div>
-        </div>
-
       </div>
 
-      <div class="skill-development__body">
-        <div class="skill-development__body__table">
-          <div class="skill-development__body__table-header">
-            <div class="skill-development__body__table-area">Образовательная область</div>
-            <div class="skill-development__body__table-direction">Направление развития</div>
-            <div class="skill-development__body__table-skill">Навык</div>
-            <div class="skill-development__body__table-count">Количество обращений к навыку за период</div>
+      <div class="table-holder">
+        <div class="table-header">
+          <div class="table-header__column table-header__column_area">
+            <div class="table-cell">Образовательная область</div>
           </div>
-          <div class="skill-development__body__table-body">
-
-            <div class="skill-development__body__table-areas">
-            <div class="skill-development__body__table-area-row"
-              v-for="area in areas" :key="area.id">
-
-
-              <div class="skill-development__body__table-area">
-                {{ area.number }}. {{ area.name }}
-              </div>
-
-              <div class="skill-development__body__table-directions"
-                v-if="area.development_directions.length">
-              <div class="skill-development__body__table-direction-row"
-                v-for="direction in area.development_directions" :key="direction.id">
-
-                <div class="skill-development__body__table-direction">
-                  {{ area.number }}.{{ direction.number }}. {{ direction.name }}
-                </div>
-
-                <div class="skill-development__body__table-skills"
-                  v-if="direction.skills.length">
-                <div class="skill-development__body__table-skill-row"
-                  v-for="skill in direction.skills" :key="skill.id">
-
-                  <div class="skill-development__body__table-skill">
-                    <span :class="{'skill-development__body__table-skill-link': reportsCountById[skill.id]}"
-                      @click="goToSkill(skill.id)">
-                      {{ area.number }}.{{ direction.number }}.{{ skill.number }}. {{ skill.name }}
-                    </span>
-                  </div>
-                  <div class="skill-development__body__table-count">
-                    {{ skill.id in reportsCountById ? reportsCountById[skill.id] : 0 }}
-                  </div>
-
-                </div>
-                </div>
-
-              </div>
-              </div>
-
-            </div>
-            </div>
-
+          <div class="table-header__column table-header__column_direction">
+            <div class="table-cell">Направление развития</div>
           </div>
+          <div class="table-header__column table-header__column_skill">
+            <div class="table-cell">Навык</div>
+          </div>
+          <div class="table-header__column table-header__column_count">
+            <div class="table-cell">Количество обращений к навыку за период</div>
+          </div>
+        </div>
+        <div class="table-body" v-if="areas.length">
+          <div class="table-row" v-for="area in areas" :key="area.id">
+            <div class="table-row__column table-row__column_area">
+              <div class="table-cell">{{[area.number, area.name].join('. ')}}</div>
+            </div>
+            <div class="table-row__container">
+              <div class="table-row" v-for="direction in area.development_directions" :key="direction.id">
+                <div class="table-row__column table-row__column_direction">
+                  <div class="table-cell">{{[area.number, direction.number].join('.')+'. '+direction.name}}</div>
+                </div>
+                <div class="table-row__container">
+                  <div class="table-row" v-for="skill in direction.skills" :key="skill.id">
+                    <div class="table-row__column_skill">
+                      <div class="table-cell">
+                        <span :class="{'skill-link' : reportsCountById[skill.id]}" @click="goToSkill(skill.id)">
+                          {{[area.number, direction.number, skill.number].join('.')+'. '+skill.name}}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="table-row__column_count">
+                      <div class="table-cell">{{ skill.id in reportsCountById ? reportsCountById[skill.id] : 0 }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="no-data" v-else>
+          <a-empty :image="simpleImage"/>
         </div>
       </div>
     </div>
@@ -84,6 +70,7 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
+import { Empty } from 'ant-design-vue';
 import moment from "moment";
 
 export default {
@@ -124,6 +111,9 @@ export default {
     await Promise.all(fetches);
     this.loading = false;
 
+  },
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   methods: {
     ...mapActions({
@@ -185,75 +175,129 @@ export default {
   flex-direction: column
   overflow: hidden
   height: 100%
-  &__header
+
+  .top-bar
     display: flex
-    flex-direction: column
-    &-title
-      flex-grow: 1
-      text-align: center
+    margin-bottom: 10px
+    line-height: 32px
+
+    .title
       font-size: 1rem
-      margin-bottom: 10px
-    &__options
-      display: flex
-      flex-direction: row
-      align-items: center
-      justify-content: space-between
-      margin-bottom: 10px
-    &__date-range
-      display: flex
-      flex-direction: row
-      align-items: center
-      &__label
-        margin-right: 10px
+      text-align: center
+      margin: 0 10px
 
-  &__body
-    &__table
-      display: flex
+  .top-bar__side-block
+    flex: 1
+
+    &.right
+      text-align: right
+
+    .date-range-label
+      margin-right: 10px
+
+    .date-range-input
+      width: 200px
+
+  .table-holder
+    flex: 1
+    overflow: auto
+
+  .table-header
+    display: flex
+    height: 60px
+    align-items: center
+    background: #fafafa
+    border: 1px solid #e8e8e8
+    overflow: hidden
+    line-height: 15px
+    z-index: 2
+    position: sticky
+    top: 0
+
+  .table-header__column
+    overflow: hidden
+    display: flex
+    align-items: center
+    height: 100%
+
+  .table-header__column_area
+    width: 20%
+
+  .table-header__column_direction
+    width: 20%
+    border-left: 1px solid #e8e8e8
+
+  .table-header__column_skill
+    flex: 1
+    border-left: 1px solid #e8e8e8
+
+  .table-header__column_count
+    min-width: 150px
+    max-width: 150px
+    border-left: 1px solid #e8e8e8
+    display: flex
+    align-items: center
+
+  .table-cell
+    padding: 10px 15px
+    display: flex
+    align-items: center
+    min-height: 52px
+    word-break: break-word
+
+  .table-body
+    border: 1px solid #e8e8e8
+    border-top: 0 none
+
+    .table-row
+        border-top: 1px solid #e8e8e8
+        display: flex
+        flex: 1
+
+    .table-row__column
+      .table-cell
+        position: sticky
+        z-index: 1
+        top: 60px
+
+    .table-row__container
       flex: 1
+      display: flex
       flex-direction: column
-      border-left: 1px solid #ccc
-      border-top: 1px solid #ccc
-      &-header
-        display: flex
-        flex: 1
-        flex-direction: row
-        background-color: #f4f4f4
-        color: rgba(0, 0, 0, 0.85)
-        div
-          display: flex
-          align-items: center
-      &-body
-        display: flex
-        flex: 1
-        flex-direction: column
 
-      &-areas, &-directions, &-skills
-        display: flex
-        flex: 1
-        flex-direction: column
-      &-area-row, &-direction-row, &-skill-row
-        display: flex
-        flex: 1
-        flex-direction: row
-      &-area, &-direction, &-count
-        min-width: 200px
-        width: 200px
-        padding: 10px 15px
-        border-right: 1px solid #ccc
-        border-bottom: 1px solid #ccc
-      &-skill
-        min-width: 200px
-        flex: 1
-        padding: 10px 15px
-        border-right: 1px solid #ccc
-        border-bottom: 1px solid #ccc
-        &-link
-          color: #1890ff
-          transition: all .3s cubic-bezier(.645,.045,.355,1)
-          cursor: pointer
-          &:hover
-            color: #40a9ff
+    .table-row:first-child
+      border-top: 0 none
 
+    .table-row__column_area
+      width: 20%
 
+    .table-row__column_direction
+      width: 25%
+      border-left: 1px solid #e8e8e8
+
+    .table-row__column_skill
+      flex: 1
+      border-left: 1px solid #e8e8e8
+
+    .table-row__column_count
+      min-width: 150px
+      max-width: 150px
+      border-left: 1px solid #e8e8e8
+      display: flex
+      align-items: center
+      justify-content: center
+
+    .skill-link
+      color: #1890ff
+      cursor: pointer
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+
+    .skill-link:hover
+      color: #40a9ff
+
+  .no-data
+    padding: 50px 0
+    border: 1px solid #e8e8e8
+    border-top: 0 none
 
 </style>

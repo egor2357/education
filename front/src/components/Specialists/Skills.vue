@@ -187,7 +187,7 @@ export default {
       display: flex
       height: 50px
       align-items: center
-      background: #efefef
+      background: #fafafa
       border: 1px solid #e8e8e8
       overflow: hidden
       line-height: 15px
