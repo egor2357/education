@@ -3,7 +3,7 @@
     <div class="presence-chart__table">
       <div class="presence-chart__table-header">
         <div class="presence-chart__table-header-specialist-cell">Специалист</div>
-        <div class="presence-chart__table-header-day-cell" v-for="day of daysInMonth" :key="day.num" :class="{weekend: day.weekend}">{{day.num}}</div>
+        <div class="presence-chart__table-header-day-cell" v-for="day of tableData.daysInMonth" :key="day.num" :class="{weekend: day.weekend}">{{day.num}}</div>
       </div>
       <div class="presence-chart__table-body">
         <div class="presence-chart__table-body-row" v-for="row in tableData.specialists" :key="row.id">
@@ -17,8 +17,8 @@
               :key="interval.id"
               :class="{start: interval.hasStart, end: interval.hasEnd}"
               :style="{
-                        width: interval.daysCount*100/daysInMonth.length+'%',
-                        left: (interval.dayFrom-1)*100/daysInMonth.length+'%'
+                        width: interval.daysCount*100/tableData.daysInMonth.length+'%',
+                        left: (interval.dayFrom-1)*100/tableData.daysInMonth.length+'%'
                       }"
             >
               <a-dropdown v-for="date, index in interval.daysCount" :key="index"
@@ -59,6 +59,7 @@
         type: Object,
         default(){
           return {
+            daysInMonth: [],
             specialists: []
           };
         }
