@@ -5,12 +5,12 @@
         <div class="job-options__header-filler"></div>
         <div>Планы занятий</div>
         <div class="job-options__header-filler">
-          <a-button @click="showModal()">
+          <a-button @click="showModal(null)" v-if="activities.length">
             <a-icon type="plus"/>Добавить план занятия
           </a-button>
         </div>
       </div>
-      <div class="job-options__tabs">
+      <div class="job-options__tabs" v-if="activities.length">
         <a-tabs v-model="activeTab">
           <a-tab-pane v-for="activity in activities" :key="activity.id">
             <span slot="tab">
@@ -19,15 +19,15 @@
           </a-tab-pane>
         </a-tabs>
       </div>
-      <div class="job-options__cards">
+      <div class="job-options__cards" v-if="currentActivityOptions.length">
         <div class="job-options__card" v-for="option in currentActivityOptions" :key="option.id">
           <job-option :option="option">
-            <a-divider type="vertical" />
             <div class="job-option-header-actions">
               <div class="job-option-header-action"
-                @click="editOption(option)">
+                @click="showModal(option)">
                 Изменить
               </div>
+              <a-divider type="vertical" />
               <div class="job-option-header-action"
                 @click="deleteOption(option)">
                 Удалить
@@ -36,18 +36,31 @@
           </job-option>
         </div>
       </div>
+      <div v-else>
+        <a-empty :image="simpleImage"/>
+      </div>
 
     </div>
+
+    <option-modal
+      v-if="displayModal"
+      :editableData="modalEditableData"
+      @closeModal="closeModal($event)"
+    />
   </a-spin>
 </template>
 
 <script>
+import JobOptionModal from "@/components/JobSchedule/JobModal";
 import { mapActions, mapGetters } from "vuex";
+import deleteAxios from "@/middleware/deleteAxios";
 import JobOption from "@/components/JobOptions/JobOption";
+import { Empty } from 'ant-design-vue';
 
 export default {
   components: {
-    JobOption
+    JobOption,
+    JobOptionModal,
   },
   name: "JobOptions",
   data() {
@@ -58,9 +71,14 @@ export default {
 
       options: [],
 
-      isModalVisible: false,
+      displayModal: false,
+
+      modalEditableData: null,
 
     };
+  },
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   async created() {
     let fetches = []
@@ -100,11 +118,26 @@ export default {
     },
 
 
-    showModal(){
-      this.isModalVisible = true;
+    showModal(option=null){
+      this.displayModal = true;
+      this.modalEditableData = option;
     },
     closeModal(){
-      this.isModalVisible = false;
+      this.displayModal = false;
+      this.modalEditableData = null;
+    },
+
+    showDeleteConfirm(option) {
+      let component = this;
+      let confirmObject = {
+        title: `План занятия "${option.topic}" будет удален.`,
+        content: "Продолжить?",
+        okType: "danger",
+        onOk() {
+          component.deleteOption(option.id);
+        },
+      }
+      this.$confirm(confirmObject);
     },
 
     createOption(){
@@ -113,8 +146,22 @@ export default {
     editOption(option){
 
     },
-    deleteOption(option){
 
+    async deleteOption(optionId){
+      try {
+        this.loading = true;
+        let res = await deleteAxios(this.$axios, `/api/options/${optionId}/`, {});
+        if (res.status === 204) {
+          this.$message.success("План занятия успешн удален");
+          await this.fetchOptions();
+        } else {
+          this.$message.error("Произошла ошибка при удалении плана занятия");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка при удалении плана занятия");
+      } finally {
+        this.loading = false;
+      }
     },
 
     ...mapActions({
@@ -151,7 +198,6 @@ export default {
       &-filler
         flex: 1
         text-align: right
-
     &__tabs
       display: flex
       justify-content: center
@@ -162,7 +208,7 @@ export default {
       overflow-y: auto
       margin-top: 10px
       width: 900px
-      margin: 10px auto
+      margin: 10px auto 0
 
     &__card
       position: relative
