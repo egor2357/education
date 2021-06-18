@@ -45,18 +45,18 @@
               {{ skillReport.job.specialist ? skillReport.job.specialist.__str__ : ""}}
             </div>
             <div class="table-cell table-cell_job">
-              <div class="job">
-                <div class="job__topic">{{ skillReport.job.topic }}</div>
-                <div class="job__form"
+              <div class="table-cell__job">
+                <div class="table-cell__job-topic">{{ skillReport.job.topic }}</div>
+                <div class="table-cell__job-form"
                   v-if="skillReport.job.method">
                   {{ skillReport.job.method.form_name }}
                 </div>
-                <div class="job__method"
+                <div class="table-cell__job-method"
                   v-if="skillReport.job.method">
                   {{ skillReport.job.method.name }}
                 </div>
               </div>
-              <div class="job__mark"
+              <div class="table-cell__job-mark"
                 :style="{'background-color': getColorByMark(skillReport.mark)}">
               </div>
             </div>
@@ -250,26 +250,26 @@ $border-color: #e8e8e8
     text-align: center
 
 
-  .job
+  .table-cell__job
     display: flex
     flex-direction: row
     flex: 1
     min-width: 200px
     padding: 10px 15px
 
-    &__text
+    &-text
       display: flex
       flex-direction: row
       flex: 1
-    &__mark
+    &-mark
       height: 26px
       width: 26px
       border-radius: 13px
       box-shadow: 0 1px 3px 1px #dedede
-    &__topic
+    &-topic
       margin-right: 10px
       font-weight: bold
-    &__form
+    &-form
       margin-right: 10px
 
 
