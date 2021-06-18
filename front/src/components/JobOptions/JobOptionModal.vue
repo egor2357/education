@@ -26,16 +26,16 @@
             :key="'area'+area.id"
             :value="'area'+area.id"
             :selectable="false"
-            :title="area.name">
+            :title="`${area.number}. ${area.name}`">
             <a-tree-select-node v-for="direction in area.development_directions"
               :key="'direction'+direction.id"
               :value="'direction'+direction.id"
               :selectable="false"
-              :title="direction.name">
+              :title="`${area.number}.${direction.number}. ${direction.name}`">
               <a-tree-select-node v-for="skill in direction.skills"
                 :key="'skill'+skill.id"
                 :value="skill.id"
-                :title="skill.name"
+                :title="`${area.number}.${direction.number}.${skill.number}. ${skill.name}`"
                 :isLeaf="true">
               </a-tree-select-node>
             </a-tree-select-node>
@@ -307,7 +307,6 @@ export default {
     },
   },
   async created() {
-    console.log(this.activity);
     let fetches = [];
     if (!this.areasFetched) {
       fetches.push(this.fetchAreas());
@@ -321,7 +320,7 @@ export default {
     this.loading = false;
 
     if (this.option) {
-      this.title = "Изменение плана занятия";
+      this.title = `${this.activity.name} | Изменение плана занятия`;
       this.form.topic = this.option.topic;
       this.form.skills.splice(0);
       this.form.skills = this.option.skills.map((skill)=>{
@@ -340,7 +339,7 @@ export default {
         });
       }
     } else {
-      this.title = "Добавление плана занятия";
+      this.title = `${this.activity.name} | Добавление плана занятия`;
     }
     document.addEventListener("keydown", this.keydown);
   },
