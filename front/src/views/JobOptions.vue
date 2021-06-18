@@ -5,12 +5,12 @@
         <div class="job-options__header-filler"></div>
         <div>Планы занятий</div>
         <div class="job-options__header-filler">
-          <a-button @click="showModal()">
+          <a-button @click="showModal(null)" v-if="activities.length">
             <a-icon type="plus"/>Добавить план занятия
           </a-button>
         </div>
       </div>
-      <div class="job-options__tabs">
+      <div class="job-options__tabs" v-if="activities.length">
         <a-tabs v-model="activeTab">
           <a-tab-pane v-for="activity in activities" :key="activity.id">
             <span slot="tab">
@@ -19,15 +19,15 @@
           </a-tab-pane>
         </a-tabs>
       </div>
-      <div class="job-options__cards">
+      <div class="job-options__cards" v-if="currentActivityOptions.length">
         <div class="job-options__card" v-for="option in currentActivityOptions" :key="option.id">
           <job-option :option="option">
-            <a-divider type="vertical" />
             <div class="job-option-header-actions">
               <div class="job-option-header-action"
-                @click="editOption(option)">
+                @click="showModal(option)">
                 Изменить
               </div>
+              <a-divider type="vertical" />
               <div class="job-option-header-action"
                 @click="deleteOption(option)">
                 Удалить
@@ -35,6 +35,9 @@
             </div>
           </job-option>
         </div>
+      </div>
+      <div v-else>
+        <a-empty :image="simpleImage"/>
       </div>
 
     </div>
@@ -44,6 +47,7 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import JobOption from "@/components/JobOptions/JobOption";
+import { Empty } from 'ant-design-vue';
 
 export default {
   components: {
@@ -61,6 +65,9 @@ export default {
       isModalVisible: false,
 
     };
+  },
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   async created() {
     let fetches = []
@@ -151,7 +158,6 @@ export default {
       &-filler
         flex: 1
         text-align: right
-
     &__tabs
       display: flex
       justify-content: center
@@ -162,7 +168,7 @@ export default {
       overflow-y: auto
       margin-top: 10px
       width: 900px
-      margin: 10px auto
+      margin: 10px auto 0
 
     &__card
       position: relative

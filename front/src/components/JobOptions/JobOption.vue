@@ -96,9 +96,9 @@ $border-color: #e8e8e8
     &-actions
       display: flex
       flex-direction: row
+      align-items: center
       margin-left: 10px
     &-action
-      margin-right: 16px
       color: #1890ff
       transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)
       cursor: pointer
