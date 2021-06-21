@@ -29,7 +29,11 @@
               <div class="job-details__header-title__specialist-name">{{ job.specialist ? job.specialist.__str__ : "Не назначен"}}</div>
             </div>
           </div>
-          <div class="job-details__header-right-block"></div>
+          <div class="job-details__header-right-block">
+            <a-button v-if="activeTab == 1" @click="showModal">
+              <a-icon type="unordered-list" />Выбрать из списка
+            </a-button>
+          </div>
         </div>
       </div>
 
@@ -164,6 +168,9 @@
         </div>
       </div>
     </div>
+    <job-option-select v-if="isModalShown"
+      @closeModal="closeModal($event)"
+      :options="options"/>
   </a-spin>
 </template>
 
@@ -172,16 +179,24 @@ import moment from "moment";
 import getColorByMark from "@/mixins/getColorByMark"
 import { mapActions, mapGetters } from "vuex";
 import patch from "@/middleware/patch";
+import JobOptionSelect from "@/components/JobOptions/JobOptionSelect"
 
 export default {
   name: "JobDetails",
   mixins: [getColorByMark],
+  components: {
+    JobOptionSelect
+  },
   props: {
   },
   data() {
     return {
       loading: true,
       activeTab: '1',
+
+      isModalShown: false,
+      isOptionFetched: false,
+      options: [],
 
       job: null,
       form: {
@@ -298,6 +313,19 @@ export default {
       fetchAreas: "skills/fetchAreas",
       fetchForms: "forms/fetchForms",
     }),
+
+    async showModal(){
+      if (!this.isOptionFetched) {
+        await this.fetchOptions();
+      }
+      this.isModalShown = true;
+    },
+    closeModal(optionId){
+      this.isModalShown = false;
+      if (optionId) {
+        console.log(optionId);
+      }
+    },
 
     fieldChanged(value, key){
       if (key == "form_id") {
@@ -439,6 +467,26 @@ export default {
     beforeUploadJobFile(file) {
       this.form.job_files = [...this.form.job_files, file];
       return false;
+    },
+
+    async fetchOptions(){
+      try {
+        this.loading = true;
+        let queryParams = `?activity_id=${this.job.activity.id}`;
+        let res = await this.$axios.get(`/api/options/${queryParams}`);
+        if (res.status === 200) {
+          this.options = res.data;
+          this.isOptionFetched = true;
+        } else if (res.status === 400) {
+          this.$message.error("Ошибка при загрузке планов занятий специалиста");
+        } else {
+          this.$message.error("Ошибка при загрузке планов занятий специалиста");
+        }
+      } catch (e) {
+        this.$message.error("Ошибка при загрузке планов занятий специалиста");
+      } finally {
+        this.loading = false;
+      }
     },
   },
   async created() {
@@ -594,6 +642,10 @@ export default {
 
 .job-details__header-right-block
   flex: 1
+  display: flex
+  flex-direction: row
+  align-items: center
+  justify-content: flex-end
 
 .job-details__content
   display: flex

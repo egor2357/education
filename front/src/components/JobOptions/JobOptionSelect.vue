@@ -2,46 +2,50 @@
   <a-modal
     width="1000px"
     :visible="true"
-    :title="Выбор варианта проведения занятия">
+    :title="'Выбор варианта проведения занятия'"
+    :footer="null"
+    @cancel="closeModal(null)"
+    :body-style="{'max-height': '700px', 'overflow-y': 'auto'}">
+    <div class="job-option-select__cards" v-if="options.length">
+      <div class="job-option-select__card" v-for="option in options" :key="option.id">
+        <job-option :option="option">
+          <div class="job-option-header-actions">
+            <div class="job-option-header-action"
+              @click="closeModal(option.id)">
+              Применить
+            </div>
+          </div>
+        </job-option>
+      </div>
+    </div>
 
   </a-modal>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
+import JobOption from "@/components/JobOptions/JobOption";
 
 export default {
   name: "JobOptionSelect",
+  components: {
+    JobOption,
+  },
   props: {
-    activity: {
-      type: Object,
-      default: null,
+    options: {
+      type: Array,
+      default: ()=>{return [];}
     }
   },
   data() {
     return {
-      options: [],
     };
   },
   computed: {
   },
   methods: {
-    async fetchOptions(){
-      try {
-        this.loading = true;
-        let res = await this.$axios.get("/api/options");
-        if (res.status === 200) {
-          this.options = res.data;
-        } else if (res.status === 400) {
-          this.$message.error("Ошибка при загрузке планов занятий специалиста");
-        } else {
-          this.$message.error("Ошибка при загрузке планов занятий специалиста");
-        }
-      } catch (e) {
-        this.$message.error("Ошибка при загрузке планов занятий специалиста");
-      } finally {
-        this.loading = false;
-      }
+    closeModal(optionId=null){
+      this.$emit('closeModal', optionId);
     },
   },
   async created() {
@@ -55,6 +59,9 @@ export default {
 </script>
 
 <style lang="sass">
-
+.job-option-select
+  &__cards
+    height: 100%
+    overflow-y: auto
 
 </style>

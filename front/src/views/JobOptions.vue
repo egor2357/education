@@ -102,7 +102,7 @@ export default {
     async fetchOptions(){
       try {
         this.loading = true;
-        let res = await this.$axios.get("/api/options");
+        let res = await this.$axios.get("/api/options/");
         if (res.status === 200) {
           this.options = res.data;
         } else if (res.status === 400) {
