@@ -320,12 +320,32 @@ export default {
       }
       this.isModalShown = true;
     },
-    closeModal(optionId){
+    async closeModal(optionId){
       this.isModalShown = false;
       if (optionId) {
-        console.log(optionId);
+        await this.setJobByOption(optionId);
       }
     },
+    async setJobByOption(optionId){
+      try {
+        this.loading = true;
+        let res = await patch(this.$axios, `/api/jobs/${this.$route.params.id}/set_job_by_option/`, {option_id: optionId});
+        if (res.status === 200) {
+          this.$message.success("Параметры занятия сохранены");
+          this.job = res.data;
+          this.setJobFormData(this.job);
+        } else if (res.status === 400) {
+          this.$message.error("Проверьте введённые данные");
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка");
+      } finally {
+        this.loading = false;
+      }
+    },
+
 
     fieldChanged(value, key){
       if (key == "form_id") {
