@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import pre_delete
+from django.dispatch.dispatcher import receiver
 
 class Educational_area(models.Model):
   name = models.TextField(max_length=200, unique=True, verbose_name='Название')
@@ -296,9 +298,8 @@ class Option(models.Model):
 
 class Option_file(models.Model):
   def get_file_upload_to(instance, filename):
-    return 'option_files/{0}/{1}/{2}/{3}'.format(
+    return 'option_files/{0}/{1}/{2}'.format(
       instance.option.activity.name,
-      instance.option.specialist,
       instance.option.topic,
       filename
     )
@@ -322,6 +323,11 @@ class Option_file(models.Model):
 
   def __str__(self):
     return self.file.name
+
+@receiver(pre_delete, sender=Option_file)
+def option_file_model_delete(sender, instance, **kwargs):
+  if instance.file.name:
+    instance.file.delete(False)
 
 class Job(models.Model):
   specialist = models.ForeignKey(
@@ -391,6 +397,11 @@ class Job_file(models.Model):
 
   def __str__(self):
     return self.file.name
+
+@receiver(pre_delete, sender=Job_file)
+def job_file_model_delete(sender, instance, **kwargs):
+  if instance.file.name:
+    instance.file.delete(False)
 
 class Skill_report(models.Model):
   marks = ['Неудовлетворительно', 'Удовлетворительно', 'Хорошо']
