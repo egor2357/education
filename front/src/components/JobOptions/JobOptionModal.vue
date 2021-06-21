@@ -80,7 +80,7 @@
         <a-upload
           multiple
           list-type="picture"
-          :default-file-list="form.option_files"
+          :file-list="form.option_files"
           :remove="handleRemoveOptionFile"
           :before-upload="beforeUploadOptionFile"
           class="option-details__body__form-files"

@@ -28,7 +28,7 @@
           multiple
           disabled
           list-type="picture"
-          :default-file-list="files"
+          :file-list="files"
           class="job-option-files-upload"/>
       </div>
     </div>
@@ -48,24 +48,25 @@ export default {
   },
   data() {
     return {
-      files: [],
     };
   },
   computed: {
-
+    files() {
+      return this.option.option_files.map((file)=>{
+        return {
+          uid: file.id,
+          name: file.name,
+          status: 'done',
+          url: file.file,
+        };
+      });
+    }
   },
   methods: {
 
   },
   created() {
-    for (let file of this.option.option_files) {
-      this.files.push({
-        uid: file.id,
-        name: file.name,
-        status: 'done',
-        url: file.file,
-      });
-    }
+
   },
   beforeDestroy() {
 
