@@ -14,7 +14,7 @@
             {{ skill.area_number }}.{{ skill.direction_number }}.{{ skill.number }} {{ skill.name }}
           </div>
       </div>
-      <div class="job-option-form">
+      <div class="job-option-form" v-if="option.method">
         {{ option.method.form_name }}
         <a-divider type="vertical" />
         {{ option.method.name }}
