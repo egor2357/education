@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from django.contrib.auth import login, logout
+from django.db.models import Q
 
 from .models import *
 from .serializers import *
@@ -84,17 +85,6 @@ class MethodView(viewsets.ModelViewSet):
 class JobView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
-  queryset = (Job.objects.all()
-                          .select_related(
-                            'activity',
-                            'schedule__activity',
-                            'specialist',
-                            'method__form'
-                          )
-                          .prefetch_related(
-                            'job_file_set',
-                            'skill_report_set__skill'
-                          ))
   serializer_class = JobSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = JobFilter
@@ -174,6 +164,28 @@ class JobView(viewsets.ModelViewSet):
       curr_date = curr_date + datetime.timedelta(days=1)
 
     return jobs_by_day_arr
+
+  def get_queryset(self):
+    user = self.request.user
+    jobs_qs = Job.objects.none()
+    if user.is_staff:
+      jobs_qs = Job.objects.all()
+    else:
+      jobs_qs = Job.objects.all()
+      own_jobs = Q(specialist=user.specialist)
+      competence_jobs = Q(reports__in=user.specialist.skills.all())
+      jobs_qs = Job.objects.filter(own_jobs | competence_jobs).distinct()
+
+    return (jobs_qs.select_related(
+                    'activity',
+                    'schedule__activity',
+                    'specialist',
+                    'method__form'
+                  )
+                  .prefetch_related(
+                    'job_file_set',
+                    'skill_report_set__skill'
+                  ))
 
 class ScheduleView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
