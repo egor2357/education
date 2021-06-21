@@ -187,22 +187,26 @@ router.beforeEach(async (to, from, next) => {
     }
   } else {
     let userInfo = store.getters["auth/getUserInfo"];
-    if (to.name == null) {
-      next({name: "Page404"});
-    } else {
+    if (to.name != null) {
       if (!to.meta.staffOnly && !to.meta.specOnly) {
         next();
       } else if (to.meta.staffOnly) {
         if (userInfo.staff) {
           next();
+        } else {
+          next({name: "Page404"});
         }
       } else if (to.meta.specOnly) {
         if (!userInfo.staff) {
           next();
+        } else {
+          next({name: "Page404"});
         }
       } else {
         next({name: "Page404"});
       }
+    } else {
+      next({name: "Page404"});
     }
   }
 });
