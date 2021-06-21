@@ -123,7 +123,7 @@
               <a-upload
                 multiple
                 list-type="picture"
-                :default-file-list="form.job_files"
+                :file-list="form.job_files"
                 :remove="handleRemoveJobFile"
                 :before-upload="beforeUploadJobFile"
                 class="job-details__body__form-files"
