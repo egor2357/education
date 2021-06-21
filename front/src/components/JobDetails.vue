@@ -2,17 +2,18 @@
   <a-spin :spinning="loading">
     <div class="job-details">
       <div class="job-details__header">
-
         <div class="job-details__header-title">
           <div class="job-details__header-left-block">
             <a-button icon="left" @click="goBack">Назад</a-button>
           </div>
           <div class="job-details__header-center-block" v-if="job">
             <div class="job-details__header-title__activity">
-              <div :style="{
-                'background-color': `${job.activity.color}10`,
-                border: `1px solid ${job.activity.color}99`,
-              }">
+              <div
+                :style="{
+                  'background-color': `${job.activity.color}10`,
+                  border: `1px solid ${job.activity.color}99`,
+                }"
+              >
                 {{ job.activity.name }}
               </div>
             </div>
@@ -25,8 +26,12 @@
               </div>
             </div>
             <div class="job-details__header-title__specialist">
-              <div class="job-details__header-title__specialist-label">Специалист:</div>
-              <div class="job-details__header-title__specialist-name">{{ job.specialist ? job.specialist.__str__ : "Не назначен"}}</div>
+              <div class="job-details__header-title__specialist-label">
+                Специалист:
+              </div>
+              <div class="job-details__header-title__specialist-name">
+                {{ job.specialist ? job.specialist.__str__ : "Не назначен" }}
+              </div>
             </div>
           </div>
           <div class="job-details__header-right-block"></div>
@@ -51,75 +56,128 @@
           </a-tabs>
         </div>
         <div class="job-details__tab_content">
-          <a-form-model v-if="activeTab == 1" :model="form" v-bind="layout" :rules="rules" ref="jobForm">
-            <a-form-model-item prop="topic" label="Тема занятия" key="topic"
-              :validateStatus="fields['topic'].validateStatus" :help="fields['topic'].help">
-              <a-input v-model="form.topic" />
+          <a-form-model
+            v-if="activeTab == 1"
+            :model="form"
+            v-bind="layout"
+            :rules="rules"
+            ref="jobForm"
+          >
+            <a-form-model-item
+              prop="topic"
+              label="Тема занятия"
+              key="topic"
+              :validateStatus="fields['topic'].validateStatus"
+              :help="fields['topic'].help"
+            >
+              <a-input v-model="form.topic" :disabled="isDisabled" />
             </a-form-model-item>
 
-            <a-form-model-item prop="reports" label="Навыки" key="reports"
-              :validateStatus="fields['reports'].validateStatus" :help="fields['reports'].help">
+            <a-form-model-item
+              prop="reports"
+              label="Навыки"
+              key="reports"
+              :validateStatus="fields['reports'].validateStatus"
+              :help="fields['reports'].help"
+            >
               <a-tree-select
                 :value="form.reports"
                 @change="setReports"
-                :dropdownStyle="{'max-height': '500px', 'overflow-y': 'auto'}"
+                :dropdownStyle="{ 'max-height': '500px', 'overflow-y': 'auto' }"
                 placeholder="Выберите навыки"
-                allow-clear multiple>
-                <a-tree-select-node v-for="area in areas"
-                  :key="'area'+area.id"
-                  :value="'area'+area.id"
+                allow-clear
+                multiple
+                :disabled="isDisabled"
+              >
+                <a-tree-select-node
+                  v-for="area in areas"
+                  :key="'area' + area.id"
+                  :value="'area' + area.id"
                   :selectable="false"
-                  :title="`${area.number}. ${area.name}`">
-                  <a-tree-select-node v-for="direction in area.development_directions"
-                    :key="'direction'+direction.id"
-                    :value="'direction'+direction.id"
+                  :title="`${area.number}. ${area.name}`"
+                >
+                  <a-tree-select-node
+                    v-for="direction in area.development_directions"
+                    :key="'direction' + direction.id"
+                    :value="'direction' + direction.id"
                     :selectable="false"
-                    :title="`${area.number}.${direction.number}. ${direction.name}`">
-                    <a-tree-select-node v-for="skill in direction.skills"
-                      :key="'skill'+skill.id"
+                    :title="`${area.number}.${direction.number}. ${direction.name}`"
+                  >
+                    <a-tree-select-node
+                      v-for="skill in direction.skills"
+                      :key="'skill' + skill.id"
                       :value="skill.id"
                       :title="`${area.number}.${direction.number}.${skill.number}. ${skill.name}`"
-                      :isLeaf="true">
+                      :isLeaf="true"
+                    >
                     </a-tree-select-node>
                   </a-tree-select-node>
                 </a-tree-select-node>
               </a-tree-select>
             </a-form-model-item>
 
-            <a-form-model-item prop="form_id" label="Форма проведения занятия" key="form"
-              :validateStatus="fields['form_id'].validateStatus" :help="fields['form_id'].help">
-              <a-select v-model="form.form_id"
+            <a-form-model-item
+              prop="form_id"
+              label="Форма проведения занятия"
+              key="form"
+              :validateStatus="fields['form_id'].validateStatus"
+              :help="fields['form_id'].help"
+            >
+              <a-select
+                v-model="form.form_id"
                 allow-clear
-                @change="fieldChanged($event, 'form_id')">
+                @change="fieldChanged($event, 'form_id')"
+                :disabled="isDisabled"
+              >
                 <a-select-option v-for="form in forms" :key="form.id">
                   {{ form.name }}
                 </a-select-option>
               </a-select>
             </a-form-model-item>
 
-            <a-form-model-item prop="method_id" label="Способ проведения занятия" key="method_id"
-              :validateStatus="fields['method_id'].validateStatus" :help="fields['method_id'].help">
-              <a-select v-model="form.method_id"
-                :disabled="!form.form_id"
+            <a-form-model-item
+              prop="method_id"
+              label="Способ проведения занятия"
+              key="method_id"
+              :validateStatus="fields['method_id'].validateStatus"
+              :help="fields['method_id'].help"
+            >
+              <a-select
+                v-model="form.method_id"
+                :disabled="!form.form_id || isDisabled"
                 allow-clear
-                @change="fieldChanged($event, 'method_id')">
+                @change="fieldChanged($event, 'method_id')"
+              >
                 <a-select-option v-for="method in methods" :key="method.id">
                   {{ method.name }}
                 </a-select-option>
               </a-select>
             </a-form-model-item>
 
-            <a-form-model-item prop="comment" label="Описание" key="comment"
-              :validateStatus="fields['comment'].validateStatus" :help="fields['comment'].help">
-              <a-input v-model="form.comment"
+            <a-form-model-item
+              prop="comment"
+              label="Описание"
+              key="comment"
+              :validateStatus="fields['comment'].validateStatus"
+              :help="fields['comment'].help"
+            >
+              <a-input
+                v-model="form.comment"
                 allow-clear
-                :auto-size="{minRows: 4, maxRows: 6}"
+                :auto-size="{ minRows: 4, maxRows: 6 }"
                 @change="fieldChanged($event, 'comment')"
-                type="textarea"/>
+                type="textarea"
+                :disabled="isDisabled"
+              />
             </a-form-model-item>
 
-            <a-form-model-item prop="job_files" label="Прикрепленные файлы" key="job_files"
-              :validateStatus="fields['job_files'].validateStatus" :help="fields['job_files'].help">
+            <a-form-model-item
+              prop="job_files"
+              label="Прикрепленные файлы"
+              key="job_files"
+              :validateStatus="fields['job_files'].validateStatus"
+              :help="fields['job_files'].help"
+            >
               <a-upload
                 multiple
                 list-type="picture"
@@ -127,39 +185,71 @@
                 :remove="handleRemoveJobFile"
                 :before-upload="beforeUploadJobFile"
                 class="job-details__body__form-files"
+                :disabled="isDisabled"
               >
-                <a-button> <a-icon type="upload" /> Прикрепить файл </a-button>
+                <a-button :disabled="isDisabled">
+                  <a-icon type="upload" /> Прикрепить файл
+                </a-button>
               </a-upload>
             </a-form-model-item>
 
-            <a-form-model-item class="job-details__body__form-ok"
-              :wrapper-col="{offset: 6}">
-              <a-button icon="check" type="primary" @click="saveJob">Сохранить параметры занятия</a-button>
+            <a-form-model-item
+              class="job-details__body__form-ok"
+              :wrapper-col="{ offset: 6 }"
+            >
+              <a-button
+                icon="check"
+                type="primary"
+                @click="saveJob"
+                :disabled="isDisabled"
+                >Сохранить параметры занятия</a-button
+              >
             </a-form-model-item>
           </a-form-model>
           <div v-if="activeTab == 2" class="job-details__wrapper">
-            <div class="job-details__label" v-if="reportForm.marks.length">Уровень освоения</div>
+            <div class="job-details__label" v-if="reportForm.marks.length">
+              Уровень освоения
+            </div>
             <div class="job-details__reports">
-              <div class="job-details__report" v-for="report in reportForm.marks" :key="report.id">
+              <div
+                class="job-details__report"
+                v-for="report in reportForm.marks"
+                :key="report.id"
+              >
                 <div class="job-details__report-name">
-                  {{ report.skill.area_number }}.{{ report.skill.direction_number }}. {{ report.skill.name }}
+                  {{ report.skill.area_number }}.{{
+                    report.skill.direction_number
+                  }}. {{ report.skill.name }}
                 </div>
                 <div class="job-details__report-marks">
-                  <div class="job-details__report-mark" v-for="i in 3" :key="i"
-                    :class="{'current': report.mark == i-1}"
-                    :style="{'background-color': getColorByMark(i-1)}"
-                    @click="setReportMark(report, i-1)">
-                  </div>
+                  <div
+                    class="job-details__report-mark"
+                    v-for="i in 3"
+                    :key="i"
+                    :class="{ current: report.mark == i - 1 }"
+                    :style="{ 'background-color': getColorByMark(i - 1) }"
+                    @click="setReportMark(report, i - 1)"
+                  ></div>
                 </div>
               </div>
             </div>
-            <a-input v-model="reportForm.report_comment"
+            <a-input
+              v-model="reportForm.report_comment"
               class="job-details__report_comment"
               allow-clear
               placeholder="Результат проведения занятия"
-              :auto-size="{minRows: 4, maxRows: 10}"
-              type="textarea"/>
-            <a-button icon="check" type="primary" @click="saveReport">Сохранить отчет</a-button>
+              :auto-size="{ minRows: 4, maxRows: 10 }"
+              type="textarea"
+              :disabled="isDisabled"
+            />
+            <a-button
+              icon="check"
+              type="primary"
+              @click="saveReport"
+              :disabled="isDisabled"
+            >
+              Сохранить отчет
+            </a-button>
           </div>
         </div>
       </div>
@@ -169,33 +259,32 @@
 
 <script>
 import moment from "moment";
-import getColorByMark from "@/mixins/getColorByMark"
+import getColorByMark from "@/mixins/getColorByMark";
 import { mapActions, mapGetters } from "vuex";
 import patch from "@/middleware/patch";
 
 export default {
   name: "JobDetails",
   mixins: [getColorByMark],
-  props: {
-  },
+  props: {},
   data() {
     return {
       loading: true,
-      activeTab: '1',
+      activeTab: "1",
 
       job: null,
       form: {
-        topic: '',
+        topic: "",
         reports: [],
         form_id: null,
         method_id: null,
-        comment: '',
+        comment: "",
         job_files: [],
       },
 
       reportForm: {
         marks: [],
-        report_comment: '',
+        report_comment: "",
       },
 
       layout: {
@@ -204,27 +293,27 @@ export default {
       },
 
       fields: {
-        'topic': {
+        topic: {
           validateStatus: "",
           help: "",
         },
-        'reports': {
+        reports: {
           validateStatus: "",
           help: "",
         },
-        'form_id': {
+        form_id: {
           validateStatus: "",
           help: "",
         },
-        'method_id': {
+        method_id: {
           validateStatus: "",
           help: "",
         },
-        'comment': {
+        comment: {
           validateStatus: "",
           help: "",
         },
-        'job_files': {
+        job_files: {
           validateStatus: "",
           help: "",
         },
@@ -273,7 +362,6 @@ export default {
           },
         ],
       },
-
     };
   },
   computed: {
@@ -282,15 +370,25 @@ export default {
       areas: "skills/getAreas",
       formsFetched: "forms/getFetched",
       forms: "forms/getForms",
+      userInfo: "auth/getUserInfo",
     }),
 
-    methods(){
+    methods() {
       for (let form of this.forms) {
         if (form.id == this.form.form_id) {
           return form.methods.slice();
         }
       }
       return [];
+    },
+
+    isDisabled() {
+      return (
+        !this.userInfo.staff ||
+        (!this.userInfo.staff &&
+          this.job &&
+          this.userInfo.id !== this.job.specialist.id)
+      );
     },
   },
   methods: {
@@ -299,7 +397,7 @@ export default {
       fetchForms: "forms/fetchForms",
     }),
 
-    fieldChanged(value, key){
+    fieldChanged(value, key) {
       if (key == "form_id") {
         this.form.method_id = null;
       }
@@ -307,21 +405,21 @@ export default {
       this.fields[key].help = "";
     },
 
-    setReports(values, labels){
+    setReports(values, labels) {
       this.form.reports.splice(0);
       for (let value of values) {
         this.form.reports.push(value);
       }
-      this.fieldChanged(values, 'reports');
+      this.fieldChanged(values, "reports");
     },
 
-    goBack(){
+    goBack() {
       this.$router.go(-1);
     },
     setJobFormData(job) {
       this.form.topic = job.topic;
       this.form.reports.splice(0);
-      this.form.reports = job.reports.map((report)=>{
+      this.form.reports = job.reports.map((report) => {
         return report.skill_id;
       });
       this.form.form_id = job.method ? job.method.form_id : null;
@@ -332,7 +430,7 @@ export default {
         this.form.job_files.push({
           uid: job_file.id,
           name: job_file.name,
-          status: 'done',
+          status: "done",
           url: job_file.file,
         });
       }
@@ -340,7 +438,7 @@ export default {
       this.reportForm.marks = job.reports.slice();
       this.reportForm.report_comment = job.report_comment;
     },
-    async fetchJob(){
+    async fetchJob() {
       try {
         this.loading = true;
         let jobId = this.$route.params.id;
@@ -358,17 +456,20 @@ export default {
         this.loading = false;
       }
     },
-    async saveJob(){
+    async saveJob() {
       this.$refs.jobForm.validate(async (valid) => {
         if (valid) {
           try {
             this.loading = true;
 
             const formData = new FormData();
-            formData.append('topic', this.form.topic);
-            formData.append('reports', this.form.reports);
-            formData.append('method_id', this.form.method_id ? this.form.method_id : '');
-            formData.append('comment', this.form.comment);
+            formData.append("topic", this.form.topic);
+            formData.append("reports", this.form.reports);
+            formData.append(
+              "method_id",
+              this.form.method_id ? this.form.method_id : ""
+            );
+            formData.append("comment", this.form.comment);
 
             let allFilesIds = [];
             this.form.job_files.forEach((file) => {
@@ -377,9 +478,13 @@ export default {
                 formData.append(file.uid, file);
               }
             });
-            formData.append('files', allFilesIds);
+            formData.append("files", allFilesIds);
 
-            let res = await patch(this.$axios, `/api/jobs/${this.$route.params.id}/`, formData);
+            let res = await patch(
+              this.$axios,
+              `/api/jobs/${this.$route.params.id}/`,
+              formData
+            );
             if (res.status === 200) {
               this.$message.success("Параметры занятия сохранены");
               await this.fetchJob();
@@ -403,7 +508,6 @@ export default {
       });
     },
 
-
     setReportMark(report, mark) {
       if (report.mark == mark) {
         report.mark = null;
@@ -411,10 +515,14 @@ export default {
         report.mark = mark;
       }
     },
-    async saveReport(){
+    async saveReport() {
       this.loading = true;
-      try{
-        let res = await patch(this.$axios, `/api/jobs/${this.$route.params.id}/`, this.reportForm);
+      try {
+        let res = await patch(
+          this.$axios,
+          `/api/jobs/${this.$route.params.id}/`,
+          this.reportForm
+        );
         if (res.status === 200) {
           this.$message.success("Отчет сохранен");
           await this.fetchJob();
@@ -457,9 +565,7 @@ export default {
     await Promise.all(fetches);
     this.loading = false;
   },
-  beforeDestroy() {
-
-  }
+  beforeDestroy() {},
 };
 </script>
 
@@ -608,7 +714,4 @@ export default {
 .job-details__tab_content
   flex: 1
   overflow: auto
-
-
-
 </style>

@@ -94,8 +94,8 @@ const router = new VueRouter({
       children: [
         {
           path: "/",
-          name: "JobSchedule",
-          component: () => import("@/components/JobSchedule/JobSchedule"),
+          name: "JobWrapper",
+          component: () => import("@/components/JobSchedule/JobWrapper"),
           meta: {
             staffOnly: false,
             specOnly: false,

@@ -3,7 +3,7 @@
     <a-layout-sider v-model="collapsed" collapsible :width="220">
       <router-link :to="'/'">
         <div class="logo">
-          <img src="../assets/logo.png">
+          <img src="../assets/logo.png" />
           <p>Обучение</p>
         </div>
       </router-link>
@@ -16,13 +16,12 @@
         <template v-for="item in menu">
           <a-sub-menu
             :key="item.key"
-            v-if="(item.childrens.length)
-                    &&
-                  (!item.staffOnly && !item.specOnly)
-                    ||
-                  (item.staffOnly && userInfo.staff)
-                    ||
-                  (item.specOnly && !userInfo.staff)">
+            v-if="
+              (item.childrens.length && !item.staffOnly && !item.specOnly) ||
+              (item.staffOnly && userInfo.staff) ||
+              (item.specOnly && !userInfo.staff)
+            "
+          >
             <span slot="title">
               <a-icon :type="item.icon" />
               <span>{{ item.title }}</span>
@@ -53,12 +52,16 @@
             <p style="margin-bottom: 0; min-width: 120px; text-align: center">
               {{ userInfo.name }}
             </p>
-            <p style="text-align: center; font-size: 0.8rem; font-weight: bold"
-              v-if="userInfo.staff">
+            <p
+              style="text-align: center; font-size: 0.8rem; font-weight: bold"
+              v-if="userInfo.staff"
+            >
               Администратор
             </p>
-            <p style="text-align: center; font-size: 0.8rem; font-weight: bold"
-              v-else>
+            <p
+              style="text-align: center; font-size: 0.8rem; font-weight: bold"
+              v-else
+            >
               Специалист
             </p>
           </div>
@@ -93,7 +96,7 @@ export default {
           key: "1",
           staffOnly: false,
           specOnly: false,
-          to: { name: "JobSchedule" },
+          to: { name: "JobWrapper" },
           childrens: [],
         },
         {
@@ -170,7 +173,7 @@ export default {
     };
   },
   methods: {
-    clearStore(){
+    clearStore() {
       this.$store.commit("activities/clear");
       this.$store.commit("forms/clear");
       this.$store.commit("presence/clear");
