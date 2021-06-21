@@ -4,6 +4,9 @@ from rest_framework.decorators import action
 
 from django.contrib.auth import login, logout
 from django.db.models import Q
+from django.core.files.base import ContentFile
+
+import os
 
 from .models import *
 from .serializers import *
@@ -164,6 +167,54 @@ class JobView(viewsets.ModelViewSet):
       curr_date = curr_date + datetime.timedelta(days=1)
 
     return jobs_by_day_arr
+
+  @action(
+    detail=True, methods=['patch'],
+    permission_classes=(permissions.IsAuthenticated,),
+    serializer_class=JobByOptionSerializer
+  )
+  def set_job_by_option(self, request, *args, **kwargs):
+    user = self.request.user
+    job = self.get_object()
+
+    serializer = JobByOptionSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    option_id = serializer.validated_data['option_id']
+
+    try:
+      option = Option.objects.get(pk=option_id)
+    except:
+      return Response({}, status=404)
+
+    if option.activity != job.activity:
+      return Response({}, status=400)
+
+    if option.specialist != job.specialist:
+      return Response({}, status=403)
+
+    job.topic = option.topic
+    job.comment = option.comment
+    job.method = option.method
+
+    job.skill_report_set.all().delete()
+    reports_to_save = []
+    for skill in option.skills.filter(pk__in=user.specialist.skills.all()).distinct():
+      reports_to_save.append(Skill_report(job=job, skill=skill))
+    Skill_report.objects.bulk_create(reports_to_save)
+
+    files_to_save = []
+    job.job_file_set.all().delete()
+    for file in option.option_file_set.all():
+      data_obj = ContentFile(file.file.read())
+      name = os.path.split(file.file.name)[-1]
+      data_obj.name = name
+      files_to_save.append(Job_file(job=job, file=data_obj))
+    Job_file.objects.bulk_create(files_to_save)
+
+    job.save()
+    job.refresh_from_db()
+
+    return Response(JobSerializer(job).data, status=200)
 
   def get_queryset(self):
     user = self.request.user
