@@ -312,6 +312,8 @@ class OptionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
   serializer_class = OptionSerializer
+  filter_backends = (DjangoFilterBackend,)
+  filterset_class = OptionFilter
 
   def partial_update(self, request, pk=None):
     #Требует FormData для передачи файлов
