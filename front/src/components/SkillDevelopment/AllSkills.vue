@@ -9,7 +9,7 @@
           <span class="date-range-label">Период:</span>
           <a-range-picker
             class="date-range-input"
-            v-model="dateRange"
+            :value="dateRange"
             @change="dateRangeChange"
             format="DD.MM.YYYY"
             :allowClear="false"
@@ -92,7 +92,7 @@ export default {
     return {
       loading: true,
 
-      dateRange: this.dateRangeInit,
+      dateRange: [],
 
       reportsCountById: {},
 
@@ -173,12 +173,15 @@ export default {
       if (!Object.prototype.hasOwnProperty.call(query, 'dateFrom')
             ||
           !Object.prototype.hasOwnProperty.call(query, 'dateTo')) {
-        this.dateRange[0] = this.dateRangeInit[0];
-        this.dateRange[1] = this.dateRangeInit[1];
+        this.dateRange.splice(0);
+        this.dateRange.push(this.dateRangeInit[0].clone());
+        this.dateRange.push(this.dateRangeInit[1].clone());
         return false;
+
       } else {
-        this.dateRange[0] = moment(query.dateFrom, "YYYY-MM-DD");
-        this.dateRange[1] = moment(query.dateTo, "YYYY-MM-DD");
+        this.dateRange.splice(0);
+        this.dateRange.push(moment(query.dateFrom, "YYYY-MM-DD"));
+        this.dateRange.push(moment(query.dateTo, "YYYY-MM-DD"));
         return true;
       }
     },
@@ -346,7 +349,7 @@ export default {
     .skill-link
       color: #1890ff
       cursor: pointer
-      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)
 
     .skill-link:hover
       color: #40a9ff
