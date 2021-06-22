@@ -326,6 +326,9 @@ export default {
     .presence-chart__table-body-chart-holder
       margin: 5px 10px
 
+    .presence-chart__table-body-row:hover
+      background: transparent
+
   .top-bar
     display: flex
     margin-bottom: 10px
