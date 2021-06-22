@@ -105,10 +105,45 @@ export default {
   },
   methods: {
     goBack(){
-      this.$router.push({name: "AllSkills"});
+      this.$router.push({
+        name: "AllSkills",
+        query: {
+          dateFrom: this.$route.query.dateFrom,
+          dateTo: this.$route.query.dateTo,
+        }
+      });
     },
-    dateRangeChange(value){
-      this.$emit("changeRange", value);
+    dateRangeChange(value, replace=false){
+      let queryObj = {
+        dateFrom: value[0].format("YYYY-MM-DD"),
+        dateTo: value[1].format("YYYY-MM-DD"),
+      };
+
+      if (replace) {
+        this.$router.replace({
+          name: this.$route.name,
+          query: queryObj
+        }).catch(()=>{});
+      } else {
+        this.$router.push({
+          name: this.$route.name,
+          query: queryObj
+        }).catch(()=>{});
+      }
+    },
+    setDateRange(route){
+      let query = route.query;
+      if (!Object.prototype.hasOwnProperty.call(query, 'dateFrom')
+            ||
+          !Object.prototype.hasOwnProperty.call(query, 'dateTo')) {
+        this.dateRange[0] = this.dateRangeInit[0];
+        this.dateRange[1] = this.dateRangeInit[1];
+        return false;
+      } else {
+        this.dateRange[0] = moment(query.dateFrom, "YYYY-MM-DD");
+        this.dateRange[1] = moment(query.dateTo, "YYYY-MM-DD");
+        return true;
+      }
     },
     async fetchSkillReports(){
       try {
@@ -134,20 +169,28 @@ export default {
       if (job){
         this.$router.push({name: "JobDetails", params: {id: job.id}});
       }
-    }
+    },
   },
   async created() {
-    let fetches = []
+    if (!this.setDateRange(this.$route)){
+      this.dateRangeChange(this.dateRange, true);
+      return;
+    }
 
-    fetches.push(this.fetchSkillReports());
-
-    this.loading = true;
-    await Promise.all(fetches);
-    this.loading = false;
+    this.fetchSkillReports();
   },
   beforeDestroy() {
 
-  }
+  },
+
+  beforeRouteUpdate(to, from, next){
+    if (!this.setDateRange(to)){
+      this.dateRangeChange(this.dateRange, true);
+      return;
+    }
+    this.fetchSkillReports();
+    next();
+  },
 };
 </script>
 
