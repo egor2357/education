@@ -19,50 +19,55 @@
         </div>
       </div>
 
-      <div v-if="skillReports.length" class="skill-name">{{ skillReports[0].skill.name }}</div>
+      <div v-if="skillReports.length">
+        <div class="skill-name">{{ skillReports[0].skill.name }}</div>
 
-      <div class="table-holder">
-        <div class="table-header">
-          <div class="table-cell table-cell_date">Дата занятия</div>
-          <div class="table-cell table-cell_activity">Вид деятельности</div>
-          <div class="table-cell table-cell_specialist">Специалист</div>
-          <div class="table-cell table-cell_job">Сведения о занятии</div>
-        </div>
-        <div class="table-body" v-if="skillReports.length">
-          <div class="table-row" v-for="skillReport in skillReports" :key="skillReport.id" @click="goToJob(skillReport.job)">
-            <div class="table-cell table-cell_date">
-              {{ skillReport.job.date | toRuDateString }}
-            </div>
-            <div class="table-cell table-cell_activity">
-              <div :style="{
-                'background-color': `${skillReport.job.activity.color}10`,
-                border: `1px solid ${skillReport.job.activity.color}99`,
-              }" class="table-cell__activity-name">
-                {{ skillReport.job.activity.name }}
+        <div class="table-holder">
+          <div class="table-header">
+            <div class="table-cell table-cell_date">Дата занятия</div>
+            <div class="table-cell table-cell_activity">Вид деятельности</div>
+            <div class="table-cell table-cell_specialist">Специалист</div>
+            <div class="table-cell table-cell_job">Сведения о занятии</div>
+          </div>
+          <div class="table-body" v-if="skillReports.length">
+            <div class="table-row" v-for="skillReport in skillReports" :key="skillReport.id" @click="goToJob(skillReport.job)">
+              <div class="table-cell table-cell_date">
+                {{ skillReport.job.date | toRuDateString }}
               </div>
-            </div>
-            <div class="table-cell table-cell_specialist">
-              {{ skillReport.job.specialist ? skillReport.job.specialist.__str__ : ""}}
-            </div>
-            <div class="table-cell table-cell_job">
-              <div class="table-cell__job">
-                <div class="table-cell__job-topic">{{ skillReport.job.topic }}</div>
-                <div class="table-cell__job-form"
-                  v-if="skillReport.job.method">
-                  {{ skillReport.job.method.form_name }}
-                </div>
-                <div class="table-cell__job-method"
-                  v-if="skillReport.job.method">
-                  {{ skillReport.job.method.name }}
+              <div class="table-cell table-cell_activity">
+                <div :style="{
+                  'background-color': `${skillReport.job.activity.color}10`,
+                  border: `1px solid ${skillReport.job.activity.color}99`,
+                }" class="table-cell__activity-name">
+                  {{ skillReport.job.activity.name }}
                 </div>
               </div>
-              <div class="table-cell__job-mark"
-                :style="{'background-color': getColorByMark(skillReport.mark)}">
+              <div class="table-cell table-cell_specialist">
+                {{ skillReport.job.specialist ? skillReport.job.specialist.__str__ : ""}}
               </div>
-            </div>
+              <div class="table-cell table-cell_job">
+                <div class="table-cell__job">
+                  <div class="table-cell__job-topic">{{ skillReport.job.topic }}</div>
+                  <div class="table-cell__job-form"
+                    v-if="skillReport.job.method">
+                    {{ skillReport.job.method.form_name }}
+                  </div>
+                  <div class="table-cell__job-method"
+                    v-if="skillReport.job.method">
+                    {{ skillReport.job.method.name }}
+                  </div>
+                </div>
+                <div class="table-cell__job-mark"
+                  :style="{'background-color': getColorByMark(skillReport.mark)}">
+                </div>
+              </div>
 
+            </div>
           </div>
         </div>
+      </div>
+      <div v-else>
+        <a-empty :image="simpleImage"/>
       </div>
     </div>
   </a-spin>
@@ -71,6 +76,7 @@
 <script>
 import moment from "moment";
 import getColorByMark from "@/mixins/getColorByMark"
+import { Empty } from 'ant-design-vue';
 
 export default {
   name: "SkillDetails",
@@ -179,6 +185,10 @@ export default {
         this.$router.push({name: "JobDetails", params: {id: job.id}});
       }
     },
+  },
+
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   async created() {
     if (!this.setDateRange(this.$route)){
