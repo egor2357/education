@@ -12,11 +12,14 @@
           <div class="job-option-header-actions">
             <div class="job-option-header-action"
               @click="closeModal(option.id)">
-              Применить
+              Выбрать
             </div>
           </div>
         </job-option>
       </div>
+    </div>
+    <div v-else>
+      <a-empty :image="simpleImage"/>
     </div>
 
   </a-modal>
@@ -25,6 +28,7 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import JobOption from "@/components/JobOptions/JobOption";
+import { Empty } from 'ant-design-vue';
 
 export default {
   name: "JobOptionSelect",
@@ -47,6 +51,9 @@ export default {
     closeModal(optionId=null){
       this.$emit('closeModal', optionId);
     },
+  },
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   async created() {
     let fetches = [];

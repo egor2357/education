@@ -24,12 +24,15 @@
         <a-divider orientation="left">
           Методические материалы
         </a-divider>
+        <div @click="fileSwitcher=!fileSwitcher"
+          class="job-option-header-action job-option-files-switcher">{{ fileSwitcherText }}</div>
         <a-upload
           multiple
           disabled
           list-type="picture"
           :file-list="files"
-          class="job-option-files-upload"/>
+          class="job-option-files-upload"
+          :class="{'all-the-files-are-shown': fileSwitcher}"/>
       </div>
     </div>
   </div>
@@ -48,6 +51,7 @@ export default {
   },
   data() {
     return {
+      fileSwitcher: false,
     };
   },
   computed: {
@@ -60,7 +64,10 @@ export default {
           url: file.file,
         };
       });
-    }
+    },
+    fileSwitcherText(){
+      return this.fileSwitcher ? 'Скрыть' : 'Показать все';
+    },
   },
   methods: {
 
@@ -127,12 +134,27 @@ $border-color: #e8e8e8
     font-weight: bold
     margin-bottom: 10px
   &-files
+    position: relative
     &-upload
       display: flex
-      flex-direction: row
-      overflow-x: auto
-      padding: 4px 0px
-      .ant-upload-list-item
-        min-width: 200px
-        margin-right: 8px
+      flex-direction: column
+      max-height: 80px
+      &.all-the-files-are-shown
+        max-height: none
+      .ant-upload-list
+        display: flex
+        flex: 1
+        flex-direction: row
+        flex-wrap: wrap
+        overflow-y: hidden
+        .ant-upload-list-item
+          min-width: 200px
+          margin-right: 8px
+    &-switcher
+      padding-left: 5px
+      background-color: white
+      position: absolute
+      top: 0
+      right: 0
+
 </style>
