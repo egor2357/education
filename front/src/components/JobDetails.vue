@@ -70,7 +70,7 @@
               :validateStatus="fields['topic'].validateStatus"
               :help="fields['topic'].help"
             >
-              <a-input v-model="form.topic" :disabled="isDisabled" />
+              <a-input v-model="form.topic" :disabled="!isEnabled" />
             </a-form-model-item>
 
             <a-form-model-item
@@ -87,7 +87,7 @@
                 placeholder="Выберите навыки"
                 allow-clear
                 multiple
-                :disabled="isDisabled"
+                :disabled="!isEnabled"
               >
                 <a-tree-select-node
                   v-for="area in areas"
@@ -127,7 +127,7 @@
                 v-model="form.form_id"
                 allow-clear
                 @change="fieldChanged($event, 'form_id')"
-                :disabled="isDisabled"
+                :disabled="!isEnabled"
               >
                 <a-select-option v-for="form in forms" :key="form.id">
                   {{ form.name }}
@@ -144,7 +144,7 @@
             >
               <a-select
                 v-model="form.method_id"
-                :disabled="!form.form_id || isDisabled"
+                :disabled="!form.form_id || !isEnabled"
                 allow-clear
                 @change="fieldChanged($event, 'method_id')"
               >
@@ -167,7 +167,7 @@
                 :auto-size="{ minRows: 4, maxRows: 6 }"
                 @change="fieldChanged($event, 'comment')"
                 type="textarea"
-                :disabled="isDisabled"
+                :disabled="!isEnabled"
               />
             </a-form-model-item>
 
@@ -185,9 +185,9 @@
                 :remove="handleRemoveJobFile"
                 :before-upload="beforeUploadJobFile"
                 class="job-details__body__form-files"
-                :disabled="isDisabled"
+                :disabled="!isEnabled"
               >
-                <a-button :disabled="isDisabled">
+                <a-button :disabled="!isEnabled">
                   <a-icon type="upload" /> Прикрепить файл
                 </a-button>
               </a-upload>
@@ -201,7 +201,7 @@
                 icon="check"
                 type="primary"
                 @click="saveJob"
-                :disabled="isDisabled"
+                :disabled="!isEnabled"
                 >Сохранить параметры занятия</a-button
               >
             </a-form-model-item>
@@ -240,13 +240,13 @@
               placeholder="Результат проведения занятия"
               :auto-size="{ minRows: 4, maxRows: 10 }"
               type="textarea"
-              :disabled="isDisabled"
+              :disabled="!isEnabled"
             />
             <a-button
               icon="check"
               type="primary"
               @click="saveReport"
-              :disabled="isDisabled"
+              :disabled="!isEnabled"
             >
               Сохранить отчет
             </a-button>
@@ -382,12 +382,12 @@ export default {
       return [];
     },
 
-    isDisabled() {
+    isEnabled() {
       return (
-        !this.userInfo.staff ||
+        this.userInfo.staff ||
         (!this.userInfo.staff &&
           this.job &&
-          this.userInfo.id !== this.job.specialist.id)
+          this.userInfo.specialistId === this.job.specialist.id)
       );
     },
   },
