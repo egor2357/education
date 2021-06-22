@@ -9,7 +9,9 @@
 
     <a-dropdown :trigger="['click']"
       placement="bottomLeft"
-      class="dropdown--hover">
+      class="dropdown--hover"
+      v-if="!readOnly"
+    >
 
       <a-icon class="icon-button" type="dash"
         @click.stop></a-icon>
@@ -29,11 +31,11 @@
         {{ job.activity.name }}
       </div>
     </div>
-    <div class="job__specialist" v-if="job.specialist">
+    <div class="job__specialist" v-if="job.specialist && !readOnly">
       <div class="job__specialist-label">Специалист:</div>
       <div class="job__specialist-name">{{ job.specialist.__str__ }}</div>
     </div>
-    <div class="job__specialist_empty" v-else>
+    <div class="job__specialist_empty" v-else-if="!readOnly">
       <a-icon type="info-circle"></a-icon>
       Специалист не назначен
     </div>
@@ -49,6 +51,10 @@ export default {
     job: {
       type: Object,
       default: null,
+    },
+    readOnly: {
+      type: Boolean,
+      default: false
     }
   },
   data() {

@@ -6,6 +6,7 @@ const state = () => ({
   jobs: [],
   jobsStat: {},
   fetched: false,
+  selectedDay: null,
 });
 
 const getters = {
@@ -17,6 +18,9 @@ const getters = {
   },
   getFetched(state) {
     return state.fetched;
+  },
+  getSelectedDay(state) {
+    return state.selectedDay;
   },
 };
 
@@ -72,6 +76,9 @@ const mutations = {
   setJobsStat(state, payload) {
     state.jobsStat = payload;
   },
+  setSelectedDay(state, payload) {
+    state.selectedDay = payload;
+  }
 };
 
 export default {

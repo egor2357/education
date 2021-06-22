@@ -1,77 +1,101 @@
 <template>
   <a-spin :spinning="loading">
     <div class="job-schedule">
-
       <div class="top-bar">
         <div class="top-bar__side-block left">
           <a-button
             :disabled="!remainingSchedule.length"
             class="job-schedule__header__options-fill_button"
-            icon="block" @click="setForTheWeek">
+            icon="block"
+            @click="setForTheWeek"
+          >
             Применить шаблон расписания
           </a-button>
         </div>
         <div class="title">Календарь занятий</div>
         <div class="top-bar__side-block right">
-          <a-button class="job-schedule__header__options-add_button"
-            icon="plus" @click="openModal(null)">
+          <a-button
+            class="job-schedule__header__options-add_button"
+            icon="plus"
+            @click="openModal(null)"
+          >
             Добавить занятие
           </a-button>
         </div>
       </div>
 
       <div class="job-schedule__interval">
-        <a-icon class="icon-button job-schedule__interval-shift job-schedule__interval-shift_left"
-          type="left" @click="switchDates(false)"/>
+        <a-icon
+          class="icon-button job-schedule__interval-shift job-schedule__interval-shift_left"
+          type="left"
+          @click="switchDates(false)"
+        />
         <div class="job-schedule__interval-label">
-          {{dateIntervalString}}
+          {{ dateIntervalString }}
         </div>
-        <a-icon class="icon-button job-schedule__interval-shift job-schedule__interval-shift_right"
-        type="right" @click="switchDates(true)"/>
+        <a-icon
+          class="icon-button job-schedule__interval-shift job-schedule__interval-shift_right"
+          type="right"
+          @click="switchDates(true)"
+        />
       </div>
 
       <div class="job-schedule__calendar">
         <div class="job-schedule__calendar__week">
-          <div class="job-schedule__calendar__date" v-for="weekday, index in momentDateArr" :key="index">
-            <div class="job-schedule__calendar__date-title"
-                :class="{'weekend': weekday.isoWeekday() > 5}">
+          <div
+            class="job-schedule__calendar__date"
+            v-for="(weekday, index) in momentDateArr"
+            :key="index"
+          >
+            <div
+              class="job-schedule__calendar__date-title"
+              :class="{ weekend: weekday.isoWeekday() > 5 }"
+            >
               <div class="job-schedule__calendar__date-title-day">
                 <div>
                   {{ weekday.format("D") }}
                 </div>
                 <div>
-                  {{ weekday.format("MMM") }}
+                  {{ weekday.format("D MMMM").split(" ")[1] }}
                 </div>
               </div>
               <div class="job-schedule__calendar__date-title-weekday">
-                  {{ weekday.format("dd").toUpperCase() }}
+                {{ weekday.format("dd").toUpperCase() }}
               </div>
             </div>
             <div class="job-schedule__calendar__jobs">
               <a-timeline>
-                <template v-for="item, index in thisDateJobsNSchedule(weekday)">
-                  <a-timeline-item v-if="'schedule' in item"
+                <template
+                  v-for="(item, index) in thisDateJobsNSchedule(weekday)"
+                >
+                  <a-timeline-item
+                    v-if="'schedule' in item"
                     :key="index"
-                    :color="item.activity.color">
-                    <job-card :job="item"
+                    :color="item.activity.color"
+                  >
+                    <job-card
+                      :job="item"
                       @deleteJob="deleteJob($event)"
-                      @editJob="openModal($event)">
+                      @editJob="openModal($event)"
+                    >
                     </job-card>
                   </a-timeline-item>
-                  <a-timeline-item v-else
-                    :key="index"
-                    :color="'#ccc'">
+                  <a-timeline-item v-else :key="index" :color="'#ccc'">
                     <div class="job-schedule__calendar__template">
                       <div class="job-schedule__calendar__template-time">
                         {{ item.start_time.substr(0, 5) }}
                       </div>
-                      <div class="job-schedule__calendar__template-activity-name">
+                      <div
+                        class="job-schedule__calendar__template-activity-name"
+                      >
                         {{ item.activity.name }}
                       </div>
                       <div class="job-schedule__calendar__template-overlay">
-                        <a-button type="primary"
+                        <a-button
+                          type="primary"
                           class="job-schedule__calendar__template-overlay__button"
-                          @click="setForTheDay(item.id, weekday)">
+                          @click="setForTheDay(item.id, weekday)"
+                        >
                           Применить
                         </a-button>
                       </div>
@@ -85,9 +109,11 @@
       </div>
 
       <div>
-        <a-checkbox class="job-schedule__switcher"
+        <a-checkbox
+          class="job-schedule__switcher"
           :checked="isScheduleVisible"
-          @change="isScheduleVisible = !isScheduleVisible">
+          @change="isScheduleVisible = !isScheduleVisible"
+        >
           Показывать шаблон расписания
         </a-checkbox>
       </div>
@@ -135,7 +161,11 @@ export default {
     };
   },
   async created() {
-    let fetches = []
+    let fetches = [];
+
+    if (this.selectedDay) {
+      this.dateFrom = moment(this.selectedDay).weekday(0).toDate();
+    }
 
     if (!this.activitiesFetched) {
       fetches.push(this.fetchActivities());
@@ -147,12 +177,11 @@ export default {
       fetches.push(this.fetchSchedule());
     }
 
-    fetches.push(this.fetchJobs())
+    fetches.push(this.fetchJobs());
 
     this.loading = true;
     await Promise.all(fetches);
     this.loading = false;
-
   },
   methods: {
     ...mapActions({
@@ -161,16 +190,16 @@ export default {
       fetchSchedule: "schedule/fetchJobs",
     }),
 
-    openModal(job=null) {
+    openModal(job = null) {
       this.modalEditableData = job;
       this.displayModal = true;
     },
-    closeModal(jobDate=null){
+    closeModal(jobDate = null) {
       this.displayModal = false;
       let isBetween = moment(jobDate).isBetween(
         this.momentDateArr[0],
-        this.momentDateArr[this.momentDateArr.length-1],
-        'day',
+        this.momentDateArr[this.momentDateArr.length - 1],
+        "day",
         "[]"
       );
       if (jobDate && isBetween) {
@@ -178,12 +207,18 @@ export default {
       }
     },
 
-    async fetchJobs(){
+    async fetchJobs() {
       try {
         this.loading = true;
-        let firstQParameter = `date__gte=${this.momentDateArr[0].format("YYYY-MM-DD")}`;
-        let secondQParameter = `date__lte=${this.momentDateArr[this.momentDateArr.length-1].format("YYYY-MM-DD")}`;
-        let res = await this.$axios.get(`/api/jobs/?${firstQParameter}&${secondQParameter}`);
+        let firstQParameter = `date__gte=${this.momentDateArr[0].format(
+          "YYYY-MM-DD"
+        )}`;
+        let secondQParameter = `date__lte=${this.momentDateArr[
+          this.momentDateArr.length - 1
+        ].format("YYYY-MM-DD")}`;
+        let res = await this.$axios.get(
+          `/api/jobs/?${firstQParameter}&${secondQParameter}`
+        );
         if (res.status === 200) {
           this.jobs = res.data;
         } else {
@@ -196,18 +231,18 @@ export default {
       }
     },
 
-    switchDates(isForward){
+    switchDates(isForward) {
       let newMomentFrom = moment(this.dateFrom);
       if (isForward) {
-        newMomentFrom = newMomentFrom.add(7, 'days');
+        newMomentFrom = newMomentFrom.add(7, "days");
       } else {
-        newMomentFrom = newMomentFrom.subtract(7, 'days');
+        newMomentFrom = newMomentFrom.subtract(7, "days");
       }
       this.dateFrom = newMomentFrom.toDate();
       this.fetchJobs();
     },
 
-    async deleteJob(id){
+    async deleteJob(id) {
       try {
         this.loading = true;
         let res = await deleteAxios(this.$axios, `/api/jobs/${id}/`, {});
@@ -224,31 +259,43 @@ export default {
       }
     },
 
-    async setForTheWeek(){
+    async setForTheWeek() {
       try {
         this.loading = true;
-        let res = await post(this.$axios, `/api/schedule/set_for_the_week/`, {date: this.dateFrom});
+        let res = await post(this.$axios, `/api/schedule/set_for_the_week/`, {
+          date: this.dateFrom,
+        });
         if (res.status === 200) {
           this.$message.success("Занятия по шаблону на неделю успешно созданы");
           await this.fetchJobs();
         } else {
-          this.$message.error("Произошла ошибка при создании занятий по шаблону на неделю");
+          this.$message.error(
+            "Произошла ошибка при создании занятий по шаблону на неделю"
+          );
         }
       } catch (e) {
-        this.$message.error("Произошла ошибка при создании занятий по шаблону на неделю");
+        this.$message.error(
+          "Произошла ошибка при создании занятий по шаблону на неделю"
+        );
       } finally {
         this.loading = false;
       }
     },
-    async setForTheDay(scheduleId, currDateMoment){
+    async setForTheDay(scheduleId, currDateMoment) {
       try {
         this.loading = true;
-        let res = await post(this.$axios, `/api/schedule/${scheduleId}/set_for_the_day/`, {date: currDateMoment.toDate()});
+        let res = await post(
+          this.$axios,
+          `/api/schedule/${scheduleId}/set_for_the_day/`,
+          { date: currDateMoment.toDate() }
+        );
         if (res.status === 200) {
           this.$message.success("Занятие по шаблону успешно применено");
           await this.fetchJobs();
         } else {
-          this.$message.error("Произошла ошибка при создании занятия по шаблону");
+          this.$message.error(
+            "Произошла ошибка при создании занятия по шаблону"
+          );
         }
       } catch (e) {
         this.$message.error("Произошла ошибка при создании занятия по шаблону");
@@ -257,14 +304,14 @@ export default {
       }
     },
     thisDateJobs(currDateMoment) {
-      let currDateString = currDateMoment.format('YYYY-MM-DD');
-      return this.jobs.filter((job)=>{
+      let currDateString = currDateMoment.format("YYYY-MM-DD");
+      return this.jobs.filter((job) => {
         return job.date == currDateString;
       });
     },
     thisDayRemainingSchedule(currDateMoment) {
       let day = currDateMoment.weekday();
-      return this.remainingSchedule.filter((schedule)=>{
+      return this.remainingSchedule.filter((schedule) => {
         return schedule.day == day;
       });
     },
@@ -272,15 +319,16 @@ export default {
       let jobs = this.thisDateJobs(currDateMoment);
       if (this.isScheduleVisible) {
         let templates = this.thisDayRemainingSchedule(currDateMoment);
-        return jobs.concat(templates).sort((first, second)=>{
-          return moment(first.start_time, "hh:mm:ss") - moment(second.start_time, "hh:mm:ss");
+        return jobs.concat(templates).sort((first, second) => {
+          return (
+            moment(first.start_time, "hh:mm:ss") -
+            moment(second.start_time, "hh:mm:ss")
+          );
         });
       } else {
         return jobs;
       }
-
     },
-
   },
   computed: {
     ...mapGetters({
@@ -290,34 +338,35 @@ export default {
       activitiesFetched: "activities/getFetched",
       schedule: "schedule/getJobs",
       scheduleFetched: "schedule/getFetched",
+      selectedDay: "schedule/getSelectedDay",
     }),
 
-    momentDateArr(){
+    momentDateArr() {
       let momentFrom = moment(this.dateFrom).clone().weekday(0);
       let currMoment = momentFrom.clone();
       let momentTo = currMoment.clone().weekday(6);
 
       let dateArray = [];
       while (currMoment <= momentTo) {
-          dateArray.push(currMoment.clone())
-          currMoment = currMoment.add(1, 'days');
+        dateArray.push(currMoment.clone());
+        currMoment = currMoment.add(1, "days");
       }
       return dateArray;
     },
-    dateIntervalString(){
+    dateIntervalString() {
       let momentFrom = this.momentDateArr[0];
-      let momentTo = this.momentDateArr[this.momentDateArr.length-1];
+      let momentTo = this.momentDateArr[this.momentDateArr.length - 1];
       return `${momentFrom.format("D MMMM")} - ${momentTo.format("D MMMM")}`;
     },
-    jobSheduleIndexes(){
-      return this.jobs.map((job)=>{
+    jobSheduleIndexes() {
+      return this.jobs.map((job) => {
         if (job.schedule) {
           return job.schedule.id;
         }
       });
     },
-    remainingSchedule(){
-      return this.schedule.filter((schedule)=>{
+    remainingSchedule() {
+      return this.schedule.filter((schedule) => {
         return !this.jobSheduleIndexes.includes(schedule.id);
       });
     },
@@ -325,114 +374,4 @@ export default {
 };
 </script>
 
-<style lang="sass">
-.job-schedule
-  display: flex
-  flex-direction: column
-  overflow: hidden
-  height: 100%
-
-  .top-bar
-    display: flex
-    margin-bottom: 10px
-    line-height: 32px
-
-    .title
-      font-size: 1rem
-      text-align: center
-      margin: 0 10px
-
-  .top-bar__side-block
-    flex: 1
-
-    &.right
-      text-align: right
-
-  .job-schedule__interval
-    display: flex
-    justify-content: center
-    font-size: 20px
-    align-items: center
-    margin-bottom: 10px
-
-  .job-schedule__interval-label
-    min-width: 250px
-    text-align: center
-
-  &__calendar
-    overflow: auto
-    flex: 1
-
-    &__week
-      display: flex
-      flex-direction: row
-      min-height: 100%
-
-    &__date
-      flex: 1 1 auto
-      border-right: 1px solid #D9D9D9
-      border-bottom: 1px solid #D9D9D9
-      min-width: 150px
-      max-width: 250px
-
-      &:first-child
-        border-left: 1px solid #D9D9D9
-
-      &-title
-        text-align: center
-        border-bottom: 1px solid #D9D9D9
-        border-top: 1px solid #D9D9D9
-        background-color: #f4f4f4
-        font-size: 1rem
-        position: sticky
-        top: 0
-        z-index: 2
-        display: flex
-        flex-direction: row
-        align-items: center
-        &-day
-          margin: 4px 10px 4px 30px
-          font-size: 18px
-        &-weekday
-          font-size: 34px
-          font-weight: bold
-          text-align: center
-          flex: 1
-        &.weekend
-          .job-schedule__calendar__date-title-weekday
-            color: #f55
-
-    &__jobs
-      padding: 15px 10px 10px 5px
-
-    &__template
-      padding: 5px 10px
-      border-radius: 4px
-      display: flex
-      flex-wrap: wrap
-      background-color: #f9f9f9
-      border: 1px solid #cccccc
-      position: relative
-      &-time
-        flex: 0 0 95%
-        color: #999
-      &-activity-name
-        color: #999
-      &:hover &-overlay
-        display: flex
-      &-overlay
-        display: none
-        position: absolute
-        top: 0
-        border-radius: 4px
-        left: 0
-        width: 100%
-        height: 100%
-        justify-content: center
-        align-items: center
-        background-color: #ffffffc2
-        &__button
-
-  &__switcher
-    margin-top: 10px
-</style>
+<style lang="sass"></style>

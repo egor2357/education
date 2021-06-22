@@ -3,6 +3,8 @@ const state = () => ({
   userInfo: {
     name: null,
     staff: false,
+    id: null,
+    specialistId: null,
   },
 });
 
@@ -27,12 +29,19 @@ const actions = {
               ? `${res.data.specialist.surname} ${res.data.specialist.name[0]}. ${res.data.specialist.patronymic[0]}.`
               : res.data.username,
           staff: res.data.is_staff,
+          id: res.data.id,
+          specialistId: res.data.specialist.id,
         });
       }
       return res;
     } catch (e) {
       commit("setIsAuth", false);
-      commit("setUserInfo", { name: null, staff: false });
+      commit("setUserInfo", {
+        name: null,
+        staff: false,
+        id: null,
+        specialistId: null,
+      });
       if (e.response) {
         return e.response;
       } else {
@@ -45,7 +54,12 @@ const actions = {
       let res = await this.$axios.get("/api/users/logout/");
       if (res.status === 200) {
         commit("setIsAuth", false);
-        commit("setUserInfo", { name: null, staff: false });
+        commit("setUserInfo", {
+          name: null,
+          staff: false,
+          id: null,
+          specialistId: null,
+        });
       }
       return res;
     } catch (e) {
@@ -67,12 +81,19 @@ const actions = {
               ? `${res.data.specialist.surname} ${res.data.specialist.name[0]}. ${res.data.specialist.patronymic[0]}.`
               : res.data.username,
           staff: res.data.is_staff,
+          id: res.data.id,
+          specialistId: res.data.specialist.id,
         });
       }
       return res;
     } catch (e) {
       commit("setIsAuth", false);
-      commit("setUserInfo", { name: null, staff: false });
+      commit("setUserInfo", {
+        name: null,
+        staff: false,
+        id: null,
+        specialistId: null,
+      });
       if (e.response) {
         return e.response;
       } else {

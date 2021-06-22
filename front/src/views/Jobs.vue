@@ -1,24 +1,14 @@
 <template>
-  <router-view></router-view>
+  <router-view />
 </template>
 
 <script>
 export default {
-  components: {
-  },
   name: "Jobs",
-  data() {
-    return {
-    };
-  },
-  async created() {
-  },
-  methods: {
-  },
-  computed: {
-  },
+  created() {
+    this.$store.commit("schedule/setSelectedDay", null)
+  }
 };
 </script>
 
-<style lang="sass">
-</style>
+<style lang="sass"></style>
