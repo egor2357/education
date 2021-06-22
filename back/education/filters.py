@@ -59,7 +59,7 @@ class Skill_reportFilter(FilterSet):
     lookup_expr='isnull', exclude=True,
   )
   skill_id = django_filters.NumberFilter(
-    label='Идентификатор наавыка', field_name='skill_id',
+    label='Идентификатор навыка', field_name='skill_id',
     lookup_expr='exact'
   )
   class Meta:
@@ -69,4 +69,16 @@ class Skill_reportFilter(FilterSet):
       'date_to',
       'is_affected',
       'skill_id',
+    ]
+
+class OptionFilter(FilterSet):
+  activity_id = django_filters.NumberFilter(
+    label='Идентификатор вида деятельности', field_name='activity_id',
+    lookup_expr='exact'
+  )
+
+  class Meta:
+    model = Option
+    fields = [
+      'activity_id',
     ]

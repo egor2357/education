@@ -17,6 +17,9 @@ import datetime
 class OnlyDateSerializer(serializers.Serializer):
   date = serializers.DateField(initial=datetime.date.today)
 
+class JobByOptionSerializer(serializers.Serializer):
+  option_id = serializers.IntegerField(max_value=None, min_value=1)
+
 # /////////////////////////////////////////////////
 
 class LoginSerializer(serializers.Serializer):
