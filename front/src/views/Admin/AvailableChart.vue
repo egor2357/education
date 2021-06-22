@@ -318,10 +318,13 @@ export default {
   overflow: hidden
   &--one
     height: auto
-    min-height: 130px
+    min-height: 140px
 
     .presence-interval-day
       cursor: default
+
+    .presence-chart__table-body-chart-holder
+      margin: 5px 10px
 
   .top-bar
     display: flex

@@ -1,14 +1,13 @@
 <template>
   <a-spin :spinning="loading">
     <div class="job-schedule-wrapper">
+      <div class="top-bar">
+        <div class="title">Занятия</div>
+      </div>
       <AvailableChart :specReadOnly="true" :userId="userInfo.id" />
 
       <div class="job-schedule">
-        <div class="top-bar">
-          <div class="title">Календарь занятий</div>
-        </div>
-
-        <div class="job-schedule__interval">
+        <div class="job-schedule__interval job-schedule__interval--small">
           <a-icon
             class="icon-button job-schedule__interval-shift job-schedule__interval-shift_left"
             type="left"
@@ -248,11 +247,13 @@ export default {
 </script>
 
 <style lang="sass">
-.top-bar
-  .title
-    flex: 1
 .job-schedule-wrapper
   height: 100%
   display: flex
   flex-direction: column
+  .top-bar
+    line-height: 32px
+    text-align: center
+    .title
+      font-size: 1rem
 </style>

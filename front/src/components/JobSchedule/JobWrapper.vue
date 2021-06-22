@@ -51,6 +51,9 @@ export default {
     align-items: center
     margin-bottom: 10px
 
+    &--small
+      font-size: 18px
+
   .job-schedule__interval-label
     min-width: 250px
     text-align: center
