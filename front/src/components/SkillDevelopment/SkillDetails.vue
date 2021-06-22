@@ -114,6 +114,12 @@ export default {
       });
     },
     dateRangeChange(value, replace=false){
+      if ((value[0].format("YYYY-MM-DD") == this.$route.query.dateFrom)
+            &&
+          (value[1].format("YYYY-MM-DD") == this.$route.query.dateTo)) {
+        return;
+      }
+
       let queryObj = {
         dateFrom: value[0].format("YYYY-MM-DD"),
         dateTo: value[1].format("YYYY-MM-DD"),
