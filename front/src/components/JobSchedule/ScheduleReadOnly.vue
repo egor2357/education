@@ -101,14 +101,12 @@ import JobCard from "@/components/JobSchedule/JobCard";
 import { mapActions, mapGetters } from "vuex";
 import consts from "@/const";
 import moment from "moment";
-//import PresenceChart from "@/components/AvailableChart/PresenceChart";
 import AvailableChart from "@/views/Admin/AvailableChart";
 
 export default {
   components: {
     JobCard,
     AvailableChart,
-    //PresenceChart,
   },
   name: "ScheduleReadOnly",
   data() {
@@ -127,6 +125,10 @@ export default {
   },
   async created() {
     let fetches = [];
+
+    if (this.selectedDay) {
+      this.dateFrom = moment(this.selectedDay).weekday(0).toDate();
+    }
 
     if (!this.activitiesFetched) {
       fetches.push(this.fetchActivities());
@@ -211,6 +213,7 @@ export default {
       schedule: "schedule/getJobs",
       scheduleFetched: "schedule/getFetched",
       userInfo: "auth/getUserInfo",
+      selectedDay: "schedule/getSelectedDay",
     }),
 
     momentDateArr() {

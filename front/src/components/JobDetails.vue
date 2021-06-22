@@ -564,6 +564,7 @@ export default {
     this.loading = true;
     await Promise.all(fetches);
     this.loading = false;
+    this.$store.commit("schedule/setSelectedDay", this.job.date);
   },
   beforeDestroy() {},
 };
