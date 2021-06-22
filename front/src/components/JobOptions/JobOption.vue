@@ -1,6 +1,5 @@
 <template>
-  <div hoverable class="job-option"
-    @click="$emit('optionSelect', option)">
+  <div hoverable class="job-option">
     <div class="job-option-header">
       <div class="job-option-header-topic">
         {{ option.topic }}
@@ -9,10 +8,16 @@
     </div>
     <div class="job-option-body">
       <div class="job-option-skills">
-        <div class="job-option-skill"
-          v-for="skill in option.skills" :key="skill.id">
-            {{ skill.area_number }}.{{ skill.direction_number }}.{{ skill.number }} {{ skill.name }}
-          </div>
+        <div
+          class="job-option-skill"
+          v-for="skill in option.skills"
+          :key="skill.id"
+        >
+          {{ skill.area_number }}.{{ skill.direction_number }}.{{
+            skill.number
+          }}
+          {{ skill.name }}
+        </div>
       </div>
       <div class="job-option-form" v-if="option.method">
         {{ option.method.form_name }}
@@ -21,63 +26,87 @@
       </div>
       <div class="job-option-comment">{{ option.comment }}</div>
       <div class="job-option-files" v-if="files.length">
-        <a-divider orientation="left">
-          Методические материалы
-        </a-divider>
-        <div @click="fileSwitcher=!fileSwitcher"
-          class="job-option-header-action job-option-files-switcher">{{ fileSwitcherText }}</div>
+        <a-divider orientation="left"> Методические материалы </a-divider>
+        <div
+          @click="fileSwitcher = !fileSwitcher"
+          class="job-option-header-action job-option-files-switcher"
+        >
+          {{ fileSwitcherText }}
+        </div>
         <a-upload
           multiple
           disabled
           list-type="picture"
           :file-list="files"
           class="job-option-files-upload"
-          :class="{'all-the-files-are-shown': fileSwitcher}"/>
+          :class="{ 'all-the-files-are-shown': fileSwitcher }"
+          @preview="clickOnFile($event)"
+        />
       </div>
     </div>
+    <MediaLightBox
+      v-if="displayMedia"
+      :files="files"
+      @close="displayMedia = false"
+      :selectedFile="selectedFile"
+    />
   </div>
 </template>
 
 <script>
-import moment from "moment";
-
+import consts from "@/const";
+import MediaLightBox from "@/components/MediaLightBox";
 export default {
   name: "JobOption",
+  components: {
+    MediaLightBox,
+  },
   props: {
     option: {
       type: Object,
       default: null,
-    }
+    },
   },
   data() {
     return {
       fileSwitcher: false,
+      displayMedia: false,
+      photoFormats: consts.photoFormats,
+      videoFormats: consts.videoFormats,
+      selectedFile: null,
     };
   },
   computed: {
     files() {
-      return this.option.option_files.map((file)=>{
+      return this.option.option_files.map((file) => {
         return {
           uid: file.id,
           name: file.name,
-          status: 'done',
+          status: "done",
           url: file.file,
+          photo:
+            file.name.split(".").pop() !== file.name &&
+            this.photoFormats.indexOf(file.name.split(".").pop()) !== -1,
+          video:
+            file.name.split(".").pop() !== file.name &&
+            this.videoFormats.indexOf(file.name.split(".").pop()) !== -1,
         };
       });
     },
-    fileSwitcherText(){
-      return this.fileSwitcher ? 'Скрыть' : 'Показать все';
+    fileSwitcherText() {
+      return this.fileSwitcher ? "Скрыть" : "Показать все";
     },
   },
   methods: {
-
+    clickOnFile(file) {
+      if (file.video || file.photo) {
+        this.selectedFile = file;
+        this.displayMedia = true;
+      } else {
+        window.open(file.url);
+      }
+    },
   },
-  created() {
-
-  },
-  beforeDestroy() {
-
-  }
 };
 </script>
 
@@ -156,5 +185,4 @@ $border-color: #e8e8e8
       position: absolute
       top: 0
       right: 0
-
 </style>
