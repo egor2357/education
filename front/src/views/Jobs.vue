@@ -5,6 +5,9 @@
 <script>
 export default {
   name: "Jobs",
+  created() {
+    this.$store.commit("schedule/setSelectedDay", null)
+  }
 };
 </script>
 
