@@ -5,7 +5,12 @@
     :showLightBox="true"
     :startAt="startAt"
     @onClosed="$emit('close')"
-  />
+  >
+    <template v-slot:customCaption="slotProps">
+      <a-button icon="save" @click="downloadFile(slotProps.currentMedia)">
+      </a-button>
+    </template>
+  </LightBox>
 </template>
 
 <script>
@@ -44,6 +49,7 @@ export default {
             type: "image",
             thumb: file.url,
             src: file.url,
+            name: file.name,
           });
           if (this.selectedFile.uid === file.uid) {
             this.startAt = arr.length - 1;
@@ -59,6 +65,7 @@ export default {
             ],
             width: 1200,
             height: 800,
+            name: file.name,
           });
           if (this.selectedFile.uid === file.uid) {
             this.startAt = arr.length - 1;
@@ -66,6 +73,23 @@ export default {
         }
       });
       return arr;
+    },
+  },
+  methods: {
+    async downloadFile(media) {
+      let url = media.type === "video" ? media.sources[0].src : media.src;
+      if (process.env.NODE_ENV === "development") {
+        url = url.split("http://192.168.137.100:8001")[1];
+      }
+      let name = media.name;
+      let response = await this.$axios.get(url);
+      let blob = new Blob([response.data], {
+        type: response.headers["content-type"],
+      });
+      let link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = name;
+      link.click();
     },
   },
 };

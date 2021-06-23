@@ -33,6 +33,7 @@
         >
           {{ fileSwitcherText }}
         </div>
+        <!--<a-button type="icon" icon="arrow-left" />-->
         <a-upload
           multiple
           disabled
@@ -42,6 +43,7 @@
           :class="{ 'all-the-files-are-shown': fileSwitcher }"
           @preview="clickOnFile($event)"
         />
+        <!--<a-button type="icon" icon="arrow-right" />-->
       </div>
     </div>
     <MediaLightBox

@@ -5,6 +5,10 @@ module.exports = {
         target: 'http://192.168.137.100:8001',
         changeOrigin: true
       },
+      '/media': {
+        target: 'http://192.168.137.100:8001',
+        changeOrigin: true
+      },
     },
   },
 };
