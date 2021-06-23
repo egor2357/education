@@ -129,6 +129,16 @@ class Presence(models.Model):
   date_to = models.DateField(verbose_name='Последний день')
   is_available = models.BooleanField(default=True, verbose_name='Является ли доступным')
 
+  def clear_jobs(self):
+    presence = self
+    if presence.main_interval != None:
+      presence = presence.main_interval
+    affected_jobs = Job.objects.filter(
+      date__gte=presence.date_from,
+      date__lte=presence.date_to,
+      specialist=presence.specialist
+    ).update(specialist=None)
+
   class Meta:
     db_table = 'presence'
     verbose_name = 'Присутствие'
