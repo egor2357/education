@@ -139,6 +139,17 @@ class Presence(models.Model):
       specialist=presence.specialist
     ).update(specialist=None)
 
+  def set_jobs(self):
+    presence = self
+    if presence.main_interval != None:
+      presence = presence.main_interval
+    affected_jobs = Job.objects.filter(
+      date__gte=presence.date_from,
+      date__lte=presence.date_to,
+      activity__in=presence.specialist.activities.all(),
+      specialist=None
+    ).update(specialist=presence.specialist)
+
   class Meta:
     db_table = 'presence'
     verbose_name = 'Присутствие'

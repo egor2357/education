@@ -230,9 +230,12 @@ class PresenceSerializer(serializers.ModelSerializer):
       quarantine.main_interval = presence
       quarantine.save()
 
+    presence.set_jobs()
+
     return presence
 
   def update(self, instance, validated_data):
+    instance.clear_jobs()
     instance.delete()
     return self.create(validated_data)
 
