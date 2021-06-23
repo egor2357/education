@@ -462,6 +462,17 @@ class PresenceView(viewsets.ModelViewSet):
   filter_backends = (DjangoFilterBackend,)
   filterset_class = PresenceFilter
 
+  def destroy(self, request, *args, **kwargs):
+    presence = self.get_object()
+    if presence.main_interval != None:
+      presence = presence.main_interval
+    affected_jobs = Job.objects.filter(
+      date__gte=presence.date_from,
+      date__lte=presence.date_to,
+      specialist=presence.specialist
+    ).update(specialist=None)
+    return super(PresenceView, self).destroy(request, *args, **kwargs)
+
 class SpecialistView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
