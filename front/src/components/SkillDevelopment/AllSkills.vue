@@ -9,7 +9,7 @@
           <span class="date-range-label">Период:</span>
           <a-range-picker
             class="date-range-input"
-            v-model="dateRange"
+            :value="dateRange"
             @change="dateRangeChange"
             format="DD.MM.YYYY"
             :allowClear="false"
@@ -92,28 +92,11 @@ export default {
     return {
       loading: true,
 
-      dateRange: this.dateRangeInit,
+      dateRange: [],
 
       reportsCountById: {},
 
     };
-  },
-  async created() {
-    let fetches = []
-
-    if (!this.areasFetched) {
-      fetches.push(this.fetchAreas());
-    }
-
-    fetches.push(this.fetchSkillReports());
-
-    this.loading = true;
-    await Promise.all(fetches);
-    this.loading = false;
-
-  },
-  beforeCreate() {
-    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   methods: {
     ...mapActions({
@@ -151,12 +134,56 @@ export default {
     },
     goToSkill(skillId){
       if (this.reportsCountById[skillId]) {
-        this.$router.push({name: "SkillDetails", params: {id: skillId}})
+        this.$router.push({
+          name: "SkillDetails",
+          params: {id: skillId},
+          query: {
+            dateFrom: this.$route.query.dateFrom,
+            dateTo: this.$route.query.dateTo,
+          }
+        })
       }
     },
-    dateRangeChange(value){
-      this.$emit("changeRange", value);
-      this.fetchSkillReports();
+    dateRangeChange(value, replace=false){
+      if ((value[0].format("YYYY-MM-DD") == this.$route.query.dateFrom)
+            &&
+          (value[1].format("YYYY-MM-DD") == this.$route.query.dateTo)) {
+        return;
+      }
+
+      let queryObj = {
+        dateFrom: value[0].format("YYYY-MM-DD"),
+        dateTo: value[1].format("YYYY-MM-DD"),
+      };
+
+      if (replace) {
+        this.$router.replace({
+          name: this.$route.name,
+          query: queryObj
+        }).catch(()=>{});
+      } else {
+        this.$router.push({
+          name: this.$route.name,
+          query: queryObj
+        }).catch(()=>{});
+      }
+    },
+    setDateRange(route){
+      let query = route.query;
+      if (!Object.prototype.hasOwnProperty.call(query, 'dateFrom')
+            ||
+          !Object.prototype.hasOwnProperty.call(query, 'dateTo')) {
+        this.dateRange.splice(0);
+        this.dateRange.push(this.dateRangeInit[0].clone());
+        this.dateRange.push(this.dateRangeInit[1].clone());
+        return false;
+
+      } else {
+        this.dateRange.splice(0);
+        this.dateRange.push(moment(query.dateFrom, "YYYY-MM-DD"));
+        this.dateRange.push(moment(query.dateTo, "YYYY-MM-DD"));
+        return true;
+      }
     },
   },
   computed: {
@@ -164,6 +191,38 @@ export default {
       areasFetched: "skills/getFetched",
       areas: "skills/getFilteredAreas",
     }),
+  },
+
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
+  },
+
+  async created() {
+    let fetches = []
+
+    if (!this.areasFetched) {
+      fetches.push(this.fetchAreas());
+    }
+
+    this.loading = true;
+    await Promise.all(fetches);
+    this.loading = false;
+
+    if (!this.setDateRange(this.$route)){
+      this.dateRangeChange(this.dateRange, true);
+      return;
+    }
+
+    this.fetchSkillReports();
+  },
+
+  beforeRouteUpdate(to, from, next){
+    if (!this.setDateRange(to)){
+      this.dateRangeChange(this.dateRange, true);
+      return;
+    }
+    this.fetchSkillReports();
+    next();
   },
 
 };
@@ -290,7 +349,7 @@ export default {
     .skill-link
       color: #1890ff
       cursor: pointer
-      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)
 
     .skill-link:hover
       color: #40a9ff
