@@ -482,5 +482,5 @@ class Skill_report(models.Model):
   def __str__(self):
     return 'Оценка за {0}: {1}'.format(
       self.job,
-      self.marks[self.mark]
+      self.marks[self.mark] if self.mark else 'Не выставлена'
     )
