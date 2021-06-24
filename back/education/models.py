@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
 
+import datetime
+
 class Educational_area(models.Model):
   name = models.TextField(max_length=200, unique=True, verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
@@ -93,6 +95,22 @@ class Specialist(models.Model):
       specialist = None
 
     return specialist
+
+  @classmethod
+  def set_to_period(self, date_from, date_to):
+    today = datetime.date.today()
+    if date_from <= today:
+      date_from = today + datetime.timedelta(days=1)
+    jobs = Job.objects.filter(
+      date__gte=date_from,
+      date__lte=date_to,
+      specialist=None,
+    )
+
+    for job in jobs:
+      specialist = self.get_available(job.activity, job.date)
+      job.specialist=specialist
+      job.save()
 
   class Meta:
     db_table = 'specialist'

@@ -8,7 +8,6 @@ from django.db.models import Q
 from .models import *
 
 import os
-import datetime
 
 #create your serializers here.
 
@@ -236,7 +235,15 @@ class PresenceSerializer(serializers.ModelSerializer):
 
   def update(self, instance, validated_data):
     instance.clear_jobs()
+
+    presence = instance
+    if presence.main_interval != None:
+      presence = presence.main_interval
+
     instance.delete()
+
+    Specialist.set_to_period(presence.date_from, presence.date_to)
+
     return self.create(validated_data)
 
   class Meta:
