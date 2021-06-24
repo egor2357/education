@@ -127,7 +127,9 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      this.filesEl = this.$refs["files-list"].$el.children[1];
+      if (this.files.length) {
+        this.filesEl = this.$refs["files-list"].$el.children[1];
+      }
     });
   },
 };

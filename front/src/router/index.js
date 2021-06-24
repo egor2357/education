@@ -72,15 +72,6 @@ const router = new VueRouter({
       },
     },
     {
-      path: "/developing",
-      name: "Developing",
-      component: () => import("@/views/InDeveloping"),
-      meta: {
-        staffOnly: false,
-        specOnly: false,
-      },
-    },
-    {
       path: "/",
       redirect: '/jobs'
     },
@@ -104,7 +95,7 @@ const router = new VueRouter({
         {
           path: ":id",
           name: "JobDetails",
-          component: () => import("@/components/JobDetails"),
+          component: () => import("@/components/JobSchedule/JobDetailWrapper"),
           meta: {
             staffOnly: false,
             specOnly: false,
