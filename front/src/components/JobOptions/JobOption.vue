@@ -27,23 +27,29 @@
       <div class="job-option-comment">{{ option.comment }}</div>
       <div class="job-option-files" v-if="files.length">
         <a-divider orientation="left"> Методические материалы </a-divider>
-        <div
-          @click="fileSwitcher = !fileSwitcher"
-          class="job-option-header-action job-option-files-switcher"
-        >
-          {{ fileSwitcherText }}
+        <div class="files-upload-with-arrows">
+          <a-icon
+            type="left"
+            class="arrow-left"
+            @click="clickLeftArrow"
+            v-if="scrollable"
+          />
+          <a-upload
+            multiple
+            disabled
+            list-type="picture"
+            :file-list="files"
+            class="job-option-files-upload"
+            @preview="clickOnFile($event)"
+            ref="files-list"
+          />
+          <a-icon
+            type="right"
+            class="arrow-right"
+            @click="clickRightArrow"
+            v-if="scrollable"
+          />
         </div>
-        <!--<a-button type="icon" icon="arrow-left" />-->
-        <a-upload
-          multiple
-          disabled
-          list-type="picture"
-          :file-list="files"
-          class="job-option-files-upload"
-          :class="{ 'all-the-files-are-shown': fileSwitcher }"
-          @preview="clickOnFile($event)"
-        />
-        <!--<a-button type="icon" icon="arrow-right" />-->
       </div>
     </div>
     <MediaLightBox
@@ -71,11 +77,11 @@ export default {
   },
   data() {
     return {
-      fileSwitcher: false,
       displayMedia: false,
       photoFormats: consts.photoFormats,
       videoFormats: consts.videoFormats,
       selectedFile: null,
+      filesEl: null,
     };
   },
   computed: {
@@ -95,8 +101,12 @@ export default {
         };
       });
     },
-    fileSwitcherText() {
-      return this.fileSwitcher ? "Скрыть" : "Показать все";
+    scrollable() {
+      if (this.filesEl) {
+        return this.filesEl.scrollWidth > this.filesEl.clientWidth;
+      } else {
+        return false;
+      }
     },
   },
   methods: {
@@ -108,6 +118,17 @@ export default {
         window.open(file.url);
       }
     },
+    clickRightArrow() {
+      this.filesEl.scrollLeft += 600;
+    },
+    clickLeftArrow() {
+      this.filesEl.scrollLeft -= 600;
+    },
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.filesEl = this.$refs["files-list"].$el.children[1];
+    });
   },
 };
 </script>
@@ -160,8 +181,8 @@ $border-color: #e8e8e8
     border: 1px solid #e8e8e8
     background-color: #1890ff
     color: white
+    margin-right: 3px
   &-form
-    // font-style: italic
     font-weight: bold
     margin-bottom: 10px
   &-files
@@ -170,21 +191,32 @@ $border-color: #e8e8e8
       display: flex
       flex-direction: column
       max-height: 80px
-      &.all-the-files-are-shown
-        max-height: none
       .ant-upload-list
-        display: flex
-        flex: 1
-        flex-direction: row
-        flex-wrap: wrap
         overflow-y: hidden
         .ant-upload-list-item
           min-width: 200px
           margin-right: 8px
-    &-switcher
-      padding-left: 5px
-      background-color: white
-      position: absolute
-      top: 0
-      right: 0
+          &-name
+            max-width: 300px
+            line-height: 1.5rem
+            height: 3rem
+            text-overflow: ellipsis
+            white-space: pre-line
+
+
+.files-upload-with-arrows
+  display: flex
+  .arrow-left, .arrow-right
+    margin: 0 5px
+    align-self: center
+    font-size: 18px
+  .job-option-files-upload
+    flex: auto
+    overflow-x: hidden
+  .ant-upload-list
+    max-height: 80px
+    white-space: nowrap
+    overflow-x: hidden
+    div
+      display: inline-block
 </style>

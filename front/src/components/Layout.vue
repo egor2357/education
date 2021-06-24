@@ -42,32 +42,18 @@
       </a-menu>
     </a-layout-sider>
     <a-layout>
-      <a-layout-header style="background: #fff; padding: 0">
+      <a-layout-header class="layout-header">
         <div class="user-info">
-          <a-icon
-            type="user"
-            style="font-size: 20px; margin-right: 10px; margin-top: 10px"
-          ></a-icon>
-          <div style="margin-right: 10px">
-            <p style="margin-bottom: 0; min-width: 120px; text-align: center">
+          <a-icon type="user" class="user-icon"></a-icon>
+          <div class="user-info__text">
+            <p class="user-info__name">
               {{ userInfo.name }}
             </p>
-            <p
-              style="text-align: center; font-size: 0.8rem; font-weight: bold"
-              v-if="userInfo.staff"
-            >
-              Администратор
-            </p>
-            <p
-              style="text-align: center; font-size: 0.8rem; font-weight: bold"
-              v-else
-            >
-              Специалист
-            </p>
+            <p class="user-info__status" v-if="userInfo.staff">Администратор</p>
+            <p class="user-info__status" v-else>Специалист</p>
           </div>
           <a-icon
             class="icon-button icon-exit"
-            style="margin-top: 10px"
             type="import"
             @click="logout"
           />
@@ -197,17 +183,25 @@ export default {
       if (this.openKeys.length > 0) this.openKeys = [];
       if (this.selectedKeys.length > 0) this.selectedKeys = [];
       for (let parent of this.menu) {
-        for (let children of parent.childrens) {
-          if (
-            children.to.query &&
-            children.to.query.type === value.query.type
-          ) {
+        if (parent.childrens.length > 0) {
+          for (let children of parent.childrens) {
+            if (
+              children.to.query &&
+              children.to.query.type === value.query.type
+            ) {
+              this.openKeys.push(parent.key);
+              this.selectedKeys.push(children.key);
+              break;
+            } else if (!children.to.query && children.to.name === value.name) {
+              this.openKeys.push(parent.key);
+              this.selectedKeys.push(children.key);
+              break;
+            }
+          }
+        } else {
+          if (parent.to.name === value.name) {
             this.openKeys.push(parent.key);
-            this.selectedKeys.push(children.key);
-            break;
-          } else if (!children.to.query && children.to.name === value.name) {
-            this.openKeys.push(parent.key);
-            this.selectedKeys.push(children.key);
+            this.selectedKeys.push(parent.key);
             break;
           }
         }
@@ -240,17 +234,37 @@ export default {
   .logo
     font-size: 0.9rem
     margin: 16px 5px
-
     img
       max-width: 32px
 
-.user-info
-  line-height: 20px
-  padding: 10px 15px
-  display: flex
-  justify-content: flex-end
-  .icon-exit svg
-    transform: rotate(180deg)
+.ant-layout-header
+  &.layout-header
+    background: #fff
+    padding: 0
+    .user-info
+      line-height: 20px
+      padding: 10px 15px
+      display: flex
+      justify-content: flex-end
+      .user-icon
+        font-size: 20px
+        margin-right: 10px
+        margin-top: 10px
+      .icon-exit
+        margin-top: 10px
+        svg
+          transform: rotate(180deg)
+      &__text
+        margin-right: 10px
+      &__name
+        margin-bottom: 0
+        min-width: 120px
+        text-align: center
+      &__status
+        text-align: center
+        font-size: 0.8rem
+        font-weight: bold
+
 .submenu--two-lines
   line-height: 20px
   white-space: normal
