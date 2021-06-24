@@ -311,7 +311,7 @@ class Option_file(models.Model):
 
   file = models.FileField(
     upload_to=get_file_upload_to,
-    max_length=300,
+    max_length=255,
     verbose_name='Файл'
   )
 
@@ -385,7 +385,7 @@ class Job_file(models.Model):
 
   file = models.FileField(
     upload_to=get_file_upload_to,
-    max_length=200,
+    max_length=255,
     verbose_name='Файл'
   )
 

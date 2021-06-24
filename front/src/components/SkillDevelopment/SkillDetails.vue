@@ -11,7 +11,7 @@
           <span class="date-range-label">Период:</span>
           <a-range-picker
             class="date-range-input"
-            v-model="dateRange"
+            :value="dateRange"
             @change="dateRangeChange"
             format="DD.MM.YYYY"
             :allowClear="false"
@@ -19,50 +19,55 @@
         </div>
       </div>
 
-      <div v-if="skillReports.length" class="skill-name">{{ skillReports[0].skill.name }}</div>
+      <div v-if="skillReports.length">
+        <div class="skill-name">{{ skillReports[0].skill.name }}</div>
 
-      <div class="table-holder">
-        <div class="table-header">
-          <div class="table-cell table-cell_date">Дата занятия</div>
-          <div class="table-cell table-cell_activity">Вид деятельности</div>
-          <div class="table-cell table-cell_specialist">Специалист</div>
-          <div class="table-cell table-cell_job">Сведения о занятии</div>
-        </div>
-        <div class="table-body" v-if="skillReports.length">
-          <div class="table-row" v-for="skillReport in skillReports" :key="skillReport.id" @click="goToJob(skillReport.job)">
-            <div class="table-cell table-cell_date">
-              {{ skillReport.job.date | toRuDateString }}
-            </div>
-            <div class="table-cell table-cell_activity">
-              <div :style="{
-                'background-color': `${skillReport.job.activity.color}10`,
-                border: `1px solid ${skillReport.job.activity.color}99`,
-              }" class="table-cell__activity-name">
-                {{ skillReport.job.activity.name }}
+        <div class="table-holder">
+          <div class="table-header">
+            <div class="table-cell table-cell_date">Дата занятия</div>
+            <div class="table-cell table-cell_activity">Вид деятельности</div>
+            <div class="table-cell table-cell_specialist">Специалист</div>
+            <div class="table-cell table-cell_job">Сведения о занятии</div>
+          </div>
+          <div class="table-body" v-if="skillReports.length">
+            <div class="table-row" v-for="skillReport in skillReports" :key="skillReport.id" @click="goToJob(skillReport.job)">
+              <div class="table-cell table-cell_date">
+                {{ skillReport.job.date | toRuDateString }}
               </div>
-            </div>
-            <div class="table-cell table-cell_specialist">
-              {{ skillReport.job.specialist ? skillReport.job.specialist.__str__ : ""}}
-            </div>
-            <div class="table-cell table-cell_job">
-              <div class="table-cell__job">
-                <div class="table-cell__job-topic">{{ skillReport.job.topic }}</div>
-                <div class="table-cell__job-form"
-                  v-if="skillReport.job.method">
-                  {{ skillReport.job.method.form_name }}
-                </div>
-                <div class="table-cell__job-method"
-                  v-if="skillReport.job.method">
-                  {{ skillReport.job.method.name }}
+              <div class="table-cell table-cell_activity">
+                <div :style="{
+                  'background-color': `${skillReport.job.activity.color}10`,
+                  border: `1px solid ${skillReport.job.activity.color}99`,
+                }" class="table-cell__activity-name">
+                  {{ skillReport.job.activity.name }}
                 </div>
               </div>
-              <div class="table-cell__job-mark"
-                :style="{'background-color': getColorByMark(skillReport.mark)}">
+              <div class="table-cell table-cell_specialist">
+                {{ skillReport.job.specialist ? skillReport.job.specialist.__str__ : ""}}
               </div>
-            </div>
+              <div class="table-cell table-cell_job">
+                <div class="table-cell__job">
+                  <div class="table-cell__job-topic">{{ skillReport.job.topic }}</div>
+                  <div class="table-cell__job-form"
+                    v-if="skillReport.job.method">
+                    {{ skillReport.job.method.form_name }}
+                  </div>
+                  <div class="table-cell__job-method"
+                    v-if="skillReport.job.method">
+                    {{ skillReport.job.method.name }}
+                  </div>
+                </div>
+                <div class="table-cell__job-mark"
+                  :style="{'background-color': getColorByMark(skillReport.mark)}">
+                </div>
+              </div>
 
+            </div>
           </div>
         </div>
+      </div>
+      <div v-else>
+        <a-empty :image="simpleImage"/>
       </div>
     </div>
   </a-spin>
@@ -71,6 +76,7 @@
 <script>
 import moment from "moment";
 import getColorByMark from "@/mixins/getColorByMark"
+import { Empty } from 'ant-design-vue';
 
 export default {
   name: "SkillDetails",
@@ -90,7 +96,7 @@ export default {
     return {
       loading: true,
 
-      dateRange: this.dateRangeInit,
+      dateRange: [],
 
       skillReports: [],
     };
@@ -105,16 +111,60 @@ export default {
   },
   methods: {
     goBack(){
-      this.$router.push({name: "AllSkills"});
+      this.$router.push({
+        name: "AllSkills",
+        query: {
+          dateFrom: this.$route.query.dateFrom,
+          dateTo: this.$route.query.dateTo,
+        }
+      });
     },
-    dateRangeChange(value){
-      this.$emit("changeRange", value);
+    dateRangeChange(value, replace=false){
+      if ((value[0].format("YYYY-MM-DD") == this.$route.query.dateFrom)
+            &&
+          (value[1].format("YYYY-MM-DD") == this.$route.query.dateTo)) {
+        return;
+      }
+
+      let queryObj = {
+        dateFrom: value[0].format("YYYY-MM-DD"),
+        dateTo: value[1].format("YYYY-MM-DD"),
+      };
+
+      if (replace) {
+        this.$router.replace({
+          name: this.$route.name,
+          query: queryObj
+        }).catch(()=>{});
+      } else {
+        this.$router.push({
+          name: this.$route.name,
+          query: queryObj
+        }).catch(()=>{});
+      }
+    },
+    setDateRange(route){
+      let query = route.query;
+      if (!Object.prototype.hasOwnProperty.call(query, 'dateFrom')
+            ||
+          !Object.prototype.hasOwnProperty.call(query, 'dateTo')) {
+        this.dateRange.splice(0);
+        this.dateRange.push(this.dateRangeInit[0].clone());
+        this.dateRange.push(this.dateRangeInit[1].clone());
+        return false;
+
+      } else {
+        this.dateRange.splice(0);
+        this.dateRange.push(moment(query.dateFrom, "YYYY-MM-DD"));
+        this.dateRange.push(moment(query.dateTo, "YYYY-MM-DD"));
+        return true;
+      }
     },
     async fetchSkillReports(){
       try {
         this.loading = true;
         let firstQParameter = `date_from=${this.dateRange[0].format("YYYY-MM-DD")}`;
-        let secondQParameter = `date__to=${this.dateRange[1].format("YYYY-MM-DD")}`;
+        let secondQParameter = `date_to=${this.dateRange[1].format("YYYY-MM-DD")}`;
         let thirdQParameter = `is_affected=true`;
         let fourthQParameter = `skill_id=${this.$route.params.id}`;
         let QParameters = `?${firstQParameter}&${secondQParameter}&${thirdQParameter}&${fourthQParameter}`;
@@ -134,20 +184,32 @@ export default {
       if (job){
         this.$router.push({name: "JobDetails", params: {id: job.id}});
       }
-    }
+    },
+  },
+
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   async created() {
-    let fetches = []
+    if (!this.setDateRange(this.$route)){
+      this.dateRangeChange(this.dateRange, true);
+      return;
+    }
 
-    fetches.push(this.fetchSkillReports());
-
-    this.loading = true;
-    await Promise.all(fetches);
-    this.loading = false;
+    this.fetchSkillReports();
   },
   beforeDestroy() {
 
-  }
+  },
+
+  beforeRouteUpdate(to, from, next){
+    if (!this.setDateRange(to)){
+      this.dateRangeChange(this.dateRange, true);
+      return;
+    }
+    this.fetchSkillReports();
+    next();
+  },
 };
 </script>
 
