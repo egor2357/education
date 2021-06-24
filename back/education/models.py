@@ -69,8 +69,8 @@ class Specialist(models.Model):
   is_active = models.BooleanField(default=True, verbose_name='Активен ли')
 
   @classmethod
-  def get_available(self, template, date):
-    available_specs = template.activity.specialty_set.values_list('specialist_id', 'is_main')
+  def get_available(self, activity, date):
+    available_specs = activity.specialty_set.values_list('specialist_id', 'is_main')
     available_specs_list = list(available_specs)
     all_specs_ids = [spec[0] for spec in available_specs_list]
     main_specs_ids = [spec[0] for spec in available_specs_list if spec[1]]

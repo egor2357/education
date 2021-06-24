@@ -269,7 +269,7 @@ class ScheduleView(viewsets.ModelViewSet):
     for template in templates:
       curr_date = start_date + datetime.timedelta(days=template.day)
 
-      specialist = Specialist.get_available(template, curr_date)
+      specialist = Specialist.get_available(template.activity, curr_date)
 
       new_job = Job(activity=template.activity,
                     specialist=specialist,
@@ -306,7 +306,7 @@ class ScheduleView(viewsets.ModelViewSet):
       job = job_qs[0]
       return Response(JobSerializer(job).data)
 
-    specialist = Specialist.get_available(template, date)
+    specialist = Specialist.get_available(template.activity, date)
 
     new_job = Job(activity=template.activity,
                   specialist=specialist,
