@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
 
+import datetime
+
 class Educational_area(models.Model):
   name = models.TextField(max_length=200, unique=True, verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
@@ -69,8 +71,8 @@ class Specialist(models.Model):
   is_active = models.BooleanField(default=True, verbose_name='Активен ли')
 
   @classmethod
-  def get_available(self, template, date):
-    available_specs = template.activity.specialty_set.values_list('specialist_id', 'is_main')
+  def get_available(self, activity, date):
+    available_specs = activity.specialty_set.values_list('specialist_id', 'is_main')
     available_specs_list = list(available_specs)
     all_specs_ids = [spec[0] for spec in available_specs_list]
     main_specs_ids = [spec[0] for spec in available_specs_list if spec[1]]
@@ -93,6 +95,22 @@ class Specialist(models.Model):
       specialist = None
 
     return specialist
+
+  @classmethod
+  def set_to_period(self, date_from, date_to):
+    today = datetime.date.today()
+    if date_from <= today:
+      date_from = today + datetime.timedelta(days=1)
+    jobs = Job.objects.filter(
+      date__gte=date_from,
+      date__lte=date_to,
+      specialist=None,
+    )
+
+    for job in jobs:
+      specialist = self.get_available(job.activity, job.date)
+      job.specialist=specialist
+      job.save()
 
   class Meta:
     db_table = 'specialist'
@@ -128,6 +146,39 @@ class Presence(models.Model):
   date_from = models.DateField(verbose_name='Первый день')
   date_to = models.DateField(verbose_name='Последний день')
   is_available = models.BooleanField(default=True, verbose_name='Является ли доступным')
+
+  def clear_jobs(self):
+    presence = self
+    if presence.main_interval != None:
+      presence = presence.main_interval
+
+    date_from = presence.date_from
+    today = datetime.date.today()
+    if date_from <= today:
+      date_from = today + datetime.timedelta(days=1)
+
+    affected_jobs = Job.objects.filter(
+      date__gte=date_from,
+      date__lte=presence.date_to,
+      specialist=presence.specialist
+    ).update(specialist=None)
+
+  def set_jobs(self):
+    presence = self
+    if presence.main_interval != None:
+      presence = presence.main_interval
+
+    date_from = presence.date_from
+    today = datetime.date.today()
+    if date_from <= today:
+      date_from = today + datetime.timedelta(days=1)
+
+    affected_jobs = Job.objects.filter(
+      date__gte=date_from,
+      date__lte=presence.date_to,
+      activity__in=presence.specialist.activities.all(),
+      specialist=None
+    ).update(specialist=presence.specialist)
 
   class Meta:
     db_table = 'presence'
