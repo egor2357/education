@@ -24,6 +24,22 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     else:
       return request.user.is_staff
 
+def set_specialists_to_period(date_from, date_to):
+  today = datetime.date.today()
+  if date_from <= today:
+    date_from = today + datetime.timedelta(days=1)
+  jobs = Job.objects.filter(
+    date__gte=date_from,
+    date__lte=date_to,
+    specialist=None,
+  )
+
+  for job in jobs:
+    specialist = Specialist.get_available(job.activity, job.date)
+    job.specialist=specialist
+    job.save()
+
+
 # Create your views here.
 class UserView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
@@ -464,8 +480,18 @@ class PresenceView(viewsets.ModelViewSet):
 
   def destroy(self, request, *args, **kwargs):
     presence = self.get_object()
+
+    if presence.main_interval != None:
+      presence = presence.main_interval
+    date_from=presence.date_from
+    date_to=presence.date_to
+
     presence.clear_jobs()
-    return super(PresenceView, self).destroy(request, *args, **kwargs)
+
+    res = super(PresenceView, self).destroy(request, *args, **kwargs)
+
+    set_specialists_to_period(date_from, date_to)
+    return res
 
 class SpecialistView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)

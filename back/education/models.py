@@ -133,8 +133,14 @@ class Presence(models.Model):
     presence = self
     if presence.main_interval != None:
       presence = presence.main_interval
+
+    date_from = presence.date_from
+    today = datetime.date.today()
+    if date_from <= today:
+      date_from = today + datetime.timedelta(days=1)
+
     affected_jobs = Job.objects.filter(
-      date__gte=presence.date_from,
+      date__gte=date_from,
       date__lte=presence.date_to,
       specialist=presence.specialist
     ).update(specialist=None)
@@ -143,8 +149,14 @@ class Presence(models.Model):
     presence = self
     if presence.main_interval != None:
       presence = presence.main_interval
+
+    date_from = presence.date_from
+    today = datetime.date.today()
+    if date_from <= today:
+      date_from = today + datetime.timedelta(days=1)
+
     affected_jobs = Job.objects.filter(
-      date__gte=presence.date_from,
+      date__gte=date_from,
       date__lte=presence.date_to,
       activity__in=presence.specialist.activities.all(),
       specialist=None
