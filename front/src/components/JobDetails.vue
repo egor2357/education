@@ -74,7 +74,7 @@
               :validateStatus="fields['topic'].validateStatus"
               :help="fields['topic'].help"
             >
-              <a-input v-model="form.topic" :disabled="!isEnabled" />
+              <a-input v-model="form.topic" />
             </a-form-model-item>
 
             <a-form-model-item
@@ -91,7 +91,6 @@
                 placeholder="Выберите навыки"
                 allow-clear
                 multiple
-                :disabled="!isEnabled"
               >
                 <a-tree-select-node
                   v-for="area in areas"
@@ -131,7 +130,6 @@
                 v-model="form.form_id"
                 allow-clear
                 @change="fieldChanged($event, 'form_id')"
-                :disabled="!isEnabled"
               >
                 <a-select-option v-for="form in forms" :key="form.id">
                   {{ form.name }}
@@ -148,7 +146,7 @@
             >
               <a-select
                 v-model="form.method_id"
-                :disabled="!form.form_id || !isEnabled"
+                :disabled="!form.form_id"
                 allow-clear
                 @change="fieldChanged($event, 'method_id')"
               >
@@ -171,7 +169,6 @@
                 :auto-size="{ minRows: 4, maxRows: 6 }"
                 @change="fieldChanged($event, 'comment')"
                 type="textarea"
-                :disabled="!isEnabled"
               />
             </a-form-model-item>
 
@@ -189,11 +186,8 @@
                 :remove="handleRemoveJobFile"
                 :before-upload="beforeUploadJobFile"
                 class="job-details__body__form-files"
-                :disabled="!isEnabled"
               >
-                <a-button :disabled="!isEnabled">
-                  <a-icon type="upload" /> Прикрепить файл
-                </a-button>
+                <a-button> <a-icon type="upload" /> Прикрепить файл </a-button>
               </a-upload>
             </a-form-model-item>
 
@@ -201,11 +195,7 @@
               class="job-details__body__form-ok"
               :wrapper-col="{ offset: 6 }"
             >
-              <a-button
-                icon="check"
-                type="primary"
-                @click="saveJob"
-                :disabled="!isEnabled"
+              <a-button icon="check" type="primary" @click="saveJob"
                 >Сохранить параметры занятия</a-button
               >
             </a-form-model-item>
@@ -244,23 +234,19 @@
               placeholder="Результат проведения занятия"
               :auto-size="{ minRows: 4, maxRows: 10 }"
               type="textarea"
-              :disabled="!isEnabled"
             />
-            <a-button
-              icon="check"
-              type="primary"
-              @click="saveReport"
-              :disabled="!isEnabled"
-            >
+            <a-button icon="check" type="primary" @click="saveReport">
               Сохранить отчет
             </a-button>
           </div>
         </div>
       </div>
     </div>
-    <job-option-select v-if="isModalShown"
+    <job-option-select
+      v-if="isModalShown"
       @closeModal="closeModal($event)"
-      :options="options"/>
+      :options="options"
+    />
   </a-spin>
 </template>
 
@@ -269,15 +255,19 @@ import moment from "moment";
 import getColorByMark from "@/mixins/getColorByMark";
 import { mapActions, mapGetters } from "vuex";
 import patch from "@/middleware/patch";
-import JobOptionSelect from "@/components/JobOptions/JobOptionSelect"
+import JobOptionSelect from "@/components/JobOptions/JobOptionSelect";
 
 export default {
   name: "JobDetails",
   mixins: [getColorByMark],
   components: {
-    JobOptionSelect
+    JobOptionSelect,
   },
   props: {
+    jobProp: {
+      type: Object,
+      default: null,
+    },
   },
   data() {
     return {
@@ -386,7 +376,6 @@ export default {
       areas: "skills/getAreas",
       formsFetched: "forms/getFetched",
       forms: "forms/getForms",
-      userInfo: "auth/getUserInfo",
     }),
 
     methods() {
@@ -397,15 +386,6 @@ export default {
       }
       return [];
     },
-
-    isEnabled() {
-      return (
-        this.userInfo.staff ||
-        (!this.userInfo.staff &&
-          this.job &&
-          this.userInfo.specialistId === this.job.specialist.id)
-      );
-    },
   },
   methods: {
     ...mapActions({
@@ -413,22 +393,26 @@ export default {
       fetchForms: "forms/fetchForms",
     }),
 
-    async showModal(){
+    async showModal() {
       if (!this.isOptionFetched) {
         await this.fetchOptions();
       }
       this.isModalShown = true;
     },
-    async closeModal(optionId){
+    async closeModal(optionId) {
       this.isModalShown = false;
       if (optionId) {
         await this.setJobByOption(optionId);
       }
     },
-    async setJobByOption(optionId){
+    async setJobByOption(optionId) {
       try {
         this.loading = true;
-        let res = await patch(this.$axios, `/api/jobs/${this.$route.params.id}/set_job_by_option/`, {option_id: optionId});
+        let res = await patch(
+          this.$axios,
+          `/api/jobs/${this.$route.params.id}/set_job_by_option/`,
+          { option_id: optionId }
+        );
         if (res.status === 200) {
           this.$message.success("Параметры занятия сохранены");
           this.job = res.data;
@@ -445,8 +429,7 @@ export default {
       }
     },
 
-
-    fieldChanged(value, key){
+    fieldChanged(value, key) {
       if (key == "form_id") {
         this.form.method_id = null;
       }
@@ -598,7 +581,7 @@ export default {
       return false;
     },
 
-    async fetchOptions(){
+    async fetchOptions() {
       try {
         this.loading = true;
         let queryParams = `?activity_id=${this.job.activity.id}`;
@@ -628,7 +611,13 @@ export default {
       fetches.push(this.fetchForms());
     }
 
-    fetches.push(this.fetchJob());
+    if (this.jobProp === null) {
+      fetches.push(this.fetchJob());
+    } else {
+      this.job = this.jobProp;
+      this.jobDateMoment = moment(this.jobProp.date, "YYYY-MM-DD");
+      this.setJobFormData(this.jobProp);
+    }
 
     this.loading = true;
     await Promise.all(fetches);
@@ -692,8 +681,6 @@ export default {
         display: flex
         flex-direction: row
         justify-content: flex-start
-
-  &__body
 
   &__body__form-files
     display: flex

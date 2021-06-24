@@ -221,4 +221,5 @@ export default {
 
     &__card
       position: relative
+      padding: 3px
 </style>
