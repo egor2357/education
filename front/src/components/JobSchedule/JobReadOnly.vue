@@ -83,7 +83,8 @@
               </div>
             </div>
           </div>
-          <div class="job-details__report-comment">
+          <div v-if="reportForm.report_comment"
+            class="job-details__report-comment">
             <div class="job-details__report-comment-title">
               Результат проведения занятия:
             </div>
