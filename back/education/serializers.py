@@ -615,6 +615,26 @@ class JobSerializer(FlexFieldsModelSerializer):
   job_files = Job_fileSerializer(
     source='job_file_set', many=True, read_only=True
   )
+
+  def update(self, instance, validated_data):
+    has_change_spec = False
+    has_change_act = False
+
+    if ('specialist' in validated_data):
+      specialist = validated_data.get('specialist')
+      has_change_spec = instance.specialist != specialist
+
+    if ('activity' in validated_data):
+      activity = validated_data.get('activity')
+      has_change_act = instance.activity != activity
+
+    if (has_change_spec) or (has_change_act):
+      instance.clear_params()
+      instance.save()
+
+    return super(JobSerializer, self).update(instance, validated_data)
+
+
   class Meta:
     model = Job
     fields = (

@@ -110,6 +110,7 @@ class Specialist(models.Model):
     for job in jobs:
       specialist = self.get_available(job.activity, job.date)
       job.specialist=specialist
+      job.clear_params()
       job.save()
 
   class Meta:
@@ -161,7 +162,11 @@ class Presence(models.Model):
       date__gte=date_from,
       date__lte=presence.date_to,
       specialist=presence.specialist
-    ).update(specialist=None)
+    )
+    for job in affected_jobs:
+      job.specialist = None
+      job.clear_params()
+      job.save()
 
   def set_jobs(self):
     presence = self
@@ -178,7 +183,11 @@ class Presence(models.Model):
       date__lte=presence.date_to,
       activity__in=presence.specialist.activities.all(),
       specialist=None
-    ).update(specialist=presence.specialist)
+    )
+    for job in affected_jobs:
+      job.specialist = presence.specialist
+      job.clear_params()
+      job.save()
 
   class Meta:
     db_table = 'presence'
@@ -303,6 +312,34 @@ class Specialty(models.Model):
 
   is_main = models.BooleanField(default=True, verbose_name='Является ли основным')
 
+  def reset_jobs(self):
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    jobs = Job.objects.filter(
+      date__gte=tomorrow,
+      specialist=self.specialist,
+      activity=self.activity,
+    )
+    jobs.update(specialist=None)
+    for job in jobs:
+      specialist = self.get_available(job.activity, job.date)
+      job.specialist=specialist
+      job.clear_params()
+      job.save()
+
+  def fill_jobs(self):
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    jobs = Job.objects.filter(
+      date__gte=tomorrow,
+      specialist=None,
+      activity=self.activity,
+    )
+    for job in jobs:
+      specialist = Specialist.get_available(job.activity, job.date)
+      job.specialist=specialist
+      job.clear_params()
+      job.save()
+
+
   class Meta:
     db_table = 'specialty'
     verbose_name = 'Направление деятельности специалиста'
@@ -407,6 +444,13 @@ class Job(models.Model):
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
   report_comment = models.TextField(blank=True, verbose_name='Комментарий по результатам занятия')
+
+  def clear_params(self):
+    self.topic = ''
+    self.reports.clear()
+    self.method = None
+    self.comment = ''
+    self.job_file_set.all().delete()
 
   class Meta:
     db_table = 'job'
