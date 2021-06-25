@@ -160,7 +160,6 @@ export default {
       this.editableData.form_id
         ? (this.form.form_id = this.editableData.form_id)
         : "";
-      console.log(this.form);
       this.title += "способа проведений занятий";
     }
     document.addEventListener("keydown", this.keydown);

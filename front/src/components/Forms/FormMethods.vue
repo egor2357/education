@@ -1,6 +1,12 @@
 <template>
   <a-collapse>
-    <a-collapse-panel :key="form.id" :header="form.name" v-for="form in forms">
+    <a-collapse-panel
+      :key="form.id"
+      :header="form.name"
+      v-for="form in forms"
+      :showArrow="form.methods.length !== 0"
+      :class="{ 'panel-empty': form.methods.length === 0 }"
+    >
       <div v-for="method in form.methods" :key="method.id" class="method">
         <span>{{ method.name }}</span>
         <span style="float: right">
@@ -84,6 +90,13 @@ export default {
 
 <style lang="sass">
 .forms
+  .ant-collapse
+    .ant-collapse-item
+      &.panel-empty
+        .ant-collapse-header
+          cursor: default
+        .ant-collapse-content
+          border-top: none
   .ant-collapse-content-box
     padding: 0 10px !important
     .method
