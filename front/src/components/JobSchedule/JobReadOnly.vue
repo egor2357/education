@@ -135,6 +135,9 @@ export default {
   .job-details__tab_content
     padding: 0 20%
 
+  .job-details__reports
+    max-height: 550px
+
   .job-details__report-mark:hover
     cursor: default
     &:not(.current)
