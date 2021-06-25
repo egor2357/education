@@ -30,7 +30,7 @@ const actions = {
               : res.data.username,
           staff: res.data.is_staff,
           id: res.data.id,
-          specialistId: res.data.specialist !== null
+          specialistId: res.data.specialist === null
             ? null
             : res.data.specialist.id,
         });
@@ -84,7 +84,7 @@ const actions = {
               : res.data.username,
           staff: res.data.is_staff,
           id: res.data.id,
-          specialistId: res.data.specialist !== null
+          specialistId: res.data.specialist === null
             ? null
             : res.data.specialist.id,
         });
