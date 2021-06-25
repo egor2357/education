@@ -312,6 +312,19 @@ class Specialty(models.Model):
 
   is_main = models.BooleanField(default=True, verbose_name='Является ли основным')
 
+  def reset_jobs(self):
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    jobs = Job.objects.filter(
+      date__gte=tomorrow,
+      specialist=self.specialist,
+      activity=self.activity,
+    )
+    jobs.update(specialist=None)
+    for job in jobs:
+      specialist = self.get_available(job.activity, job.date)
+      job.specialist=specialist
+      job.clear_params()
+      job.save()
   class Meta:
     db_table = 'specialty'
     verbose_name = 'Направление деятельности специалиста'
