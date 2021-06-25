@@ -556,3 +556,20 @@ class SpecialtyView(viewsets.ModelViewSet):
       else:
         return (Specialty.objects.filter(specialist=user.specialist)
                                   .select_related('activity'))
+
+  def destroy(self, request, *args, **kwargs):
+    specialty = self.get_object()
+    specialty.reset_jobs()
+
+    return super(SpecialtyView, self).destroy(request, *args, **kwargs)
+
+  def create(self, request, pk=None):
+    serializer = SpecialtySerializer(data=request.data, context={'request': request})
+    if serializer.is_valid(raise_exception=True):
+      specialty = serializer.save()
+
+    specialty.fill_jobs()
+
+    return Response(SpecialtySerializer(specialty, context={'request': request}).data, status=201)
+
+
