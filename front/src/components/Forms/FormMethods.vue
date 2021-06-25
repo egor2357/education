@@ -1,5 +1,5 @@
 <template>
-  <a-collapse>
+  <a-collapse v-if="forms.length > 0">
     <a-collapse-panel
       :key="form.id"
       :header="form.name"
@@ -24,10 +24,14 @@
       </template>
     </a-collapse-panel>
   </a-collapse>
+  <div v-else>
+    <a-empty :image="simpleImage" />
+  </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
+import { Empty } from "ant-design-vue";
 export default {
   name: "FormMethods",
   data() {
@@ -84,6 +88,9 @@ export default {
         },
       });
     },
+  },
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
 };
 </script>
