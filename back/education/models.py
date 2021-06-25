@@ -325,6 +325,21 @@ class Specialty(models.Model):
       job.specialist=specialist
       job.clear_params()
       job.save()
+
+  def fill_jobs(self):
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    jobs = Job.objects.filter(
+      date__gte=tomorrow,
+      specialist=None,
+      activity=self.activity,
+    )
+    for job in jobs:
+      specialist = Specialist.get_available(job.activity, job.date)
+      job.specialist=specialist
+      job.clear_params()
+      job.save()
+
+
   class Meta:
     db_table = 'specialty'
     verbose_name = 'Направление деятельности специалиста'
