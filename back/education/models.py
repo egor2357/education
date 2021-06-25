@@ -408,6 +408,14 @@ class Job(models.Model):
 
   report_comment = models.TextField(blank=True, verbose_name='Комментарий по результатам занятия')
 
+  def clear_params(self):
+    self.topic = ''
+    self.reports.clear()
+    self.method = None
+    self.comment = ''
+    self.job_file_set.all().delete()
+    self.save()
+
   class Meta:
     db_table = 'job'
     verbose_name = 'Занятие'

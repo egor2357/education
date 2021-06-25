@@ -629,12 +629,7 @@ class JobSerializer(FlexFieldsModelSerializer):
       has_change_act = instance.activity != activity
 
     if (has_change_spec) or (has_change_act):
-      instance.topic = ''
-      instance.reports.clear()
-      instance.method = None
-      instance.comment = ''
-      instance.job_file_set.all().delete()
-      instance.save()
+      instance.clear_params()
 
     return super(JobSerializer, self).update(instance, validated_data)
 
