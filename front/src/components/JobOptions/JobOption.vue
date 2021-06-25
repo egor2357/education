@@ -15,7 +15,7 @@
         >
           {{ skill.area_number }}.{{ skill.direction_number }}.{{
             skill.number
-          }}
+          }}.
           {{ skill.name }}
         </div>
       </div>
