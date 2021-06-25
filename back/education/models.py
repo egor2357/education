@@ -110,6 +110,7 @@ class Specialist(models.Model):
     for job in jobs:
       specialist = self.get_available(job.activity, job.date)
       job.specialist=specialist
+      job.clear_params()
       job.save()
 
   class Meta:
@@ -161,7 +162,11 @@ class Presence(models.Model):
       date__gte=date_from,
       date__lte=presence.date_to,
       specialist=presence.specialist
-    ).update(specialist=None)
+    )
+    for job in affected_jobs:
+      job.specialist = None
+      job.clear_params()
+      job.save()
 
   def set_jobs(self):
     presence = self
@@ -178,7 +183,11 @@ class Presence(models.Model):
       date__lte=presence.date_to,
       activity__in=presence.specialist.activities.all(),
       specialist=None
-    ).update(specialist=presence.specialist)
+    )
+    for job in affected_jobs:
+      job.specialist = presence.specialist
+      job.clear_params()
+      job.save()
 
   class Meta:
     db_table = 'presence'
@@ -414,7 +423,6 @@ class Job(models.Model):
     self.method = None
     self.comment = ''
     self.job_file_set.all().delete()
-    self.save()
 
   class Meta:
     db_table = 'job'

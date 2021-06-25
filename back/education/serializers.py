@@ -630,6 +630,7 @@ class JobSerializer(FlexFieldsModelSerializer):
 
     if (has_change_spec) or (has_change_act):
       instance.clear_params()
+      instance.save()
 
     return super(JobSerializer, self).update(instance, validated_data)
 
