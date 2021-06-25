@@ -54,7 +54,11 @@ export default {
       userInfo: "auth/getUserInfo",
     }),
     isEditable() {
-      return (this.job && this.userInfo.specialistId === this.job.specialist.id);
+      return (
+        this.job &&
+        this.job.specialist &&
+        this.userInfo.specialistId === this.job.specialist.id
+      );
     },
   },
 };
