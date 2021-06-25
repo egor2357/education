@@ -213,7 +213,7 @@
                 <div class="job-details__report-name">
                   {{ report.skill.area_number }}.{{
                     report.skill.direction_number
-                  }}. {{ report.skill.name }}
+                  }}.{{ report.skill.number }}. {{ report.skill.name }}
                 </div>
                 <div class="job-details__report-marks">
                   <div
