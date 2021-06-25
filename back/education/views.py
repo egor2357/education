@@ -269,7 +269,7 @@ class ScheduleView(viewsets.ModelViewSet):
     for template in templates:
       curr_date = start_date + datetime.timedelta(days=template.day)
 
-      specialist = Specialist.get_available(template, curr_date)
+      specialist = Specialist.get_available(template.activity, curr_date)
 
       new_job = Job(activity=template.activity,
                     specialist=specialist,
@@ -306,7 +306,7 @@ class ScheduleView(viewsets.ModelViewSet):
       job = job_qs[0]
       return Response(JobSerializer(job).data)
 
-    specialist = Specialist.get_available(template, date)
+    specialist = Specialist.get_available(template.activity, date)
 
     new_job = Job(activity=template.activity,
                   specialist=specialist,
@@ -461,6 +461,21 @@ class PresenceView(viewsets.ModelViewSet):
   serializer_class = PresenceSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = PresenceFilter
+
+  def destroy(self, request, *args, **kwargs):
+    presence = self.get_object()
+
+    if presence.main_interval != None:
+      presence = presence.main_interval
+    date_from=presence.date_from
+    date_to=presence.date_to
+
+    presence.clear_jobs()
+
+    res = super(PresenceView, self).destroy(request, *args, **kwargs)
+
+    Specialist.set_to_period(date_from, date_to)
+    return res
 
 class SpecialistView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
