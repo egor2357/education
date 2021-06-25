@@ -499,6 +499,9 @@ class SpecialistView(viewsets.ModelViewSet):
     specialist.save()
     if not (user is None):
       user.delete()
+
+    specialist.presence_set.all().delete()
+
     specialist.refresh_from_db()
     return Response(SpecialistSerializer(specialist).data, status=204)
 
