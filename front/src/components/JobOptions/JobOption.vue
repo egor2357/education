@@ -8,21 +8,29 @@
     </div>
     <div class="job-option-body">
       <div class="job-option-skills">
-        <div
-          class="job-option-skill"
-          v-for="skill in option.skills"
-          :key="skill.id"
-        >
-          {{ skill.area_number }}.{{ skill.direction_number }}.{{
-            skill.number
-          }}
-          {{ skill.name }}
+        <template v-if="option.skills.length">
+          <div
+            class="job-option-skill"
+            v-for="skill in option.skills"
+            :key="skill.id"
+          >
+            {{ skill.area_number }}.{{ skill.direction_number }}.{{
+              skill.number
+            }}
+            {{ skill.name }}
+          </div>
+        </template>
+        <div class="job-option-skill job-option-skill--empty" v-else>
+          Навыки не выбраны
         </div>
       </div>
       <div class="job-option-form" v-if="option.method">
         {{ option.method.form_name }}
         <a-divider type="vertical" />
         {{ option.method.name }}
+      </div>
+      <div class="job-option-form" v-else>
+        Форма и способ не выбраны
       </div>
       <div class="job-option-comment">{{ option.comment }}</div>
       <div class="job-option-files" v-if="files.length">
@@ -183,7 +191,13 @@ $border-color: #e8e8e8
     border: 1px solid #e8e8e8
     background-color: #1890ff
     color: white
-    margin-right: 3px
+    margin-right: 5px
+    margin-bottom: 5px
+
+    &--empty
+      background-color: #f9f9f9
+      color: #000
+
   &-form
     font-weight: bold
     margin-bottom: 10px
