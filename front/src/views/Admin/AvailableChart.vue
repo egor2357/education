@@ -221,7 +221,13 @@ export default {
           }
           if (dateFrom < firstDateOfMonth) {
             firstDayOfInterval = 1;
-            if (moment(presence.date_from).date() == 1) labledDays.push(1);
+            if (
+              moment(presence.date_from).date() == 1 &&
+              firstDateOfMonth.month() == moment(presence.date_from).month()
+            ) {
+              //проверка на старт присутствия в первый день месяца после карантина
+              labledDays.push(1);
+            }
           } else {
             firstDayOfInterval = dateFrom.date();
             hasStart = true;
