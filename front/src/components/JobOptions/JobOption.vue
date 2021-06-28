@@ -2,7 +2,7 @@
   <div hoverable class="job-option">
     <div class="job-option-header">
       <div class="job-option-header-topic">
-        {{ option.topic }}
+        {{ option.topic ? option.topic : 'Тема не указана' }}
       </div>
       <slot></slot>
     </div>
