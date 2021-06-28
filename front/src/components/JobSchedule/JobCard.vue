@@ -5,26 +5,29 @@
       'background-color': `${job.activity.color}10`,
       border: `1px solid ${job.activity.color}99`,
     }">
-    <div class="job__time">{{ job.start_time.substr(0, 5) }}</div>
 
-    <a-dropdown :trigger="['click']"
-      placement="bottomLeft"
-      class="dropdown--hover"
-      v-if="!readOnly"
-    >
+    <div class="job__time__wrapper">
+      <div class="job__time">{{ job.start_time.substr(0, 5) }}</div>
 
-      <a-icon class="icon-button" type="dash"
-        @click.stop></a-icon>
-      <a-menu slot="overlay">
-        <a-menu-item key="1" @click="openModalEdit(job)">
-          Изменить
-        </a-menu-item>
-        <a-menu-item key="2"
-          @click="displayConfirmDelete(job)">
-          <span> Удалить </span>
-        </a-menu-item>
-      </a-menu>
-    </a-dropdown>
+      <a-dropdown :trigger="['click']"
+        placement="bottomLeft"
+        class="dropdown--hover"
+        v-if="!readOnly"
+      >
+
+        <a-icon class="icon-button" type="dash"
+          @click.stop></a-icon>
+        <a-menu slot="overlay">
+          <a-menu-item key="1" @click="openModalEdit(job)">
+            Изменить
+          </a-menu-item>
+          <a-menu-item key="2"
+            @click="displayConfirmDelete(job)">
+            <span> Удалить </span>
+          </a-menu-item>
+        </a-menu>
+      </a-dropdown>
+    </div>
 
     <div class="job__activity">
       <div class="job__activity-name">
@@ -103,11 +106,15 @@ export default {
   padding: 5px 10px
   border-radius: 4px
   display: flex
-  flex-wrap: wrap
+  flex-direction: column
   transition: box-shadow ease-out .3s
   &:hover
     cursor: pointer
     box-shadow: 0 0 2px 1px rgba(0,0,0,.15)
+
+  &__time__wrapper
+    display: flex
+    flex-direction: row
 
   &__time
     flex: 0 0 95%
