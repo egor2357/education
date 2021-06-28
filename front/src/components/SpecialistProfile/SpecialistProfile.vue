@@ -241,13 +241,15 @@ export default {
       display: flex
       flex-direction: row
       font-size: 22px
-      &-full
-        margin-right: 10px
       &-login
         color: #1890ff
       .ant-divider
-        height: 50%
+        height: 15px
         margin-top: 12px
+    &__specialties
+      .ant-divider
+        &::before, &::after
+          position: unset
 
     .activities
         display: flex
