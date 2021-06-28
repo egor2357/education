@@ -59,7 +59,7 @@ class FilteredSkillListSerializer(serializers.ListSerializer):
       qs =  data
     else:
       if user.specialist is not None:
-        qs = data.filter(competence__specialist=user.specialist)
+        qs = data.filter(competence__specialist=user.specialist).distinct()
 
     return super(FilteredSkillListSerializer, self).to_representation(qs)
 
@@ -433,7 +433,7 @@ class FilteredDevelopment_directionListSerializer(serializers.ListSerializer):
       qs =  data
     else:
       if user.specialist is not None:
-        qs = data.filter(skill__competence__specialist=user.specialist)
+        qs = data.filter(skill__competence__specialist=user.specialist).distinct()
 
     return super(FilteredDevelopment_directionListSerializer, self).to_representation(qs)
 
@@ -461,7 +461,7 @@ class FilteredEducational_areaListSerializer(serializers.ListSerializer):
       qs = data
     else:
       if user.specialist is not None:
-        qs = data.filter(development_direction__skill__competence__specialist=user.specialist)
+        qs = data.filter(development_direction__skill__competence__specialist=user.specialist).distinct()
 
     return super(FilteredEducational_areaListSerializer, self).to_representation(qs)
 
