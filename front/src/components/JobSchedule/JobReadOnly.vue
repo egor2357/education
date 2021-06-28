@@ -58,30 +58,35 @@
         <JobOption :option="job" v-if="activeTab == 1" />
 
         <div v-if="activeTab == 2" class="job-details__wrapper">
-          <div class="job-details__label" v-if="reportForm.marks.length">
-            Уровень освоения
-          </div>
-          <div class="job-details__reports">
-            <div
-              class="job-details__report"
-              v-for="report in reportForm.marks"
-              :key="report.id"
-            >
-              <div class="job-details__report-name">
-                {{ report.skill.area_number }}.{{
-                  report.skill.direction_number
-                }}.{{ report.skill.number }}. {{ report.skill.name }}
-              </div>
-              <div class="job-details__report-marks">
-                <div
-                  class="job-details__report-mark"
-                  v-for="i in 3"
-                  :key="i"
-                  :class="{ current: report.mark == i - 1 }"
-                  :style="{ 'background-color': getColorByMark(i - 1) }"
-                ></div>
+          <template v-if="reportForm.marks.length">
+            <div class="job-details__label">
+              Уровень освоения
+            </div>
+            <div class="job-details__reports">
+              <div
+                class="job-details__report"
+                v-for="report in reportForm.marks"
+                :key="report.id"
+              >
+                <div class="job-details__report-name">
+                  {{ report.skill.area_number }}.{{
+                    report.skill.direction_number
+                  }}.{{ report.skill.number }}. {{ report.skill.name }}
+                </div>
+                <div class="job-details__report-marks">
+                  <div
+                    class="job-details__report-mark"
+                    v-for="i in 3"
+                    :key="i"
+                    :class="{ current: report.mark == i - 1 }"
+                    :style="{ 'background-color': getColorByMark(i - 1) }"
+                  ></div>
+                </div>
               </div>
             </div>
+          </template>
+          <div class="job-details__report__no-data" v-else>
+            <a-empty :image="simpleImage"/>
           </div>
           <div v-if="reportForm.report_comment"
             class="job-details__report-comment">
@@ -102,6 +107,7 @@
 import JobOption from "@/components/JobOptions/JobOption";
 import moment from "moment";
 import getColorByMark from "@/mixins/getColorByMark";
+import { Empty } from 'ant-design-vue';
 export default {
   name: "JobReadOnly",
   components: {
@@ -123,6 +129,9 @@ export default {
         report_comment: "",
       },
     };
+  },
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   created() {
     this.reportForm.marks = this.job.reports.slice();
@@ -149,4 +158,9 @@ export default {
     width: 100%
     &-title
       font-weight: bold
+.job-details__report__no-data
+  display: flex
+  flex-direction: column
+  align-items: center
+  width: 100%
 </style>
