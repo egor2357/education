@@ -245,6 +245,9 @@ export default {
         margin-right: 10px
       &-login
         color: #1890ff
+      .ant-divider
+        height: 50%
+        margin-top: 12px
 
     .activities
         display: flex

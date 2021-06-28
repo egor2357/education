@@ -168,7 +168,8 @@ export default {
     border-left: 1px solid #e8e8e8
     display: flex
     align-items: center
-    writing-mode: sideways-lr;
+    writing-mode: vertical-lr
+    transform: rotate(180deg)
     height: 100%
     padding: 5px
 
@@ -176,7 +177,7 @@ export default {
       width: 20px
       height: 20px
       border-radius: 10px
-      margin-top: 10px
+      margin-bottom: 10px
 
     .activity-name
       flex: 1

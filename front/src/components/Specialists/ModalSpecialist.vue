@@ -153,7 +153,7 @@ export default {
           let dispatchName = "";
           let successCode = 0;
           let successMessage = "";
-
+          let dataForSend = JSON.parse(JSON.stringify(this.form));
           if (this.adding) {
             dispatchName = "specialists/addSpecialist";
             successCode = 201;
@@ -166,9 +166,12 @@ export default {
             this.staffSelected
               ? (successMessage = "Администратор успешно изменён")
               : (successMessage = "Специалист успешно изменён");
+            if (!this.displayPassword) {
+              delete dataForSend["password"];
+            }
           }
           try {
-            let res = await this.$store.dispatch(dispatchName, this.form);
+            let res = await this.$store.dispatch(dispatchName, dataForSend);
             if (res.status === successCode) {
               this.$message.success(successMessage);
               this.$emit("closeSuccess");
@@ -249,7 +252,7 @@ export default {
   },
   beforeDestroy() {
     document.removeEventListener("keydown", this.keydown);
-  }
+  },
 };
 </script>
 

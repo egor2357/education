@@ -17,7 +17,7 @@
         </template>
       </div>
       <template v-if="data.specialist.hasAdditionalActivity">
-        <a-divider orientation="center" style="font-size: 0.8rem; margin: 0">
+        <a-divider orientation="center" class="activities-divider">
           Дополнительные виды деятельности
         </a-divider>
         <div class="activities-popover">
@@ -66,4 +66,11 @@ export default {
     .activity-label-popover
       margin: 5px
       color: #111111
+.ant-divider
+  &.activities-divider
+    font-size: 0.8rem
+    margin: 0
+    max-width: 330px
+    &::before
+      position: unset
 </style>

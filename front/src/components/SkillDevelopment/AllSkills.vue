@@ -1,7 +1,6 @@
 <template>
   <a-spin :spinning="loading">
     <div class="skill-development">
-
       <div class="top-bar">
         <div class="top-bar__side-block left"></div>
         <div class="title">Развитие навыков</div>
@@ -13,7 +12,8 @@
             @change="dateRangeChange"
             format="DD.MM.YYYY"
             :allowClear="false"
-            separator="-"/>
+            separator="-"
+          />
         </div>
       </div>
 
@@ -29,30 +29,63 @@
             <div class="table-cell">Навык</div>
           </div>
           <div class="table-header__column table-header__column_count">
-            <div class="table-cell">Количество обращений к навыку за период</div>
+            <div class="table-cell">
+              Количество обращений к навыку за период
+            </div>
           </div>
         </div>
         <div class="table-body" v-if="areas.length">
           <div class="table-row" v-for="area in areas" :key="area.id">
             <div class="table-row__column table-row__column_area">
-              <div class="table-cell">{{[area.number, area.name].join('. ')}}</div>
+              <div class="table-cell">
+                {{ [area.number, area.name].join(". ") }}
+              </div>
             </div>
             <div class="table-row__container">
-              <div class="table-row" v-for="direction in area.development_directions" :key="direction.id">
+              <div
+                class="table-row"
+                v-for="direction in area.development_directions"
+                :key="direction.id"
+              >
                 <div class="table-row__column table-row__column_direction">
-                  <div class="table-cell">{{[area.number, direction.number].join('.')+'. '+direction.name}}</div>
+                  <div class="table-cell">
+                    {{
+                      [area.number, direction.number].join(".") +
+                      ". " +
+                      direction.name
+                    }}
+                  </div>
                 </div>
                 <div class="table-row__container">
-                  <div class="table-row" v-for="skill in direction.skills" :key="skill.id">
+                  <div
+                    class="table-row"
+                    v-for="skill in direction.skills"
+                    :key="skill.id"
+                  >
                     <div class="table-row__column_skill">
                       <div class="table-cell">
-                        <span :class="{'skill-link' : reportsCountById[skill.id]}" @click="goToSkill(skill.id)">
-                          {{[area.number, direction.number, skill.number].join('.')+'. '+skill.name}}
+                        <span
+                          :class="{ 'skill-link': reportsCountById[skill.id] }"
+                          @click="goToSkill(skill.id)"
+                        >
+                          {{
+                            [area.number, direction.number, skill.number].join(
+                              "."
+                            ) +
+                            ". " +
+                            skill.name
+                          }}
                         </span>
                       </div>
                     </div>
                     <div class="table-row__column_count">
-                      <div class="table-cell">{{ skill.id in reportsCountById ? reportsCountById[skill.id] : 0 }}</div>
+                      <div class="table-cell">
+                        {{
+                          skill.id in reportsCountById
+                            ? reportsCountById[skill.id]
+                            : 0
+                        }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -61,7 +94,7 @@
           </div>
         </div>
         <div class="no-data" v-else>
-          <a-empty :image="simpleImage"/>
+          <a-empty :image="simpleImage" />
         </div>
       </div>
     </div>
@@ -70,21 +103,17 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import { Empty } from 'ant-design-vue';
+import { Empty } from "ant-design-vue";
 import moment from "moment";
 
 export default {
-  components: {
-  },
+  components: {},
   props: {
     dateRangeInit: {
       type: Array,
-      default(){
-        return [
-          moment(new Date()).weekday(0),
-          moment(new Date()).weekday(6)
-        ];
-      }
+      default() {
+        return [moment(new Date()).weekday(0), moment(new Date()).weekday(6)];
+      },
     },
   },
   name: "AllSkills",
@@ -95,7 +124,6 @@ export default {
       dateRange: [],
 
       reportsCountById: {},
-
     };
   },
   methods: {
@@ -103,7 +131,7 @@ export default {
       fetchAreas: "skills/fetchAreas",
     }),
 
-    setReportsCountById(reports){
+    setReportsCountById(reports) {
       this.reportsCountById = {};
       for (let report of reports) {
         if (report.skill_id in this.reportsCountById) {
@@ -113,11 +141,15 @@ export default {
         }
       }
     },
-    async fetchSkillReports(){
+    async fetchSkillReports() {
       try {
         this.loading = true;
-        let firstQParameter = `date_from=${this.dateRange[0].format("YYYY-MM-DD")}`;
-        let secondQParameter = `date_to=${this.dateRange[1].format("YYYY-MM-DD")}`;
+        let firstQParameter = `date_from=${this.dateRange[0].format(
+          "YYYY-MM-DD"
+        )}`;
+        let secondQParameter = `date_to=${this.dateRange[1].format(
+          "YYYY-MM-DD"
+        )}`;
         let thirdQParameter = `is_affected=true`;
         let QParameters = `?${firstQParameter}&${secondQParameter}&${thirdQParameter}`;
         let res = await this.$axios.get(`/api/skill_reports/${QParameters}`);
@@ -132,22 +164,23 @@ export default {
         this.loading = false;
       }
     },
-    goToSkill(skillId){
+    goToSkill(skillId) {
       if (this.reportsCountById[skillId]) {
         this.$router.push({
           name: "SkillDetails",
-          params: {id: skillId},
+          params: { id: skillId },
           query: {
             dateFrom: this.$route.query.dateFrom,
             dateTo: this.$route.query.dateTo,
-          }
-        })
+          },
+        });
       }
     },
-    dateRangeChange(value, replace=false){
-      if ((value[0].format("YYYY-MM-DD") == this.$route.query.dateFrom)
-            &&
-          (value[1].format("YYYY-MM-DD") == this.$route.query.dateTo)) {
+    dateRangeChange(value, replace = false) {
+      if (
+        value[0].format("YYYY-MM-DD") == this.$route.query.dateFrom &&
+        value[1].format("YYYY-MM-DD") == this.$route.query.dateTo
+      ) {
         return;
       }
 
@@ -157,27 +190,31 @@ export default {
       };
 
       if (replace) {
-        this.$router.replace({
-          name: this.$route.name,
-          query: queryObj
-        }).catch(()=>{});
+        this.$router
+          .replace({
+            name: this.$route.name,
+            query: queryObj,
+          })
+          .catch(() => {});
       } else {
-        this.$router.push({
-          name: this.$route.name,
-          query: queryObj
-        }).catch(()=>{});
+        this.$router
+          .push({
+            name: this.$route.name,
+            query: queryObj,
+          })
+          .catch(() => {});
       }
     },
-    setDateRange(route){
+    setDateRange(route) {
       let query = route.query;
-      if (!Object.prototype.hasOwnProperty.call(query, 'dateFrom')
-            ||
-          !Object.prototype.hasOwnProperty.call(query, 'dateTo')) {
+      if (
+        !Object.prototype.hasOwnProperty.call(query, "dateFrom") ||
+        !Object.prototype.hasOwnProperty.call(query, "dateTo")
+      ) {
         this.dateRange.splice(0);
         this.dateRange.push(this.dateRangeInit[0].clone());
         this.dateRange.push(this.dateRangeInit[1].clone());
         return false;
-
       } else {
         this.dateRange.splice(0);
         this.dateRange.push(moment(query.dateFrom, "YYYY-MM-DD"));
@@ -198,7 +235,7 @@ export default {
   },
 
   async created() {
-    let fetches = []
+    let fetches = [];
 
     if (!this.areasFetched) {
       fetches.push(this.fetchAreas());
@@ -208,7 +245,7 @@ export default {
     await Promise.all(fetches);
     this.loading = false;
 
-    if (!this.setDateRange(this.$route)){
+    if (!this.setDateRange(this.$route)) {
       this.dateRangeChange(this.dateRange, true);
       return;
     }
@@ -216,15 +253,14 @@ export default {
     this.fetchSkillReports();
   },
 
-  beforeRouteUpdate(to, from, next){
-    if (!this.setDateRange(to)){
+  beforeRouteUpdate(to, from, next) {
+    if (!this.setDateRange(to)) {
       this.dateRangeChange(this.dateRange, true);
       return;
     }
     this.fetchSkillReports();
     next();
   },
-
 };
 </script>
 
@@ -292,8 +328,7 @@ export default {
     border-left: 1px solid #e8e8e8
 
   .table-header__column_count
-    min-width: 150px
-    max-width: 150px
+    width: 160px
     border-left: 1px solid #e8e8e8
     display: flex
     align-items: center
@@ -340,8 +375,7 @@ export default {
       border-left: 1px solid #e8e8e8
 
     .table-row__column_count
-      min-width: 150px
-      max-width: 150px
+      width: 160px
       border-left: 1px solid #e8e8e8
       display: flex
       align-items: center
@@ -359,5 +393,4 @@ export default {
     padding: 50px 0
     border: 1px solid #e8e8e8
     border-top: 0 none
-
 </style>
