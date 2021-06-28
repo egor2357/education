@@ -63,4 +63,8 @@ html
   &.ant-menu-inline
     &.ant-menu-sub
       box-shadow: none !important
+
+.ant-layout
+  .ant-layout-content
+    flex: 1
 </style>

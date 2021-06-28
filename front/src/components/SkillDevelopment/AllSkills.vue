@@ -255,7 +255,8 @@ export default {
       margin-right: 10px
 
     .date-range-input
-      width: 200px
+      width: 220px
+      text-align: center
 
   .table-holder
     flex: 1

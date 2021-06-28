@@ -198,7 +198,7 @@ export default {
   .skill-table__area-row, .skill-table__direction-row, .skill-table__skill-row
     display: flex
     border-top: 1px solid #e8e8e8
-    flex: 1
+    flex: 1 1 auto
 
   .skill-table__area-row:first-child, .skill-table__direction-row:first-child, .skill-table__skill-row:first-child
     border-top: 0 none
@@ -211,7 +211,7 @@ export default {
 
     .skill-table__cell-label-text
       display: flex
-      word-break: break-word;
+      word-break: break-word
 
       i
         height: 16px
@@ -220,6 +220,7 @@ export default {
         position: absolute
         right: 5px
         cursor: pointer
+        top: 10px
 
   .skill-table__no-data
     padding: 50px 0
