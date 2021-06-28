@@ -1,13 +1,5 @@
 <template>
-  <a-modal
-    :visible="true"
-    @cancel="handleCancel"
-    @ok="handleOk"
-    okText="Сохранить"
-    cancelText="Отмена"
-    :title="title"
-    @confirmLoading="loadingButton"
-  >
+  <a-modal :visible="true" :title="title">
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <template v-for="(field, index) in fields">
         <a-form-model-item
@@ -27,7 +19,7 @@
               v-for="specialist in specialists"
               :key="specialist.id"
             >
-              {{formatSpecialist(specialist)}}
+              {{ formatSpecialist(specialist) }}
             </a-select-option>
           </a-select>
           <a-range-picker
@@ -53,6 +45,17 @@
         />
       </a-form-model-item>
     </a-form-model>
+    <template slot="footer">
+      <a-button @click="handleCancel"> Отмена </a-button>
+      <a-button
+        type="primary"
+        :loading="loadingButton"
+        :disabled="loadingButton"
+        @click="handleOk"
+      >
+        {{ loadingButton ? "Загрузка..." : "Сохранить" }}
+      </a-button>
+    </template>
   </a-modal>
 </template>
 
@@ -129,54 +132,57 @@ export default {
       this.$emit("close");
     },
     async handleOk() {
-      this.loadingButton = true;
-      this.$refs.form.validate(async (valid) => {
-        if (valid) {
-          let dispatchName = "";
-          let successCode = 0;
-          let successMessage = "";
+      if (!this.loadingButton) {
+        this.loadingButton = true;
+        this.$refs.form.validate(async (valid) => {
+          if (valid) {
+            let dispatchName = "";
+            let successCode = 0;
+            let successMessage = "";
 
-          if (this.adding) {
-            dispatchName = "presence/addPresence";
-            successCode = 201;
-            successMessage = "Период присутствия специалиста успешно добавлен";
-          } else if (!this.adding) {
-            dispatchName = "presence/editPresence";
-            successCode = 200;
-            successMessage = "Период присутствия специалиста успешно изменен";
-          }
-          try {
-            let res = await this.$store.dispatch(dispatchName, this.form);
-            if (res.status === successCode) {
-              this.$message.success(successMessage);
-              this.$emit("closeSuccess");
-            } else if (res.status === 400) {
-              this.$message.error("Проверьте введённые данные");
-              for (let key in res.data) {
-                this.fields.forEach((field) => {
-                  if (field.name === key) {
-                    field.validateStatus = "error";
-                    field.help = res.data[key];
-                  }
-                });
-              }
-              if (res.data['non_field_errors']) {
-                for (let error of res.data['non_field_errors']) {
-                  this.$message.error(error)
-                }
-              }
-            } else {
-              this.$message.error("Произошла ошибка");
+            if (this.adding) {
+              dispatchName = "presence/addPresence";
+              successCode = 201;
+              successMessage =
+                "Период присутствия специалиста успешно добавлен";
+            } else if (!this.adding) {
+              dispatchName = "presence/editPresence";
+              successCode = 200;
+              successMessage = "Период присутствия специалиста успешно изменен";
             }
-          } catch (e) {
-            this.$message.error("Произошла ошибка");
-          } finally {
-            this.loadingButton = false;
+            try {
+              let res = await this.$store.dispatch(dispatchName, this.form);
+              if (res.status === successCode) {
+                this.$message.success(successMessage);
+                this.$emit("closeSuccess");
+              } else if (res.status === 400) {
+                this.$message.error("Проверьте введённые данные");
+                for (let key in res.data) {
+                  this.fields.forEach((field) => {
+                    if (field.name === key) {
+                      field.validateStatus = "error";
+                      field.help = res.data[key];
+                    }
+                  });
+                }
+                if (res.data["non_field_errors"]) {
+                  for (let error of res.data["non_field_errors"]) {
+                    this.$message.error(error);
+                  }
+                }
+              } else {
+                this.$message.error("Произошла ошибка");
+              }
+            } catch (e) {
+              this.$message.error("Произошла ошибка");
+            } finally {
+              this.loadingButton = false;
+            }
+          } else {
+            return false;
           }
-        } else {
-          return false;
-        }
-      });
+        });
+      }
     },
     fieldChanged(field) {
       field.validateStatus = "";
@@ -186,7 +192,11 @@ export default {
           this.form.date_from = this.form.date[0].format("YYYY-MM-DD");
         if (this.form.date[1])
           this.form.date_to = this.form.date[1].format("YYYY-MM-DD");
-        if (this.form.date[0] && this.form.date[1] && this.form.date[1].diff(this.form.date[0], "days") > 0) {
+        if (
+          this.form.date[0] &&
+          this.form.date[1] &&
+          this.form.date[1].diff(this.form.date[0], "days") > 0
+        ) {
           this.maxDays = this.form.date[1].diff(this.form.date[0], "days") - 1;
         }
       }
@@ -206,16 +216,26 @@ export default {
       this.title += "Добавление периода присутствия специалиста";
     } else {
       this.title += "Изменение периода присутствия специалиста";
-      this.form.id = this.editableData.presence.main_interval_id === null
-              ? this.editableData.presence.id
-              : this.editableData.presence.main_interval_id
+      this.form.id =
+        this.editableData.presence.main_interval_id === null
+          ? this.editableData.presence.id
+          : this.editableData.presence.main_interval_id;
       if (this.editableData.presence.specialist_id) {
-        this.form.specialist_id = this.editableData.presence.specialist_id
+        this.form.specialist_id = this.editableData.presence.specialist_id;
       }
-      if (this.editableData.presence.full_interval.date_from && this.editableData.presence.full_interval.date_to) {
+      if (
+        this.editableData.presence.full_interval.date_from &&
+        this.editableData.presence.full_interval.date_to
+      ) {
         this.form.date = [];
-        this.form.date[0] = moment(this.editableData.presence.full_interval.date_from, "YYYY-MM-DD");
-        this.form.date[1] = moment(this.editableData.presence.full_interval.date_to, "YYYY-MM-DD");
+        this.form.date[0] = moment(
+          this.editableData.presence.full_interval.date_from,
+          "YYYY-MM-DD"
+        );
+        this.form.date[1] = moment(
+          this.editableData.presence.full_interval.date_to,
+          "YYYY-MM-DD"
+        );
         if (this.form.date[1].diff(this.form.date[0], "days") > 0) {
           this.maxDays = this.form.date[1].diff(this.form.date[0], "days") - 1;
         }

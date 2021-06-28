@@ -1,14 +1,5 @@
 <template>
-  <a-modal
-    :visible="true"
-    @cancel="handleCancel"
-    @ok="handleOk"
-    okText="Сохранить"
-    cancelText="Отмена"
-    :title="title"
-    @confirmLoading="loadingButton"
-    class="modal-activities"
-  >
+  <a-modal :visible="true" :title="title" class="modal-activities">
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <template v-for="(field, index) in fields">
         <a-form-model-item
@@ -39,6 +30,17 @@
         >
       </a-form-model-item>
     </a-form-model>
+    <template slot="footer">
+      <a-button @click="handleCancel"> Отмена </a-button>
+      <a-button
+        type="primary"
+        :loading="loadingButton"
+        :disabled="loadingButton"
+        @click="handleOk"
+      >
+        {{ loadingButton ? "Загрузка..." : "Сохранить" }}
+      </a-button>
+    </template>
   </a-modal>
 </template>
 
@@ -147,56 +149,58 @@ export default {
       this.$emit("close");
     },
     async handleOk() {
-      this.loadingButton = true;
-      this.$refs.form.validate(async (valid) => {
-        if (valid) {
-          let dispatchName = "";
-          let successCode = 0;
-          let successMessage = "";
-          let dataForSend = JSON.parse(JSON.stringify(this.form));
-          if (this.adding) {
-            dispatchName = "specialists/addSpecialist";
-            successCode = 201;
-            this.staffSelected
-              ? (successMessage = "Администратор успешно добавлен")
-              : (successMessage = "Специалист успешно добавлен");
-          } else if (!this.adding) {
-            dispatchName = "specialists/editSpecialist";
-            successCode = 200;
-            this.staffSelected
-              ? (successMessage = "Администратор успешно изменён")
-              : (successMessage = "Специалист успешно изменён");
-            if (!this.displayPassword) {
-              delete dataForSend["password"];
-            }
-          }
-          try {
-            let res = await this.$store.dispatch(dispatchName, dataForSend);
-            if (res.status === successCode) {
-              this.$message.success(successMessage);
-              this.$emit("closeSuccess");
-            } else if (res.status === 400) {
-              this.$message.error("Проверьте введённые данные");
-              for (let key in res.data) {
-                this.fields.forEach((field) => {
-                  if (field.name === key) {
-                    field.validateStatus = "error";
-                    field.help = res.data[key];
-                  }
-                });
+      if (!this.loadingButton) {
+        this.loadingButton = true;
+        this.$refs.form.validate(async (valid) => {
+          if (valid) {
+            let dispatchName = "";
+            let successCode = 0;
+            let successMessage = "";
+            let dataForSend = JSON.parse(JSON.stringify(this.form));
+            if (this.adding) {
+              dispatchName = "specialists/addSpecialist";
+              successCode = 201;
+              this.staffSelected
+                ? (successMessage = "Администратор успешно добавлен")
+                : (successMessage = "Специалист успешно добавлен");
+            } else if (!this.adding) {
+              dispatchName = "specialists/editSpecialist";
+              successCode = 200;
+              this.staffSelected
+                ? (successMessage = "Администратор успешно изменён")
+                : (successMessage = "Специалист успешно изменён");
+              if (!this.displayPassword) {
+                delete dataForSend["password"];
               }
-            } else {
-              this.$message.error("Произошла ошибка");
             }
-          } catch (e) {
-            this.$message.error("Произошла ошибка");
-          } finally {
-            this.loadingButton = false;
+            try {
+              let res = await this.$store.dispatch(dispatchName, dataForSend);
+              if (res.status === successCode) {
+                this.$message.success(successMessage);
+                this.$emit("closeSuccess");
+              } else if (res.status === 400) {
+                this.$message.error("Проверьте введённые данные");
+                for (let key in res.data) {
+                  this.fields.forEach((field) => {
+                    if (field.name === key) {
+                      field.validateStatus = "error";
+                      field.help = res.data[key];
+                    }
+                  });
+                }
+              } else {
+                this.$message.error("Произошла ошибка");
+              }
+            } catch (e) {
+              this.$message.error("Произошла ошибка");
+            } finally {
+              this.loadingButton = false;
+            }
+          } else {
+            return false;
           }
-        } else {
-          return false;
-        }
-      });
+        });
+      }
     },
     fieldChanged(field) {
       field.validateStatus = "";

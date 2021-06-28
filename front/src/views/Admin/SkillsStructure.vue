@@ -58,11 +58,7 @@ export default {
     ...mapActions({
       fetchAreas: "skills/fetchAreas",
     }),
-    deleteItem(payload){
-      console.log(payload)
-    },
     openModalAdd(type, item) {
-      console.log(item)
       this.modalAdding = true;
       this.modalType = type;
       this.displayModal = true;
