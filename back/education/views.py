@@ -1,4 +1,4 @@
-from rest_framework import status, viewsets, views, permissions
+from rest_framework import status, viewsets, views, permissions, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
@@ -522,8 +522,9 @@ class Skill_reportView(viewsets.ModelViewSet):
                                   )
                                   )
   serializer_class = Skill_reportSerializer
-  filter_backends = (DjangoFilterBackend,)
+  filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
   filterset_class = Skill_reportFilter
+  ordering_fields = ['job__date', 'job__activity__name', 'job__specialist__surname']
 
 class CompetenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
