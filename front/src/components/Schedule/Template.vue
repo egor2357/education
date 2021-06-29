@@ -124,8 +124,6 @@ export default {
     border-bottom: 1px solid #D9D9D9
     min-width: 150px
     max-width: 250px
-    /*&:last-child*/
-      /*min-width: 150px*/
     &:first-child
       border-left: 1px solid #D9D9D9
     .title

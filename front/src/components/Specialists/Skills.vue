@@ -142,12 +142,6 @@ export default {
       for (let area of this.areas) {
         for (let direction of area.development_directions) {
           for (let skill of direction.skills) {
-            // let skillObject = {}
-            // skillObject[skill.id] = {
-            //   linkId: null,
-            //   coefficient: null
-            // };
-            // this.skillsData = Object.assign({}, this.skillsData, skillObject);
             this.$set(this.skillsData, skill.id, {
               linkId: null,
               coefficient: null,
