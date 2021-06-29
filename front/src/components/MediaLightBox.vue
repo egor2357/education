@@ -54,22 +54,6 @@ export default {
           if (this.selectedFile.uid === file.uid) {
             this.startAt = arr.length - 1;
           }
-        } else if (file.video) {
-          arr.push({
-            type: "video",
-            sources: [
-              {
-                src: file.url,
-                type: "video/mp4",
-              },
-            ],
-            width: 1200,
-            height: 800,
-            name: file.name,
-          });
-          if (this.selectedFile.uid === file.uid) {
-            this.startAt = arr.length - 1;
-          }
         }
       });
       return arr;
@@ -77,7 +61,7 @@ export default {
   },
   methods: {
     async downloadFile(media) {
-      let url = media.type === "video" ? media.sources[0].src : media.src;
+      let url = media.src;
       if (process.env.NODE_ENV === "development") {
         url = url.split("http://192.168.137.100:8001")[1];
       }

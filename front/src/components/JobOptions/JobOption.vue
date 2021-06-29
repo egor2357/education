@@ -85,7 +85,6 @@ export default {
     return {
       displayMedia: false,
       photoFormats: consts.photoFormats,
-      videoFormats: consts.videoFormats,
       selectedFile: null,
       filesEl: null,
     };
@@ -101,9 +100,6 @@ export default {
           photo:
             file.name.split(".").pop() !== file.name &&
             this.photoFormats.indexOf(file.name.split(".").pop()) !== -1,
-          video:
-            file.name.split(".").pop() !== file.name &&
-            this.videoFormats.indexOf(file.name.split(".").pop()) !== -1,
           thumb: file.thumbnail,
         };
       });
@@ -118,7 +114,7 @@ export default {
   },
   methods: {
     clickOnFile(file) {
-      if (file.video || file.photo) {
+      if (file.photo) {
         this.selectedFile = file;
         this.displayMedia = true;
       } else {
