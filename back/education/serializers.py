@@ -7,8 +7,6 @@ from django.db.models import Q
 
 from .models import *
 
-import os
-
 #create your serializers here.
 
 # /////////////////////////////////////////////////
@@ -554,7 +552,8 @@ class Job_fileSerializer(serializers.ModelSerializer):
     model = Job_file
     fields = (
       'id', 'job_id',
-      'file', 'name',
+      'file', 'thumbnail',
+      'name',
     )
 
 class Skill_reportSerializer(FlexFieldsModelSerializer):

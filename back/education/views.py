@@ -3,10 +3,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from django.contrib.auth import login, logout
-from django.db.models import Q
-from django.core.files.base import ContentFile
-
-import os
 
 from .models import *
 from .serializers import *

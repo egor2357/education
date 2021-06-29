@@ -3,6 +3,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django_filters.rest_framework import FilterSet
 
 from .views import *
+from .models import *
+from .serializers import *
 
 class JobFilter(FilterSet):
   class Meta:

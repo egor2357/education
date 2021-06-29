@@ -2,8 +2,14 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
+from django.core.files.base import ContentFile
 
 import datetime
+
+import os
+
+from PIL import Image
+from io import BytesIO
 
 class Educational_area(models.Model):
   name = models.TextField(max_length=200, unique=True, verbose_name='Название')
@@ -392,6 +398,13 @@ class Option_file(models.Model):
       filename
     )
 
+  def get_thumbnail_upload_to(instance, filename):
+    return 'option_files/{0}/{1}/thumbnail_{2}'.format(
+      instance.option.activity.name,
+      instance.option.topic,
+      filename
+    )
+
   option = models.ForeignKey(
     Option, null=False,
     on_delete=models.CASCADE, verbose_name='Вариант занятия'
@@ -403,6 +416,14 @@ class Option_file(models.Model):
     verbose_name='Файл'
   )
 
+  thumbnail = models.ImageField(
+    null=True,
+    default=None,
+    upload_to=get_thumbnail_upload_to,
+    max_length=255,
+    verbose_name='Миниатюра'
+  )
+
   class Meta:
     db_table = 'option_file'
     verbose_name = 'Файл варианта занятия'
@@ -411,6 +432,39 @@ class Option_file(models.Model):
 
   def __str__(self):
     return self.file.name
+
+  def create_thumbnail(self):
+    try:
+      file_name, file_extension = os.path.splitext(self.file.name)
+
+      if file_extension in ['.jpg', '.jpeg']:
+        FTYPE = 'JPEG'
+      elif file_extension == '.gif':
+        FTYPE = 'GIF'
+      elif file_extension == '.png':
+        FTYPE = 'PNG'
+      else:
+        return
+
+      image = Image.open(self.file)
+      image.thumbnail((200,200), Image.ANTIALIAS)
+
+      temp_thumb = BytesIO()
+      image.save(temp_thumb, FTYPE)
+      temp_thumb.seek(0)
+
+      data_obj = ContentFile(temp_thumb.read())
+      data_obj.name = self.file.name
+
+      self.thumbnail = data_obj
+
+      temp_thumb.close()
+    except:
+      return
+
+  def save(self, *args, **kwargs):
+    self.create_thumbnail()
+    super(Option_file, self).save(*args, **kwargs)
 
 @receiver(pre_delete, sender=Option_file)
 def option_file_model_delete(sender, instance, **kwargs):
@@ -472,6 +526,13 @@ class Job_file(models.Model):
       instance.job.date.day,
       filename
     )
+  def get_thumbnail_upload_to(instance, filename):
+    return 'job_files/{0}/{1}/{2}/thumbnail_{3}'.format(
+      instance.job.date.year,
+      instance.job.date.month,
+      instance.job.date.day,
+      filename
+    )
 
   job = models.ForeignKey(
     Job, null=False,
@@ -484,14 +545,56 @@ class Job_file(models.Model):
     verbose_name='Файл'
   )
 
+  thumbnail = models.ImageField(
+    null=True,
+    default=None,
+    upload_to=get_thumbnail_upload_to,
+    max_length=255,
+    verbose_name='Миниатюра'
+  )
+
   class Meta:
     db_table = 'job_file'
     verbose_name = 'Файл занятия'
     verbose_name_plural = 'Файлы занятия'
     ordering = ['job']
 
+  def create_thumbnail(self):
+    try:
+      file_name, file_extension = os.path.splitext(self.file.name)
+
+      if file_extension in ['.jpg', '.jpeg']:
+        FTYPE = 'JPEG'
+      elif file_extension == '.gif':
+        FTYPE = 'GIF'
+      elif file_extension == '.png':
+        FTYPE = 'PNG'
+      else:
+        return
+
+      image = Image.open(self.file)
+      image.thumbnail((200,200), Image.ANTIALIAS)
+
+      temp_thumb = BytesIO()
+      image.save(temp_thumb, FTYPE)
+      temp_thumb.seek(0)
+
+      data_obj = ContentFile(temp_thumb.read())
+      data_obj.name = self.file.name
+
+      self.thumbnail = data_obj
+
+      temp_thumb.close()
+    except:
+      return
+
   def __str__(self):
     return self.file.name
+
+  def save(self, *args, **kwargs):
+    self.create_thumbnail()
+    super(Job_file, self).save(*args, **kwargs)
+
 
 @receiver(pre_delete, sender=Job_file)
 def job_file_model_delete(sender, instance, **kwargs):
