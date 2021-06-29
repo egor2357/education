@@ -59,9 +59,7 @@
 
         <div v-if="activeTab == 2" class="job-details__wrapper">
           <template v-if="reportForm.marks.length">
-            <div class="job-details__label">
-              Уровень освоения
-            </div>
+            <div class="job-details__label">Уровень освоения</div>
             <div class="job-details__reports">
               <div
                 class="job-details__report"
@@ -86,10 +84,12 @@
             </div>
           </template>
           <div class="job-details__report__no-data" v-else>
-            <a-empty :image="simpleImage"/>
+            <a-empty :image="simpleImage" />
           </div>
-          <div v-if="reportForm.report_comment"
-            class="job-details__report-comment">
+          <div
+            v-if="reportForm.report_comment"
+            class="job-details__report-comment"
+          >
             <div class="job-details__report-comment-title">
               Результат проведения занятия:
             </div>
@@ -107,7 +107,7 @@
 import JobOption from "@/components/JobOptions/JobOption";
 import moment from "moment";
 import getColorByMark from "@/mixins/getColorByMark";
-import { Empty } from 'ant-design-vue';
+import { Empty } from "ant-design-vue";
 export default {
   name: "JobReadOnly",
   components: {
@@ -158,6 +158,9 @@ export default {
     width: 100%
     &-title
       font-weight: bold
+
+  .job-details__wrapper
+    padding: 0
 .job-details__report__no-data
   display: flex
   flex-direction: column
