@@ -1,7 +1,6 @@
 <template>
   <a-spin :spinning="loading">
     <div class="skill-details">
-
       <div class="top-bar">
         <div class="top-bar__side-block left">
           <a-button icon="left" @click="goBack">Назад</a-button>
@@ -15,7 +14,8 @@
             @change="dateRangeChange"
             format="DD.MM.YYYY"
             :allowClear="false"
-            separator="-"/>
+            separator="-"
+          />
         </div>
       </div>
 
@@ -24,50 +24,135 @@
 
         <div class="table-holder">
           <div class="table-header">
-            <div class="table-cell table-cell_date">Дата занятия</div>
-            <div class="table-cell table-cell_activity">Вид деятельности</div>
-            <div class="table-cell table-cell_specialist">Специалист</div>
+            <div class="table-cell table-cell_date">
+              Дата занятия
+              <span
+                class="table-cell-sort"
+                @click="clickedSort('job__date')"
+                :class="{
+                  active:
+                    activeSort === 'job__date' || activeSort === '-job__date',
+                }"
+              >
+                <a-icon
+                  type="caret-up"
+                  v-if="activeSort === '-job__date'"
+                  :class="{ on: activeSort === '-job__date' }"
+                />
+                <a-icon
+                  type="caret-down"
+                  v-if="activeSort !== '-job__date'"
+                  :class="{ on: activeSort === 'job__date' }"
+                />
+              </span>
+            </div>
+            <div class="table-cell table-cell_activity">
+              Вид деятельности
+              <span
+                class="table-cell-sort"
+                @click="clickedSort('job__activity__name')"
+                :class="{
+                  active:
+                    activeSort === 'job__activity__name' ||
+                    activeSort === '-job__activity__name',
+                }"
+              >
+                <a-icon
+                  type="caret-up"
+                  v-if="activeSort === '-job__activity__name'"
+                  :class="{ on: activeSort === '-job__activity__name' }"
+                />
+                <a-icon
+                  type="caret-down"
+                  v-if="activeSort !== '-job__activity__name'"
+                  :class="{ on: activeSort === 'job__activity__name' }"
+                />
+              </span>
+            </div>
+            <div class="table-cell table-cell_specialist">
+              Специалист
+              <span
+                class="table-cell-sort"
+                @click="clickedSort('job__specialist__surname')"
+                :class="{
+                  active:
+                    activeSort === 'job__specialist__surname' ||
+                    activeSort === '-job__specialist__surname',
+                }"
+              >
+                <a-icon
+                  type="caret-up"
+                  v-if="activeSort === '-job__specialist__surname'"
+                  :class="{ on: activeSort === '-job__specialist__surname' }"
+                />
+                <a-icon
+                  type="caret-down"
+                  v-if="activeSort !== '-job__specialist__surname'"
+                  :class="{ on: activeSort === 'job__specialist__surname' }"
+                />
+              </span>
+            </div>
             <div class="table-cell table-cell_job">Сведения о занятии</div>
           </div>
           <div class="table-body" v-if="skillReports.length">
-            <div class="table-row" v-for="skillReport in skillReports" :key="skillReport.id" @click="goToJob(skillReport.job)">
+            <div
+              class="table-row"
+              v-for="skillReport in skillReports"
+              :key="skillReport.id"
+              @click="goToJob(skillReport.job)"
+            >
               <div class="table-cell table-cell_date">
                 {{ skillReport.job.date | toRuDateString }}
               </div>
               <div class="table-cell table-cell_activity">
-                <div :style="{
-                  'background-color': `${skillReport.job.activity.color}10`,
-                  border: `1px solid ${skillReport.job.activity.color}99`,
-                }" class="table-cell__activity-name">
+                <div
+                  :style="{
+                    'background-color': `${skillReport.job.activity.color}10`,
+                    border: `1px solid ${skillReport.job.activity.color}99`,
+                  }"
+                  class="table-cell__activity-name"
+                >
                   {{ skillReport.job.activity.name }}
                 </div>
               </div>
               <div class="table-cell table-cell_specialist">
-                {{ skillReport.job.specialist ? skillReport.job.specialist.__str__ : ""}}
+                {{
+                  skillReport.job.specialist
+                    ? skillReport.job.specialist.__str__
+                    : ""
+                }}
               </div>
               <div class="table-cell table-cell_job">
                 <div class="table-cell__job">
-                  <div class="table-cell__job-topic">{{ skillReport.job.topic }}</div>
-                  <div class="table-cell__job-form"
-                    v-if="skillReport.job.method">
+                  <div class="table-cell__job-topic">
+                    {{ skillReport.job.topic }}
+                  </div>
+                  <div
+                    class="table-cell__job-form"
+                    v-if="skillReport.job.method"
+                  >
                     {{ skillReport.job.method.form_name }}
                   </div>
-                  <div class="table-cell__job-method"
-                    v-if="skillReport.job.method">
+                  <div
+                    class="table-cell__job-method"
+                    v-if="skillReport.job.method"
+                  >
                     {{ skillReport.job.method.name }}
                   </div>
                 </div>
-                <div class="table-cell__job-mark"
-                  :style="{'background-color': getColorByMark(skillReport.mark)}">
-                </div>
+                <div
+                  class="table-cell__job-mark"
+                  :style="{
+                    'background-color': getColorByMark(skillReport.mark),
+                  }"
+                ></div>
               </div>
-
             </div>
           </div>
         </div>
       </div>
       <div v-else>
-        <a-empty :image="simpleImage"/>
+        <a-empty :image="simpleImage" />
       </div>
     </div>
   </a-spin>
@@ -75,8 +160,8 @@
 
 <script>
 import moment from "moment";
-import getColorByMark from "@/mixins/getColorByMark"
-import { Empty } from 'ant-design-vue';
+import getColorByMark from "@/mixins/getColorByMark";
+import { Empty } from "ant-design-vue";
 
 export default {
   name: "SkillDetails",
@@ -84,12 +169,9 @@ export default {
   props: {
     dateRangeInit: {
       type: Array,
-      default(){
-        return [
-          moment(new Date()).weekday(0),
-          moment(new Date()).weekday(6)
-        ];
-      }
+      default() {
+        return [moment(new Date()).weekday(0), moment(new Date()).weekday(6)];
+      },
     },
   },
   data() {
@@ -99,30 +181,31 @@ export default {
       dateRange: [],
 
       skillReports: [],
+
+      activeSort: "job__date",
     };
   },
-  computed: {
-
-  },
+  computed: {},
   filters: {
-    toRuDateString(value){
+    toRuDateString(value) {
       return moment(value).format("DD.MM.YYYY");
-    }
+    },
   },
   methods: {
-    goBack(){
+    goBack() {
       this.$router.push({
         name: "AllSkills",
         query: {
           dateFrom: this.$route.query.dateFrom,
           dateTo: this.$route.query.dateTo,
-        }
+        },
       });
     },
-    dateRangeChange(value, replace=false){
-      if ((value[0].format("YYYY-MM-DD") == this.$route.query.dateFrom)
-            &&
-          (value[1].format("YYYY-MM-DD") == this.$route.query.dateTo)) {
+    dateRangeChange(value, replace = false) {
+      if (
+        value[0].format("YYYY-MM-DD") == this.$route.query.dateFrom &&
+        value[1].format("YYYY-MM-DD") == this.$route.query.dateTo
+      ) {
         return;
       }
 
@@ -132,27 +215,31 @@ export default {
       };
 
       if (replace) {
-        this.$router.replace({
-          name: this.$route.name,
-          query: queryObj
-        }).catch(()=>{});
+        this.$router
+          .replace({
+            name: this.$route.name,
+            query: queryObj,
+          })
+          .catch(() => {});
       } else {
-        this.$router.push({
-          name: this.$route.name,
-          query: queryObj
-        }).catch(()=>{});
+        this.$router
+          .push({
+            name: this.$route.name,
+            query: queryObj,
+          })
+          .catch(() => {});
       }
     },
-    setDateRange(route){
+    setDateRange(route) {
       let query = route.query;
-      if (!Object.prototype.hasOwnProperty.call(query, 'dateFrom')
-            ||
-          !Object.prototype.hasOwnProperty.call(query, 'dateTo')) {
+      if (
+        !Object.prototype.hasOwnProperty.call(query, "dateFrom") ||
+        !Object.prototype.hasOwnProperty.call(query, "dateTo")
+      ) {
         this.dateRange.splice(0);
         this.dateRange.push(this.dateRangeInit[0].clone());
         this.dateRange.push(this.dateRangeInit[1].clone());
         return false;
-
       } else {
         this.dateRange.splice(0);
         this.dateRange.push(moment(query.dateFrom, "YYYY-MM-DD"));
@@ -160,15 +247,21 @@ export default {
         return true;
       }
     },
-    async fetchSkillReports(){
+    async fetchSkillReports() {
       try {
         this.loading = true;
-        let firstQParameter = `date_from=${this.dateRange[0].format("YYYY-MM-DD")}`;
-        let secondQParameter = `date_to=${this.dateRange[1].format("YYYY-MM-DD")}`;
+        let firstQParameter = `date_from=${this.dateRange[0].format(
+          "YYYY-MM-DD"
+        )}`;
+        let secondQParameter = `date_to=${this.dateRange[1].format(
+          "YYYY-MM-DD"
+        )}`;
         let thirdQParameter = `is_affected=true`;
         let fourthQParameter = `skill_id=${this.$route.params.id}`;
         let QParameters = `?${firstQParameter}&${secondQParameter}&${thirdQParameter}&${fourthQParameter}`;
-        let res = await this.$axios.get(`/api/skill_reports/${QParameters}`);
+        let res = await this.$axios.get(
+          `/api/skill_reports/${QParameters}&ordering=${this.activeSort}`
+        );
         if (res.status === 200) {
           this.skillReports = res.data;
         } else {
@@ -181,9 +274,37 @@ export default {
       }
     },
     goToJob(job) {
-      if (job){
-        this.$router.push({name: "JobDetails", params: {id: job.id}});
+      if (job) {
+        this.$router.push({ name: "JobDetails", params: { id: job.id } });
       }
+    },
+    async clickedSort(param) {
+      if (param === "job__date") {
+        if (this.activeSort === "job__date") {
+          this.activeSort = "-job__date";
+        } else if (this.activeSort === "-job__date") {
+          this.activeSort = "job__date";
+        } else {
+          this.activeSort = "job__date";
+        }
+      } else if (param === "job__activity__name") {
+        if (this.activeSort === "job__activity__name") {
+          this.activeSort = "-job__activity__name";
+        } else if (this.activeSort === "-job__activity__name") {
+          this.activeSort = "job__activity__name";
+        } else {
+          this.activeSort = "job__activity__name";
+        }
+      } else if (param === "job__specialist__surname") {
+        if (this.activeSort === "job__specialist__surname") {
+          this.activeSort = "-job__specialist__surname";
+        } else if (this.activeSort === "-job__specialist__surname") {
+          this.activeSort = "job__specialist__surname";
+        } else {
+          this.activeSort = "job__specialist__surname";
+        }
+      }
+      await this.fetchSkillReports();
     },
   },
 
@@ -191,19 +312,17 @@ export default {
     this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   async created() {
-    if (!this.setDateRange(this.$route)){
+    if (!this.setDateRange(this.$route)) {
       this.dateRangeChange(this.dateRange, true);
       return;
     }
 
     this.fetchSkillReports();
   },
-  beforeDestroy() {
+  beforeDestroy() {},
 
-  },
-
-  beforeRouteUpdate(to, from, next){
-    if (!this.setDateRange(to)){
+  beforeRouteUpdate(to, from, next) {
+    if (!this.setDateRange(to)) {
       this.dateRangeChange(this.dateRange, true);
       return;
     }
@@ -273,6 +392,21 @@ $border-color: #e8e8e8
     min-height: 52px
     word-break: break-word
 
+    &-sort
+      margin: 5px 0 0 5px
+      color: #bfbfbf
+      display: none
+      .anticon-caret-up, .anticon-caret-down
+        font-size: 15px
+        cursor: pointer
+        &.on
+          color: #1890ff
+      &.active
+        display: unset
+    &:hover
+      .table-cell-sort
+        display: unset
+
   .table-cell_date
     width: 150px
 
@@ -333,6 +467,4 @@ $border-color: #e8e8e8
       font-weight: bold
     &-form
       margin-right: 10px
-
-
 </style>
