@@ -136,7 +136,7 @@ export default {
       position: sticky
       position: -webkit-sticky
       top: 0
-      z-index: 2
+      z-index: 3
     .jobs
       padding: 15px 10px 10px 5px
       .job-card

@@ -141,7 +141,7 @@ export default {
     border: 1px solid #e8e8e8
     overflow: hidden
     line-height: 15px
-    z-index: 2
+    z-index: 3
     position: sticky
     position: -webkit-sticky
     top: 0

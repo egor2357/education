@@ -86,7 +86,7 @@ export default {
         position: sticky
         position: -webkit-sticky
         top: 0
-        z-index: 2
+        z-index: 3
         display: flex
         flex-direction: row
         align-items: center

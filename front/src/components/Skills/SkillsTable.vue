@@ -143,6 +143,7 @@ export default {
   .skill-table
     overflow: auto
     height: 100%
+    position: relative
 
   .skill-table__cell
     transition: background 0.3s
@@ -165,7 +166,7 @@ export default {
     position: sticky
     position: -webkit-sticky
     top: 0
-    z-index: 2
+    z-index: 3
     line-height: 20px
     height: 42px
 
