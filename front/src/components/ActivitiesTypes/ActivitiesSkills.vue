@@ -165,7 +165,7 @@ export default {
   .table-header__column_activity
     min-width: 50px
     max-width: 50px
-    border-left: 1px solid #e8e8e8
+    border-right: 1px solid #e8e8e8
     display: flex
     align-items: center
     writing-mode: vertical-lr
