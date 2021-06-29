@@ -1,5 +1,5 @@
 <template>
-  <a-modal :visible="true" :title="title">
+  <a-modal :visible="true" :title="title" @close="handleCancel">
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <template v-for="(field, index) in fields">
         <a-form-model-item

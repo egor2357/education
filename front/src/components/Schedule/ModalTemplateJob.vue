@@ -14,7 +14,8 @@
             v-model="form[field.name]"
             @change="fieldChanged(field)"
             :ref="`field${index}`"
-            type="time"
+            v-mask="timeMask"
+            placeholder="ЧЧ:ММ"
             style="width: 90px"
           />
           <a-select
@@ -56,6 +57,7 @@
 
 <script>
 import consts from "@/const";
+import datetime from "@/mixins/datetime";
 export default {
   name: "ModalTemplateJob",
   props: {
@@ -68,6 +70,7 @@ export default {
     },
     editableData: Object,
   },
+  mixins: [datetime],
   data() {
     return {
       daysOfWeek: consts.daysOfWeek,

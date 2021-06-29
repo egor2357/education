@@ -196,7 +196,7 @@ export default {
     .table-row
         border-top: 1px solid #e8e8e8
         display: flex
-        flex: 1
+        flex: 1 1 auto
 
     .table-row__column
       .table-cell
