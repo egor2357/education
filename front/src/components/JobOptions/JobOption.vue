@@ -100,6 +100,7 @@ export default {
           name: file.name,
           status: "done",
           url: file.file,
+          thumbUrl: file.thumbnail,
           photo:
             file.name.split(".").pop() !== file.name &&
             this.photoFormats.indexOf(file.name.split(".").pop()) !== -1,

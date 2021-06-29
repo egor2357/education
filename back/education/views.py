@@ -100,7 +100,9 @@ class JobView(viewsets.ModelViewSet):
       for file in files:
         if file in request.FILES:
           file_data = request.FILES[file]
-          files_to_save.append(Job_file(job=job, file=file_data))
+          new_file = Job_file(job=job, file=file_data)
+          new_file.create_thumbnail()
+          files_to_save.append(new_file)
         else:
           remaining_files.append(int(file))
       job.job_file_set.exclude(pk__in=remaining_files).delete()
@@ -204,7 +206,9 @@ class JobView(viewsets.ModelViewSet):
       data_obj = ContentFile(file.file.read())
       name = os.path.split(file.file.name)[-1]
       data_obj.name = name
-      files_to_save.append(Job_file(job=job, file=data_obj))
+      new_file = Job_file(job=job, file=data_obj)
+      new_file.create_thumbnail()
+      files_to_save.append(new_file)
     Job_file.objects.bulk_create(files_to_save)
 
     job.save()
@@ -386,7 +390,9 @@ class OptionView(viewsets.ModelViewSet):
       for file in files:
         if file in request.FILES:
           file_data = request.FILES[file]
-          files_to_save.append(Option_file(option=option, file=file_data))
+          new_file = Option_file(option=option, file=file_data)
+          new_file.create_thumbnail()
+          files_to_save.append(new_file)
         else:
           remaining_files.append(int(file))
       option.option_file_set.exclude(pk__in=remaining_files).delete()
@@ -423,7 +429,9 @@ class OptionView(viewsets.ModelViewSet):
       for file in files:
         if file in request.FILES:
           file_data = request.FILES[file]
-          files_to_save.append(Option_file(option=option, file=file_data))
+          new_file = Option_file(option=option, file=file_data)
+          new_file.create_thumbnail()
+          files_to_save.append(new_file)
       Option_file.objects.bulk_create(files_to_save)
 
     if 'skills' in request.data:

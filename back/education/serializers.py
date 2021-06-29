@@ -507,7 +507,7 @@ class Option_fileSerializer(serializers.ModelSerializer):
     model = Option_file
     fields = (
       'id', 'option_id',
-      'file',
+      'file', 'thumbnail',
       'name',
     )
 
