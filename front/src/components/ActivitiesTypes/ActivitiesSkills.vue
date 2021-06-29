@@ -143,6 +143,7 @@ export default {
     line-height: 15px
     z-index: 2
     position: sticky
+    position: -webkit-sticky
     top: 0
 
   .table-header__column
@@ -165,7 +166,7 @@ export default {
   .table-header__column_activity
     min-width: 50px
     max-width: 50px
-    border-left: 1px solid #e8e8e8
+    border-right: 1px solid #e8e8e8
     display: flex
     align-items: center
     writing-mode: vertical-lr
@@ -196,11 +197,12 @@ export default {
     .table-row
         border-top: 1px solid #e8e8e8
         display: flex
-        flex: 1
+        flex: 1 1 auto
 
     .table-row__column
       .table-cell
         position: sticky
+        position: -webkit-sticky
         z-index: 1
         top: 180px
 

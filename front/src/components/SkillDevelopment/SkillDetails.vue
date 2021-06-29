@@ -383,6 +383,7 @@ $border-color: #e8e8e8
     line-height: 15px
     z-index: 1
     position: sticky
+    position: -webkit-sticky
     top: 0
 
   .table-cell

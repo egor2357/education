@@ -5,7 +5,7 @@
         <div class="title">
           {{ daysOfWeek[index].long }}
         </div>
-        <div class="job">
+        <div class="jobs">
           <a-timeline>
             <template v-for="job in jobs">
               <a-timeline-item
@@ -124,8 +124,6 @@ export default {
     border-bottom: 1px solid #D9D9D9
     min-width: 150px
     max-width: 250px
-    /*&:last-child*/
-      /*min-width: 150px*/
     &:first-child
       border-left: 1px solid #D9D9D9
     .title
@@ -136,11 +134,11 @@ export default {
       color: #FFFFFF
       font-size: 1rem
       position: sticky
+      position: -webkit-sticky
       top: 0
       z-index: 2
-    .job
+    .jobs
       padding: 15px 10px 10px 5px
-      /*height: 100%*/
       .job-card
         padding: 10px
         border-radius: 4px
@@ -156,6 +154,8 @@ export default {
             transform: rotate(90deg)
             margin-top: 3px
         &:hover
+          cursor: pointer
+          box-shadow: 0 0 2px 1px rgba(0,0,0,.15)
           .dropdown--hover
             display: unset
         .job-name

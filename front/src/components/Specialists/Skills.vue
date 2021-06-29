@@ -142,12 +142,6 @@ export default {
       for (let area of this.areas) {
         for (let direction of area.development_directions) {
           for (let skill of direction.skills) {
-            // let skillObject = {}
-            // skillObject[skill.id] = {
-            //   linkId: null,
-            //   coefficient: null
-            // };
-            // this.skillsData = Object.assign({}, this.skillsData, skillObject);
             this.$set(this.skillsData, skill.id, {
               linkId: null,
               coefficient: null,
@@ -222,6 +216,7 @@ export default {
     line-height: 15px
     z-index: 2
     position: sticky
+    position: -webkit-sticky
     top: 0
 
   .table-header__column
@@ -260,6 +255,7 @@ export default {
     .table-row__column
       .table-cell
         position: sticky
+        position: -webkit-sticky
         z-index: 1
         top: 50px
 

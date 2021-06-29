@@ -11,11 +11,11 @@
 import Layout from "@/components/Layout";
 import Login from "@/views/Login";
 import { mapGetters } from "vuex";
-import ru_RU from 'ant-design-vue/lib/locale-provider/ru_RU';
-import moment from 'moment';
-import 'moment/locale/ru';
+import ru_RU from "ant-design-vue/lib/locale-provider/ru_RU";
+import moment from "moment";
+import "moment/locale/ru";
 
-moment.locale('ru');
+moment.locale("ru");
 export default {
   name: "App",
   components: {
@@ -24,8 +24,8 @@ export default {
   },
   data() {
     return {
-      ru_RU
-    }
+      ru_RU,
+    };
   },
   created() {
     document.title = "Обучение";

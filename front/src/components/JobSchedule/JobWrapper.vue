@@ -84,6 +84,7 @@ export default {
         background-color: #f4f4f4
         font-size: 1rem
         position: sticky
+        position: -webkit-sticky
         top: 0
         z-index: 2
         display: flex

@@ -4,53 +4,57 @@
     :class="{ 'specialist-presence--one': specReadOnly }"
   >
     <a-spin :spinning="loading">
-      <div class="top-bar" v-if="!specReadOnly">
-        <div class="top-bar__side-block left">
-          <a-button
-            type="link"
-            icon="swap"
-            @click="specialistMode = !specialistMode"
-            >Изменить представление</a-button
-          >
+      <div class="presence-container">
+        <div class="top-bar" v-if="!specReadOnly">
+          <div class="top-bar__side-block left">
+            <a-button
+              type="link"
+              icon="swap"
+              @click="specialistMode = !specialistMode"
+              >Изменить представление</a-button
+            >
+          </div>
+          <div class="title">График присутствия специалистов</div>
+          <div class="top-bar__side-block right">
+            <a-button icon="plus" @click="onAddPeriod"
+              >Добавить период</a-button
+            >
+          </div>
         </div>
-        <div class="title">График присутствия специалистов</div>
-        <div class="top-bar__side-block right">
-          <a-button icon="plus" @click="onAddPeriod">Добавить период</a-button>
+        <div class="month-container">
+          <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
+          <span class="text">{{ monthLabel }}</span>
+          <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
         </div>
-      </div>
-      <div class="month-container">
-        <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
-        <span class="text">{{ monthLabel }}</span>
-        <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
-      </div>
 
-      <div class="table-presence">
-        <presence-chart
-          v-if="specialistMode"
-          :tableData="tableData"
-          @displayEdit="displayEdit"
-          @displayDeleteConfirm="displayDeleteConfirm($event)"
-          :specReadOnly="specReadOnly"
-        />
+        <div class="table-presence">
+          <presence-chart
+            v-if="specialistMode"
+            :tableData="tableData"
+            @displayEdit="displayEdit"
+            @displayDeleteConfirm="displayDeleteConfirm($event)"
+            :specReadOnly="specReadOnly"
+          />
 
-        <activity-presence-chart
-          v-else
-          :tableData="tableData"
-          :activities="activities"
-          @displayEdit="displayEdit"
-          @displayDeleteConfirm="displayDeleteConfirm($event)"
+          <activity-presence-chart
+            v-else
+            :tableData="tableData"
+            :activities="activities"
+            @displayEdit="displayEdit"
+            @displayDeleteConfirm="displayDeleteConfirm($event)"
+          />
+        </div>
+        <ModalPeriod
+          v-if="displayModal"
+          :editableData="modalEditableData"
+          :adding="modalAdding"
+          @close="displayModal = false"
+          @closeSuccess="
+            displayModal = false;
+            updateData();
+          "
         />
       </div>
-      <ModalPeriod
-        v-if="displayModal"
-        :editableData="modalEditableData"
-        :adding="modalAdding"
-        @close="displayModal = false"
-        @closeSuccess="
-          displayModal = false;
-          updateData();
-        "
-      />
     </a-spin>
   </div>
 </template>
@@ -317,6 +321,10 @@ export default {
 </script>
 
 <style lang="sass">
+.presence-container
+  display: flex
+  flex-direction: column
+  height: 100%
 .specialist-presence
   display: flex
   flex-direction: column

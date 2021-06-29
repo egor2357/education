@@ -163,6 +163,7 @@ export default {
     border: 1px solid #e8e8e8
     background: #fafafa
     position: sticky
+    position: -webkit-sticky
     top: 0
     z-index: 2
     line-height: 20px
@@ -206,6 +207,7 @@ export default {
   .skill-table__cell-label
     padding: 10px 15px
     position: sticky
+    position: -webkit-sticky
     top: 42px
     z-index: 1
 

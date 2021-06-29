@@ -2,7 +2,7 @@
   <div hoverable class="job-option">
     <div class="job-option-header">
       <div class="job-option-header-topic">
-        {{ option.topic ? option.topic : 'Тема не указана' }}
+        {{ option.topic ? option.topic : "Тема не указана" }}
       </div>
       <slot></slot>
     </div>
@@ -29,9 +29,7 @@
         <a-divider type="vertical" />
         {{ option.method.name }}
       </div>
-      <div class="job-option-form" v-else>
-        Форма и способ не выбраны
-      </div>
+      <div class="job-option-form" v-else>Форма и способ не выбраны</div>
       <div class="job-option-comment">{{ option.comment }}</div>
       <div class="job-option-files" v-if="files.length">
         <a-divider orientation="left"> Методические материалы </a-divider>
@@ -106,6 +104,7 @@ export default {
           video:
             file.name.split(".").pop() !== file.name &&
             this.videoFormats.indexOf(file.name.split(".").pop()) !== -1,
+          thumb: file.thumbnail,
         };
       });
     },

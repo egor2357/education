@@ -1,5 +1,5 @@
 <template>
-  <a-modal :visible="true" :title="title">
+  <a-modal :visible="true" :title="title" @cancel="closeModal(null)">
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <a-form-model-item
         prop="date"
@@ -66,8 +66,8 @@
       >
         <a-input
           v-model="form.start_time"
-          type="time"
-          format="HH:SS"
+          v-mask="timeMask"
+          placeholder="ЧЧ:ММ"
           @change="fieldChanged($event, 'start_time')"
         />
       </a-form-model-item>
@@ -91,6 +91,7 @@ import consts from "@/const";
 import post from "@/middleware/post";
 import put from "@/middleware/put";
 import moment from "moment";
+import datetime from "@/mixins/datetime";
 
 export default {
   name: "ModalTemplateJob",
@@ -108,6 +109,7 @@ export default {
       default: null,
     },
   },
+  mixins: [datetime],
   data() {
     return {
       daysOfWeek: consts.daysOfWeek,
