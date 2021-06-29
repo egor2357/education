@@ -1,5 +1,10 @@
 <template>
-  <a-modal width="900px" :visible="true" :title="title">
+  <a-modal
+    width="900px"
+    :visible="true"
+    :title="title"
+    @cancel="closeModal(false)"
+  >
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <a-form-model-item
         prop="topic"
