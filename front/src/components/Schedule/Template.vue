@@ -134,6 +134,7 @@ export default {
       color: #FFFFFF
       font-size: 1rem
       position: sticky
+      position: -webkit-sticky
       top: 0
       z-index: 2
     .jobs

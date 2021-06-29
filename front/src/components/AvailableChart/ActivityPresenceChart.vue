@@ -112,6 +112,7 @@
       border-bottom: 1px solid #e8e8e8
       background: #fafafa
       position: sticky
+      position: -webkit-sticky
       top: 0
       cursor: default
       z-index: 1

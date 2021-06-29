@@ -143,6 +143,7 @@ export default {
     line-height: 15px
     z-index: 2
     position: sticky
+    position: -webkit-sticky
     top: 0
 
   .table-header__column
@@ -201,6 +202,7 @@ export default {
     .table-row__column
       .table-cell
         position: sticky
+        position: -webkit-sticky
         z-index: 1
         top: 180px
 
