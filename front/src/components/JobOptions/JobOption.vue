@@ -101,7 +101,6 @@ export default {
           photo:
             file.name.split(".").pop() !== file.name &&
             this.photoFormats.indexOf(file.name.split(".").pop()) !== -1,
-          thumb: file.thumbnail,
         };
       });
     },
