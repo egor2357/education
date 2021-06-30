@@ -18,73 +18,79 @@
       </div>
 
       <div class="table-holder">
-        <div class="table-header">
-          <div class="table-header__column table-header__column_area">
-            <div class="table-cell">Образовательная область</div>
-          </div>
-          <div class="table-header__column table-header__column_direction">
-            <div class="table-cell">Направление развития</div>
-          </div>
-          <div class="table-header__column table-header__column_skill">
-            <div class="table-cell">Навык</div>
-          </div>
-          <div class="table-header__column table-header__column_count">
-            <div class="table-cell">
-              Количество обращений к навыку за период
+        <div>
+          <div class="table-header">
+            <div class="table-header__column table-header__column_area">
+              <div class="table-cell">Образовательная область</div>
             </div>
-          </div>
-        </div>
-        <div class="table-body" v-if="areas.length">
-          <div class="table-row" v-for="area in areas" :key="area.id">
-            <div class="table-row__column table-row__column_area">
+            <div class="table-header__column table-header__column_direction">
+              <div class="table-cell">Направление развития</div>
+            </div>
+            <div class="table-header__column table-header__column_skill">
+              <div class="table-cell">Навык</div>
+            </div>
+            <div class="table-header__column table-header__column_count">
               <div class="table-cell">
-                {{ [area.number, area.name].join(". ") }}
+                Количество обращений к навыку за период
               </div>
             </div>
-            <div class="table-row__container">
-              <div
-                class="table-row"
-                v-for="direction in area.development_directions"
-                :key="direction.id"
-              >
-                <div class="table-row__column table-row__column_direction">
-                  <div class="table-cell">
-                    {{
-                      [area.number, direction.number].join(".") +
-                      ". " +
-                      direction.name
-                    }}
-                  </div>
+          </div>
+          <div class="table-body" v-if="areas.length">
+            <div class="table-row" v-for="area in areas" :key="area.id">
+              <div class="table-row__column table-row__column_area">
+                <div class="table-cell">
+                  {{ [area.number, area.name].join(". ") }}
                 </div>
-                <div class="table-row__container">
-                  <div
-                    class="table-row"
-                    v-for="skill in direction.skills"
-                    :key="skill.id"
-                  >
-                    <div class="table-row__column_skill">
-                      <div class="table-cell">
-                        <span
-                          :class="{ 'skill-link': reportsCountById[skill.id] }"
-                          @click="goToSkill(skill.id)"
-                        >
-                          {{
-                            [area.number, direction.number, skill.number].join(
-                              "."
-                            ) +
-                            ". " +
-                            skill.name
-                          }}
-                        </span>
-                      </div>
+              </div>
+              <div class="table-row__container">
+                <div
+                  class="table-row"
+                  v-for="direction in area.development_directions"
+                  :key="direction.id"
+                >
+                  <div class="table-row__column table-row__column_direction">
+                    <div class="table-cell">
+                      {{
+                        [area.number, direction.number].join(".") +
+                        ". " +
+                        direction.name
+                      }}
                     </div>
-                    <div class="table-row__column_count">
-                      <div class="table-cell">
-                        {{
-                          skill.id in reportsCountById
-                            ? reportsCountById[skill.id]
-                            : 0
-                        }}
+                  </div>
+                  <div class="table-row__container">
+                    <div
+                      class="table-row"
+                      v-for="skill in direction.skills"
+                      :key="skill.id"
+                    >
+                      <div class="table-row__column_skill">
+                        <div class="table-cell">
+                          <span
+                            :class="{
+                              'skill-link': reportsCountById[skill.id],
+                            }"
+                            @click="goToSkill(skill.id)"
+                          >
+                            {{
+                              [
+                                area.number,
+                                direction.number,
+                                skill.number,
+                              ].join(".") +
+                              ". " +
+                              skill.name
+                            }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="table-row__column_count">
+                        <div class="table-cell">
+                          {{
+                            skill.id in reportsCountById
+                              ? reportsCountById[skill.id]
+                              : 0
+                          }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -92,9 +98,9 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="no-data" v-else>
-          <a-empty :image="simpleImage" />
+          <div class="no-data" v-else>
+            <a-empty :image="simpleImage" />
+          </div>
         </div>
       </div>
     </div>
@@ -348,7 +354,7 @@ export default {
     .table-row
         border-top: 1px solid #e8e8e8
         display: flex
-        flex: 1
+        flex: 1 1 auto
 
     .table-row__column
       .table-cell

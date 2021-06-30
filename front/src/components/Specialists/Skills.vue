@@ -1,91 +1,93 @@
 <template>
   <a-spin :spinning="loading">
     <div class="specialist-skills">
-      <div class="table-header">
-        <div class="table-header__column table-header__column_area">
-          <div class="table-cell">Образовательная область</div>
-        </div>
-        <div class="table-header__column table-header__column_direction">
-          <div class="table-cell">Направление развития</div>
-        </div>
-        <div class="table-header__column table-header__column_skill">
-          <div class="table-cell">Навык</div>
-        </div>
-        <div class="table-header__column table-header__column_coefficient">
-          <div class="table-cell">Коэффициент развития</div>
-        </div>
-      </div>
-      <div class="table-body" v-if="filteredAreas.length">
-        <div class="table-row" v-for="area in filteredAreas" :key="area.id">
-          <div class="table-row__column table-row__column_area">
-            <div class="table-cell">
-              {{ [area.number, area.name].join(". ") }}
-            </div>
+      <div>
+        <div class="table-header">
+          <div class="table-header__column table-header__column_area">
+            <div class="table-cell">Образовательная область</div>
           </div>
-          <div class="table-row__container">
-            <div
-              class="table-row"
-              v-for="direction in area.development_directions"
-              :key="direction.id"
-            >
-              <div class="table-row__column table-row__column_direction">
-                <div class="table-cell">
-                  {{
-                    [area.number, direction.number].join(".") +
-                    ". " +
-                    direction.name
-                  }}
-                </div>
-              </div>
-              <div class="table-row__container">
-                <div
-                  class="table-row"
-                  v-for="skill in direction.skills"
-                  :key="skill.id"
-                >
-                  <div class="table-row__column_skill">
-                    <div class="table-cell">
-                      {{
-                        [area.number, direction.number, skill.number].join(
-                          "."
-                        ) +
-                        ". " +
-                        skill.name
-                      }}
-                    </div>
-                  </div>
-                  <div class="table-row__column_coefficient">
-                    <div class="table-cell">
-                      <a-checkbox
-                        v-if="skillsData[skill.id]"
-                        :checked="!!skillsData[skill.id].linkId"
-                        @change="setSkillState($event, skill.id)"
-                      />
-                      <a-input-number
-                        class="skill-coefficient"
-                        v-if="skillsData[skill.id]"
-                        :step="0.1"
-                        :min="0"
-                        :max="1"
-                        :disabled="!skillsData[skill.id].linkId"
-                        v-model="skillsData[skill.id].coefficient"
-                        @blur="
-                          setSkillCoefficient(
-                            $event,
-                            skillsData[skill.id].linkId
-                          )
-                        "
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="table-header__column table-header__column_direction">
+            <div class="table-cell">Направление развития</div>
+          </div>
+          <div class="table-header__column table-header__column_skill">
+            <div class="table-cell">Навык</div>
+          </div>
+          <div class="table-header__column table-header__column_coefficient">
+            <div class="table-cell">Коэффициент развития</div>
           </div>
         </div>
-      </div>
-      <div class="no-data" v-else>
-        <a-empty :image="simpleImage" />
+        <div class="table-body" v-if="filteredAreas.length">
+          <div class="table-row" v-for="area in filteredAreas" :key="area.id">
+            <div class="table-row__column table-row__column_area">
+              <div class="table-cell">
+                {{ [area.number, area.name].join(". ") }}
+              </div>
+            </div>
+            <div class="table-row__container">
+              <div
+                class="table-row"
+                v-for="direction in area.development_directions"
+                :key="direction.id"
+              >
+                <div class="table-row__column table-row__column_direction">
+                  <div class="table-cell">
+                    {{
+                      [area.number, direction.number].join(".") +
+                      ". " +
+                      direction.name
+                    }}
+                  </div>
+                </div>
+                <div class="table-row__container">
+                  <div
+                    class="table-row"
+                    v-for="skill in direction.skills"
+                    :key="skill.id"
+                  >
+                    <div class="table-row__column_skill">
+                      <div class="table-cell">
+                        {{
+                          [area.number, direction.number, skill.number].join(
+                            "."
+                          ) +
+                          ". " +
+                          skill.name
+                        }}
+                      </div>
+                    </div>
+                    <div class="table-row__column_coefficient">
+                      <div class="table-cell">
+                        <a-checkbox
+                          v-if="skillsData[skill.id]"
+                          :checked="!!skillsData[skill.id].linkId"
+                          @change="setSkillState($event, skill.id)"
+                        />
+                        <a-input-number
+                          class="skill-coefficient"
+                          v-if="skillsData[skill.id]"
+                          :step="0.1"
+                          :min="0"
+                          :max="1"
+                          :disabled="!skillsData[skill.id].linkId"
+                          v-model="skillsData[skill.id].coefficient"
+                          @blur="
+                            setSkillCoefficient(
+                              $event,
+                              skillsData[skill.id].linkId
+                            )
+                          "
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="no-data" v-else>
+          <a-empty :image="simpleImage" />
+        </div>
       </div>
     </div>
   </a-spin>
