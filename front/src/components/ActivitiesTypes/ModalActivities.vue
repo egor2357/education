@@ -248,4 +248,6 @@ export default {
 .modal-activities
   .ant-modal-body
     padding-bottom: 0
+    max-height: unset
+    overflow: unset
 </style>
