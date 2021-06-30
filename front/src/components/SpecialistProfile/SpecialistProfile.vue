@@ -28,22 +28,24 @@
             <span class="activity-label">{{ specialty.activity.name }}</span>
           </div>
         </div>
-        <a-divider orientation="left">
-          Дополнительные виды деятельности
-        </a-divider>
-        <div class="activities">
-          <div
-            class="activity-block"
-            v-for="specialty in subSpecialties"
-            :key="specialty.activity.id"
-            :style="{
-              'background-color': `${specialty.activity.color}4d`,
-              border: `1px solid ${specialty.activity.color}99`,
-            }"
-          >
-            <span class="activity-label">{{ specialty.activity.name }}</span>
+        <template v-if="subSpecialties.length">
+          <a-divider orientation="left">
+            Дополнительные виды деятельности
+          </a-divider>
+          <div class="activities">
+            <div
+              class="activity-block"
+              v-for="specialty in subSpecialties"
+              :key="specialty.activity.id"
+              :style="{
+                'background-color': `${specialty.activity.color}4d`,
+                border: `1px solid ${specialty.activity.color}99`,
+              }"
+            >
+              <span class="activity-label">{{ specialty.activity.name }}</span>
+            </div>
           </div>
-        </div>
+        </template>
       </div>
       <a-divider orientation="left" v-else>
         Специалист не преподает ни одного вида деятельности
