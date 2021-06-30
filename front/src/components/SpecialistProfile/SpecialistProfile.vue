@@ -321,7 +321,7 @@ export default {
       flex-direction: column
     &-area-row, &-direction-row, &-skill-row
       display: flex
-      flex: 1
+      flex: 1 1 auto
       flex-direction: row
     &-area, &-direction, &-coefficient
       min-width: 200px
@@ -329,6 +329,9 @@ export default {
       padding: 10px 15px
       border-right: 1px solid #ccc
       border-bottom: 1px solid #ccc
+    &-coefficient
+      width: 120px
+      min-width: 120px
     &-skill
       min-width: 200px
       flex: 1
