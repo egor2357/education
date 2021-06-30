@@ -522,7 +522,8 @@ class Skill_reportView(viewsets.ModelViewSet):
                                   .select_related(
                                     'skill__direction__area',
                                     'job__activity',
-                                    'job__method__form'
+                                    'job__method__form',
+                                    'job__specialist',
                                   )
                                   )
   serializer_class = Skill_reportSerializer
