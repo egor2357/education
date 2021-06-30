@@ -23,129 +23,131 @@
         <div class="skill-name">{{ skillReports[0].skill.name }}</div>
 
         <div class="table-holder">
-          <div class="table-header">
-            <div class="table-cell table-cell_date">
-              Дата занятия
-              <span
-                class="table-cell-sort"
-                @click="clickedSort('job__date')"
-                :class="{
-                  active:
-                    activeSort === 'job__date' || activeSort === '-job__date',
-                }"
-              >
-                <a-icon
-                  type="caret-up"
-                  v-if="activeSort === '-job__date'"
-                  :class="{ on: activeSort === '-job__date' }"
-                />
-                <a-icon
-                  type="caret-down"
-                  v-if="activeSort !== '-job__date'"
-                  :class="{ on: activeSort === 'job__date' }"
-                />
-              </span>
-            </div>
-            <div class="table-cell table-cell_activity">
-              Вид деятельности
-              <span
-                class="table-cell-sort"
-                @click="clickedSort('job__activity__name')"
-                :class="{
-                  active:
-                    activeSort === 'job__activity__name' ||
-                    activeSort === '-job__activity__name',
-                }"
-              >
-                <a-icon
-                  type="caret-up"
-                  v-if="activeSort === '-job__activity__name'"
-                  :class="{ on: activeSort === '-job__activity__name' }"
-                />
-                <a-icon
-                  type="caret-down"
-                  v-if="activeSort !== '-job__activity__name'"
-                  :class="{ on: activeSort === 'job__activity__name' }"
-                />
-              </span>
-            </div>
-            <div class="table-cell table-cell_specialist">
-              Специалист
-              <span
-                class="table-cell-sort"
-                @click="clickedSort('job__specialist__surname')"
-                :class="{
-                  active:
-                    activeSort === 'job__specialist__surname' ||
-                    activeSort === '-job__specialist__surname',
-                }"
-              >
-                <a-icon
-                  type="caret-up"
-                  v-if="activeSort === '-job__specialist__surname'"
-                  :class="{ on: activeSort === '-job__specialist__surname' }"
-                />
-                <a-icon
-                  type="caret-down"
-                  v-if="activeSort !== '-job__specialist__surname'"
-                  :class="{ on: activeSort === 'job__specialist__surname' }"
-                />
-              </span>
-            </div>
-            <div class="table-cell table-cell_job">Сведения о занятии</div>
-          </div>
-          <div class="table-body" v-if="skillReports.length">
-            <div
-              class="table-row"
-              v-for="skillReport in skillReports"
-              :key="skillReport.id"
-              @click="goToJob(skillReport.job)"
-            >
+          <div>
+            <div class="table-header">
               <div class="table-cell table-cell_date">
-                {{ skillReport.job.date | toRuDateString }}
+                Дата занятия
+                <span
+                  class="table-cell-sort"
+                  @click="clickedSort('job__date')"
+                  :class="{
+                    active:
+                      activeSort === 'job__date' || activeSort === '-job__date',
+                  }"
+                >
+                  <a-icon
+                    type="caret-up"
+                    v-if="activeSort === '-job__date'"
+                    :class="{ on: activeSort === '-job__date' }"
+                  />
+                  <a-icon
+                    type="caret-down"
+                    v-if="activeSort !== '-job__date'"
+                    :class="{ on: activeSort === 'job__date' }"
+                  />
+                </span>
               </div>
               <div class="table-cell table-cell_activity">
-                <div
-                  :style="{
-                    'background-color': `${skillReport.job.activity.color}10`,
-                    border: `1px solid ${skillReport.job.activity.color}99`,
+                Вид деятельности
+                <span
+                  class="table-cell-sort"
+                  @click="clickedSort('job__activity__name')"
+                  :class="{
+                    active:
+                      activeSort === 'job__activity__name' ||
+                      activeSort === '-job__activity__name',
                   }"
-                  class="table-cell__activity-name"
                 >
-                  {{ skillReport.job.activity.name }}
-                </div>
+                  <a-icon
+                    type="caret-up"
+                    v-if="activeSort === '-job__activity__name'"
+                    :class="{ on: activeSort === '-job__activity__name' }"
+                  />
+                  <a-icon
+                    type="caret-down"
+                    v-if="activeSort !== '-job__activity__name'"
+                    :class="{ on: activeSort === 'job__activity__name' }"
+                  />
+                </span>
               </div>
               <div class="table-cell table-cell_specialist">
-                {{
-                  skillReport.job.specialist
-                    ? skillReport.job.specialist.__str__
-                    : ""
-                }}
+                Специалист
+                <span
+                  class="table-cell-sort"
+                  @click="clickedSort('job__specialist__surname')"
+                  :class="{
+                    active:
+                      activeSort === 'job__specialist__surname' ||
+                      activeSort === '-job__specialist__surname',
+                  }"
+                >
+                  <a-icon
+                    type="caret-up"
+                    v-if="activeSort === '-job__specialist__surname'"
+                    :class="{ on: activeSort === '-job__specialist__surname' }"
+                  />
+                  <a-icon
+                    type="caret-down"
+                    v-if="activeSort !== '-job__specialist__surname'"
+                    :class="{ on: activeSort === 'job__specialist__surname' }"
+                  />
+                </span>
               </div>
-              <div class="table-cell table-cell_job">
-                <div class="table-cell__job">
-                  <div class="table-cell__job-topic">
-                    {{ skillReport.job.topic }}
-                  </div>
+              <div class="table-cell table-cell_job">Сведения о занятии</div>
+            </div>
+            <div class="table-body" v-if="skillReports.length">
+              <div
+                class="table-row"
+                v-for="skillReport in skillReports"
+                :key="skillReport.id"
+                @click="goToJob(skillReport.job)"
+              >
+                <div class="table-cell table-cell_date">
+                  {{ skillReport.job.date | toRuDateString }}
+                </div>
+                <div class="table-cell table-cell_activity">
                   <div
-                    class="table-cell__job-form"
-                    v-if="skillReport.job.method"
+                    :style="{
+                      'background-color': `${skillReport.job.activity.color}10`,
+                      border: `1px solid ${skillReport.job.activity.color}99`,
+                    }"
+                    class="table-cell__activity-name"
                   >
-                    {{ skillReport.job.method.form_name }}
-                  </div>
-                  <div
-                    class="table-cell__job-method"
-                    v-if="skillReport.job.method"
-                  >
-                    {{ skillReport.job.method.name }}
+                    {{ skillReport.job.activity.name }}
                   </div>
                 </div>
-                <div
-                  class="table-cell__job-mark"
-                  :style="{
-                    'background-color': getColorByMark(skillReport.mark),
-                  }"
-                ></div>
+                <div class="table-cell table-cell_specialist">
+                  {{
+                    skillReport.job.specialist
+                      ? skillReport.job.specialist.__str__
+                      : ""
+                  }}
+                </div>
+                <div class="table-cell table-cell_job">
+                  <div class="table-cell__job">
+                    <div class="table-cell__job-topic">
+                      {{ skillReport.job.topic }}
+                    </div>
+                    <div
+                      class="table-cell__job-form"
+                      v-if="skillReport.job.method"
+                    >
+                      {{ skillReport.job.method.form_name }}
+                    </div>
+                    <div
+                      class="table-cell__job-method"
+                      v-if="skillReport.job.method"
+                    >
+                      {{ skillReport.job.method.name }}
+                    </div>
+                  </div>
+                  <div
+                    class="table-cell__job-mark"
+                    :style="{
+                      'background-color': getColorByMark(skillReport.mark),
+                    }"
+                  ></div>
+                </div>
               </div>
             </div>
           </div>
@@ -361,7 +363,8 @@ $border-color: #e8e8e8
       margin-right: 10px
 
     .date-range-input
-      width: 200px
+      width: 220px
+      text-align: center
 
   .skill-name
     max-width: 900px

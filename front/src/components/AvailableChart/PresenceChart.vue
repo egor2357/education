@@ -1,91 +1,95 @@
 <template>
   <div class="presence-chart">
     <div class="presence-chart__table">
-      <div class="presence-chart__table-header">
-        <div
-          class="presence-chart__table-header-specialist-cell"
-          v-if="!specReadOnly"
-        >
-          Специалист
-        </div>
-        <div
-          class="presence-chart__table-header-day-cell"
-          v-for="day of tableData.daysInMonth"
-          :key="day.num"
-          :class="{ weekend: day.weekend }"
-        >
-          {{ day.num }}
-        </div>
-      </div>
-      <div class="presence-chart__table-body">
-        <div
-          class="presence-chart__table-body-row"
-          v-for="row in tableData.specialists"
-          :key="row.id"
-        >
+      <div>
+        <div class="presence-chart__table-header">
           <div
-            class="presence-chart__table-body-specialist-cell"
+            class="presence-chart__table-header-specialist-cell"
             v-if="!specReadOnly"
           >
-            <Popover :data="{ name: row.fullName, specialist: row }" />
+            Специалист
           </div>
-          <div class="presence-chart__table-body-chart-holder">
+          <div
+            class="presence-chart__table-header-day-cell"
+            v-for="day of tableData.daysInMonth"
+            :key="day.num"
+            :class="{ weekend: day.weekend }"
+          >
+            {{ day.num }}
+          </div>
+        </div>
+        <div class="presence-chart__table-body">
+          <div
+            class="presence-chart__table-body-row"
+            v-for="row in tableData.specialists"
+            :key="row.id"
+          >
             <div
-              class="presence-interval"
-              v-for="interval in row.presence"
-              :key="interval.id"
-              :class="{ start: interval.hasStart, end: interval.hasEnd }"
-              :style="{
-                width:
-                  (interval.daysCount * 100) / tableData.daysInMonth.length +
-                  '%',
-                left:
-                  ((interval.dayFrom - 1) * 100) /
-                    tableData.daysInMonth.length +
-                  '%',
-              }"
+              class="presence-chart__table-body-specialist-cell"
+              v-if="!specReadOnly"
             >
-              <a-dropdown
-                v-for="(date, index) in interval.daysCount"
-                :key="index"
-                :trigger="['click']"
-                placement="bottomLeft"
+              <Popover :data="{ name: row.fullName, specialist: row }" />
+            </div>
+            <div class="presence-chart__table-body-chart-holder">
+              <div
+                class="presence-interval"
+                v-for="interval in row.presence"
+                :key="interval.id"
+                :class="{ start: interval.hasStart, end: interval.hasEnd }"
+                :style="{
+                  width:
+                    (interval.daysCount * 100) / tableData.daysInMonth.length +
+                    '%',
+                  left:
+                    ((interval.dayFrom - 1) * 100) /
+                      tableData.daysInMonth.length +
+                    '%',
+                }"
               >
-                <div
-                  class="presence-interval-day"
-                  :class="{
-                    quarantine: date <= interval.quarantineDaysCount,
-                    available: date > interval.quarantineDaysCount,
-                  }"
+                <a-dropdown
+                  v-for="(date, index) in interval.daysCount"
+                  :key="index"
+                  :trigger="['click']"
+                  placement="bottomLeft"
                 >
-                  {{
-                    interval.labledDays.includes(date)
-                      ? date + interval.dayFrom - 1
-                      : ""
-                  }}
-                </div>
-                <a-menu slot="overlay" v-if="!specReadOnly">
-                  <a-menu-item
-                    key="1"
-                    @click="
-                      $emit('displayEdit', { presence: interval.editableData })
-                    "
+                  <div
+                    class="presence-interval-day"
+                    :class="{
+                      quarantine: date <= interval.quarantineDaysCount,
+                      available: date > interval.quarantineDaysCount,
+                    }"
                   >
-                    Изменить
-                  </a-menu-item>
-                  <a-menu-item
-                    key="2"
-                    @click="
-                      $emit('displayDeleteConfirm', {
-                        specialist: row.fullName,
-                        presence: interval.editableData,
-                      })
-                    "
-                  >
-                    <span> Удалить </span>
-                  </a-menu-item>
-                </a-menu>
-              </a-dropdown>
+                    {{
+                      interval.labledDays.includes(date)
+                        ? date + interval.dayFrom - 1
+                        : ""
+                    }}
+                  </div>
+                  <a-menu slot="overlay" v-if="!specReadOnly">
+                    <a-menu-item
+                      key="1"
+                      @click="
+                        $emit('displayEdit', {
+                          presence: interval.editableData,
+                        })
+                      "
+                    >
+                      Изменить
+                    </a-menu-item>
+                    <a-menu-item
+                      key="2"
+                      @click="
+                        $emit('displayDeleteConfirm', {
+                          specialist: row.fullName,
+                          presence: interval.editableData,
+                        })
+                      "
+                    >
+                      <span> Удалить </span>
+                    </a-menu-item>
+                  </a-menu>
+                </a-dropdown>
+              </div>
             </div>
           </div>
         </div>

@@ -52,6 +52,7 @@
 
               <a-list-item-meta style="width: 50px">
                 <template slot="title">
+                  <a-icon type="user" class="specialist-icon" />
                   <span class="specialist-label">{{
                     item.surname
                       ? formatSpecialistFull(item)
@@ -77,7 +78,7 @@
                     </template>
                   </div>
                   <template v-if="item.hasAdditionalActivity">
-                    <a-divider orientation="left">
+                    <a-divider orientation="left" class="activities-divider">
                       Дополнительные виды деятельности
                     </a-divider>
                     <div class="activities">
@@ -234,9 +235,12 @@ export default {
   justify-content: center
 
   .specialists-container__list
-    min-width: 900px
+    width: 900px
   .specialist-label
     font-size: 1.1rem
+  .specialist-icon
+    margin-right: 5px
+    font-size: 1.2rem
   .ant-list-item-meta-description
     .ant-divider
       margin: 0
@@ -252,4 +256,8 @@ export default {
         .activity-label
           margin: 5px
           color: #111111
+
+  .activities-divider
+    font-size: .9rem
+    color: rgba(0, 0, 0, 0.6)
 </style>
