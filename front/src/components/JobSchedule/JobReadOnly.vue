@@ -136,6 +136,7 @@ export default {
   created() {
     this.reportForm.marks = this.job.reports.slice();
     this.reportForm.report_comment = this.job.report_comment;
+    this.$store.commit("schedule/setSelectedDay", this.job.date);
   },
 };
 </script>

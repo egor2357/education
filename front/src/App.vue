@@ -67,4 +67,7 @@ html
 .ant-layout
   .ant-layout-content
     flex: 1
+.ant-modal-body
+  max-height: 500px
+  overflow: auto
 </style>

@@ -201,7 +201,12 @@ export default {
       });
     },
     thisDateJobsNSchedule(currDateMoment) {
-      return this.thisDateJobs(currDateMoment);
+      return this.thisDateJobs(currDateMoment).sort((first, second) => {
+        return (
+          moment(first.start_time, "hh:mm:ss") -
+          moment(second.start_time, "hh:mm:ss")
+        );
+      });
     },
   },
   computed: {

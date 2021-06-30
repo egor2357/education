@@ -1,6 +1,6 @@
 <template>
   <a-spin :spinning="loading">
-    <div v-if="job">
+    <div class="job-detail-wrapper" v-if="job">
       <JobDetails v-if="isEditable" :jobProp="job" />
       <JobReadOnly :job="job" v-else />
     </div>
@@ -67,5 +67,7 @@ export default {
 <style lang="sass">
 .loader-full-page
   width: 100%
+  height: 100%
+.job-detail-wrapper
   height: 100%
 </style>

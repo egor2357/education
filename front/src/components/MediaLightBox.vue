@@ -47,7 +47,7 @@ export default {
         if (file.photo) {
           arr.push({
             type: "image",
-            thumb: file.thumbUrl !== null ? file.thumbUrl : file.url,
+            thumb: file.thumbUrl ? file.thumbUrl : file.url,
             src: file.url,
             name: file.name,
           });
