@@ -78,7 +78,7 @@ class FormView(viewsets.ModelViewSet):
 class MethodView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Method.objects.all()
+  queryset = Method.objects.all().select_related('form')
   serializer_class = MethodSerializer
 
 class JobView(viewsets.ModelViewSet):
