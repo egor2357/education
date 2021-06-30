@@ -369,7 +369,7 @@ export default {
 
     .text
       padding: 0 10px
-      width: 130px
+      width: 140px
       display: inline-block
       font-size: 1rem
 

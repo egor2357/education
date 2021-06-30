@@ -230,4 +230,5 @@ $border-color: #e8e8e8
     overflow-x: hidden
     div
       display: inline-block
+      vertical-align: middle
 </style>

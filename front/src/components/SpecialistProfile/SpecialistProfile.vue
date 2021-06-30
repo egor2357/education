@@ -14,34 +14,34 @@
         </div>
       </div>
       <div class="specialist-profile__specialties" v-if="specialties.length">
-        <a-divider orientation="left">
-          Основные виды деятельности
-        </a-divider>
+        <a-divider orientation="left"> Основные виды деятельности </a-divider>
         <div class="activities">
-          <div class="activity-block" v-for="specialty in mainSpecialties"
+          <div
+            class="activity-block"
+            v-for="specialty in mainSpecialties"
             :key="specialty.activity.id"
             :style="{
               'background-color': `${specialty.activity.color}4d`,
               border: `1px solid ${specialty.activity.color}99`,
-            }">
-            <span class="activity-label">{{
-              specialty.activity.name
-            }}</span>
+            }"
+          >
+            <span class="activity-label">{{ specialty.activity.name }}</span>
           </div>
         </div>
         <a-divider orientation="left">
           Дополнительные виды деятельности
         </a-divider>
         <div class="activities">
-          <div class="activity-block" v-for="specialty in subSpecialties"
+          <div
+            class="activity-block"
+            v-for="specialty in subSpecialties"
             :key="specialty.activity.id"
             :style="{
               'background-color': `${specialty.activity.color}4d`,
               border: `1px solid ${specialty.activity.color}99`,
-            }">
-            <span class="activity-label">{{
-              specialty.activity.name
-            }}</span>
+            }"
+          >
+            <span class="activity-label">{{ specialty.activity.name }}</span>
           </div>
         </div>
       </div>
@@ -51,53 +51,70 @@
       <div class="specialist-profile__header">Развиваемые навыки</div>
       <div class="specialist-profile__competence" v-if="competence.length">
         <div class="specialist-profile__table">
-          <div class="specialist-profile__table-header">
-            <div class="specialist-profile__table-area">Образовательная область</div>
-            <div class="specialist-profile__table-direction">Направление развития</div>
-            <div class="specialist-profile__table-skill">Навык</div>
-            <div class="specialist-profile__table-coefficient">Коэффициент</div>
-          </div>
-          <div class="specialist-profile__table-body">
-
-            <div class="specialist-profile__table-areas">
-            <div class="specialist-profile__table-area-row"
-              v-for="area in areas" :key="area.id">
-
-
+          <div>
+            <div class="specialist-profile__table-header">
               <div class="specialist-profile__table-area">
-                {{ area.number }}. {{ area.name }}
+                Образовательная область
               </div>
-
-              <div class="specialist-profile__table-directions"
-                v-if="area.development_directions.length">
-              <div class="specialist-profile__table-direction-row"
-                v-for="direction in area.development_directions" :key="direction.id">
-
-                <div class="specialist-profile__table-direction">
-                  {{ area.number }}.{{ direction.number }}. {{ direction.name }}
-                </div>
-
-                <div class="specialist-profile__table-skills"
-                  v-if="direction.skills.length">
-                <div class="specialist-profile__table-skill-row"
-                  v-for="skill in direction.skills" :key="skill.id">
-
-                  <div class="specialist-profile__table-skill">
-                    <span>
-                      {{ area.number }}.{{ direction.number }}.{{ skill.number }}. {{ skill.name }}
-                    </span>
+              <div class="specialist-profile__table-direction">
+                Направление развития
+              </div>
+              <div class="specialist-profile__table-skill">Навык</div>
+              <div class="specialist-profile__table-coefficient">
+                Коэффициент
+              </div>
+            </div>
+            <div class="specialist-profile__table-body">
+              <div class="specialist-profile__table-areas">
+                <div
+                  class="specialist-profile__table-area-row"
+                  v-for="area in areas"
+                  :key="area.id"
+                >
+                  <div class="specialist-profile__table-area">
+                    {{ area.number }}. {{ area.name }}
                   </div>
-                  <div class="specialist-profile__table-coefficient">{{ coefficientBySkillId[skill.id] }}</div>
 
+                  <div
+                    class="specialist-profile__table-directions"
+                    v-if="area.development_directions.length"
+                  >
+                    <div
+                      class="specialist-profile__table-direction-row"
+                      v-for="direction in area.development_directions"
+                      :key="direction.id"
+                    >
+                      <div class="specialist-profile__table-direction">
+                        {{ area.number }}.{{ direction.number }}.
+                        {{ direction.name }}
+                      </div>
+
+                      <div
+                        class="specialist-profile__table-skills"
+                        v-if="direction.skills.length"
+                      >
+                        <div
+                          class="specialist-profile__table-skill-row"
+                          v-for="skill in direction.skills"
+                          :key="skill.id"
+                        >
+                          <div class="specialist-profile__table-skill">
+                            <span>
+                              {{ area.number }}.{{ direction.number }}.{{
+                                skill.number
+                              }}. {{ skill.name }}
+                            </span>
+                          </div>
+                          <div class="specialist-profile__table-coefficient">
+                            {{ coefficientBySkillId[skill.id] }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                </div>
-
               </div>
-              </div>
-
             </div>
-            </div>
-
           </div>
         </div>
       </div>
@@ -112,8 +129,7 @@
 import { mapActions, mapGetters } from "vuex";
 
 export default {
-  components: {
-  },
+  components: {},
   name: "SpecialistProfile",
   data() {
     return {
@@ -126,7 +142,7 @@ export default {
     };
   },
   async created() {
-    let fetches = []
+    let fetches = [];
 
     if (!this.areasFetched) {
       fetches.push(this.fetchAreas());
@@ -135,14 +151,12 @@ export default {
     fetches.push(this.fetchSpecialties());
     fetches.push(this.fetchCompetence());
 
-
     this.loading = true;
     await Promise.all(fetches);
     this.loading = false;
-
   },
   methods: {
-    async fetchUserData(){
+    async fetchUserData() {
       try {
         this.loading = true;
         let res = await this.$axios.get("/api/users/current");
@@ -160,30 +174,36 @@ export default {
       }
     },
 
-    async fetchSpecialties(){
+    async fetchSpecialties() {
       try {
         let res = await this.$axios.get("/api/specialties/");
         if (res.status === 200) {
           this.specialties = res.data;
         } else if (res.status === 400) {
-          this.$message.error("Ошибка при загрузке видов деятельности специалиста");
+          this.$message.error(
+            "Ошибка при загрузке видов деятельности специалиста"
+          );
         } else {
-          this.$message.error("Ошибка при загрузке видов деятельности специалиста");
+          this.$message.error(
+            "Ошибка при загрузке видов деятельности специалиста"
+          );
         }
       } catch (e) {
-        this.$message.error("Ошибка при загрузке видов деятельности специалиста");
+        this.$message.error(
+          "Ошибка при загрузке видов деятельности специалиста"
+        );
       } finally {
         this.loading = false;
       }
     },
 
-    setCoefficientBySkillId(competence){
+    setCoefficientBySkillId(competence) {
       for (let comp of competence) {
         this.coefficientBySkillId[comp.skill_id] = comp.coefficient;
       }
     },
 
-    async fetchCompetence(){
+    async fetchCompetence() {
       try {
         let res = await this.$axios.get("/api/competence/");
         if (res.status === 200) {
@@ -209,108 +229,113 @@ export default {
       areasFetched: "skills/getFetched",
       areas: "skills/getFilteredAreas",
     }),
-    mainSpecialties(){
-      return this.specialties.filter((specialty)=>{
+    mainSpecialties() {
+      return this.specialties.filter((specialty) => {
         return specialty.is_main;
-      })
+      });
     },
-    subSpecialties(){
-      return this.specialties.filter((specialty)=>{
+    subSpecialties() {
+      return this.specialties.filter((specialty) => {
         return !specialty.is_main;
-      })
+      });
     },
   },
 };
 </script>
 
 <style lang="sass">
-  .specialist-profile
+.specialist-profile
+  display: flex
+  flex-direction: column
+  height: 100%
+  overflow: hidden
+  &__header
+    text-align: center
+    font-size: 16px
+    margin-bottom: 10px
+  &__wrapper
     display: flex
     flex-direction: column
-    height: 100%
-    overflow: hidden
-    &__header
-      text-align: center
-      font-size: 16px
-      margin-bottom: 10px
-    &__wrapper
-      display: flex
-      flex-direction: column
-      flex: 1
-    &__name
-      display: flex
-      flex-direction: row
-      font-size: 22px
-      &-login
-        color: #1890ff
-      .ant-divider
-        height: 15px
-        margin-top: 12px
-    &__specialties
-      .ant-divider
-        &::before, &::after
-          position: unset
+    flex: 1
+  &__name
+    display: flex
+    flex-direction: row
+    font-size: 22px
+    margin-bottom: 5px
+    &-login
+      color: #1890ff
+    .ant-divider
+      height: 15px
+      margin-top: 12px
+  &__specialties
+    .ant-divider
+      margin: 0
+      &::before, &::after
+        position: unset
+  &__competence
+    overflow: auto
 
-    .activities
-        display: flex
-        flex-wrap: wrap
-        .activity-block
-          margin: 5px
-          padding: 3px
-          -webkit-border-radius: 4px
-          -moz-border-radius: 4px
-          border-radius: 4px
-          .activity-label
-            margin: 5px
-            color: #111111
+  .activities
+    display: flex
+    flex-wrap: wrap
+    .activity-block
+      margin: 5px
+      padding: 3px
+      -webkit-border-radius: 4px
+      -moz-border-radius: 4px
+      border-radius: 4px
+      .activity-label
+        margin: 5px
+        color: #111111
 
-    &__table
-      display: flex
-      flex: 1
-      flex-direction: column
-      border-left: 1px solid #ccc
+  &__table
+    display: flex
+    flex: 1
+    flex-direction: column
+    border-left: 1px solid #ccc
+    &-header
       border-top: 1px solid #ccc
-      &-header
+      display: flex
+      flex: 1
+      flex-direction: row
+      background-color: #f4f4f4
+      color: rgba(0, 0, 0, 0.85)
+      z-index: 3
+      position: sticky
+      position: -webkit-sticky
+      top: 0
+      div
         display: flex
-        flex: 1
-        flex-direction: row
-        background-color: #f4f4f4
-        color: rgba(0, 0, 0, 0.85)
-        div
-          display: flex
-          align-items: center
-      &-body
-        display: flex
-        flex: 1
-        flex-direction: column
+        align-items: center
+    &-body
+      display: flex
+      flex: 1
+      flex-direction: column
 
-      &-areas, &-directions, &-skills
-        display: flex
-        flex: 1
-        flex-direction: column
-      &-area-row, &-direction-row, &-skill-row
-        display: flex
-        flex: 1
-        flex-direction: row
-      &-area, &-direction, &-coefficient
-        min-width: 200px
-        width: 200px
-        padding: 10px 15px
-        border-right: 1px solid #ccc
-        border-bottom: 1px solid #ccc
-      &-skill
-        min-width: 200px
-        flex: 1
-        padding: 10px 15px
-        border-right: 1px solid #ccc
-        border-bottom: 1px solid #ccc
-        &-link
-          color: #1890ff
-          transition: all .3s cubic-bezier(.645,.045,.355,1)
-          cursor: pointer
-          &:hover
-            color: #40a9ff
-
-
-
+    &-areas, &-directions, &-skills
+      display: flex
+      flex: 1
+      flex-direction: column
+    &-area-row, &-direction-row, &-skill-row
+      display: flex
+      flex: 1
+      flex-direction: row
+    &-area, &-direction, &-coefficient
+      min-width: 200px
+      width: 200px
+      padding: 10px 15px
+      border-right: 1px solid #ccc
+      border-bottom: 1px solid #ccc
+    &-skill
+      min-width: 200px
+      flex: 1
+      padding: 10px 15px
+      border-right: 1px solid #ccc
+      border-bottom: 1px solid #ccc
+      &-link
+        color: #1890ff
+        transition: all .3s cubic-bezier(.645,.045,.355,1)
+        cursor: pointer
+        &:hover
+          color: #40a9ff
 </style>
