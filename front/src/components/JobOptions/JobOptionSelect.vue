@@ -5,7 +5,7 @@
     :title="'Выбор варианта проведения занятия'"
     :footer="null"
     @cancel="closeModal(null)"
-    :body-style="{'max-height': '700px', 'overflow-y': 'auto'}">
+  >
     <div class="job-option-select__cards" v-if="options.length">
       <div class="job-option-select__card" v-for="option in options" :key="option.id">
         <job-option :option="option">
@@ -70,5 +70,6 @@ export default {
   &__cards
     height: 100%
     overflow-y: auto
+    padding: 3px
 
 </style>
