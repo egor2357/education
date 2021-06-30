@@ -51,10 +51,7 @@ class UserView(viewsets.ModelViewSet):
 class Educational_areaView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = (Educational_area.objects.all()
-                                      .prefetch_related(
-                                        'development_direction_set__skill_set'
-                                      ))
+  queryset = Educational_area.objects.all().prefetch_related('development_direction_set__skill_set__direction__area')
   serializer_class = Educational_areaSerializer
 
 class Development_directionView(viewsets.ModelViewSet):
@@ -447,16 +444,15 @@ class OptionView(viewsets.ModelViewSet):
   def get_queryset(self):
     user = self.request.user
     if user.is_staff:
-      return (Option.objects.all()
-                            .prefetch_related('option_file_set')
-                            .select_related('method__form'))
+      qs = Option.objects.all()
     else:
-      if user.specialist is None:
-        return Option.objects.none()
+      if user.specialist is not None:
+        qs = Option.objects.filter(specialist=user.specialist)
       else:
-        return (Option.objects.filter(specialist=user.specialist)
-                              .prefetch_related('option_file_set')
-                              .select_related('method__form'))
+        qs = Option.objects.none()
+    qs = (qs.prefetch_related('option_file_set', 'skills__direction__area')
+            .select_related('method__form'))
+    return qs
 
 class PresenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication, IsAdminOrReadOnly)

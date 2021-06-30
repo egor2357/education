@@ -52,13 +52,13 @@ class LoginSerializer(serializers.Serializer):
 class FilteredSkillListSerializer(serializers.ListSerializer):
   def to_representation(self, data):
     user=self.context['request'].user
-    qs = Skill.objects.none()
     if user.is_staff:
-      qs =  data
+      qs =  data.all()
     else:
       if user.specialist is not None:
         qs = data.filter(competence__specialist=user.specialist).distinct()
-
+      else:
+        qs = Skill.objects.none()
     return super(FilteredSkillListSerializer, self).to_representation(qs)
 
 class SkillSerializer(FlexFieldsModelSerializer):
@@ -426,13 +426,13 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
 class FilteredDevelopment_directionListSerializer(serializers.ListSerializer):
   def to_representation(self, data):
     user=self.context['request'].user
-    qs = Development_direction.objects.none()
     if user.is_staff:
-      qs =  data
+      qs =  data.all()
     else:
       if user.specialist is not None:
         qs = data.filter(skill__competence__specialist=user.specialist).distinct()
-
+      else:
+        qs = Development_direction.objects.none()
     return super(FilteredDevelopment_directionListSerializer, self).to_representation(qs)
 
 class Development_directionSerializer(serializers.ModelSerializer):
@@ -454,13 +454,13 @@ class Development_directionSerializer(serializers.ModelSerializer):
 class FilteredEducational_areaListSerializer(serializers.ListSerializer):
   def to_representation(self, data):
     user=self.context['request'].user
-    qs = Educational_area.objects.none()
     if user.is_staff:
-      qs = data
+      qs = data.all()
     else:
       if user.specialist is not None:
         qs = data.filter(development_direction__skill__competence__specialist=user.specialist).distinct()
-
+      else:
+        qs = Educational_area.objects.none()
     return super(FilteredEducational_areaListSerializer, self).to_representation(qs)
 
 class Educational_areaSerializer(serializers.ModelSerializer):
