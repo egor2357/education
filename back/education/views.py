@@ -60,7 +60,7 @@ class Educational_areaView(viewsets.ModelViewSet):
 class Development_directionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Development_direction.objects.all().prefetch_related('skill_set')
+  queryset = Development_direction.objects.all().prefetch_related('skill_set__direction__area')
   serializer_class = Development_directionSerializer
 
 class SkillView(viewsets.ModelViewSet):
