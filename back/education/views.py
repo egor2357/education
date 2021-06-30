@@ -60,7 +60,7 @@ class Educational_areaView(viewsets.ModelViewSet):
 class Development_directionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Development_direction.objects.all().prefetch_related('skill_set')
+  queryset = Development_direction.objects.all().prefetch_related('skill_set__direction__area')
   serializer_class = Development_directionSerializer
 
 class SkillView(viewsets.ModelViewSet):
@@ -78,7 +78,7 @@ class FormView(viewsets.ModelViewSet):
 class MethodView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Method.objects.all()
+  queryset = Method.objects.all().select_related('form')
   serializer_class = MethodSerializer
 
 class JobView(viewsets.ModelViewSet):
@@ -235,7 +235,7 @@ class JobView(viewsets.ModelViewSet):
                   )
                   .prefetch_related(
                     'job_file_set',
-                    'skill_report_set__skill'
+                    'skill_report_set__skill__direction__area'
                   ))
 
 class ScheduleView(viewsets.ModelViewSet):
@@ -522,7 +522,8 @@ class Skill_reportView(viewsets.ModelViewSet):
                                   .select_related(
                                     'skill__direction__area',
                                     'job__activity',
-                                    'job__method__form'
+                                    'job__method__form',
+                                    'job__specialist',
                                   )
                                   )
   serializer_class = Skill_reportSerializer
