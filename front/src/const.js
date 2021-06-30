@@ -10,5 +10,5 @@ const daysOfWeek = [
 
 export default {
   daysOfWeek: daysOfWeek,
-  photoFormats: ["jpg", "png"],
+  photoFormats: ["jpg", "png", "jpeg", "gif"],
 };

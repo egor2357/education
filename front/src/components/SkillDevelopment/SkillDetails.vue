@@ -19,7 +19,7 @@
         </div>
       </div>
 
-      <div v-if="skillReports.length">
+      <div class="table-block" v-if="skillReports.length">
         <div class="skill-name">{{ skillReports[0].skill.name }}</div>
 
         <div class="table-holder">
@@ -342,6 +342,12 @@ $border-color: #e8e8e8
   flex-direction: column
   overflow: hidden
   height: 100%
+
+  .table-block
+    display: flex
+    flex-direction: column
+    flex: 1
+    overflow: hidden
 
   .top-bar
     display: flex

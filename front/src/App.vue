@@ -70,4 +70,8 @@ html
 .ant-modal-body
   max-height: 500px
   overflow: auto
+.content
+  .ant-upload-list-picture
+    .ant-upload-list-item-name
+      max-width: 300px
 </style>
