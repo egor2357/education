@@ -235,7 +235,7 @@ class JobView(viewsets.ModelViewSet):
                   )
                   .prefetch_related(
                     'job_file_set',
-                    'skill_report_set__skill'
+                    'skill_report_set__skill__direction__area'
                   ))
 
 class ScheduleView(viewsets.ModelViewSet):
