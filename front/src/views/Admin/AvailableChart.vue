@@ -120,6 +120,9 @@ export default {
     if (!this.activitiesFetched) await this.fetchActivities();
     this.makeTableData();
     this.loading = false;
+    if (!this.specReadOnly) {
+      document.addEventListener("keydown", this.keydown);
+    }
   },
   methods: {
     ...mapActions({
@@ -316,6 +319,16 @@ export default {
       await this.makeTableData();
       this.loading = false;
     },
+    keydown(event) {
+      if (event.type === "keydown" && event.keyCode === 39) {
+        this.changeMonth(true);
+      } else if (event.type === "keydown" && event.keyCode === 37) {
+        this.changeMonth(false);
+      }
+    },
+  },
+  beforeDestroy() {
+    document.removeEventListener("keydown", this.keydown);
   },
 };
 </script>

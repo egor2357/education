@@ -182,6 +182,7 @@ export default {
     this.loading = true;
     await Promise.all(fetches);
     this.loading = false;
+    document.addEventListener("keydown", this.keydown);
   },
   methods: {
     ...mapActions({
@@ -329,6 +330,13 @@ export default {
         return jobs;
       }
     },
+    keydown(event) {
+      if (event.type === "keydown" && event.keyCode === 39) {
+        this.switchDates(true);
+      } else if (event.type === "keydown" && event.keyCode === 37) {
+        this.switchDates(false);
+      }
+    },
   },
   computed: {
     ...mapGetters({
@@ -370,6 +378,9 @@ export default {
         return !this.jobSheduleIndexes.includes(schedule.id);
       });
     },
+  },
+  beforeDestroy() {
+    document.removeEventListener("keydown", this.keydown);
   },
 };
 </script>

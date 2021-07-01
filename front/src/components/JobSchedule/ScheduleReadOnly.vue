@@ -4,7 +4,11 @@
       <div class="top-bar">
         <div class="title">Занятия</div>
       </div>
-      <AvailableChart :specReadOnly="true" :userId="userInfo.id" />
+      <AvailableChart
+        :specReadOnly="true"
+        :userId="userInfo.id"
+        ref="available-read-only"
+      />
 
       <div class="job-schedule">
         <div class="job-schedule__interval job-schedule__interval--small">
@@ -145,6 +149,7 @@ export default {
     this.loading = true;
     await Promise.all(fetches);
     this.loading = false;
+    document.addEventListener("keydown", this.keydown);
   },
   methods: {
     ...mapActions({
@@ -208,6 +213,37 @@ export default {
         );
       });
     },
+    async keydown(event) {
+      if (
+        event.type === "keydown" &&
+        (event.keyCode === 39 || event.keyCode === 37)
+      ) {
+        let oldStart = this.dateFrom;
+        if (event.keyCode === 39) {
+          await this.switchDates(true);
+        } else {
+          await this.switchDates(false);
+        }
+        let newStart = this.dateFrom;
+        if (
+          newStart.getMonth() !== oldStart.getMonth() &&
+          this.$refs["available-read-only"].currentDate.month() !== newStart &&
+          event.keyCode === 39
+        ) {
+          this.$refs["available-read-only"].currentDate = moment(oldStart);
+          this.$refs["available-read-only"].changeMonth(true);
+        }
+        if (
+          newStart.getMonth() !== oldStart.getMonth() &&
+          this.$refs["available-read-only"].currentDate.month() !==
+            newStart.getMonth() &&
+          event.keyCode === 37
+        ) {
+          this.$refs["available-read-only"].currentDate = moment(oldStart);
+          this.$refs["available-read-only"].changeMonth(false);
+        }
+      }
+    },
   },
   computed: {
     ...mapGetters({
@@ -250,6 +286,9 @@ export default {
         return !this.jobSheduleIndexes.includes(schedule.id);
       });
     },
+  },
+  beforeDestroy() {
+    document.removeEventListener("keydown", this.keydown);
   },
 };
 </script>
