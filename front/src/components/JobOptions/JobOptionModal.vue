@@ -26,7 +26,7 @@
         <a-tree-select
           :value="form.skills"
           @change="setSkills"
-          :dropdownStyle="{ 'max-height': '500px', 'overflow-y': 'auto' }"
+          :dropdownStyle="{ 'max-height': '500px', 'max-width': '566px', 'overflow-y': 'auto' }"
           placeholder="Выберите навыки"
           allow-clear
           multiple

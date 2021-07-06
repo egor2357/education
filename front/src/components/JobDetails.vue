@@ -90,6 +90,7 @@
                   @change="setReports"
                   :dropdownStyle="{
                     'max-height': '500px',
+                    'max-width': '566px',
                     'overflow-y': 'auto',
                   }"
                   placeholder="Выберите навыки"

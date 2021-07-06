@@ -74,4 +74,7 @@ html
   .ant-upload-list-picture
     .ant-upload-list-item-name
       max-width: 300px
+
+.ant-select-tree-title
+  white-space: normal
 </style>
