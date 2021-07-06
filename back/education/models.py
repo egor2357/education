@@ -12,7 +12,7 @@ from PIL import Image
 from io import BytesIO
 
 class Educational_area(models.Model):
-  name = models.TextField(max_length=200, unique=True, verbose_name='Название')
+  name = models.TextField(unique=True, verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
 
   class Meta:
@@ -31,7 +31,7 @@ class Development_direction(models.Model):
     on_delete=models.CASCADE, verbose_name='Образовательная область'
   )
 
-  name = models.TextField(max_length=200, unique=True, verbose_name='Название')
+  name = models.TextField(unique=True, verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
 
   class Meta:
@@ -49,7 +49,7 @@ class Skill(models.Model):
     on_delete=models.CASCADE, verbose_name='Направление развития'
   )
 
-  name = models.TextField(max_length=200, verbose_name='Название')
+  name = models.TextField(verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
 
   class Meta:
@@ -70,9 +70,9 @@ class Specialist(models.Model):
   skills = models.ManyToManyField(Skill, through='Competence', verbose_name='Развиваемые навыки')
   activities = models.ManyToManyField('Activity', through='Specialty', verbose_name='Направления деятельности')
 
-  surname = models.CharField(max_length=20, blank=True, verbose_name='Фамилия')
-  name = models.CharField(max_length=20, blank=True, verbose_name='Имя')
-  patronymic = models.CharField(max_length=20, blank=True, verbose_name='Отчество')
+  surname = models.CharField(max_length=50, blank=True, verbose_name='Фамилия')
+  name = models.CharField(max_length=50, blank=True, verbose_name='Имя')
+  patronymic = models.CharField(max_length=50, blank=True, verbose_name='Отчество')
   role = models.TextField(max_length=200, blank=True, verbose_name='Роль')
   is_active = models.BooleanField(default=True, verbose_name='Активен ли')
 
@@ -209,7 +209,7 @@ class Presence(models.Model):
     )
 
 class Form(models.Model):
-  name = models.TextField(max_length=200, verbose_name='Название')
+  name = models.TextField(verbose_name='Название')
 
   class Meta:
     db_table = 'form'
@@ -226,7 +226,7 @@ class Method(models.Model):
     on_delete=models.CASCADE, verbose_name='Форма'
   )
 
-  name = models.TextField(max_length=200, verbose_name='Название')
+  name = models.TextField(verbose_name='Название')
 
   class Meta:
     db_table = 'method'
@@ -240,7 +240,7 @@ class Method(models.Model):
 class Activity(models.Model):
   skills = models.ManyToManyField(Skill, verbose_name='Развиваемые навыки')
 
-  name = models.TextField(max_length=200, verbose_name='Название')
+  name = models.TextField(verbose_name='Название')
   color = models.CharField(max_length=7, default='#CCCCCC', blank=True, verbose_name='Код цвета')
 
   class Meta:
@@ -374,7 +374,7 @@ class Option(models.Model):
 
   skills = models.ManyToManyField(Skill, verbose_name='Развиваемые на занятии навыки')
 
-  topic = models.TextField(max_length=200, verbose_name='Тема занятия')
+  topic = models.TextField(verbose_name='Тема занятия')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
   class Meta:
@@ -494,7 +494,7 @@ class Job(models.Model):
   date = models.DateField(verbose_name='Дата проведения')
   start_time = models.TimeField(verbose_name='Время начала')
 
-  topic = models.TextField(blank=True, max_length=200, verbose_name='Тема занятия')
+  topic = models.TextField(blank=True, verbose_name='Тема занятия')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
   report_comment = models.TextField(blank=True, verbose_name='Комментарий по результатам занятия')
