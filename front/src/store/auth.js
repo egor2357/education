@@ -24,10 +24,7 @@ const actions = {
       if (res.status === 200) {
         commit("setIsAuth", true);
         commit("setUserInfo", {
-          name:
-            res.data.specialist !== null && res.data.specialist.surname
-              ? `${res.data.specialist.surname} ${res.data.specialist.name[0]}. ${res.data.specialist.patronymic[0]}.`
-              : res.data.username,
+          name: res.data.specialist ? res.data.specialist.__str__ : res.data.username,
           staff: res.data.is_staff,
           id: res.data.id,
           specialistId: res.data.specialist === null
@@ -78,10 +75,7 @@ const actions = {
       if (res.status === 200) {
         commit("setIsAuth", true);
         commit("setUserInfo", {
-          name:
-            res.data.specialist !== null && res.data.specialist.surname
-              ? `${res.data.specialist.surname} ${res.data.specialist.name[0]}. ${res.data.specialist.patronymic[0]}.`
-              : res.data.username,
+          name: res.data.specialist ? res.data.specialist.__str__ : res.data.username,
           staff: res.data.is_staff,
           id: res.data.id,
           specialistId: res.data.specialist === null

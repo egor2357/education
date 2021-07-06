@@ -263,6 +263,7 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
       'id',
       'surname', 'name',
       'patronymic', 'role',
+      '__str__',
     )
 
 class UserSerializer(FlexFieldsModelSerializer):
@@ -272,7 +273,7 @@ class UserSerializer(FlexFieldsModelSerializer):
     fields = [
       'id',
       'username', 'is_staff',
-      'specialist'
+      'specialist',
     ]
 
 class SpecialtySerializer(FlexFieldsModelSerializer):

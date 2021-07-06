@@ -70,9 +70,9 @@ class Specialist(models.Model):
   skills = models.ManyToManyField(Skill, through='Competence', verbose_name='Развиваемые навыки')
   activities = models.ManyToManyField('Activity', through='Specialty', verbose_name='Направления деятельности')
 
-  surname = models.CharField(max_length=50, blank=True, verbose_name='Фамилия')
-  name = models.CharField(max_length=50, blank=True, verbose_name='Имя')
-  patronymic = models.CharField(max_length=50, blank=True, verbose_name='Отчество')
+  surname = models.CharField(max_length=50, blank=True, default='', verbose_name='Фамилия')
+  name = models.CharField(max_length=50, blank=True, default='', verbose_name='Имя')
+  patronymic = models.CharField(max_length=50, blank=True, default='', verbose_name='Отчество')
   role = models.TextField(max_length=200, blank=True, verbose_name='Роль')
   is_active = models.BooleanField(default=True, verbose_name='Активен ли')
 
