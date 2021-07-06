@@ -28,7 +28,7 @@
       <a-form-model-item v-if="adding === false && !displayPassword">
         <a-button
           @click="
-            form.password = null;
+            form.password = '';
             displayPassword = true;
           "
           >Сменить пароль</a-button
@@ -66,11 +66,11 @@ export default {
   data() {
     return {
       form: {
-        name: null,
-        surname: null,
-        patronymic: null,
-        username: null,
-        password: null,
+        name: '',
+        surname: '',
+        patronymic: '',
+        username: '',
+        password: '',
       },
       title: "",
       layout: {
@@ -222,11 +222,11 @@ export default {
     },
     clearFields() {
       this.form = {
-        name: null,
-        subname: null,
-        patronymic: null,
-        username: null,
-        password: null,
+        name: '',
+        subname: '',
+        patronymic: '',
+        username: '',
+        password: '',
       };
     },
     fillFields(data) {
