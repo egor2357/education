@@ -74,7 +74,9 @@
                   :key="area.id"
                 >
                   <div class="specialist-profile__table-area">
-                    {{ area.number }}. {{ area.name }}
+                    <div class="cell">
+                      {{ area.number }}. {{ area.name }}
+                    </div>
                   </div>
 
                   <div
@@ -87,8 +89,10 @@
                       :key="direction.id"
                     >
                       <div class="specialist-profile__table-direction">
-                        {{ area.number }}.{{ direction.number }}.
-                        {{ direction.name }}
+                        <div class="cell">
+                          {{ area.number }}.{{ direction.number }}.
+                          {{ direction.name }}
+                        </div>
                       </div>
 
                       <div
@@ -101,14 +105,16 @@
                           :key="skill.id"
                         >
                           <div class="specialist-profile__table-skill">
-                            <span>
+                            <div class="cell">
                               {{ area.number }}.{{ direction.number }}.{{
                                 skill.number
                               }}. {{ skill.name }}
-                            </span>
+                            </div>
                           </div>
                           <div class="specialist-profile__table-coefficient">
-                            {{ coefficientBySkillId[skill.id] }}
+                            <div class="cell">
+                              {{ coefficientBySkillId[skill.id] }}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -324,20 +330,36 @@ export default {
       flex: 1 1 auto
       flex-direction: row
     &-area, &-direction, &-coefficient
+      position: sticky
+      position: -webkit-sticky
       min-width: 200px
       width: 200px
       padding: 10px 15px
       border-right: 1px solid #ccc
       border-bottom: 1px solid #ccc
+      .cell
+        position: sticky
+        position: -webkit-sticky
+        z-index: 1
+        top: 64px
+        word-break: break-word
+
     &-coefficient
       width: 120px
       min-width: 120px
+      text-align: center
     &-skill
       min-width: 200px
       flex: 1
       padding: 10px 15px
       border-right: 1px solid #ccc
       border-bottom: 1px solid #ccc
+      .cell
+        position: sticky
+        position: -webkit-sticky
+        z-index: 1
+        top: 64px
+        word-break: break-word
       &-link
         color: #1890ff
         transition: all .3s cubic-bezier(.645,.045,.355,1)
