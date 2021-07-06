@@ -155,9 +155,9 @@ export default {
     },
     async handleOk() {
       if (!this.loadingButton) {
-        this.loadingButton = true;
         this.$refs.form.validate(async (valid) => {
           if (valid) {
+            this.loadingButton = true;
             let dispatchName = "";
             let successCode = 0;
             let successMessage = "";

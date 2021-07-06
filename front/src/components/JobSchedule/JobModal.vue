@@ -252,10 +252,10 @@ export default {
 
     async handleOk() {
       if (!this.loadingButton) {
-        this.loadingButton = true;
         this.$refs.form.validate(async (valid) => {
           if (valid) {
             try {
+              this.loadingButton = true;
               let successCode = 0;
               let res = null;
               let successMessage = "";

@@ -293,8 +293,8 @@ export default {
         this.$refs.form.validate(async (valid) => {
           if (valid) {
             try {
-              this.loading = true;
               this.loadingButton = true;
+              this.loading = true;
 
               const formData = new FormData();
               formData.append("activity_id", this.activity.id);
