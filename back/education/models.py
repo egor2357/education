@@ -31,7 +31,7 @@ class Development_direction(models.Model):
     on_delete=models.CASCADE, verbose_name='Образовательная область'
   )
 
-  name = models.TextField(unique=True, verbose_name='Название')
+  name = models.TextField(verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
 
   class Meta:
@@ -39,6 +39,7 @@ class Development_direction(models.Model):
     verbose_name = 'Направление развития'
     verbose_name_plural = 'Направления развития'
     ordering = ['number']
+    unique_together = ('area', 'name',)
 
   def __str__(self):
     return self.name
@@ -57,6 +58,7 @@ class Skill(models.Model):
     verbose_name = 'Навык'
     verbose_name_plural = 'Навыки'
     ordering = ['number']
+    unique_together = ('direction', 'name',)
 
   def __str__(self):
     return self.name
