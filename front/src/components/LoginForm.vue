@@ -4,7 +4,7 @@
       <div><b>Обучение</b></div>
       Авторизация
     </div>
-    <a-form-model :model="form" :rules="rules">
+    <a-form-model :model="form" :rules="rules" ref="form">
       <a-form-model-item key="username" prop="username">
         <a-input
           v-model="form.username"
@@ -84,26 +84,31 @@ export default {
   },
   methods: {
     async login() {
-      this.loadingButton = true;
-      this.$store
-        .dispatch("auth/login", this.form)
-        .then((res) => {
-          if (res.status === 200) {
-            this.$message.success("Вход успешно выполнен");
-            this.$router.push({ name: "JobWrapper" });
-          } else if (res.status === 400) {
-            this.$message.error("Проверьте введённые данные");
-            displayErrors(this.$message, res.data, this.fields);
-          } else {
-            this.$message.error("Произошла ошибка");
+      if (!this.loadingButton) {
+        this.$refs.form.validate(async (valid) => {
+          if (valid) {
+            this.loadingButton = true;
+            this.$store
+              .dispatch("auth/login", this.form)
+              .then((res) => {
+                if (res.status === 200) {
+                  this.$message.success("Вход успешно выполнен");
+                  this.$router.push({ name: "JobWrapper" });
+                } else if (res.status === 400) {
+                  displayErrors(this.$message, res.data, this.fields);
+                } else {
+                  this.$message.error("Произошла ошибка");
+                }
+              })
+              .catch(() => {
+                this.$message.error("Произошла ошибка");
+              })
+              .finally(() => {
+                this.loadingButton = false;
+              });
           }
-        })
-        .catch(() => {
-          this.$message.error("Произошла ошибка");
-        })
-        .finally(() => {
-          this.loadingButton = false;
         });
+      }
     },
   },
 };
