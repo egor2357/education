@@ -4,34 +4,16 @@
       <div class="top-bar__side-block left"></div>
       <div class="title">Виды деятельности</div>
       <div class="top-bar__side-block right">
-        <a-button v-if="activeTab == 1" icon="plus" type="secondary" @click="onAddActivity">Добавить</a-button>
+        <a-button icon="plus" type="secondary" @click="onAddActivity">Добавить</a-button>
       </div>
     </div>
-    <a-tabs v-model="activeTab" class="tabs--center">
-      <a-tab-pane key="1">
-        <span slot="tab">
-          <a-icon type="unordered-list" />
-          Список
-        </span>
-      </a-tab-pane>
-      <a-tab-pane key="2">
-        <span slot="tab">
-          <a-icon type="share-alt" />
-          Вид деятельности / навыки
-        </span>
-      </a-tab-pane>
-    </a-tabs>
     <div class="tab-content">
       <TypesList
-        v-if="activeTab == 1"
         :data="activities"
         @needUpdate="fetchActivities"
         :loadingList="loadingList"
         @onEditActivity="onEditActivity"
         @onDeleteActivity="onDeleteActivity"
-      />
-      <ActivitiesSkills
-        v-if="activeTab == 2"
       />
     </div>
     <ModalActivities
@@ -61,7 +43,6 @@ export default {
   },
   data() {
     return {
-      activeTab: "1",
       loadingList: true,
       displayModal: false,
       modalAdding: true,
