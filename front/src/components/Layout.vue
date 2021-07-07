@@ -61,7 +61,7 @@
       </a-layout-header>
       <a-layout-content style="margin: 15px">
         <div class="content">
-          <router-view v-if="$route.name !== 'Login'" />
+          <router-view/>
         </div>
       </a-layout-content>
     </a-layout>
@@ -155,7 +155,6 @@ export default {
           ],
         },
       ],
-      breadcrumbs: [],
     };
   },
   methods: {
@@ -172,43 +171,43 @@ export default {
       this.clearStore();
       this.$router.push("/login/");
     },
+    setSelectedMenuItem(to){
+      if (this.openKeys.length) this.openKeys.splice(0);
+      if (this.selectedKeys.length) this.selectedKeys.splice(0);
+      let matched = false;
+      for (let parent of this.menu) {
+        if (parent.childrens.length) {
+          for (let children of parent.childrens) {
+            if (children.to.name === to.name) {
+              this.openKeys.push(parent.key);
+              this.selectedKeys.push(children.key);
+              matched = true;
+              break;
+            }
+          }
+        } else {
+          if (parent.to.name === to.name) {
+            this.openKeys.push(parent.key);
+            this.selectedKeys.push(parent.key);
+            matched = true;
+          }
+        }
+        if (matched) break;
+      }
+    }
   },
   computed: {
     ...mapGetters({
       userInfo: "auth/getUserInfo",
     }),
   },
-  watch: {
-    $route(value) {
-      if (this.openKeys.length > 0) this.openKeys = [];
-      if (this.selectedKeys.length > 0) this.selectedKeys = [];
-      for (let parent of this.menu) {
-        if (parent.childrens.length > 0) {
-          for (let children of parent.childrens) {
-            if (
-              children.to.query &&
-              children.to.query.type === value.query.type
-            ) {
-              this.openKeys.push(parent.key);
-              this.selectedKeys.push(children.key);
-              break;
-            } else if (!children.to.query && children.to.name === value.name) {
-              this.openKeys.push(parent.key);
-              this.selectedKeys.push(children.key);
-              break;
-            }
-          }
-        } else {
-          if (parent.to.name === value.name) {
-            this.openKeys.push(parent.key);
-            this.selectedKeys.push(parent.key);
-            break;
-          }
-        }
-      }
-      this.breadcrumbs = value.meta.breadcrumbs;
-    },
+  beforeRouteUpdate(to, from, next){
+    this.setSelectedMenuItem(to);
+    next();
   },
+  created(){
+    this.setSelectedMenuItem(this.$route);
+  }
 };
 </script>
 

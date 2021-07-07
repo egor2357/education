@@ -1,8 +1,7 @@
 <template>
   <a-config-provider :locale="ru_RU">
     <div id="app">
-      <Layout v-if="isAuth" />
-      <Login v-else-if="isAuth === false" />
+      <router-view/>
     </div>
   </a-config-provider>
 </template>
@@ -31,9 +30,6 @@ export default {
     document.title = "Обучение";
   },
   computed: {
-    ...mapGetters({
-      isAuth: "auth/getIsAuth",
-    }),
   },
 };
 </script>

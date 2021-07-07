@@ -17,146 +17,157 @@ const router = new VueRouter({
       },
     },
     {
-      path: "/skills",
-      name: "Skills",
-      // component: () => import("@/components/TableSkill"),
-      component: () => import("@/views/Admin/SkillsStructure"),
-      meta: {
-        staffOnly: true,
-        specOnly: false,
-      },
-    },
-    {
-      path: "/activities-types",
-      name: "ActivitiesTypes",
-      component: () => import("@/views/Admin/ActivitiesTypes"),
-      meta: {
-        staffOnly: true,
-        specOnly: false,
-      },
-    },
-    {
-      path: "/specialists",
-      name: "Specialists",
-      component: () => import("@/views/Admin/Specialists"),
-      meta: {
-        staffOnly: true,
-        specOnly: false,
-      },
-    },
-    {
-      path: "/schedule",
-      name: "Schedule",
-      component: () => import("@/views/Admin/Schedule"),
-      meta: {
-        staffOnly: true,
-        specOnly: false,
-      },
-    },
-    {
-      path: "/forms",
-      name: "Forms",
-      component: () => import("@/views/Admin/Forms"),
-      meta: {
-        staffOnly: true,
-        specOnly: false,
-      },
-    },
-    {
-      path: "/chart-available",
-      name: "AvailableChart",
-      component: () => import("@/views/Admin/AvailableChart"),
-      meta: {
-        staffOnly: true,
-        specOnly: false,
-      },
-    },
-    {
       path: "/",
-      redirect: '/jobs'
-    },
-    {
-      path: "/jobs",
-      component: () => import("@/views/Jobs"),
+      component: () => import ("@/components/Layout"),
       meta: {
         staffOnly: false,
         specOnly: false,
       },
       children: [
         {
-          path: "/",
-          name: "JobWrapper",
-          component: () => import("@/components/JobSchedule/JobWrapper"),
+          path: "",
+          redirect: "jobs"
+        },
+        {
+          path: "skills",
+          name: "Skills",
+          // component: () => import("@/components/TableSkill"),
+          component: () => import("@/views/Admin/SkillsStructure"),
           meta: {
-            staffOnly: false,
+            staffOnly: true,
             specOnly: false,
           },
         },
         {
-          path: ":id",
-          name: "JobDetails",
-          component: () => import("@/components/JobSchedule/JobDetailWrapper"),
+          path: "activities-types",
+          name: "ActivitiesTypes",
+          component: () => import("@/views/Admin/ActivitiesTypes"),
+          meta: {
+            staffOnly: true,
+            specOnly: false,
+          },
+        },
+        {
+          path: "specialists",
+          name: "Specialists",
+          component: () => import("@/views/Admin/Specialists"),
+          meta: {
+            staffOnly: true,
+            specOnly: false,
+          },
+        },
+        {
+          path: "schedule",
+          name: "Schedule",
+          component: () => import("@/views/Admin/Schedule"),
+          meta: {
+            staffOnly: true,
+            specOnly: false,
+          },
+        },
+        {
+          path: "forms",
+          name: "Forms",
+          component: () => import("@/views/Admin/Forms"),
+          meta: {
+            staffOnly: true,
+            specOnly: false,
+          },
+        },
+        {
+          path: "chart-available",
+          name: "AvailableChart",
+          component: () => import("@/views/Admin/AvailableChart"),
+          meta: {
+            staffOnly: true,
+            specOnly: false,
+          },
+        },
+        {
+          path: "jobs",
+          component: () => import("@/views/Jobs"),
+          meta: {
+            staffOnly: false,
+            specOnly: false,
+          },
+          children: [
+            {
+              path: "/",
+              name: "JobWrapper",
+              component: () => import("@/components/JobSchedule/JobWrapper"),
+              meta: {
+                staffOnly: false,
+                specOnly: false,
+              },
+            },
+            {
+              path: ":id",
+              name: "JobDetails",
+              component: () => import("@/components/JobSchedule/JobDetailWrapper"),
+              meta: {
+                staffOnly: false,
+                specOnly: false,
+              },
+            },
+          ]
+        },
+        {
+          path: "skill-development",
+          component: () => import("@/views/SkillDevelopment"),
+          meta: {
+            staffOnly: false,
+            specOnly: false,
+          },
+          children: [
+            {
+              path: "/",
+              name: "AllSkills",
+              component: () => import("@/components/SkillDevelopment/AllSkills"),
+              meta: {
+                staffOnly: false,
+                specOnly: false,
+              },
+            },
+            {
+              path: ":id",
+              name: "SkillDetails",
+              component: () => import("@/components/SkillDevelopment/SkillDetails"),
+              meta: {
+                staffOnly: false,
+                specOnly: false,
+              },
+            },
+          ]
+        },
+        {
+          path: "specialist-profile",
+          name: "SpecialistProfile",
+          component: () => import("@/components/SpecialistProfile/SpecialistProfile"),
+          meta: {
+            staffOnly: false,
+            specOnly: true,
+          },
+        },
+        {
+          path: "job-options",
+          name: "JobOptions",
+          component: () => import("@/views/JobOptions"),
+          meta: {
+            staffOnly: false,
+            specOnly: true,
+          },
+        },
+        {
+          path: "*",
+          name: "Page404",
+          component: () => import("@/views/Page404"),
           meta: {
             staffOnly: false,
             specOnly: false,
           },
         },
+
       ]
-    },
-    {
-      path: "/skill-development",
-      component: () => import("@/views/SkillDevelopment"),
-      meta: {
-        staffOnly: false,
-        specOnly: false,
-      },
-      children: [
-        {
-          path: "/",
-          name: "AllSkills",
-          component: () => import("@/components/SkillDevelopment/AllSkills"),
-          meta: {
-            staffOnly: false,
-            specOnly: false,
-          },
-        },
-        {
-          path: ":id",
-          name: "SkillDetails",
-          component: () => import("@/components/SkillDevelopment/SkillDetails"),
-          meta: {
-            staffOnly: false,
-            specOnly: false,
-          },
-        },
-      ]
-    },
-    {
-      path: "/specialist-profile",
-      name: "SpecialistProfile",
-      component: () => import("@/components/SpecialistProfile/SpecialistProfile"),
-      meta: {
-        staffOnly: false,
-        specOnly: true,
-      },
-    },
-    {
-      path: "/job-options",
-      name: "JobOptions",
-      component: () => import("@/views/JobOptions"),
-      meta: {
-        staffOnly: false,
-        specOnly: true,
-      },
-    },
-    {
-      path: "*",
-      name: "Page404",
-      component: () => import("@/views/Page404"),
-      meta: {
-        staffOnly: false,
-        specOnly: false,
-      },
     },
   ],
 });
