@@ -73,4 +73,7 @@ html
 
 .ant-select-tree-title
   white-space: normal
+
+.ant-layout-sider .ant-layout-sider-trigger
+  position: absolute
 </style>
