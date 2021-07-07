@@ -83,10 +83,20 @@ export default {
     };
   },
   methods: {
+    clearStore() {
+      this.$store.commit("activities/clear");
+      this.$store.commit("forms/clear");
+      this.$store.commit("presence/clear");
+      this.$store.commit("schedule/clear");
+      this.$store.commit("skills/clear");
+      this.$store.commit("specialists/clear");
+    },
     async login() {
       if (!this.loadingButton) {
         this.$refs.form.validate(async (valid) => {
           if (valid) {
+            await this.$store.dispatch("auth/logout");
+            this.clearStore();
             this.loadingButton = true;
             this.$store
               .dispatch("auth/login", this.form)
