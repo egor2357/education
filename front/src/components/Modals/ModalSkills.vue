@@ -19,6 +19,8 @@
             v-model="form[field.name]"
             @change="fieldChanged(field)"
             :ref="`field${index}`"
+            type="textarea"
+            allow-clear
           />
           <a-input-number
             v-else-if="field.type === 'number'"
