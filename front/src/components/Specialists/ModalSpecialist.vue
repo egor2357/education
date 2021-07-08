@@ -115,13 +115,6 @@ export default {
         },
       ],
       rules: {
-        name: [
-          {
-            trigger: "blur",
-            required: true,
-            message: "Пожалуйста, введите имя",
-          },
-        ],
         surname: [
           {
             trigger: "blur",
@@ -223,18 +216,18 @@ export default {
     clearFields() {
       this.form = {
         name: '',
-        subname: '',
+        surname: '',
         patronymic: '',
         username: '',
         password: '',
       };
     },
     fillFields(data) {
-      data.id ? (this.form.id = data.id) : "";
-      data.name ? (this.form.name = data.name) : "";
-      data.surname ? (this.form.surname = data.surname) : "";
-      data.patronymic ? (this.form.patronymic = data.patronymic) : "";
-      data.user.username ? (this.form.username = data.user.username) : "";
+      this.form.id = data.id;
+      this.form.name = data.name;
+      this.form.surname = data.surname;
+      this.form.patronymic = data.patronymic;
+      this.form.username = data.user.username;
     },
   },
   created() {

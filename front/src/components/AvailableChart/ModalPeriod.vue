@@ -19,7 +19,7 @@
               v-for="specialist in specialists"
               :key="specialist.id"
             >
-              {{ formatSpecialist(specialist) }}
+              {{ specialist.__str__ }}
             </a-select-option>
           </a-select>
           <a-range-picker
@@ -65,7 +65,6 @@ import moment from "moment";
 import common from "@/mixins/common";
 export default {
   name: "ModalPeriod",
-  mixins: [common],
   props: {
     adding: {
       type: Boolean,
