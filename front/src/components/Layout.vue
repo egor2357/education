@@ -167,9 +167,9 @@ export default {
       this.$store.commit("specialists/clear");
     },
     async logout() {
+      this.$router.push("/login/");
       await this.$store.dispatch("auth/logout");
       this.clearStore();
-      this.$router.push("/login/");
     },
     setSelectedMenuItem(to){
       if (this.openKeys.length) this.openKeys.splice(0);
