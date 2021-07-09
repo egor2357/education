@@ -714,9 +714,7 @@ export default {
     font-weight: bold
     margin-bottom: 16px
   &__reports
-    display: flex
     width: 100%
-    flex-direction: column
     margin-bottom: 10px
     max-height: 400px
     overflow-y: auto
@@ -733,6 +731,7 @@ export default {
       padding-left: 10px
       font-size: 18px
     &-marks
+      margin-left: 10px
       display: flex
       flex-direction: row
     &-mark
