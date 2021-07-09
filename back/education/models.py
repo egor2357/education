@@ -327,10 +327,9 @@ class Specialty(models.Model):
       specialist=self.specialist,
       activity=self.activity,
     )
-    jobs.update(specialist=None)
     for job in jobs:
-      specialist = self.get_available(job.activity, job.date)
-      job.specialist=specialist
+      specialist = Specialist.get_available(job.activity, job.date)
+      job.specialist = specialist
       job.clear_params()
       job.save()
 
