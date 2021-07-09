@@ -211,7 +211,7 @@ class Presence(models.Model):
     )
 
 class Form(models.Model):
-  name = models.TextField(verbose_name='Название')
+  name = models.TextField(unique=True, verbose_name='Название')
 
   class Meta:
     db_table = 'form'
@@ -235,6 +235,7 @@ class Method(models.Model):
     verbose_name = 'Способ проведения занятия'
     verbose_name_plural = 'Способы проведения занятия'
     ordering = ['name']
+    unique_together = ('form', 'name')
 
   def __str__(self):
     return self.name
@@ -242,7 +243,7 @@ class Method(models.Model):
 class Activity(models.Model):
   skills = models.ManyToManyField(Skill, verbose_name='Развиваемые навыки')
 
-  name = models.TextField(verbose_name='Название')
+  name = models.TextField(unique=True, verbose_name='Название')
   color = models.CharField(max_length=7, default='#CCCCCC', blank=True, verbose_name='Код цвета')
 
   class Meta:
