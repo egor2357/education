@@ -270,7 +270,7 @@ export default {
     flex-direction: row
     font-size: 22px
     margin-bottom: 5px
-    height: 40px
+    min-height: 30px
     &-login
       color: #1890ff
     .ant-divider
