@@ -350,16 +350,20 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
     has_password = (not (password is None) and password)
 
     if has_username and has_password:
-      user = User(username=username, is_staff=is_staff)
-      user.set_password(password)
-      user.save()
-      if user.is_staff:
-        user.groups.add(admin_group)
+      serializer = UserSerializer(data={'username': username, 'is_staff': is_staff})
+      if serializer.is_valid(raise_exception=True):
+        user = serializer.save()
 
-      specialist = Specialist(**validated_data)
-      specialist.user = user
-      specialist.save()
-      return specialist
+        user.set_password(password)
+        user.save()
+
+        if user.is_staff:
+          user.groups.add(admin_group)
+
+        specialist = Specialist(**validated_data)
+        specialist.user = user
+        specialist.save()
+        return specialist
     else:
       raise serializers.ValidationError('Не указан username или password')
 
@@ -373,30 +377,33 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
     has_username = (not (username is None) and username)
     has_password = (not (password is None) and password)
 
+    new_data_dict = {}
     user = instance.user
     if not (user is None):
       if has_username:
-        user.username = username
+        new_data_dict['username'] = username
       if not is_staff is None:
-        user.is_staff = is_staff
-      if has_password:
-        user.set_password(password)
-      user.save()
+        new_data_dict['is_staff'] = is_staff
+      serializer = UserSerializer(user, data=new_data_dict, partial=True)
 
+    elif has_username:
+      if is_staff is None:
+        new_data_dict['is_staff'] = False
+      new_data_dict['username'] = username
+      serializer = UserSerializer(data=new_data_dict)
+
+    if serializer.is_valid(raise_exception=True):
+      user = serializer.save()
+
+    if has_password:
+      user.set_password(password)
+      user.save()
       if user.is_staff:
         user.groups.add(admin_group)
       else:
         user.groups.remove(admin_group)
 
-    elif has_username and has_password:
-      if is_staff is None:
-        is_staff = False
-      user = User(username=username, is_staff=is_staff)
-      user.set_password(password)
-      user.save()
-      if user.is_staff:
-        user.groups.add(admin_group)
-      instance.user = user
+    instance.user = user
 
     instance.surname = validated_data.pop('surname', '')
     instance.name = validated_data.pop('name', '')
