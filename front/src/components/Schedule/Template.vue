@@ -26,7 +26,7 @@
                     placement="bottomLeft"
                     class="dropdown--hover"
                   >
-                    <a-icon class="icon-button" type="dash"></a-icon>
+                    <a-icon class="icon-button" type="more"></a-icon>
                     <a-menu slot="overlay">
                       <a-menu-item key="1" @click="openModalEdit(job)">
                         Изменить
@@ -150,9 +150,6 @@ export default {
           display: none
           max-width: 0
           height: 20px
-          svg
-            transform: rotate(90deg)
-            margin-top: 3px
         &:hover
           cursor: pointer
           box-shadow: 0 0 2px 1px rgba(0,0,0,.15)
