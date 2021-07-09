@@ -15,7 +15,7 @@
         v-if="!readOnly"
       >
 
-        <a-icon class="icon-button" type="dash"
+        <a-icon class="icon-button" type="more"
           @click.stop></a-icon>
         <a-menu slot="overlay">
           <a-menu-item key="1" @click="openModalEdit(job)">
@@ -124,9 +124,6 @@ export default {
     display: none
     max-width: 0
     height: 20px
-    svg
-      transform: rotate(90deg)
-      margin-top: 3px
 
   &:hover
     .dropdown--hover
@@ -144,4 +141,6 @@ export default {
       color: #0b0b0b
     &_empty
       color: #ff2222
+  .icon-button
+    font-size: 16px
 </style>
