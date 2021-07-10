@@ -128,18 +128,6 @@
                     <div class="table-cell__job-topic">
                       {{ skillReport.job.topic }}
                     </div>
-                    <div
-                      class="table-cell__job-form"
-                      v-if="skillReport.job.method"
-                    >
-                      {{ skillReport.job.method.form_name }}
-                    </div>
-                    <div
-                      class="table-cell__job-method"
-                      v-if="skillReport.job.method"
-                    >
-                      {{ skillReport.job.method.name }}
-                    </div>
                   </div>
                   <div
                     class="table-cell__job-mark"
@@ -461,7 +449,7 @@ $border-color: #e8e8e8
     flex-direction: row
     flex: 1
     min-width: 200px
-    padding: 10px 15px
+    padding: 0 15px 0 0
 
     &-text
       display: flex
@@ -475,6 +463,4 @@ $border-color: #e8e8e8
     &-topic
       margin-right: 10px
       font-weight: bold
-    &-form
-      margin-right: 10px
 </style>
