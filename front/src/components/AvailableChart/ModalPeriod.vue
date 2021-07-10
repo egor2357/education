@@ -33,11 +33,13 @@
         </a-form-model-item>
       </template>
       <a-form-model-item prop="quarantine" label="Карантин" key="quarantine">
-        <a-checkbox v-model="form.with_quarantine" />
+        <a-checkbox v-model="form.with_quarantine"
+          @change="changeQuarantine"/>
         <span style="margin: 10px" v-if="form.with_quarantine"
           >Количество дней:</span
         >
         <a-input-number
+          ref="quarInput"
           v-model="form.quarantine_days"
           :min="0"
           :max="maxDays"
@@ -123,6 +125,13 @@ export default {
     };
   },
   methods: {
+    changeQuarantine(event) {
+      if (event.target.checked) {
+        this.$nextTick(()=>{
+          this.$refs.quarInput.focus();
+        });
+      }
+    },
     handleCancel() {
       this.form.name = null;
       this.form.date = null;
