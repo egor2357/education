@@ -2,6 +2,7 @@
   <LightBox
     :media="media"
     :showCaption="false"
+    :showThumbs="false"
     :showLightBox="true"
     :startAt="startAt"
     @onClosed="$emit('close')"
