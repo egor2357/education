@@ -38,7 +38,7 @@ class Development_direction(models.Model):
     db_table = 'development_direction'
     verbose_name = 'Направление развития'
     verbose_name_plural = 'Направления развития'
-    ordering = ['number']
+    ordering = ['area', 'number']
     unique_together = ('area', 'name',)
 
   def __str__(self):
@@ -57,7 +57,7 @@ class Skill(models.Model):
     db_table = 'skill'
     verbose_name = 'Навык'
     verbose_name_plural = 'Навыки'
-    ordering = ['number']
+    ordering = ['direction', 'number']
     unique_together = ('direction', 'name',)
 
   def __str__(self):
@@ -625,7 +625,7 @@ class Skill_report(models.Model):
     db_table = 'skill_report'
     verbose_name = 'Отчет по навыку'
     verbose_name_plural = 'Отчеты по навыку'
-    ordering = ['job']
+    ordering = ['job', 'skill']
     unique_together = ('job', 'skill')
 
   def __str__(self):
