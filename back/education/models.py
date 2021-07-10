@@ -362,10 +362,6 @@ class Specialty(models.Model):
     )
 
 class Option(models.Model):
-  method = models.ForeignKey(
-    Method, null=True, blank=True,
-    on_delete=models.SET_NULL, verbose_name='Форма проведения занятия'
-  )
   specialist = models.ForeignKey(
     Specialist, null=True,
     on_delete=models.SET_NULL, verbose_name='Специалист'
@@ -374,6 +370,7 @@ class Option(models.Model):
     Activity, null=False,
     on_delete=models.CASCADE, verbose_name='Вид деятельсности')
 
+  methods = models.ManyToManyField(Method, verbose_name='Формы')
   skills = models.ManyToManyField(Skill, verbose_name='Развиваемые на занятии навыки')
 
   topic = models.TextField(verbose_name='Тема занятия')
@@ -486,10 +483,7 @@ class Job(models.Model):
     Schedule, null=True, default=None, blank=True,
     on_delete=models.SET_NULL, verbose_name='Шаблон занятия'
   )
-  method = models.ForeignKey(
-    Method, null=True, default=None, blank=True,
-    on_delete=models.SET_NULL, verbose_name='Форма'
-  )
+  methods = models.ManyToManyField(Method, verbose_name='Формы')
 
   reports = models.ManyToManyField('Skill', through='Skill_report', verbose_name='Отчеты по навыкам')
 

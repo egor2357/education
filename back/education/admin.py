@@ -140,7 +140,6 @@ class JobAdmin(admin.ModelAdmin):
   list_display = (
     'activity', 'date',
     'specialist', 'schedule',
-    'method',
     'start_time', 'topic')
   list_filter = ('schedule',)
   inlines = (Job_fileInline, Skill_reportInline)
