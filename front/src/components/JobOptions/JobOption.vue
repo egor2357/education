@@ -24,12 +24,13 @@
           Навыки не выбраны
         </div>
       </div>
-      <div class="job-option-form" v-if="option.method">
-        {{ option.method.form_name }}
-        <a-divider type="vertical" />
-        {{ option.method.name }}
+      <div class="job-option-methods" v-if="option.methods.length">
+        <span v-for="method, index in option.methods" :key="method.id">
+          {{method.name}}
+          <a-divider type="vertical" v-if="index!=(option.methods.length-1)"/>
+        </span>
       </div>
-      <div class="job-option-form" v-else>Форма и способ не выбраны</div>
+      <div class="job-option-methods" v-else>Формы проведения занятия не выбраны</div>
       <div class="job-option-comment">{{ option.comment }}</div>
       <div class="job-option-files" v-if="files.length">
         <a-divider orientation="left"> Методические материалы </a-divider>
@@ -193,7 +194,7 @@ $border-color: #e8e8e8
       background-color: #f9f9f9
       color: #000
 
-  &-form
+  &-methods
     font-weight: bold
     margin-bottom: 10px
   &-files
