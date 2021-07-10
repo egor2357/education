@@ -59,40 +59,37 @@
       </a-form-model-item>
 
       <a-form-model-item
-        prop="form_id"
-        label="Форма проведения занятия"
-        key="form"
-        :validateStatus="fields['form_id'].validateStatus"
-        :help="fields['form_id'].help"
+        prop="methods"
+        label="Формы проведения занятия"
+        key="methods"
+        :validateStatus="fields['methods'].validateStatus"
+        :help="fields['methods'].help"
       >
-        <a-select
-          v-model="form.form_id"
+        <a-tree-select
+          :value="form.methods"
+          @change="setMethods"
+          :dropdownStyle="{ 'max-height': '500px', 'max-width': '566px', 'overflow-y': 'auto' }"
+          placeholder="Выберите формы проведения занятия"
           allow-clear
-          @change="fieldChanged($event, 'form_id')"
+          multiple
         >
-          <a-select-option v-for="form in forms" :key="form.id">
-            {{ form.name }}
-          </a-select-option>
-        </a-select>
-      </a-form-model-item>
-
-      <a-form-model-item
-        prop="method_id"
-        label="Способ проведения занятия"
-        key="method_id"
-        :validateStatus="fields['method_id'].validateStatus"
-        :help="fields['method_id'].help"
-      >
-        <a-select
-          v-model="form.method_id"
-          :disabled="!form.form_id"
-          allow-clear
-          @change="fieldChanged($event, 'method_id')"
-        >
-          <a-select-option v-for="method in methods" :key="method.id">
-            {{ method.name }}
-          </a-select-option>
-        </a-select>
+          <a-tree-select-node
+            v-for="form in forms"
+            :key="'form' + form.id"
+            :value="'form' + form.id"
+            :selectable="false"
+            :title="`${form.name}`"
+          >
+            <a-tree-select-node
+              v-for="method in form.methods"
+              :key="'method' + method.id"
+              :value="method.id"
+              :title="`${method.name}`"
+              :isLeaf="true"
+            >
+            </a-tree-select-node>
+          </a-tree-select-node>
+        </a-tree-select>
       </a-form-model-item>
 
       <a-form-model-item
@@ -170,8 +167,7 @@ export default {
       form: {
         topic: "",
         skills: [],
-        form_id: null,
-        method_id: null,
+        methods: [],
         comment: "",
         option_files: [],
       },
@@ -188,11 +184,7 @@ export default {
           validateStatus: "",
           help: "",
         },
-        form_id: {
-          validateStatus: "",
-          help: "",
-        },
-        method_id: {
+        methods: {
           validateStatus: "",
           help: "",
         },
@@ -220,18 +212,11 @@ export default {
             message: "Пожалуйста, выберите затрагиваемые навыки",
           },
         ],
-        form_id: [
+        methods: [
           {
             trigger: "change",
             required: false,
-            message: "Пожалуйста, выберите форму проведения занятия",
-          },
-        ],
-        method_id: [
-          {
-            trigger: "change",
-            required: false,
-            message: "Пожалуйста, выберите способ проведения занятия",
+            message: "Пожалуйста, выберите формы проведения занятия",
           },
         ],
         comment: [
@@ -260,14 +245,6 @@ export default {
       formsFetched: "forms/getFetched",
       forms: "forms/getForms",
     }),
-    methods() {
-      for (let form of this.forms) {
-        if (form.id == this.form.form_id) {
-          return form.methods.slice();
-        }
-      }
-      return [];
-    },
   },
   methods: {
     ...mapActions({
@@ -276,10 +253,6 @@ export default {
     }),
 
     async fieldChanged(val, field_key) {
-      if (field_key == "form_id") {
-        this.form.method_id = null;
-      }
-
       this.fields[field_key].validateStatus = "";
       this.fields[field_key].help = "";
     },
@@ -301,10 +274,7 @@ export default {
 
               formData.append("topic", this.form.topic);
               formData.append("skills", this.form.skills);
-              formData.append(
-                "method_id",
-                this.form.method_id ? this.form.method_id : ""
-              );
+              formData.append("methods", this.form.methods);
               formData.append("comment", this.form.comment);
 
               let allFilesIds = [];
@@ -365,6 +335,13 @@ export default {
       }
       this.fieldChanged(values, "skills");
     },
+    setMethods(values, labels) {
+      this.form.methods.splice(0);
+      for (let value of values) {
+        this.form.methods.push(value);
+      }
+      this.fieldChanged(values, "methods");
+    },
     handleRemoveOptionFile(file) {
       const index = this.form.option_files.indexOf(file);
       const newFileList = this.form.option_files.slice();
@@ -401,14 +378,17 @@ export default {
     if (this.option) {
       this.title = `${this.activity.name} | Изменение плана занятия`;
       this.form.topic = this.option.topic;
+
       this.form.skills.splice(0);
       this.form.skills = this.option.skills.map((skill) => {
         return skill.id;
       });
-      this.form.form_id = this.option.method
-        ? this.option.method.form_id
-        : null;
-      this.form.method_id = this.option.method ? this.option.method.id : null;
+
+      this.form.methods.splice(0);
+      this.form.methods = this.option.methods.map((method) => {
+        return method.id;
+      });
+
       this.form.comment = this.option.comment;
       this.form.option_files.splice(0);
       for (let option_file of this.option.option_files) {
