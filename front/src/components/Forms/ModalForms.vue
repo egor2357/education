@@ -98,19 +98,19 @@ export default {
             if (this.type === 1 && this.adding) {
               dispatchName = "forms/addForm";
               successCode = 201;
-              successMessage = "Форма проведения занятий успешно добавлена";
+              successMessage = "Метод проведения занятий успешно добавлен";
             } else if (this.type === 1 && !this.adding) {
               dispatchName = "forms/editForm";
               successCode = 200;
-              successMessage = "Форма проведения занятий успешно изменена";
+              successMessage = "Метод проведения занятий успешно изменен";
             } else if (this.type === 2 && this.adding) {
               dispatchName = "forms/addMethod";
               successCode = 201;
-              successMessage = "Способ проведения занятий успешно добавлено";
+              successMessage = "Форма проведения занятий успешно добавлена";
             } else if (this.type === 2 && !this.adding) {
               dispatchName = "forms/editMethod";
               successCode = 200;
-              successMessage = "Способ проведения занятий успешно изменено";
+              successMessage = "Форма проведения занятий успешно изменена";
             }
             try {
               let res = await this.$store.dispatch(dispatchName, this.form);
@@ -164,12 +164,12 @@ export default {
       this.editableData.name ? (this.form.name = this.editableData.name) : "";
     }
     if (this.type === 1) {
-      this.title += "формы проведения занятий";
+      this.title += "метода проведения занятий";
     } else if (this.type === 2) {
       this.editableData.form_id
         ? (this.form.form_id = this.editableData.form_id)
         : "";
-      this.title += "способа проведений занятий";
+      this.title += "формы проведений занятий";
     }
     document.addEventListener("keydown", this.keydown);
   },

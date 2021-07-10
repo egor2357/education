@@ -215,8 +215,8 @@ class Form(models.Model):
 
   class Meta:
     db_table = 'form'
-    verbose_name = 'Форма проведения занятий'
-    verbose_name_plural = 'Формы проведения занятий'
+    verbose_name = 'Методы проведения занятий'
+    verbose_name_plural = 'Методы проведения занятий'
     ordering = ['name']
 
   def __str__(self):
@@ -225,15 +225,15 @@ class Form(models.Model):
 class Method(models.Model):
   form = models.ForeignKey(
     Form, null=False,
-    on_delete=models.CASCADE, verbose_name='Форма'
+    on_delete=models.CASCADE, verbose_name='Методы'
   )
 
   name = models.TextField(verbose_name='Название')
 
   class Meta:
     db_table = 'method'
-    verbose_name = 'Способ проведения занятия'
-    verbose_name_plural = 'Способы проведения занятия'
+    verbose_name = 'Форма проведения занятия'
+    verbose_name_plural = 'Формы проведения занятия'
     ordering = ['name']
     unique_together = ('form', 'name')
 
@@ -364,7 +364,7 @@ class Specialty(models.Model):
 class Option(models.Model):
   method = models.ForeignKey(
     Method, null=True, blank=True,
-    on_delete=models.SET_NULL, verbose_name='Способ проведения занятия'
+    on_delete=models.SET_NULL, verbose_name='Форма проведения занятия'
   )
   specialist = models.ForeignKey(
     Specialist, null=True,
@@ -488,7 +488,7 @@ class Job(models.Model):
   )
   method = models.ForeignKey(
     Method, null=True, default=None, blank=True,
-    on_delete=models.SET_NULL, verbose_name='Способ'
+    on_delete=models.SET_NULL, verbose_name='Форма'
   )
 
   reports = models.ManyToManyField('Skill', through='Skill_report', verbose_name='Отчеты по навыкам')

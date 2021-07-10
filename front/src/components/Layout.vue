@@ -123,7 +123,7 @@ export default {
             },
             {
               key: "3.5",
-              title: "Формы и способы занятий",
+              title: "Методы и формы занятий",
               class: "submenu--two-lines",
               to: { name: "Forms" },
             },

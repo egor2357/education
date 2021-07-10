@@ -16,7 +16,7 @@
         </span>
       </div>
       <template slot="extra">
-        <a @click.stop="$emit('displayAdd', 2, form.id)">Добавить способ</a>
+        <a @click.stop="$emit('displayAdd', 2, form.id)">Добавить форму</a>
         <a-divider type="vertical" />
         <a @click.stop="$emit('displayEdit', 1, form)"> Изменить </a>
         <a-divider type="vertical" />
@@ -52,10 +52,10 @@ export default {
       let successMessage = "";
       if (type === 1) {
         dispatchName = "forms/deleteForm";
-        successMessage = "Форма проведения занятий успешно удалена";
+        successMessage = "Метод проведения занятий успешно удален";
       } else if (type === 2) {
         dispatchName = "forms/deleteMethod";
-        successMessage = "Способ проведения занятий успешно удален";
+        successMessage = "Форма проведения занятий успешно удалена";
       } else {
         return;
       }
@@ -74,9 +74,9 @@ export default {
     displayDelete({ id, name }, type) {
       let title = "";
       if (type === 1) {
-        title += `Форма проведения занятий "${name}" будет удалена?`;
+        title += `Метод проведения занятий "${name}" будет удален?`;
       } else if (type === 2) {
-        title += `Способ проведения занятий "${name}" будет удален?`;
+        title += `Форма проведения занятий "${name}" будет удалена?`;
       }
       let that = this;
       this.$confirm({

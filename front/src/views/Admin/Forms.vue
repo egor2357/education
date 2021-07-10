@@ -2,7 +2,7 @@
   <div class="forms">
     <div class="top-bar">
       <div class="placeholder"></div>
-      <div class="title">Формы и способы проведения занятий</div>
+      <div class="title">Методы и формы проведения занятий</div>
       <div class="add-button">
         <a-button
           type="secondary"
@@ -13,7 +13,7 @@
             modalAdding = true;
             modalType = 1;
           "
-          >Добавить форму</a-button>
+          >Добавить метод</a-button>
       </div>
     </div>
 
