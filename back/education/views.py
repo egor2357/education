@@ -121,6 +121,12 @@ class JobView(viewsets.ModelViewSet):
       skill_reports_qs.exclude(skill_id__in=remaining_skills).delete()
       Skill_report.objects.bulk_create(skills_to_save)
 
+    if 'methods' in request.data:
+      methods = request.data.get('methods', '')
+      methods = [int(method) for method in methods.split(',')] if methods else []
+      methods = Method.objects.filter(pk__in=methods)
+      job.methods.set(methods)
+
     if 'marks' in request.data:
       marks = request.data.get('marks', [])
       for mark in marks:
@@ -189,7 +195,8 @@ class JobView(viewsets.ModelViewSet):
 
     job.topic = option.topic
     job.comment = option.comment
-    job.method = option.method
+
+    job.methods.set(option.methods.all())
 
     job.skill_report_set.all().delete()
     reports_to_save = []
@@ -227,12 +234,12 @@ class JobView(viewsets.ModelViewSet):
     return (jobs_qs.select_related(
                     'activity',
                     'schedule__activity',
-                    'specialist',
-                    'method__form'
+                    'specialist'
                   )
                   .prefetch_related(
                     'job_file_set',
-                    'skill_report_set__skill__direction__area'
+                    'skill_report_set__skill__direction__area',
+                    'methods__form',
                   ))
 
 class ScheduleView(viewsets.ModelViewSet):
@@ -402,6 +409,12 @@ class OptionView(viewsets.ModelViewSet):
       option.skills.clear()
       option.skills.set(skills)
 
+    if 'methods' in request.data:
+      methods = request.data.get('methods', '')
+      methods = [int(method) for method in methods.split(',')] if methods else []
+      methods = Method.objects.filter(pk__in=methods)
+      option.methods.set(methods)
+
     serializer = OptionSerializer(option, data=request.data, partial=True, context={'request': request})
     if serializer.is_valid(raise_exception=True):
       serializer.save()
@@ -437,6 +450,12 @@ class OptionView(viewsets.ModelViewSet):
       skills = Skill.objects.filter(pk__in=skills)
       option.skills.set(skills)
 
+    if 'methods' in request.data:
+      methods = request.data.get('methods', '')
+      methods = [int(method) for method in methods.split(',')] if methods else []
+      methods = Method.objects.filter(pk__in=methods)
+      option.methods.set(methods)
+
     option.save()
     option.refresh_from_db()
     return Response(OptionSerializer(option, context={'request': request}).data, status=201)
@@ -450,8 +469,7 @@ class OptionView(viewsets.ModelViewSet):
         qs = Option.objects.filter(specialist=user.specialist)
       else:
         qs = Option.objects.none()
-    qs = (qs.prefetch_related('option_file_set', 'skills__direction__area')
-            .select_related('method__form'))
+    qs = (qs.prefetch_related('option_file_set', 'skills__direction__area', 'methods__form'))
     return qs
 
 class PresenceView(viewsets.ModelViewSet):

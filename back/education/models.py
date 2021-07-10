@@ -498,7 +498,7 @@ class Job(models.Model):
   def clear_params(self):
     self.topic = ''
     self.reports.clear()
-    self.method = None
+    self.methods.clear()
     self.comment = ''
     self.job_file_set.all().delete()
 

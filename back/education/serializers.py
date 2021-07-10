@@ -520,12 +520,6 @@ class Option_fileSerializer(serializers.ModelSerializer):
     )
 
 class OptionSerializer(serializers.ModelSerializer):
-  method_id = serializers.PrimaryKeyRelatedField(
-    source='method', queryset=Method.objects.all(), required=False
-  )
-  method = MethodSerializer(
-    read_only=True,
-  )
   activity_id = serializers.PrimaryKeyRelatedField(
     source='activity', queryset=Activity.objects.all()
   )
@@ -535,6 +529,7 @@ class OptionSerializer(serializers.ModelSerializer):
   option_files = Option_fileSerializer(
     source='option_file_set', many=True, read_only=True
   )
+  methods = MethodSerializer(read_only=True, many=True)
   skills = SkillSerializer(read_only=True, many=True)
 
   class Meta:
@@ -542,10 +537,9 @@ class OptionSerializer(serializers.ModelSerializer):
     fields = (
       'id', 'topic',
       'comment',
-      'method_id', 'specialist_id',
+      'specialist_id',
       'activity_id', 'option_files',
-      'skills',
-      'method',
+      'skills', 'methods',
     )
 
 class Job_fileSerializer(serializers.ModelSerializer):
@@ -607,14 +601,7 @@ class JobSerializer(FlexFieldsModelSerializer):
   schedule = ScheduleSerializer(
     read_only=True,
   )
-  method_id = serializers.PrimaryKeyRelatedField(
-    source='method', queryset=Method.objects.all(),
-    write_only=True, required=False, allow_null=True
-  )
-  method = MethodSerializer(
-    read_only=True,
-  )
-
+  methods = MethodSerializer(read_only=True, many=True)
   reports = Skill_reportSerializer(
     source='skill_report_set',
     many=True, read_only=True,
@@ -650,10 +637,10 @@ class JobSerializer(FlexFieldsModelSerializer):
       'activity_id', 'activity',
       'schedule_id', 'schedule',
       'reports',
+      'methods',
       'job_files',
       'date', 'start_time',
       'comment', 'topic',
-      'method_id', 'method',
       'report_comment',
     )
 
@@ -667,7 +654,7 @@ class Skill_reportSerializer(FlexFieldsModelSerializer):
 
   job = JobSerializer(
     read_only=True,
-    omit=['schedule', 'reports', 'job_files']
+    omit=['schedule', 'reports', 'methods', 'job_files']
   )
 
   skill = SkillSerializer(read_only=True)
