@@ -246,9 +246,8 @@ export default {
         let secondQParameter = `date_to=${this.dateRange[1].format(
           "YYYY-MM-DD"
         )}`;
-        let thirdQParameter = `is_affected=true`;
         let fourthQParameter = `skill_id=${this.$route.params.id}`;
-        let QParameters = `?${firstQParameter}&${secondQParameter}&${thirdQParameter}&${fourthQParameter}`;
+        let QParameters = `?${firstQParameter}&${secondQParameter}&${fourthQParameter}`;
         let res = await this.$axios.get(
           `/api/skill_reports/${QParameters}&ordering=${this.activeSort}`
         );

@@ -72,8 +72,7 @@
                         <div class="table-cell">
                           <span
                             :class="{
-                              'skill-link': reportsStatisticsById[skill.id]
-                                            && reportsStatisticsById[skill.id].called,
+                              'skill-link': reportsStatisticsById[skill.id],
                             }"
                             @click="goToSkill(skill.id)"
                           >
@@ -180,7 +179,7 @@ export default {
       }
     },
     goToSkill(skillId) {
-      if (this.reportsStatisticsById[skillId] && this.reportsStatisticsById[skillId].called) {
+      if (this.reportsStatisticsById[skillId]) {
         this.$router.push({
           name: "SkillDetails",
           params: { id: skillId },
