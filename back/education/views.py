@@ -532,17 +532,60 @@ class Job_fileView(viewsets.ModelViewSet):
 class Skill_reportView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
-  queryset = (Skill_report.objects.all()
-                                  .select_related(
-                                    'skill__direction__area',
-                                    'job__activity',
-                                    'job__specialist',
-                                  )
-                                  )
   serializer_class = Skill_reportSerializer
   filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
   filterset_class = Skill_reportFilter
   ordering_fields = ['job__date', 'job__activity__name', 'job__specialist__surname']
+
+  def get_queryset(self):
+    user = self.request.user
+    if user.is_staff:
+      qs =  Skill_report.objects.all()
+    else:
+      if user.specialist is not None:
+        qs = Skill_report.objects.filter(skill__in=user.specialist.skills.all())
+      else:
+        qs = Skill_report.objects.none()
+    return qs.select_related(
+                              'skill__direction__area',
+                              'job__activity',
+                              'job__specialist',
+                            )
+  @action(detail=False, methods=['get'])
+  def statistics(self, request, *args, **kwargs):
+    skill_reports = self.filter_queryset(self.get_queryset())
+
+    mark_coeffs = [0.33, 0.66, 1]
+    calls_by_id = {}
+
+    coeff_by_spec_id_skill_id = {}
+    all_competence = Competence.objects.all()
+    for competence in all_competence:
+      if not competence.specialist_id in coeff_by_spec_id_skill_id.keys():
+        coeff_by_spec_id_skill_id[competence.specialist_id] = {}
+
+      coeff_by_spec_id_skill_id[competence.specialist_id][competence.skill_id] = competence.coefficient
+
+    for skill_report in skill_reports:
+      if not skill_report.skill.id in calls_by_id.keys():
+        calls_by_id[skill_report.skill.id] = {
+          'planned': 0,
+          'called': 0,
+          'value': 0,
+        }
+
+      spec_coeff = coeff_by_spec_id_skill_id[skill_report.job.specialist_id][skill_report.skill_id]
+
+      calls_by_id[skill_report.skill.id]['planned'] += 1
+
+      is_called = not skill_report.mark is None
+      calls_by_id[skill_report.skill.id]['called'] += 1 if is_called else 0
+      calls_by_id[skill_report.skill.id]['value'] += mark_coeffs[skill_report.mark]*spec_coeff if is_called else 0
+
+    for skill_id in calls_by_id.keys():
+      calls_by_id[skill_id]['value'] = round(calls_by_id[skill_id]['value'] / calls_by_id[skill_id]['planned'], 2)
+
+    return Response(calls_by_id)
 
 class CompetenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)

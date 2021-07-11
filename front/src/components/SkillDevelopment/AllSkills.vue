@@ -34,6 +34,11 @@
                 Количество обращений к навыку за период
               </div>
             </div>
+            <div class="table-header__column table-header__column_mark">
+              <div class="table-cell">
+                Оценка освоения навыка
+              </div>
+            </div>
           </div>
           <div class="table-body" v-if="areas.length">
             <div class="table-row" v-for="area in areas" :key="area.id">
@@ -67,7 +72,8 @@
                         <div class="table-cell">
                           <span
                             :class="{
-                              'skill-link': reportsCountById[skill.id],
+                              'skill-link': reportsStatisticsById[skill.id]
+                                            && reportsStatisticsById[skill.id].called,
                             }"
                             @click="goToSkill(skill.id)"
                           >
@@ -86,9 +92,24 @@
                       <div class="table-row__column_count">
                         <div class="table-cell">
                           {{
-                            skill.id in reportsCountById
-                              ? reportsCountById[skill.id]
+                            skill.id in reportsStatisticsById
+                              ? reportsStatisticsById[skill.id].called
                               : 0
+                          }}
+                          /
+                          {{
+                            skill.id in reportsStatisticsById
+                              ? reportsStatisticsById[skill.id].planned
+                              : 0
+                          }}
+                        </div>
+                      </div>
+                      <div class="table-row__column_mark">
+                        <div class="table-cell">
+                          {{
+                            skill.id in reportsStatisticsById
+                              ? reportsStatisticsById[skill.id].value
+                              : '-'
                           }}
                         </div>
                       </div>
@@ -129,25 +150,14 @@ export default {
 
       dateRange: [],
 
-      reportsCountById: {},
+      reportsStatisticsById: {},
     };
   },
   methods: {
     ...mapActions({
       fetchAreas: "skills/fetchAreas",
     }),
-
-    setReportsCountById(reports) {
-      this.reportsCountById = {};
-      for (let report of reports) {
-        if (report.skill_id in this.reportsCountById) {
-          this.reportsCountById[report.skill_id] += 1;
-        } else {
-          this.reportsCountById[report.skill_id] = 1;
-        }
-      }
-    },
-    async fetchSkillReports() {
+    async fetchSkillReportsStatistics() {
       try {
         this.loading = true;
         let firstQParameter = `date_from=${this.dateRange[0].format(
@@ -156,11 +166,10 @@ export default {
         let secondQParameter = `date_to=${this.dateRange[1].format(
           "YYYY-MM-DD"
         )}`;
-        let thirdQParameter = `is_affected=true`;
-        let QParameters = `?${firstQParameter}&${secondQParameter}&${thirdQParameter}`;
-        let res = await this.$axios.get(`/api/skill_reports/${QParameters}`);
+        let QParameters = `?${firstQParameter}&${secondQParameter}`;
+        let res = await this.$axios.get(`/api/skill_reports/statistics/${QParameters}`);
         if (res.status === 200) {
-          this.setReportsCountById(res.data);
+          this.reportsStatisticsById = res.data;
         } else {
           this.$message.error("Произошла ошибка при загрузке отчетов");
         }
@@ -171,7 +180,7 @@ export default {
       }
     },
     goToSkill(skillId) {
-      if (this.reportsCountById[skillId]) {
+      if (this.reportsStatisticsById[skillId] && this.reportsStatisticsById[skillId].called) {
         this.$router.push({
           name: "SkillDetails",
           params: { id: skillId },
@@ -256,7 +265,7 @@ export default {
       return;
     }
 
-    this.fetchSkillReports();
+    this.fetchSkillReportsStatistics();
   },
 
   beforeRouteUpdate(to, from, next) {
@@ -264,7 +273,7 @@ export default {
       this.dateRangeChange(this.dateRange, true);
       return;
     }
-    this.fetchSkillReports();
+    this.fetchSkillReportsStatistics();
     next();
   },
 };
@@ -340,6 +349,12 @@ export default {
     display: flex
     align-items: center
 
+  .table-header__column_mark
+    width: 160px
+    border-left: 1px solid #e8e8e8
+    display: flex
+    align-items: center
+
   .table-cell
     padding: 10px 15px
     display: flex
@@ -383,6 +398,13 @@ export default {
       border-left: 1px solid #e8e8e8
 
     .table-row__column_count
+      width: 160px
+      border-left: 1px solid #e8e8e8
+      display: flex
+      align-items: center
+      justify-content: center
+
+    .table-row__column_mark
       width: 160px
       border-left: 1px solid #e8e8e8
       display: flex
