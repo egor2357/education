@@ -2,17 +2,20 @@
   <LightBox
     :media="media"
     :showCaption="false"
-    :showThumbs="false"
     :showLightBox="true"
     :startAt="startAt"
     @onClosed="$emit('close')"
   >
+    <template v-slot:customCaption="slotProps">
+      <a-button icon="save" @click="downloadFile(slotProps.currentMedia)" />
+    </template>
   </LightBox>
 </template>
 
 <script>
 import LightBox from "vue-it-bigger";
 import("vue-it-bigger/dist/vue-it-bigger.min.css");
+import { saveAs } from 'file-saver';
 export default {
   name: "MediaLightBox",
   components: {
@@ -56,6 +59,16 @@ export default {
       return arr;
     },
   },
+  methods: {
+    async downloadFile(media) {
+      let url = media.src;
+      if (process.env.NODE_ENV === "development") {
+        url = url.split("http://192.168.137.100:8001")[1];
+      }
+      saveAs(url, media.name);
+    },
+  },
+
 };
 </script>
 
