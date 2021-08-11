@@ -146,3 +146,10 @@ class JobAdmin(admin.ModelAdmin):
   date_hierarchy = 'date'
 
 admin.site.register(Job, JobAdmin)
+
+class MissionAdmin(admin.ModelAdmin):
+  list_filter = ('director', 'executor', 'controller', 'status')
+  list_display = ('caption', 'deadline', 'director', 'executor', 'controller', 'status')
+  search_fields = ('caption', 'comment')
+
+admin.site.register(Mission, MissionAdmin)
