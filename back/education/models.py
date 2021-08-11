@@ -652,10 +652,13 @@ class Mission(models.Model):
     on_delete=models.CASCADE, verbose_name='Контролер'
   )
 
-  creation_date = models.DateField(null=False, verbose_name='Дата создания')
+  creation_date = models.DateField(
+    auto_now_add=True,
+    null=False, verbose_name='Дата создания'
+  )
   deadline = models.DateField(null=False, verbose_name='Срок исполнения')
   caption = models.TextField(blank=False, verbose_name='Название')
-  comment = models.TextField(blank=False, verbose_name='Комментарий')
+  comment = models.TextField(blank=True, verbose_name='Комментарий')
   status = models.PositiveSmallIntegerField(
     default=0, null=False, choices=STATUS_CHOICES,
     blank=False, verbose_name='Статус поручения'
