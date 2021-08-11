@@ -630,7 +630,7 @@ class Skill_report(models.Model):
 
 class Mission(models.Model):
   '''
-    Поручение
+    Задача
   '''
   STATUS_CHOICES = (
     (0, 'Новое'),
@@ -663,8 +663,8 @@ class Mission(models.Model):
 
   class Meta:
     db_table = 'mission'
-    verbose_name = 'Поручение'
-    verbose_name_plural = 'Поручения'
+    verbose_name = 'Задача'
+    verbose_name_plural = 'Задачи'
     ordering = ['-creation_date']
 
   def __str__(self):
