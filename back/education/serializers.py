@@ -667,3 +667,34 @@ class Skill_reportSerializer(FlexFieldsModelSerializer):
       'skill_id', 'skill',
       'mark',
     )
+
+class MissionSerializer(FlexFieldsModelSerializer):
+  director_id = serializers.PrimaryKeyRelatedField(
+    source='director', queryset=Specialist.objects.all(),
+    write_only=True, required=True, allow_null=False
+  )
+  executor_id = serializers.PrimaryKeyRelatedField(
+    source='executor', queryset=Specialist.objects.all(),
+    write_only=True, required=True, allow_null=False
+  )
+  controller_id = serializers.PrimaryKeyRelatedField(
+    source='controller', queryset=Specialist.objects.all(),
+    write_only=True, required=False, allow_null=True
+  )
+
+  director = SpecialistSerializer(
+    read_only=True,
+    fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
+  )
+  executor = SpecialistSerializer(
+    read_only=True,
+    fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
+  )
+  controller = SpecialistSerializer(
+    read_only=True,
+    fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
+  )
+
+  class Meta:
+    model = Mission
+    fields = '__all__'
