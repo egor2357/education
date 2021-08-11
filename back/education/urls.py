@@ -20,6 +20,7 @@ router.register(r'skill_reports', Skill_reportView, basename='Skill_report')
 router.register(r'jobs', JobView, basename='Job')
 router.register(r'competence', CompetenceView, basename='Competence')
 router.register(r'specialties', SpecialtyView, basename='Specialty')
+router.register(r'missions', MissionView, basename='Mission')
 
 
 urlpatterns = [

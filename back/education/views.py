@@ -1,6 +1,8 @@
 from rest_framework import status, viewsets, views, permissions, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from django.db.models import Q
+
 
 from django.contrib.auth import login, logout
 
@@ -635,3 +637,19 @@ class SpecialtyView(viewsets.ModelViewSet):
     return Response(SpecialtySerializer(specialty, context={'request': request}).data, status=201)
 
 
+class MissionView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
+  serializer_class = MissionSerializer
+
+  def get_queryset(self):
+    user = self.request.user
+    qs = Mission.objects.none()
+    if user.is_staff:
+      qs = Mission.objects.all()
+    else:
+      if user.specialist is not None:
+        user_is_an_executor = Q(executor=user.specialist)
+        user_is_a_controler = Q(controller=user.specialist)
+        qs = Mission.objects.filter(user_is_an_executor | user_is_a_controler)
+    return qs.select_related('director', 'executor', 'controller')
