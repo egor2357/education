@@ -627,3 +627,45 @@ class Skill_report(models.Model):
       self.job,
       self.marks[self.mark] if self.mark else 'Не выставлена'
     )
+
+class Mission(models.Model):
+  '''
+    Поручение
+  '''
+  STATUS_CHOICES = (
+    (0, 'Новое'),
+    (1, 'В процессе'),
+    (2, 'Исполнено'),
+  )
+
+  director = models.ForeignKey(
+    Specialist, null=False, related_name='director_missions',
+    on_delete=models.CASCADE, verbose_name='Постановщик'
+  )
+  executor = models.ForeignKey(
+    Specialist, null=False, related_name='executor_missions',
+    on_delete=models.CASCADE, verbose_name='Исполнитель'
+  )
+  controller = models.ForeignKey(
+    Specialist, null=True, related_name='controller_missions',
+    blank=True,
+    on_delete=models.CASCADE, verbose_name='Контролер'
+  )
+
+  creation_date = models.DateField(null=False, verbose_name='Дата создания')
+  deadline = models.DateField(null=False, verbose_name='Срок исполнения')
+  caption = models.TextField(blank=False, verbose_name='Название')
+  comment = models.TextField(blank=False, verbose_name='Комментарий')
+  status = models.PositiveSmallIntegerField(
+    default=0, null=False, choices=STATUS_CHOICES,
+    blank=False, verbose_name='Статус поручения'
+  )
+
+  class Meta:
+    db_table = 'mission'
+    verbose_name = 'Поручение'
+    verbose_name_plural = 'Поручения'
+    ordering = ['-creation_date']
+
+  def __str__(self):
+    return self.caption
