@@ -4,7 +4,7 @@
       <div class="top-bar">
         <div class="top-bar__side-block left"></div>
         <div class="title">Задачи</div>
-        <div class="top-bar__side-block right">
+        <div class="top-bar__side-block right" v-if="isStaff">
           <a-button icon="plus" @click="displayAdd"> Добавить задачу </a-button>
         </div>
       </div>

@@ -97,6 +97,9 @@ export default {
   },
   async created() {
     await this.getData();
+    if (!this.isStaff) {
+      this.columns.splice(8);
+    }
   },
   methods: {
     ...mapActions({
@@ -162,6 +165,9 @@ export default {
     ...mapGetters({
       data: "missions/getMissions",
     }),
+    isStaff() {
+      return this.$store.getters["auth/getUserInfo"].staff;
+    },
   },
 };
 </script>
