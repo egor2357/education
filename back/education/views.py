@@ -653,3 +653,11 @@ class MissionView(viewsets.ModelViewSet):
         user_is_a_controler = Q(controller=user.specialist)
         qs = Mission.objects.filter(user_is_an_executor | user_is_a_controler)
     return qs.select_related('director', 'executor', 'controller')
+
+  def list(self, *args, **kwargs):
+    qs = self.get_queryset()
+    user = self.request.user
+    if (not user.is_staff) and (user.specialist is not None):
+      new_missions = qs.filter(executor=user.specialist, status=0)
+      new_missions.update(status=1)
+    return Response(MissionSerializer(qs, many=True).data)
