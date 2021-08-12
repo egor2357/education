@@ -1,8 +1,6 @@
 <template>
   <div>
-    <a-button type="primary" @click="displayForm(true)" v-if="!viewOnly">
-      Добавить
-    </a-button>
+    <a-button type="primary" v-if="isStaff"> Добавить </a-button>
     <a-divider />
     <a-spin :spinning="loading">
       <a-table
@@ -31,14 +29,73 @@
 </template>
 
 <script>
+import {mapGetters, mapActions} from 'vuex';
 export default {
   name: "MissionsTable",
   data() {
     return {
-      loading: true
+      loading: true,
+      pagination: {
+        total: 0,
+        page: 1,
+        pageSize: 10,
+        showSizeChanger: true,
+        locale: { items_per_page: " на странице" },
+        pageSizeOptions: ["10", "20", "30"],
+      },
+      columns: [
+        {
+          title: "Постановщик",
+          dataIndex: "director.__str__",
+          key: "director",
+        },
+        {
+          title: "Исполнитель",
+          dataIndex: "executor.__str__",
+          key: "executor",
+        },
+        {
+          title: "Контролёр",
+          dataIndex: "controller.__str__",
+          key: "controller",
+        },
+        {
+          title: "Срок исполнения",
+          dataIndex: "deadline",
+          key: "deadline",
+        },
+        {
+          title: "Описание",
+          dataIndex: "caption",
+          key: "caption",
+        },
+        {
+          title: "Комментарий",
+          dataIndex: "comment",
+          key: "comment",
+        },
+        {
+          title: "Статус",
+          dataIndex: "status",
+          key: "status",
+        },
+        {
+          title: "Действия",
+          dataIndex: "actions",
+          key: "actions",
+          scopedSlots: { customRender: "actions" },
+        },
+      ],
     }
   },
+  async created() {
+    await this.fetchMissions();
+    this.loading = false;
+  },
   methods: {
+    ...mapActions({
+      fetchMissions: "missions/fetchMissions"
+    }),
     tableChanged(e) {
       console.log(e)
     },
@@ -76,6 +133,14 @@ export default {
       } catch (e) {
         this.$message.error("Произошла ошибка");
       }
+    },
+  },
+  computed: {
+    ...mapGetters({
+      data: "missions/getMissions",
+    }),
+    isStaff() {
+      return this.$store.getters['auth/getUserInfo'].staff
     },
   },
 };

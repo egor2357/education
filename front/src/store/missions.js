@@ -18,10 +18,10 @@ const actions = {
     try {
       let res = await this.$axios.get("/api/missions/");
       if (res.status === 200) {
-        commit("setForms", {data: res.data, success: true});
+        commit("setMissions", {data: res.data, success: true});
       }
     } catch (e) {
-      commit("setForms", {data: [], success: false});
+      commit("setMissions", {data: {}, success: false});
     }
   },
   async addMission(context, payload) {
