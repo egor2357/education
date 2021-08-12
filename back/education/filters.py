@@ -1,6 +1,7 @@
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters.rest_framework import FilterSet
+from rest_framework.pagination import PageNumberPagination
 
 from .views import *
 from .models import *
@@ -83,4 +84,33 @@ class OptionFilter(FilterSet):
     model = Option
     fields = [
       'activity_id',
+    ]
+
+class MissionPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'per_page'
+    max_page_size = 1000
+
+    def get_paginated_response(self, data):
+      page_size = self.get_page_size(self.request)
+      if page_size is None:
+        page_size = 10
+      return Response({
+        'pagination': {
+          'count': self.page.paginator.count,
+          'page': self.page.number,
+          'per_page': page_size,
+          'links': {
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link()
+          },
+        },
+        'results': data
+      })
+
+class MissionFilter(FilterSet):
+  class Meta:
+    model = Mission
+    fields = [
+      'status'
     ]

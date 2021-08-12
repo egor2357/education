@@ -641,6 +641,9 @@ class MissionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = MissionSerializer
+  filter_backends = (DjangoFilterBackend,)
+  filterset_class = MissionFilter
+  pagination_class = MissionPagination
 
   def get_queryset(self):
     user = self.request.user
@@ -653,3 +656,31 @@ class MissionView(viewsets.ModelViewSet):
         user_is_a_controler = Q(controller=user.specialist)
         qs = Mission.objects.filter(user_is_an_executor | user_is_a_controler)
     return qs.select_related('director', 'executor', 'controller')
+
+  def list(self, request):
+    qs = self.get_queryset()
+    user = self.request.user
+    if (not user.is_staff) and (user.specialist is not None):
+      new_missions = qs.filter(executor=user.specialist, status=0)
+      new_missions.update(status=1)
+    return super().list(request)
+
+  @action(
+    detail=True, methods=['get'],
+    permission_classes=(permissions.IsAuthenticated,),
+    serializer_class=MissionSerializer
+  )
+  def execute(self, request, *args, **kwargs):
+    user = self.request.user
+    mission = self.get_object()
+
+    if (mission.satus == 1
+        and
+        user.specialist is not None
+        and
+        (mission.director == user.specialist) or (mission.controller == user.specialist)):
+      mission.status = 2
+      mission.save()
+
+    serializer = MissionSerializer(mission)
+    return Response(serializer.data)
