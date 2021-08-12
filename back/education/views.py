@@ -661,3 +661,23 @@ class MissionView(viewsets.ModelViewSet):
       new_missions = qs.filter(executor=user.specialist, status=0)
       new_missions.update(status=1)
     return Response(MissionSerializer(qs, many=True).data)
+
+  @action(
+    detail=True, methods=['get'],
+    permission_classes=(permissions.IsAuthenticated,),
+    serializer_class=MissionSerializer
+  )
+  def execute(self, request, *args, **kwargs):
+    user = self.request.user
+    mission = self.get_object()
+
+    if (mission.satus == 1
+        and
+        user.specialist is not None
+        and
+        (mission.director == user.specialist) or (mission.controller == user.specialist)):
+      mission.status = 2
+      mission.save()
+
+    serializer = MissionSerializer(mission)
+    return Response(serializer.data)
