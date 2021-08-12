@@ -157,6 +157,15 @@ const router = new VueRouter({
             specOnly: true,
           },
         },
+         {
+          path: "missions",
+          name: "Missions",
+          component: () => import("@/components/Missions/MissionsTable"),
+          meta: {
+            staffOnly: false,
+            specOnly: false,
+          },
+        },
         {
           path: "*",
           name: "Page404",

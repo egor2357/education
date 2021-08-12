@@ -95,6 +95,15 @@ export default {
           childrens: [],
         },
         {
+          icon: "issues-close",
+          title: "Поручения",
+          key: "5",
+          staffOnly: false,
+          specOnly: false,
+          to: { name: "Missions" },
+          childrens: [],
+        },
+        {
           icon: "setting",
           key: "3",
           title: "Настройки",
