@@ -589,6 +589,42 @@ class Skill_reportView(viewsets.ModelViewSet):
 
     return Response(calls_by_id)
 
+  @action(
+    detail=False, methods=['get'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+    serializer_class=Skill_reportSerializer
+  )
+  def set_current_coefficients(self, request, *args, **kwargs):
+    skill_reports = self.filter_queryset(self.get_queryset())
+
+    coeff_by_spec_id_skill_id = {}
+    all_competence = Competence.objects.all()
+    for competence in all_competence:
+      if not competence.specialist_id in coeff_by_spec_id_skill_id.keys():
+        coeff_by_spec_id_skill_id[competence.specialist_id] = {}
+
+      coeff_by_spec_id_skill_id[competence.specialist_id][competence.skill_id] = competence.coefficient
+
+    absent_coeffs = []
+
+    for skill_report in skill_reports:
+      spec_id = skill_report.job.specialist_id
+      skill_id = skill_report.skill_id
+      try:
+        skill_report.coefficient = coeff_by_spec_id_skill_id[spec_id][skill_id]
+        skill_report.save()
+      except:
+        absent_coeffs.append(
+          '{0} не имеет навыка {1}'.format(
+            skill_report.job.specialist.__str__(),
+            skill_report.skill.name
+          )
+        )
+
+    return Response({'absent': absent_coeffs})
+
+
+
 class CompetenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
