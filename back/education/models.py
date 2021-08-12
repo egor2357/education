@@ -672,7 +672,7 @@ class Mission(models.Model):
     db_table = 'mission'
     verbose_name = 'Задача'
     verbose_name_plural = 'Задачи'
-    ordering = ['-creation_date']
+    ordering = ['-creation_date', '-id']
 
   def __str__(self):
     return self.caption
