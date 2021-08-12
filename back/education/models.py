@@ -610,6 +610,10 @@ class Skill_report(models.Model):
     on_delete=models.CASCADE, verbose_name='Навык'
   )
 
+  coefficient = models.FloatField(
+    default=0,
+    verbose_name='Коэффициент навыка на момент отчета'
+  )
   mark = models.PositiveSmallIntegerField(
     null=True, blank=True, default=None,
     choices=mark_choices,
