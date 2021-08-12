@@ -643,6 +643,7 @@ class MissionView(viewsets.ModelViewSet):
   serializer_class = MissionSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = MissionFilter
+  pagination_class = MissionPagination
 
   def get_queryset(self):
     user = self.request.user
