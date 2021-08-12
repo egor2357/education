@@ -9,9 +9,19 @@
   >
     <span slot="actions" slot-scope="text, item">
       <div class="flex-column">
-        <a @click="$emit('displayEdit', item)" v-if="item.status !== 2"> Изменить </a>
+        <a @click="$emit('displayEdit', item)" v-if="item.status !== 2">
+          Изменить
+        </a>
         <a @click="displayDelete(item)">Удалить</a>
-        <a @click="setExecute(item.id)" v-if="item.status !== 2">Завершить</a>
+        <a
+          @click="setExecute(item.id)"
+          v-if="
+            item.status !== 2 &&
+            (userInfo.id === item.director.id ||
+              (item.controller && userInfo.id === item.controller.id))
+          "
+          >Завершить</a
+        >
       </div>
     </span>
     <template slot="status" slot-scope="status">
@@ -97,7 +107,7 @@ export default {
   },
   async created() {
     await this.getData();
-    if (!this.isStaff) {
+    if (!this.userInfo.staff) {
       this.columns.splice(8);
     }
   },
@@ -164,10 +174,8 @@ export default {
   computed: {
     ...mapGetters({
       data: "missions/getMissions",
+      userInfo: "auth/getUserInfo",
     }),
-    isStaff() {
-      return this.$store.getters["auth/getUserInfo"].staff;
-    },
   },
 };
 </script>
