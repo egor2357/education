@@ -110,14 +110,19 @@ class JobView(viewsets.ModelViewSet):
     if 'reports' in request.data:
       skills = request.data.get('reports', '')
       skills = [int(report) for report in skills.split(',')] if skills else []
+
       curr_skill_reports_ids = list(job.skill_report_set.all().values_list('skill_id', flat=True))
+
       skills_to_save = []
       remaining_skills = []
-      for skill in skills:
-        if skill not in curr_skill_reports_ids:
-          skills_to_save.append(Skill_report(job=job, skill_id=skill))
+
+      for skill_id in skills:
+        if skill_id not in curr_skill_reports_ids:
+          skills_to_save.append(
+            Skill_report(job=job, skill_id=skill_id)
+          )
         else:
-          remaining_skills.append(skill)
+          remaining_skills.append(skill_id)
 
       skill_reports_qs = job.skill_report_set.all()
       skill_reports_qs.exclude(skill_id__in=remaining_skills).delete()
@@ -130,9 +135,15 @@ class JobView(viewsets.ModelViewSet):
       job.methods.set(methods)
 
     if 'marks' in request.data:
+      user = request.user
+      coeff_by_skill_id = dict(list(user.specialist.competence_set.all().values_list('skill_id', 'coefficient')))
+
       marks = request.data.get('marks', [])
       for mark in marks:
-        Skill_report.objects.filter(pk=mark['id']).update(mark=mark['mark'])
+        skill_report = Skill_report.objects.get(pk=mark['id'])
+        skill_report.coefficient = coeff_by_skill_id[skill_report.skill_id]
+        skill_report.mark = mark['mark']
+        skill_report.save()
 
 
     serializer = JobSerializer(job, data=request.data, partial=True)
