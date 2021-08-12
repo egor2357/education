@@ -4,8 +4,10 @@
       <div class="top-bar">
         <div class="top-bar__side-block left"></div>
         <div class="title">Задачи</div>
-        <div class="top-bar__side-block right" v-if="isStaff">
-          <a-button icon="plus" @click="displayAdd"> Добавить задачу </a-button>
+        <div class="top-bar__side-block right">
+          <a-button icon="plus" v-if="isStaff" @click="displayAdd">
+            Добавить задачу
+          </a-button>
         </div>
       </div>
       <MissionsTable
@@ -147,5 +149,4 @@ export default {
 .ant-modal-missions
   .ant-modal-body
     max-height: 550px
-
 </style>
