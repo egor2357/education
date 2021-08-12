@@ -8,10 +8,10 @@
     @change="tableChanged"
   >
     <span slot="actions" slot-scope="text, item">
-      <div style="display: flex; flex-direction: column">
-        <a @click="$emit('displayEdit', item)"> Изменить </a>
+      <div class="flex-column">
+        <a @click="$emit('displayEdit', item)" v-if="item.status !== 2"> Изменить </a>
         <a @click="displayDelete(item)">Удалить</a>
-        <a>Завершить</a>
+        <a @click="setExecute(item.id)" v-if="item.status !== 2">Завершить</a>
       </div>
     </span>
     <template slot="status" slot-scope="status">
@@ -102,6 +102,7 @@ export default {
     ...mapActions({
       fetchMissions: "missions/fetchMissions",
       deleteMission: "missions/deleteMission",
+      setExecuteMission: "missions/setExecuteMission",
     }),
     ...mapMutations({
       setQueryParams: "missions/setQueryParams",
@@ -135,6 +136,19 @@ export default {
         let res = await this.deleteMission(id);
         if (res.status === 204) {
           this.$message.success("Поручение успешно удалено");
+          await this.fetchMissions();
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка");
+      }
+    },
+    async setExecute(id) {
+      try {
+        let res = await this.setExecuteMission(id);
+        if (res.status === 200) {
+          this.$message.success("Статус поручения успешно изменён");
           await this.fetchMissions();
         } else {
           this.$message.error("Произошла ошибка");

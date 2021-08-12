@@ -282,4 +282,8 @@ export default {
     height: 100%
   .ant-spin-container
     height: 100%
+
+.flex-column
+  display: flex
+  flex-direction: column
 </style>

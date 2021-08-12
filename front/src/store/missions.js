@@ -34,6 +34,18 @@ const actions = {
   async deleteMission(context, id) {
     return deleteAxios(this.$axios, `/api/missions/${id}/`, {});
   },
+  async setExecuteMission(context, id) {
+    try {
+      let res = await this.$axios.get(`/api/missions/${id}/execute/`);
+      if (res.status === 200) {
+        return res
+      } else {
+        console.log(res)
+      }
+    } catch (e) {
+      return e
+    }
+  },
 };
 
 const mutations = {
