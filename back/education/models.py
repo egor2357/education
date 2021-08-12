@@ -660,7 +660,7 @@ class Mission(models.Model):
     auto_now_add=True,
     null=False, verbose_name='Дата создания'
   )
-  deadline = models.DateField(null=False, verbose_name='Срок исполнения')
+  deadline = models.DateField(null=True, blank=True, verbose_name='Срок исполнения')
   caption = models.TextField(blank=False, verbose_name='Название')
   comment = models.TextField(blank=True, verbose_name='Комментарий')
   status = models.PositiveSmallIntegerField(
