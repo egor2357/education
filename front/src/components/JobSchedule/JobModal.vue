@@ -94,7 +94,7 @@ import moment from "moment";
 import datetime from "@/mixins/datetime";
 
 export default {
-  name: "ModalTemplateJob",
+  name: "JobModal",
   props: {
     activities: {
       type: Array,

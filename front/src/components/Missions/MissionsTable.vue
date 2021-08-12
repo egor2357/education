@@ -1,40 +1,45 @@
 <template>
-  <div>
-    <a-button type="primary" v-if="isStaff"> Добавить </a-button>
-    <a-divider />
-    <a-spin :spinning="loading">
-      <a-table
-        :columns="columns"
-        :dataSource="data.results"
-        bordered
-        :rowKey="'id'"
-        :pagination="pagination"
-        @change="tableChanged"
-      >
-        <span slot="actions" slot-scope="text, item">
-          <a @click="editRow(item)"> Изменить </a>
-          <a-divider type="vertical" />
-          <a-popconfirm
-            title="Вы действительно хотите удалить поручение"
-            ok-text="Да"
-            cancel-text="Нет"
-            @confirm="displayDelete(item)"
-          >
-            <a>Удалить</a>
-          </a-popconfirm>
-        </span>
-      </a-table>
-    </a-spin>
-  </div>
+  <a-table
+    :columns="columns"
+    :dataSource="data.results"
+    bordered
+    :rowKey="'id'"
+    :pagination="pagination"
+    @change="tableChanged"
+  >
+    <span slot="actions" slot-scope="text, item">
+      <div class="flex-column">
+        <a @click="$emit('displayEdit', item)" v-if="item.status !== 2">
+          Изменить
+        </a>
+        <a @click="displayDelete(item)">Удалить</a>
+        <a
+          @click="setExecute(item.id)"
+          v-if="
+            item.status !== 2 &&
+            (userInfo.id === item.director.id ||
+              (item.controller && userInfo.id === item.controller.id))
+          "
+          >Завершить</a
+        >
+      </div>
+    </span>
+    <template slot="status" slot-scope="status">
+      <a-tag v-if="status === 0" color="cyan">Новое</a-tag>
+      <a-tag v-else-if="status === 1" color="purple">В процессе</a-tag>
+      <a-tag v-else-if="status === 2" color="green">Исполнено</a-tag>
+    </template>
+  </a-table>
 </template>
 
 <script>
-import {mapGetters, mapActions} from 'vuex';
+import { mapGetters, mapActions, mapMutations } from "vuex";
+import datetime from "@/mixins/datetime";
 export default {
   name: "MissionsTable",
+  mixins: [datetime],
   data() {
     return {
-      loading: true,
       pagination: {
         total: 0,
         page: 1,
@@ -44,6 +49,19 @@ export default {
         pageSizeOptions: ["10", "20", "30"],
       },
       columns: [
+        {
+          title: "Дата",
+          dataIndex: "creation_date",
+          key: "creation_date",
+          customRender: (date) => {
+            return date ? this.formatDate(date) : "";
+          },
+        },
+        {
+          title: "Наименование",
+          dataIndex: "caption",
+          key: "caption",
+        },
         {
           title: "Постановщик",
           dataIndex: "director.__str__",
@@ -60,24 +78,23 @@ export default {
           key: "controller",
         },
         {
-          title: "Срок исполнения",
+          title: "Срок",
           dataIndex: "deadline",
           key: "deadline",
-        },
-        {
-          title: "Описание",
-          dataIndex: "caption",
-          key: "caption",
-        },
-        {
-          title: "Комментарий",
-          dataIndex: "comment",
-          key: "comment",
+          customRender: (date) => {
+            return date ? this.formatDate(date) : "";
+          },
         },
         {
           title: "Статус",
           dataIndex: "status",
           key: "status",
+          scopedSlots: { customRender: "status" },
+        },
+        {
+          title: "Комментарий",
+          dataIndex: "comment",
+          key: "comment",
         },
         {
           title: "Действия",
@@ -86,47 +103,66 @@ export default {
           scopedSlots: { customRender: "actions" },
         },
       ],
-    }
+    };
   },
   async created() {
-    await this.fetchMissions();
-    this.loading = false;
+    await this.getData();
+    if (!this.userInfo.staff) {
+      this.columns.splice(8);
+    }
   },
   methods: {
     ...mapActions({
-      fetchMissions: "missions/fetchMissions"
+      fetchMissions: "missions/fetchMissions",
+      deleteMission: "missions/deleteMission",
+      setExecuteMission: "missions/setExecuteMission",
     }),
-    tableChanged(e) {
-      console.log(e)
+    ...mapMutations({
+      setQueryParams: "missions/setQueryParams",
+    }),
+    async getData() {
+      this.$emit("startLoading");
+      this.setQueryParams(
+        `?page=${this.pagination.page}&per_page=${this.pagination.pageSize}`
+      );
+      await this.fetchMissions();
+      this.$emit("loaded");
     },
-    displayDelete({ id, caption }, type) {
+    async tableChanged(pagination) {
+      this.pagination.page = pagination.current;
+      this.pagination.pageSize = pagination.pageSize;
+      await this.getData();
+    },
+    displayDelete({ id, caption }) {
       let that = this;
       this.$confirm({
         title: `Поручение "${caption} будет удалено."`,
         content: `Продолжить?`,
         okType: "danger",
         onOk() {
-          that.deleteRecord(id, type);
+          that.deleteRecord(id);
         },
       });
     },
-    async deleteRecord(id, type) {
-      let dispatchName = "";
-      let successMessage = "";
-      if (type === 1) {
-        dispatchName = "forms/deleteForm";
-        successMessage = "Метод проведения занятий успешно удален";
-      } else if (type === 2) {
-        dispatchName = "forms/deleteMethod";
-        successMessage = "Форма проведения занятий успешно удалена";
-      } else {
-        return;
-      }
+    async deleteRecord(id) {
       try {
-        let res = await this.$store.dispatch(dispatchName, id);
+        let res = await this.deleteMission(id);
         if (res.status === 204) {
-          this.$message.success(successMessage);
-          this.$emit("needUpdate");
+          this.$message.success("Поручение успешно удалено");
+          await this.fetchMissions();
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка");
+      }
+    },
+    async setExecute(id) {
+      try {
+        let res = await this.setExecuteMission(id);
+        if (res.status === 200) {
+          this.$message.success("Статус поручения успешно изменён");
+          await this.fetchMissions();
         } else {
           this.$message.error("Произошла ошибка");
         }
@@ -138,10 +174,8 @@ export default {
   computed: {
     ...mapGetters({
       data: "missions/getMissions",
+      userInfo: "auth/getUserInfo",
     }),
-    isStaff() {
-      return this.$store.getters['auth/getUserInfo'].staff
-    },
   },
 };
 </script>

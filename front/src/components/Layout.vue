@@ -96,7 +96,7 @@ export default {
         },
         {
           icon: "issues-close",
-          title: "Поручения",
+          title: "Задачи",
           key: "5",
           staffOnly: false,
           specOnly: false,
@@ -282,4 +282,8 @@ export default {
     height: 100%
   .ant-spin-container
     height: 100%
+
+.flex-column
+  display: flex
+  flex-direction: column
 </style>
