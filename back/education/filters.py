@@ -84,3 +84,10 @@ class OptionFilter(FilterSet):
     fields = [
       'activity_id',
     ]
+
+class MissionFilter(FilterSet):
+  class Meta:
+    model = Mission
+    fields = [
+      'status'
+    ]

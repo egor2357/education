@@ -641,6 +641,8 @@ class MissionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = MissionSerializer
+  filter_backends = (DjangoFilterBackend,)
+  filterset_class = MissionFilter
 
   def get_queryset(self):
     user = self.request.user
@@ -654,13 +656,13 @@ class MissionView(viewsets.ModelViewSet):
         qs = Mission.objects.filter(user_is_an_executor | user_is_a_controler)
     return qs.select_related('director', 'executor', 'controller')
 
-  def list(self, *args, **kwargs):
+  def list(self, request):
     qs = self.get_queryset()
     user = self.request.user
     if (not user.is_staff) and (user.specialist is not None):
       new_missions = qs.filter(executor=user.specialist, status=0)
       new_missions.update(status=1)
-    return Response(MissionSerializer(qs, many=True).data)
+    return super().list(request)
 
   @action(
     detail=True, methods=['get'],
