@@ -5,6 +5,7 @@ import deleteAxios from "@/middleware/deleteAxios";
 const state = () => ({
   missions: {},
   fetched: false,
+  queryParams: "",
 });
 
 const getters = {
@@ -14,9 +15,9 @@ const getters = {
 };
 
 const actions = {
-  async fetchMissions({ commit }) {
+  async fetchMissions({ state, commit }) {
     try {
-      let res = await this.$axios.get("/api/missions/");
+      let res = await this.$axios.get(`/api/missions/${state.queryParams}`);
       if (res.status === 200) {
         commit("setMissions", {data: res.data, success: true});
       }
@@ -40,6 +41,9 @@ const mutations = {
     state.missions = payload.data;
     state.fetched = payload.success;
   },
+  setQueryParams(state, payload) {
+    state.queryParams = payload;
+  }
 };
 
 export default {

@@ -15,6 +15,9 @@ export default {
         ? [...hours, ':', ...minutes]
         : hours;
     },
+    formatDate(date) {
+      return moment(date, "YYYY-MM-DD").format("DD.MM.YYYY");
+    },
   },
 
 

@@ -96,7 +96,7 @@ export default {
         },
         {
           icon: "issues-close",
-          title: "Поручения",
+          title: "Задачи",
           key: "5",
           staffOnly: false,
           specOnly: false,

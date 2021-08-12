@@ -160,7 +160,7 @@ const router = new VueRouter({
          {
           path: "missions",
           name: "Missions",
-          component: () => import("@/components/Missions/MissionsTable"),
+          component: () => import("@/views/Missions"),
           meta: {
             staffOnly: false,
             specOnly: false,

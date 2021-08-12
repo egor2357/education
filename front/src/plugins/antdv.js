@@ -33,6 +33,7 @@ import {
   TreeSelect,
   Upload,
   Empty,
+  Tag
 } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
@@ -68,6 +69,7 @@ Vue.use(Popover);
 Vue.use(TreeSelect);
 Vue.use(Upload);
 Vue.use(Empty);
+Vue.use(Tag);
 
 Vue.prototype.$message = message;
 Vue.prototype.$confirm = Modal.confirm;
