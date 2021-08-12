@@ -711,13 +711,17 @@ class MissionView(viewsets.ModelViewSet):
     user = self.request.user
     mission = self.get_object()
 
-    if (mission.satus == 1
-        and
-        user.specialist is not None
-        and
-        (mission.director == user.specialist) or (mission.controller == user.specialist)):
+    if (user.specialist is not None
+      and
+      (mission.director == user.specialist) or (mission.controller == user.specialist)):
       mission.status = 2
       mission.save()
+      serializer = MissionSerializer(mission)
+      return Response(serializer.data, status=200)
+    else:
+      return Response({'error': 'Вы не имеете права ставить отметку о выполнении этой задачи.'}, status=400)
 
-    serializer = MissionSerializer(mission)
-    return Response(serializer.data)
+
+
+
+
