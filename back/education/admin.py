@@ -153,3 +153,9 @@ class MissionAdmin(admin.ModelAdmin):
   search_fields = ('caption', 'comment')
 
 admin.site.register(Mission, MissionAdmin)
+
+class AnnouncementAdmin(admin.ModelAdmin):
+  list_display = ('creation_date', 'caption', 'text',)
+  search_fields = ('caption', 'text')
+
+admin.site.register(Announcement, AnnouncementAdmin)
