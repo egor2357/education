@@ -20,9 +20,11 @@ const actions = {
       let res = await this.$axios.get(`/api/missions/${state.queryParams}`);
       if (res.status === 200) {
         commit("setMissions", {data: res.data, success: true});
+        return res
       }
     } catch (e) {
       commit("setMissions", {data: {}, success: false});
+      return e
     }
   },
   async addMission(context, payload) {

@@ -14,6 +14,8 @@
         @startLoading="loading = true"
         @loaded="loading = false"
         @displayEdit="displayEdit"
+        :specialists="specialists"
+        :admins="admins"
       />
       <MissionsModal
         v-if="displayModal"
