@@ -112,6 +112,10 @@ class OptionFilter(FilterSet):
 
 
 class MissionFilter(FilterSet):
+  creation_date = django_filters.DateFilter(
+    label='Дата создания', field_name='creation_date',
+    lookup_expr='date',
+  )
   caption = django_filters.CharFilter(
     lookup_expr='icontains'
   )
