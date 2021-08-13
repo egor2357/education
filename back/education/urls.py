@@ -21,6 +21,7 @@ router.register(r'jobs', JobView, basename='Job')
 router.register(r'competence', CompetenceView, basename='Competence')
 router.register(r'specialties', SpecialtyView, basename='Specialty')
 router.register(r'missions', MissionView, basename='Mission')
+router.register(r'announcement', AnnouncementView, basename='Announcement')
 
 
 urlpatterns = [

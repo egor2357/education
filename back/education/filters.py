@@ -7,6 +7,29 @@ from .views import *
 from .models import *
 from .serializers import *
 
+class CommonPagination(PageNumberPagination):
+  page_size = 10
+  page_size_query_param = 'per_page'
+  max_page_size = 1000
+
+  def get_paginated_response(self, data):
+    page_size = self.get_page_size(self.request)
+    if page_size is None:
+      page_size = 10
+    return Response({
+      'pagination': {
+        'count': self.page.paginator.count,
+        'page': self.page.number,
+        'per_page': page_size,
+        'links': {
+          'next': self.get_next_link(),
+          'previous': self.get_previous_link()
+        },
+      },
+      'results': data
+    })
+
+
 class JobFilter(FilterSet):
   class Meta:
     model = Job
@@ -86,29 +109,13 @@ class OptionFilter(FilterSet):
       'activity_id',
     ]
 
-class MissionPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'per_page'
-    max_page_size = 1000
 
-    def get_paginated_response(self, data):
-      page_size = self.get_page_size(self.request)
-      if page_size is None:
-        page_size = 10
-      return Response({
-        'pagination': {
-          'count': self.page.paginator.count,
-          'page': self.page.number,
-          'per_page': page_size,
-          'links': {
-            'next': self.get_next_link(),
-            'previous': self.get_previous_link()
-          },
-        },
-        'results': data
-      })
 
 class MissionFilter(FilterSet):
+  creation_date = django_filters.DateFilter(
+    label='Дата создания', field_name='creation_date',
+    lookup_expr='date',
+  )
   caption = django_filters.CharFilter(
     lookup_expr='icontains'
   )
@@ -124,3 +131,15 @@ class MissionFilter(FilterSet):
       'deadline', 'creation_date',
       'caption', 'comment'
     ]
+
+class AnnouncementFilter(FilterSet):
+  caption = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
+  text = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
+
+  class Meta:
+    model = Announcement
+    fields = '__all__'
