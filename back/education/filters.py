@@ -127,3 +127,15 @@ class MissionFilter(FilterSet):
       'deadline', 'creation_date',
       'caption', 'comment'
     ]
+
+class AnnouncementFilter(FilterSet):
+  caption = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
+  text = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
+
+  class Meta:
+    model = Announcement
+    fields = '__all__'

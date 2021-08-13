@@ -701,3 +701,10 @@ class MissionSerializer(FlexFieldsModelSerializer):
   class Meta:
     model = Mission
     fields = '__all__'
+
+class AnnouncementSerializer(FlexFieldsModelSerializer):
+  creation_date = serializers.DateTimeField(read_only=True)
+
+  class Meta:
+    model = Announcement
+    fields = '__all__'

@@ -680,7 +680,7 @@ class MissionView(viewsets.ModelViewSet):
   serializer_class = MissionSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = MissionFilter
-  pagination_class = MissionPagination
+  pagination_class = CommonPagination
 
   def get_queryset(self):
     user = self.request.user
@@ -720,6 +720,16 @@ class MissionView(viewsets.ModelViewSet):
       return Response(serializer.data, status=200)
     else:
       return Response({'error': 'Вы не имеете права ставить отметку о выполнении этой задачи.'}, status=400)
+
+
+class AnnouncementView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
+  serializer_class = AnnouncementSerializer
+  queryset = Announcement.objects.all()
+  filter_backends = (DjangoFilterBackend,)
+  filterset_class = AnnouncementFilter
+  pagination_class = CommonPagination
 
 
 
