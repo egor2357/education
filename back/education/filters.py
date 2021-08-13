@@ -109,8 +109,18 @@ class MissionPagination(PageNumberPagination):
       })
 
 class MissionFilter(FilterSet):
+  caption = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
+  comment = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
+
   class Meta:
     model = Mission
     fields = [
-      'status'
+      'status',
+      'director_id', 'executor_id', 'controller_id',
+      'deadline', 'creation_date',
+      'caption', 'comment'
     ]
