@@ -730,6 +730,11 @@ class Message(models.Model):
   '''
     Сообщение в теме обращения к руководству
   '''
+
+  appeal = models.ForeignKey(
+    Appeal, null=False,
+    on_delete=models.CASCADE, verbose_name='Обращение'
+  )
   author = models.ForeignKey(
     Specialist, null=False,
     on_delete=models.CASCADE, verbose_name='Автор'
