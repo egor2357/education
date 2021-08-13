@@ -696,7 +696,7 @@ class MissionSerializer(FlexFieldsModelSerializer):
     fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
   )
 
-  creation_date = serializers.DateField(read_only=True)
+  creation_date = serializers.DateTimeField(read_only=True)
 
   class Meta:
     model = Mission
