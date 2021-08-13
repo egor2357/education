@@ -656,9 +656,9 @@ class Mission(models.Model):
     on_delete=models.CASCADE, verbose_name='Контролер'
   )
 
-  creation_date = models.DateField(
+  creation_date = models.DateTimeField(
     auto_now_add=True,
-    null=False, verbose_name='Дата создания'
+    null=False, verbose_name='Дата-время создания'
   )
   deadline = models.DateField(null=True, blank=True, verbose_name='Срок исполнения')
   caption = models.TextField(blank=False, verbose_name='Название')
@@ -672,7 +672,29 @@ class Mission(models.Model):
     db_table = 'mission'
     verbose_name = 'Задача'
     verbose_name_plural = 'Задачи'
-    ordering = ['-creation_date', '-id']
+    ordering = ['-creation_date',]
+
+  def __str__(self):
+    return self.caption
+
+class Announcement(models.Model):
+  '''
+    Обращения руководства
+  '''
+
+  creation_date = models.DateTimeField(
+    auto_now_add=True,
+    null=False, verbose_name='Дата-время создания'
+  )
+  caption = models.TextField(blank=False, verbose_name='Краткое описание')
+  text = models.TextField(blank=False, verbose_name='Текст обращения')
+
+
+  class Meta:
+    db_table = 'announcement'
+    verbose_name = 'Обращение руководсва'
+    verbose_name_plural = 'Обращения руководсва'
+    ordering = ['-creation_date',]
 
   def __str__(self):
     return self.caption
