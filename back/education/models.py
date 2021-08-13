@@ -713,6 +713,9 @@ class Appeal(models.Model):
     null=False, verbose_name='Дата-время создания'
   )
   theme = models.TextField(blank=False, verbose_name='Тема обращения')
+  closed = models.BooleanField(
+    default=False, verbose_name='Закрыто'
+  )
 
   class Meta:
     db_table = 'appeal'
@@ -727,12 +730,6 @@ class Message(models.Model):
   '''
     Сообщение в теме обращения к руководству
   '''
-
-  MESSAGE_TYPES = (
-    (0, 'Сообщение обратившегося'),
-    (1, 'Сообщение руководства'),
-  )
-
   author = models.ForeignKey(
     Specialist, null=False,
     on_delete=models.CASCADE, verbose_name='Автор'
@@ -743,9 +740,8 @@ class Message(models.Model):
     null=False, verbose_name='Дата-время написания'
   )
   text = models.TextField(blank=False, verbose_name='Текст')
-  from_type = models.PositiveSmallIntegerField(
-    default=0, null=False, choices=MESSAGE_TYPES,
-    blank=False, verbose_name='Сторона диалога'
+  reply = models.BooleanField(
+    default=False, verbose_name='Ответ руководства'
   )
 
   class Meta:
