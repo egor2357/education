@@ -689,7 +689,6 @@ class Announcement(models.Model):
   caption = models.TextField(blank=False, verbose_name='Краткое описание')
   text = models.TextField(blank=False, verbose_name='Текст обращения')
 
-
   class Meta:
     db_table = 'announcement'
     verbose_name = 'Обращение руководсва'
@@ -698,3 +697,62 @@ class Announcement(models.Model):
 
   def __str__(self):
     return self.caption
+
+class Appeal(models.Model):
+  '''
+    Тема обращения к руководству
+  '''
+
+  creator = models.ForeignKey(
+    Specialist, null=False,
+    on_delete=models.CASCADE, verbose_name='Обратившийся'
+  )
+
+  creation_date = models.DateTimeField(
+    auto_now_add=True,
+    null=False, verbose_name='Дата-время создания'
+  )
+  theme = models.TextField(blank=False, verbose_name='Тема обращения')
+
+  class Meta:
+    db_table = 'appeal'
+    verbose_name = 'Обращение к руководсву'
+    verbose_name_plural = 'Обращения к руководсву'
+    ordering = ['-creation_date',]
+
+  def __str__(self):
+    return self.theme
+
+class Message(models.Model):
+  '''
+    Сообщение в теме обращения к руководству
+  '''
+
+  MESSAGE_TYPES = (
+    (0, 'Сообщение обратившегося'),
+    (1, 'Сообщение руководства'),
+  )
+
+  author = models.ForeignKey(
+    Specialist, null=False,
+    on_delete=models.CASCADE, verbose_name='Автор'
+  )
+
+  creation_date = models.DateTimeField(
+    auto_now_add=True,
+    null=False, verbose_name='Дата-время написания'
+  )
+  text = models.TextField(blank=False, verbose_name='Текст')
+  from_type = models.PositiveSmallIntegerField(
+    default=0, null=False, choices=MESSAGE_TYPES,
+    blank=False, verbose_name='Сторона диалога'
+  )
+
+  class Meta:
+    db_table = 'message'
+    verbose_name = 'Сообщение обращения'
+    verbose_name_plural = 'Сообщения обращения'
+    ordering = ['creation_date',]
+
+  def __str__(self):
+    return self.text
