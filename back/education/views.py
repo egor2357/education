@@ -1,4 +1,4 @@
-from rest_framework import status, viewsets, views, permissions, filters
+from rest_framework import status, viewsets, views, permissions, filters, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db.models import Q
@@ -21,6 +21,19 @@ class IsAdminOrReadOnly(permissions.BasePermission):
       return True
     else:
       return request.user.is_staff
+
+
+class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
+                                        mixins.ListModelMixin,
+                                        mixins.RetrieveModelMixin,
+                                        mixins.DestroyModelMixin,
+                                        viewsets.GenericViewSet):
+  '''
+    ViewSet without update actions
+  '''
+  pass
+
+
 
 # Create your views here.
 class UserView(viewsets.ModelViewSet):
