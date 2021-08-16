@@ -725,3 +725,40 @@ class AppealSerializer(FlexFieldsModelSerializer):
       'creation_date', 'theme',
       'closed'
     )
+
+class AppealPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+  def get_queryset(self):
+    request = self.context.get('request', None)
+    queryset = super(AppealPrimaryKeyRelatedField, self).get_queryset()
+
+    if not request or not queryset:
+      return None
+
+    if request.user.is_staff:
+      qs = queryset.all()
+    elif request.user.specialist is not None:
+      qs = queryset.filter(creator=request.user.specialist)
+    else:
+      qs = queryset.none()
+
+    return qs
+
+class MessageSerializer(FlexFieldsModelSerializer):
+  author = SpecialistSerializer(
+    read_only=True,
+    fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
+  )
+  appeal_id = AppealPrimaryKeyRelatedField(
+    source='appeal', queryset=Appeal.objects,
+  )
+  creation_date = serializers.DateTimeField(read_only=True)
+  reply = serializers.BooleanField(read_only=True)
+
+  class Meta:
+    model = Message
+    fields = (
+      'id',
+      'author', 'appeal_id',
+      'creation_date',
+      'text', 'reply'
+    )

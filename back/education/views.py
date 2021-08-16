@@ -799,3 +799,25 @@ class AppealView(CreateListRetrieveDestroyViewSet):
     serializer = AppealSerializer(appeal)
     return Response(serializer.data, status=200)
 
+class MessageView(CreateListRetrieveDestroyViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated, NotDeleteIfNotAdmin)
+  serializer_class = MessageSerializer
+  filter_backends = (DjangoFilterBackend,)
+  filterset_class = MessageFilter
+  pagination_class = CommonPagination
+
+  def get_queryset(self):
+    user = self.request.user
+    qs = Message.objects.none()
+    if user.is_staff:
+      qs = Message.objects.all()
+    else:
+      if user.specialist is not None:
+        qs = Message.objects.filter(appeal__creator=user.specialist)
+    return qs.select_related('author')
+
+  def perform_create(self, serializer):
+    user = self.request.user
+    if user.specialist is not None:
+      serializer.save(author=user.specialist, reply=user.is_staff)

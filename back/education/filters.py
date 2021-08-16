@@ -154,6 +154,25 @@ class AppealFilter(FilterSet):
   class Meta:
     model = Appeal
     fields = (
-      'creator', 'closed',
-      'theme', 'creation_date'
+      'creator_id',
+      'theme', 'creation_date',
+      'closed',
+    )
+
+class MessageFilter(FilterSet):
+  text = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
+  creation_date = django_filters.DateFilter(
+    label='Дата создания', field_name='creation_date',
+    lookup_expr='date',
+  )
+
+  class Meta:
+    model = Message
+    fields = (
+      'appeal_id',
+      'author_id',
+      'text', 'creation_date',
+      'reply',
     )
