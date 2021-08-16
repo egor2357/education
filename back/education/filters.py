@@ -7,6 +7,11 @@ from .views import *
 from .models import *
 from .serializers import *
 
+
+class NumberInFilter(django_filters.BaseInFilter, django_filters.NumberFilter):
+  pass
+
+
 class CommonPagination(PageNumberPagination):
   page_size = 10
   page_size_query_param = 'per_page'
@@ -120,6 +125,10 @@ class MissionFilter(FilterSet):
   comment = django_filters.CharFilter(
     lookup_expr='icontains'
   )
+  director_id = NumberInFilter()
+  executor_id = NumberInFilter()
+  controller_id = NumberInFilter()
+  status = NumberInFilter()
 
   class Meta:
     model = Mission

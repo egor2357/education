@@ -6,6 +6,10 @@
     :rowKey="'id'"
     :pagination="pagination"
     @change="tableChanged"
+    :locale="{
+      filterReset: 'Отменить',
+      filterConfirm: 'Поиск',
+    }"
   >
     <span slot="actions" slot-scope="text, item">
       <div class="flex-column">
@@ -29,6 +33,106 @@
       <a-tag v-else-if="status === 1" color="purple">В процессе</a-tag>
       <a-tag v-else-if="status === 2" color="green">Исполнено</a-tag>
     </template>
+    <div
+      slot="filterDropdown"
+      slot-scope="{
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+        column,
+      }"
+      class="filter-dropdown"
+    >
+      <a-input
+        v-ant-ref="(c) => (searchInput = c)"
+        :placeholder="`Поиск ${column.title}`"
+        :value="selectedKeys[0]"
+        class="text-input"
+        @change="(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+        @pressEnter="
+          () => handleSearch(selectedKeys, confirm, column.dataIndex)
+        "
+      />
+      <a-button
+        type="primary"
+        icon="search"
+        size="small"
+        class="search-button"
+        @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+      >
+        Поиск
+      </a-button>
+      <a-button
+        size="small"
+        class="cancel-button"
+        @click="() => handleReset(clearFilters)"
+      >
+        Отменить
+      </a-button>
+    </div>
+    <a-icon
+      slot="filterIcon"
+      slot-scope="filtered"
+      type="search"
+      :style="{ color: filtered ? '#108ee9' : undefined }"
+    />
+    <div
+      slot="filterDropdownDate"
+      slot-scope="{
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+        column,
+      }"
+      class="filter-dropdown"
+    >
+      <a-date-picker
+        v-ant-ref="(c) => (searchInput = c)"
+        :placeholder="`Поиск ${column.title}`"
+        :value="selectedKeys[0]"
+        format="DD.MM.YYYY"
+        class="date-input"
+        @change="
+          (e) =>
+            setSelectedKeys(
+              e !== null
+                ? [
+                    `${e._d.getFullYear()}-${
+                      e._d.getMonth() + 1
+                    }-${e._d.getDate()}`,
+                  ]
+                : []
+            )
+        "
+        @pressEnter="
+          () => handleSearch(selectedKeys, confirm, column.dataIndex)
+        "
+      ></a-date-picker>
+      <a-button
+        type="primary"
+        icon="search"
+        size="small"
+        class="search-button"
+        @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+      >
+        Поиск
+      </a-button>
+      <a-button
+        size="small"
+        class="cancel-button"
+        @click="() => handleReset(clearFilters)"
+      >
+        Отменить
+      </a-button>
+    </div>
+    <a-icon
+      slot="filterIconDate"
+      slot-scope="filtered"
+      type="calendar"
+      :style="{ color: filtered ? '#108ee9' : undefined }"
+    />
   </a-table>
 </template>
 
@@ -38,6 +142,16 @@ import datetime from "@/mixins/datetime";
 export default {
   name: "MissionsTable",
   mixins: [datetime],
+  props: {
+    specialists: {
+      type: Array,
+      default: () => [],
+    },
+    admins: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
       pagination: {
@@ -56,26 +170,37 @@ export default {
           customRender: (date) => {
             return date ? this.formatDate(date) : "";
           },
+          scopedSlots: {
+            filterDropdown: "filterDropdownDate",
+            filterIcon: "filterIconDate",
+          },
         },
         {
           title: "Наименование",
           dataIndex: "caption",
           key: "caption",
+          scopedSlots: {
+            filterDropdown: "filterDropdown",
+            filterIcon: "filterIcon",
+          },
         },
         {
           title: "Постановщик",
           dataIndex: "director.__str__",
-          key: "director",
+          key: "director_id",
+          filters: [],
         },
         {
           title: "Исполнитель",
           dataIndex: "executor.__str__",
-          key: "executor",
+          key: "executor_id",
+          filters: [],
         },
         {
           title: "Контролёр",
           dataIndex: "controller.__str__",
-          key: "controller",
+          key: "controller_id",
+          filters: [],
         },
         {
           title: "Срок",
@@ -84,17 +209,30 @@ export default {
           customRender: (date) => {
             return date ? this.formatDate(date) : "";
           },
+          scopedSlots: {
+            filterDropdown: "filterDropdownDate",
+            filterIcon: "filterIconDate",
+          },
         },
         {
           title: "Статус",
           dataIndex: "status",
           key: "status",
           scopedSlots: { customRender: "status" },
+          filters: [
+            { value: "0", text: "Новое" },
+            { value: "1", text: "В процессе" },
+            { value: "2", text: "Исполнено" },
+          ],
         },
         {
           title: "Комментарий",
           dataIndex: "comment",
           key: "comment",
+          scopedSlots: {
+            filterDropdown: "filterDropdown",
+            filterIcon: "filterIcon",
+          },
         },
         {
           title: "Действия",
@@ -103,6 +241,7 @@ export default {
           scopedSlots: { customRender: "actions" },
         },
       ],
+      filterQuery: "",
     };
   },
   async created() {
@@ -123,14 +262,26 @@ export default {
     async getData() {
       this.$emit("startLoading");
       this.setQueryParams(
-        `?page=${this.pagination.page}&per_page=${this.pagination.pageSize}`
+        `?page=${this.pagination.page}&per_page=${this.pagination.pageSize}` +
+          this.filterQuery
       );
-      await this.fetchMissions();
+      let res = await this.fetchMissions();
+      if (res.status !== 200) {
+        this.$message.error("Произошла ошибка при получении данных");
+      }
       this.$emit("loaded");
     },
-    async tableChanged(pagination) {
+    async tableChanged(pagination, filters) {
+      this.filterQuery = "";
       this.pagination.page = pagination.current;
       this.pagination.pageSize = pagination.pageSize;
+      for (let key in filters) {
+        if (Array.isArray(filters[key])) {
+          this.filterQuery += `&${key}=${filters[key].join(",")}`;
+        } else {
+          this.filterQuery += `&${key}=${filters[key]}`;
+        }
+      }
       await this.getData();
     },
     displayDelete({ id, caption }) {
@@ -170,6 +321,15 @@ export default {
         this.$message.error("Произошла ошибка");
       }
     },
+    handleSearch(selectedKeys, confirm, dataIndex) {
+      confirm();
+      this.searchText = selectedKeys[0];
+      this.searchedColumn = dataIndex;
+    },
+    handleReset(clearFilters) {
+      clearFilters();
+      this.searchText = "";
+    },
   },
   computed: {
     ...mapGetters({
@@ -177,7 +337,42 @@ export default {
       userInfo: "auth/getUserInfo",
     }),
   },
+  watch: {
+    admins(values) {
+      this.columns[2].filters = values.map((admin) => {
+        return { value: admin.id, text: admin.name };
+      });
+    },
+    specialists(values) {
+      let filters = values.map((admin) => {
+        return { value: admin.id, text: admin.name };
+      });
+      this.columns[3].filters = filters;
+      this.columns[4].filters = filters;
+    },
+  },
 };
 </script>
 
-<style scoped></style>
+<style lang="sass">
+.ant-table-filter-dropdown
+  min-width: 150px
+
+.filter-dropdown
+  padding: 8px
+
+  .text-input
+    width: 188px
+    margin-bottom: 8px
+    display: block
+  .search-button
+    width: 90px
+    margin-right: 8px
+  .cancel-button
+    width: 90px
+
+  .date-input
+    width: 200px
+    margin-bottom: 8px
+    display: block
+</style>
