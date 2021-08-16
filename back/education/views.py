@@ -22,6 +22,14 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     else:
       return request.user.is_staff
 
+class NotDeleteIfNotAdmin(permissions.BasePermission):
+  def has_permission(self, request, view):
+    if request.method == 'DELETE':
+      return request.user.is_staff
+    else:
+      return True
+
+
 
 class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
                                         mixins.ListModelMixin,
@@ -636,8 +644,6 @@ class Skill_reportView(viewsets.ModelViewSet):
         )
 
     return Response({'absent': absent_coeffs})
-
-
 
 class CompetenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
