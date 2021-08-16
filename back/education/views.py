@@ -756,6 +756,7 @@ class AppealView(CreateListRetrieveDestroyViewSet):
   serializer_class = AppealSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = AppealFilter
+  pagination_class = CommonPagination
 
   def get_queryset(self):
     user = self.request.user
