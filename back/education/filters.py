@@ -109,8 +109,6 @@ class OptionFilter(FilterSet):
       'activity_id',
     ]
 
-
-
 class MissionFilter(FilterSet):
   creation_date = django_filters.DateFilter(
     label='Дата создания', field_name='creation_date',
@@ -143,3 +141,19 @@ class AnnouncementFilter(FilterSet):
   class Meta:
     model = Announcement
     fields = '__all__'
+
+class AppealFilter(FilterSet):
+  theme = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
+  creation_date = django_filters.DateFilter(
+    label='Дата создания', field_name='creation_date',
+    lookup_expr='date',
+  )
+
+  class Meta:
+    model = Appeal
+    fields = (
+      'creator', 'closed',
+      'theme', 'creation_date'
+    )

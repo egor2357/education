@@ -750,7 +750,51 @@ class AnnouncementView(viewsets.ModelViewSet):
   filterset_class = AnnouncementFilter
   pagination_class = CommonPagination
 
+class AppealView(CreateListRetrieveDestroyViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated, NotDeleteIfNotAdmin)
+  serializer_class = AppealSerializer
+  filter_backends = (DjangoFilterBackend,)
+  filterset_class = AppealFilter
 
+  def get_queryset(self):
+    user = self.request.user
+    qs = Appeal.objects.none()
+    if user.is_staff:
+      qs = Appeal.objects.all()
+    else:
+      if user.specialist is not None:
+        qs = Appeal.objects.filter(creator=user.specialist)
+    return qs.select_related('creator')
 
+  def perform_create(self, serializer):
+    user = self.request.user
+    if user.specialist is not None:
+      serializer.save(creator=user.specialist)
 
+  @action(
+    detail=True, methods=['get'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+    serializer_class=AppealSerializer
+  )
+  def close(self, request, *args, **kwargs):
+    appeal = self.get_object()
+
+    appeal.closed = True
+    appeal.save()
+    serializer = AppealSerializer(appeal)
+    return Response(serializer.data, status=200)
+
+  @action(
+    detail=True, methods=['get'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+    serializer_class=AppealSerializer
+  )
+  def open(self, request, *args, **kwargs):
+    appeal = self.get_object()
+
+    appeal.closed = False
+    appeal.save()
+    serializer = AppealSerializer(appeal)
+    return Response(serializer.data, status=200)
 
