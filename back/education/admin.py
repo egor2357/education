@@ -159,3 +159,17 @@ class AnnouncementAdmin(admin.ModelAdmin):
   search_fields = ('caption', 'text')
 
 admin.site.register(Announcement, AnnouncementAdmin)
+
+class AppealAdmin(admin.ModelAdmin):
+  list_filter = ('creation_date', 'closed',)
+  list_display = ('creator', 'creation_date', 'theme', 'closed',)
+  search_fields = ('theme',)
+
+admin.site.register(Appeal, AppealAdmin)
+
+class MessageAdmin(admin.ModelAdmin):
+  list_filter = ('creation_date', 'reply', 'appeal')
+  list_display = ('appeal', 'author', 'reply', 'creation_date', 'text',)
+  search_fields = ('text',)
+
+admin.site.register(Message, MessageAdmin)
