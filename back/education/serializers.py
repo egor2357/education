@@ -708,3 +708,20 @@ class AnnouncementSerializer(FlexFieldsModelSerializer):
   class Meta:
     model = Announcement
     fields = '__all__'
+
+class AppealSerializer(FlexFieldsModelSerializer):
+  creator = SpecialistSerializer(
+    read_only=True,
+    fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
+  )
+  creation_date = serializers.DateTimeField(read_only=True)
+  closed = serializers.BooleanField(read_only=True)
+
+  class Meta:
+    model = Appeal
+    fields = (
+      'id',
+      'creator',
+      'creation_date', 'theme',
+      'closed'
+    )
