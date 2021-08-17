@@ -6,11 +6,10 @@ from django.db.models import Q
 
 from django.contrib.auth import login, logout
 
-import json
-
 from .models import *
 from .serializers import *
 from .filters import *
+from .service import (option_update_related, job_update_related)
 
 from rest_framework.authentication import SessionAuthentication
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -114,59 +113,10 @@ class JobView(viewsets.ModelViewSet):
     #Требует FormData для передачи файлов
     job = self.get_object()
 
-    if 'files_id' in request.data:
-      files_id = json.loads(request.data['files_id'])
-
-      files_to_save = []
-      files = request.FILES.getlist('files')
-      for file in files:
-        new_file = Job_file(job=job, file=file)
-        new_file.create_thumbnail()
-        files_to_save.append(new_file)
-
-      job.job_file_set.exclude(pk__in=files_id).delete()
-      Job_file.objects.bulk_create(files_to_save)
-
-    if 'reports' in request.data:
-      skills = json.loads(request.data['reports'])
-
-      curr_skill_reports_ids = list(job.skill_report_set.all().values_list('skill_id', flat=True))
-
-      skills_to_save = []
-      remaining_skills = []
-
-      for skill_id in skills:
-        if skill_id not in curr_skill_reports_ids:
-          skills_to_save.append(
-            Skill_report(job=job, skill_id=skill_id)
-          )
-        else:
-          remaining_skills.append(skill_id)
-
-      skill_reports_qs = job.skill_report_set.all()
-      skill_reports_qs.exclude(skill_id__in=remaining_skills).delete()
-      Skill_report.objects.bulk_create(skills_to_save)
-
-    if 'methods' in request.data:
-      methods = json.loads(request.data['methods'])
-      methods = Method.objects.filter(pk__in=methods)
-      job.methods.set(methods)
-
-    if 'marks' in request.data:
-      user = request.user
-      coeff_by_skill_id = dict(list(user.specialist.competence_set.all().values_list('skill_id', 'coefficient')))
-
-      marks = request.data.get('marks', [])
-      for mark in marks:
-        skill_report = Skill_report.objects.get(pk=mark['id'])
-        skill_report.coefficient = coeff_by_skill_id[skill_report.skill_id]
-        skill_report.mark = mark['mark']
-        skill_report.save()
-
-
     serializer = JobSerializer(job, data=request.data, partial=True)
     if serializer.is_valid(raise_exception=True):
       serializer.save()
+      job_update_related(job, request)
       job.refresh_from_db()
       serializer = JobSerializer(job)
 
@@ -413,76 +363,23 @@ class OptionView(viewsets.ModelViewSet):
   filterset_class = OptionFilter
 
   def partial_update(self, request, pk=None):
-    #Требует FormData для передачи файлов
     option = self.get_object()
-
-    if 'files_id' in request.data:
-      files_id = json.loads(request.data['files_id'])
-
-      files_to_save = []
-      files = request.FILES.getlist('files')
-      for file in files:
-        file_data = file
-        new_file = Option_file(option=option, file=file_data)
-        new_file.create_thumbnail()
-        files_to_save.append(new_file)
-
-      option.option_file_set.exclude(pk__in=files_id).delete()
-      Option_file.objects.bulk_create(files_to_save)
-
-    if 'skills' in request.data:
-      skills = json.loads(request.data['skills'])
-      skills = Skill.objects.filter(pk__in=skills)
-      option.skills.clear()
-      option.skills.set(skills)
-
-    if 'methods' in request.data:
-      methods = json.loads(request.data['methods'])
-      methods = Method.objects.filter(pk__in=methods)
-      option.methods.set(methods)
 
     serializer = OptionSerializer(option, data=request.data, partial=True, context={'request': request})
     if serializer.is_valid(raise_exception=True):
       serializer.save()
+      option_update_related(option, request)
       option.refresh_from_db()
       serializer = OptionSerializer(option, context={'request': request})
 
     return Response(serializer.data)
 
   def create(self, request, pk=None):
-    #Требует FormData для передачи файлов
-
     serializer = OptionSerializer(data=request.data, context={'request': request})
     if serializer.is_valid(raise_exception=True):
-      option = serializer.save()
-
-    option.specialist = request.user.specialist
-
-    if 'files_id' in request.data:
-      files_id = json.loads(request.data['files_id'])
-
-      files_to_save = []
-      files = request.FILES.getlist('files')
-      for file in files:
-        file_data = file
-        new_file = Option_file(option=option, file=file_data)
-        new_file.create_thumbnail()
-        files_to_save.append(new_file)
-
-      Option_file.objects.bulk_create(files_to_save)
-
-    if 'skills' in request.data:
-      skills = json.loads(request.data['skills'])
-      skills = Skill.objects.filter(pk__in=skills)
-      option.skills.set(skills)
-
-    if 'methods' in request.data:
-      methods = json.loads(request.data['methods'])
-      methods = Method.objects.filter(pk__in=methods)
-      option.methods.set(methods)
-
-    option.save()
-    option.refresh_from_db()
+      option = serializer.save(specialist=request.user.specialist)
+      option_update_related(option, request)
+      option.refresh_from_db()
     return Response(OptionSerializer(option, context={'request': request}).data, status=201)
 
   def get_queryset(self):
