@@ -71,6 +71,7 @@ class SpecialistAdmin(admin.ModelAdmin):
 admin.site.register(Specialist, SpecialistAdmin)
 
 class PresenceAdmin(admin.ModelAdmin):
+  search_fields = ('summary',)
   list_filter = ('specialist', 'is_available')
   list_display = (
     'specialist', 'main_interval',

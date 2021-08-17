@@ -155,6 +155,7 @@ class Presence(models.Model):
   date_from = models.DateField(verbose_name='Первый день')
   date_to = models.DateField(verbose_name='Последний день')
   is_available = models.BooleanField(default=True, verbose_name='Является ли доступным')
+  summary = models.TextField(default='', blank=True, verbose_name='Отчет по пребыванию')
 
   def clear_jobs(self):
     presence = self

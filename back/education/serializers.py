@@ -138,6 +138,7 @@ class PresenceSerializer(serializers.ModelSerializer):
     required=False,
     write_only=True, min_value=0
   )
+  summary = serializers.CharField(required=False)
 
   def get_full_interval(self, instance):
     main_interval = instance.main_interval if instance.main_interval is not None else instance
@@ -253,7 +254,8 @@ class PresenceSerializer(serializers.ModelSerializer):
       'date_from', 'date_to',
       'is_available',
       'full_interval',
-      'with_quarantine', 'quarantine_days'
+      'with_quarantine', 'quarantine_days',
+      'summary'
     )
 
 class SpecialistSerializer(FlexFieldsModelSerializer):
