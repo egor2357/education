@@ -139,9 +139,10 @@
 <script>
 import { mapGetters, mapActions, mapMutations } from "vuex";
 import datetime from "@/mixins/datetime";
+import common from "@/mixins/common";
 export default {
   name: "MissionsTable",
-  mixins: [datetime],
+  mixins: [datetime, common],
   data() {
     return {
       pagination: {
@@ -235,9 +236,14 @@ export default {
     };
   },
   async created() {
-    await this.getData();
-    if (!this.userInfo.staff) {
-      this.columns.splice(8);
+    try {
+      this.loadFiltersFromQuery();
+      await this.getData();
+      if (!this.userInfo.staff) {
+        this.columns.splice(8);
+      }
+    } catch (e) {
+      this.$message.error("Произошла ошибка при получении данных");
     }
   },
   methods: {
@@ -251,13 +257,16 @@ export default {
     }),
     async getData() {
       this.$emit("startLoading");
-      this.setQueryParams(
+      let queryString =
         `?page=${this.pagination.page}&per_page=${this.pagination.pageSize}` +
-          this.filterQuery
-      );
+        this.filterQuery;
+      this.setQueryParams(queryString);
       let res = await this.fetchMissions();
       if (res.status !== 200) {
         this.$message.error("Произошла ошибка при получении данных");
+      }
+      if (queryString !== this.$route.fullPath.replace(this.$route.path, "")) {
+        this.$router.push(queryString);
       }
       this.$emit("loaded");
     },
@@ -271,6 +280,11 @@ export default {
         } else {
           this.filterQuery += `&${key}=${filters[key]}`;
         }
+        this.columns.forEach((column) => {
+          if (column.key === key) {
+            if (filters[key] !== "") column.filteredValue = filters[key];
+          }
+        });
       }
       await this.getData();
     },
@@ -320,6 +334,42 @@ export default {
       clearFilters();
       this.searchText = "";
     },
+    loadFiltersFromQuery() {
+      this.filterQuery = "";
+      let query = this.$route.query;
+      for (let key in this.$route.query) {
+        if (key === "page") {
+          this.pagination.page = Number(query.page);
+        } else if (key === "per_page") {
+          this.pagination.pageSize = Number(query.per_page);
+        } else {
+          let queryValue = null;
+          if (query[key].indexOf(",") !== -1) {
+            queryValue = query[key].split(",");
+          } else {
+            queryValue = query[key];
+          }
+          this.columns.forEach((column) => {
+            if (column.key === key) {
+              if (queryValue !== "") {
+                if (Array.isArray(queryValue)) {
+                  column.filteredValue = queryValue.map(Number);
+                } else {
+                  if (this.isOnlyPositiveDigit(queryValue)) {
+                    column.filteredValue = [Number(queryValue)];
+                  } else {
+                    column.filteredValue = [queryValue];
+                  }
+                }
+                this.filterQuery += `&${key}=${query[key]}`;
+              } else {
+                column.filteredValue = [];
+              }
+            }
+          });
+        }
+      }
+    },
   },
   computed: {
     ...mapGetters({
@@ -343,14 +393,21 @@ export default {
     this.$set(this.columns[2], "filters", this.adminsForFilter);
     this.$set(this.columns[3], "filters", this.specialistsForFilter);
     this.$set(this.columns[4], "filters", this.specialistsForFilter);
+    window.onpopstate = function () {
+      this.columns.forEach((column) => {
+        column.filteredValue = [];
+      });
+      this.loadFiltersFromQuery();
+      this.getData();
+    }.bind(this);
   },
   watch: {
     specialistsForFilter(values) {
-      this.columns[2].filters = values;
-    },
-    adminsForFilter(values) {
       this.columns[3].filters = values;
       this.columns[4].filters = values;
+    },
+    adminsForFilter(values) {
+      this.columns[2].filters = values;
     },
   },
 };
