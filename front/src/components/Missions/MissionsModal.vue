@@ -27,19 +27,12 @@
             :ref="`field${index}`"
             allowClear
           >
-            <template v-if="field.name !== 'director_id'">
-              <a-select-option
-                v-for="specialist in specialists"
-                :key="specialist.id"
-              >
-                {{ specialist.name }}
-              </a-select-option>
-            </template>
-            <template v-else>
-              <a-select-option v-for="admin in admins" :key="admin.id">
-                {{ admin.name }}
-              </a-select-option>
-            </template>
+            <a-select-option
+              v-for="specialist in specialists"
+              :key="specialist.id"
+            >
+              {{ specialist.__str__ }}
+            </a-select-option>
           </a-select>
           <a-date-picker
             v-if="field.type === 'date'"
@@ -73,29 +66,19 @@
 </template>
 
 <script>
-import ATextarea from "ant-design-vue/es/input/TextArea";
+import {mapGetters} from "vuex";
 export default {
   name: "MissionsModal",
-  components: { ATextarea },
   props: {
     adding: {
       type: Boolean,
       default: true,
     },
     editableData: Object,
-    specialists: {
-      type: Array,
-      default: () => [],
-    },
-    admins: {
-      type: Array,
-      default: () => [],
-    },
   },
   data() {
     return {
       form: {
-        director_id: null,
         executor_id: null,
         controller_id: null,
         caption: "",
@@ -104,21 +87,14 @@ export default {
       },
       title: "",
       layout: {
-        labelCol: { span: 6 },
-        wrapperCol: { span: 18 },
+        labelCol: { span: 7 },
+        wrapperCol: { span: 17 },
       },
       fields: [
         {
           name: "deadline",
           label: "Срок исполнения",
           type: "date",
-          validateStatus: "",
-          help: "",
-        },
-        {
-          name: "director_id",
-          label: "Постановщик",
-          type: "select",
           validateStatus: "",
           help: "",
         },
@@ -152,13 +128,6 @@ export default {
         },
       ],
       rules: {
-        director_id: [
-          {
-            trigger: "blur",
-            required: true,
-            message: "Пожалуйста, выберите постановщика",
-          },
-        ],
         executor_id: [
           {
             trigger: "blur",
@@ -249,11 +218,6 @@ export default {
     } else {
       this.title += "Изменение задачи";
       this.editableData.id ? (this.form.id = this.editableData.id) : "";
-      if (this.editableData.director) {
-        this.editableData.director.id
-          ? (this.form.director_id = this.editableData.director.id)
-          : null;
-      }
       if (this.editableData.executor) {
         this.editableData.executor.id
           ? (this.form.executor_id = this.editableData.executor.id)
@@ -283,6 +247,12 @@ export default {
   },
   beforeDestroy() {
     document.removeEventListener("keydown", this.keydown);
+  },
+  computed: {
+    ...mapGetters({
+      specialists: "specialists/getOnlySpecialists",
+      admins: "specialists/getOnlyAdmins"
+    }),
   },
 };
 </script>

@@ -6,6 +6,8 @@ import deleteAxios from "@/middleware/deleteAxios";
 const state = () => ({
   specialists: [],
   fetched: false,
+  onlySpecialists: [],
+  onlyAdmins: [],
 });
 
 const getters = {
@@ -15,10 +17,16 @@ const getters = {
   getFetched(state) {
     return state.fetched;
   },
+  getOnlySpecialists(state) {
+    return state.onlySpecialists;
+  },
+  getOnlyAdmins(state) {
+    return state.onlyAdmins;
+  },
 };
 
 const actions = {
-  async fetchSpecialists({ commit }, params = '') {
+  async fetchSpecialists({ commit }, params = "") {
     try {
       let res = await this.$axios.get(`/api/specialists/${params}`);
       if (res.status === 200) {
@@ -33,20 +41,36 @@ const actions = {
           }
           spec.hasAdditionalActivity = hasAdditional;
         }
-        commit("setSpecialists", {data: res.data, success: true});
+        commit("setSpecialists", { data: res.data, success: true });
+        commit(
+          "setOnlySpecialists",
+          res.data
+            .filter((item) => !item.user.is_staff)
+            .map((item) => {
+              return item;
+            })
+        );
+        commit(
+          "setOnlyAdmins",
+          res.data
+            .filter((item) => item.user.is_staff)
+            .map((item) => {
+              return item;
+            })
+        );
       }
     } catch (e) {
-      commit("setSpecialists", {data: [], success: false});
+      commit("setSpecialists", { data: [], success: false });
     }
   },
-  async fetchSpecialistsWithoutCommit(context, params = '') {
+  async fetchSpecialistsWithoutCommit(context, params = "") {
     try {
       let res = await this.$axios.get(`/api/specialists/${params}`);
       if (res.status === 200) {
-        return {status: 200, data: res.data}
+        return { status: 200, data: res.data };
       }
     } catch (e) {
-      return e
+      return e;
     }
   },
   async addSpecialist(context, payload) {
@@ -61,21 +85,32 @@ const actions = {
 
   async addSpecialistActivity({ commit }, payload) {
     let res = await post(this.$axios, "/api/specialties/", payload);
-    let specialistRequest = await this.$axios.get(`/api/specialists/${payload.specialist_id}/`);
+    let specialistRequest = await this.$axios.get(
+      `/api/specialists/${payload.specialist_id}/`
+    );
     if (specialistRequest.status === 200)
       commit("updateSpecialist", specialistRequest.data);
     return res;
   },
   async editSpecialistActivity({ commit }, payload) {
-    let res = await patch(this.$axios, `/api/specialties/${payload.linkId}/`, {is_main: payload.isMain});
-    let specialistRequest = await this.$axios.get(`/api/specialists/${payload.specialistId}/`);
+    let res = await patch(this.$axios, `/api/specialties/${payload.linkId}/`, {
+      is_main: payload.isMain,
+    });
+    let specialistRequest = await this.$axios.get(
+      `/api/specialists/${payload.specialistId}/`
+    );
     if (specialistRequest.status === 200)
       commit("updateSpecialist", specialistRequest.data);
     return res;
   },
   async deleteSpecialistActivity({ commit }, payload) {
-    let res = await deleteAxios(this.$axios, `/api/specialties/${payload.linkId}/`);
-    let specialistRequest = await this.$axios.get(`/api/specialists/${payload.specialistId}/`);
+    let res = await deleteAxios(
+      this.$axios,
+      `/api/specialties/${payload.linkId}/`
+    );
+    let specialistRequest = await this.$axios.get(
+      `/api/specialists/${payload.specialistId}/`
+    );
     if (specialistRequest.status === 200)
       commit("updateSpecialist", specialistRequest.data);
     return res;
@@ -83,21 +118,32 @@ const actions = {
 
   async addSpecialistSkill({ commit }, payload) {
     let res = await post(this.$axios, "/api/competence/", payload);
-    let specialistRequest = await this.$axios.get(`/api/specialists/${payload.specialist_id}/`);
+    let specialistRequest = await this.$axios.get(
+      `/api/specialists/${payload.specialist_id}/`
+    );
     if (specialistRequest.status === 200)
       commit("updateSpecialist", specialistRequest.data);
     return res;
   },
   async editSpecialistSkill({ commit }, payload) {
-    let res = await patch(this.$axios, `/api/competence/${payload.linkId}/`, {coefficient: payload.coefficient});
-    let specialistRequest = await this.$axios.get(`/api/specialists/${payload.specialistId}/`);
+    let res = await patch(this.$axios, `/api/competence/${payload.linkId}/`, {
+      coefficient: payload.coefficient,
+    });
+    let specialistRequest = await this.$axios.get(
+      `/api/specialists/${payload.specialistId}/`
+    );
     if (specialistRequest.status === 200)
       commit("updateSpecialist", specialistRequest.data);
     return res;
   },
   async deleteSpecialistSkill({ commit }, payload) {
-    let res = await deleteAxios(this.$axios, `/api/competence/${payload.linkId}/`);
-    let specialistRequest = await this.$axios.get(`/api/specialists/${payload.specialistId}/`);
+    let res = await deleteAxios(
+      this.$axios,
+      `/api/competence/${payload.linkId}/`
+    );
+    let specialistRequest = await this.$axios.get(
+      `/api/specialists/${payload.specialistId}/`
+    );
     if (specialistRequest.status === 200)
       commit("updateSpecialist", specialistRequest.data);
     return res;
@@ -105,7 +151,7 @@ const actions = {
 };
 
 const mutations = {
-  clear(state){
+  clear(state) {
     state.specialists = [];
     state.fetched = false;
   },
@@ -113,15 +159,24 @@ const mutations = {
     state.specialists = payload.data;
     state.fetched = payload.success;
   },
-  updateSpecialist(state, payload)
-  {
-    let specialist = state.specialists.find(specialist => specialist.id == payload.id);
-    if (specialist){
+  updateSpecialist(state, payload) {
+    let specialist = state.specialists.find(
+      (specialist) => specialist.id == payload.id
+    );
+    if (specialist) {
       specialist.skills = payload.skills;
       specialist.activities = payload.activities;
-      specialist.hasAdditionalActivity = !!specialist.activities.filter(activity => !activity.is_main).length;
+      specialist.hasAdditionalActivity = !!specialist.activities.filter(
+        (activity) => !activity.is_main
+      ).length;
     }
-  }
+  },
+  setOnlySpecialists(state, payload) {
+    state.onlySpecialists = payload;
+  },
+  setOnlyAdmins(state, payload) {
+    state.onlyAdmins = payload;
+  },
 };
 
 export default {

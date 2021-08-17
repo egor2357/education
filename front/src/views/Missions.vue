@@ -14,15 +14,11 @@
         @startLoading="loading = true"
         @loaded="loading = false"
         @displayEdit="displayEdit"
-        :specialists="specialists"
-        :admins="admins"
       />
       <MissionsModal
         v-if="displayModal"
         :adding="modalAdding"
         :editableData="modalEditableData"
-        :specialists="specialists"
-        :admins="admins"
         @closeSuccess="
           displayModal = false;
           fetchMissions();
@@ -58,25 +54,10 @@ export default {
   },
   computed: {
     ...mapGetters({
-      allSpecialists: "specialists/getSpecialists",
       specialistsFetched: "specialists/getFetched",
     }),
     isStaff() {
       return this.$store.getters["auth/getUserInfo"].staff;
-    },
-    specialists() {
-      return this.allSpecialists
-        .filter((item) => !item.user.is_staff)
-        .map((item) => {
-          return { id: item.id, name: item.__str__ };
-        });
-    },
-    admins() {
-      return this.allSpecialists
-        .filter((item) => item.user.is_staff)
-        .map((item) => {
-          return { id: item.id, name: item.__str__ };
-        });
     },
   },
   methods: {

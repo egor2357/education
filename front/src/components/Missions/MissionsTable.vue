@@ -142,16 +142,6 @@ import datetime from "@/mixins/datetime";
 export default {
   name: "MissionsTable",
   mixins: [datetime],
-  props: {
-    specialists: {
-      type: Array,
-      default: () => [],
-    },
-    admins: {
-      type: Array,
-      default: () => [],
-    },
-  },
   data() {
     return {
       pagination: {
@@ -335,20 +325,32 @@ export default {
     ...mapGetters({
       data: "missions/getMissions",
       userInfo: "auth/getUserInfo",
+      specialists: "specialists/getOnlySpecialists",
+      admins: "specialists/getOnlyAdmins",
     }),
-  },
-  watch: {
-    admins(values) {
-      this.columns[2].filters = values.map((admin) => {
-        return { value: admin.id, text: admin.name };
+    specialistsForFilter() {
+      return this.specialists.map((admin) => {
+        return { value: admin.id, text: admin.__str__ };
       });
     },
-    specialists(values) {
-      let filters = values.map((admin) => {
-        return { value: admin.id, text: admin.name };
+    adminsForFilter() {
+      return this.admins.map((admin) => {
+        return { value: admin.id, text: admin.__str__ };
       });
-      this.columns[3].filters = filters;
-      this.columns[4].filters = filters;
+    },
+  },
+  mounted() {
+    this.$set(this.columns[2], "filters", this.adminsForFilter);
+    this.$set(this.columns[3], "filters", this.specialistsForFilter);
+    this.$set(this.columns[4], "filters", this.specialistsForFilter);
+  },
+  watch: {
+    specialistsForFilter(values) {
+      this.columns[2].filters = values;
+    },
+    adminsForFilter(values) {
+      this.columns[3].filters = values;
+      this.columns[4].filters = values;
     },
   },
 };
