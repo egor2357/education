@@ -114,19 +114,17 @@ class JobView(viewsets.ModelViewSet):
     #Требует FormData для передачи файлов
     job = self.get_object()
 
-    if 'files' in request.data:
-      files = json.loads(request.data['files'])
+    if 'files_id' in request.data:
+      files_id = json.loads(request.data['files_id'])
+
       files_to_save = []
-      remaining_files = []
+      files = request.FILES.getlist('files')
       for file in files:
-        if file in request.FILES:
-          file_data = request.FILES[file]
-          new_file = Job_file(job=job, file=file_data)
-          new_file.create_thumbnail()
-          files_to_save.append(new_file)
-        else:
-          remaining_files.append(int(file))
-      job.job_file_set.exclude(pk__in=remaining_files).delete()
+        new_file = Job_file(job=job, file=file)
+        new_file.create_thumbnail()
+        files_to_save.append(new_file)
+
+      job.job_file_set.exclude(pk__in=files_id).delete()
       Job_file.objects.bulk_create(files_to_save)
 
     if 'reports' in request.data:
@@ -418,19 +416,18 @@ class OptionView(viewsets.ModelViewSet):
     #Требует FormData для передачи файлов
     option = self.get_object()
 
-    if 'files' in request.data:
-      files = json.loads(request.data['files'])
+    if 'files_id' in request.data:
+      files_id = json.loads(request.data['files_id'])
+
       files_to_save = []
-      remaining_files = []
+      files = request.FILES.getlist('files')
       for file in files:
-        if file in request.FILES:
-          file_data = request.FILES[file]
-          new_file = Option_file(option=option, file=file_data)
-          new_file.create_thumbnail()
-          files_to_save.append(new_file)
-        else:
-          remaining_files.append(int(file))
-      option.option_file_set.exclude(pk__in=remaining_files).delete()
+        file_data = file
+        new_file = Option_file(option=option, file=file_data)
+        new_file.create_thumbnail()
+        files_to_save.append(new_file)
+
+      option.option_file_set.exclude(pk__in=files_id).delete()
       Option_file.objects.bulk_create(files_to_save)
 
     if 'skills' in request.data:
@@ -461,15 +458,17 @@ class OptionView(viewsets.ModelViewSet):
 
     option.specialist = request.user.specialist
 
-    if 'files' in request.data:
-      files = json.loads(request.data['files'])
+    if 'files_id' in request.data:
+      files_id = json.loads(request.data['files_id'])
+
       files_to_save = []
+      files = request.FILES.getlist('files')
       for file in files:
-        if file in request.FILES:
-          file_data = request.FILES[file]
-          new_file = Option_file(option=option, file=file_data)
-          new_file.create_thumbnail()
-          files_to_save.append(new_file)
+        file_data = file
+        new_file = Option_file(option=option, file=file_data)
+        new_file.create_thumbnail()
+        files_to_save.append(new_file)
+
       Option_file.objects.bulk_create(files_to_save)
 
     if 'skills' in request.data:

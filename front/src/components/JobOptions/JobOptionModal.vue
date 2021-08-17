@@ -277,14 +277,15 @@ export default {
               formData.append("methods", JSON.stringify(this.form.methods));
               formData.append("comment", this.form.comment);
 
-              let allFilesIds = [];
+              let currFilesIds = [];
               this.form.option_files.forEach((file) => {
-                allFilesIds.push(file.uid);
                 if (file.status != "done") {
-                  formData.append(file.uid, file);
+                  formData.append("files", file);
+                } else {
+                  currFilesIds.push(file.uid);
                 }
               });
-              formData.append("files", JSON.stringify(allFilesIds));
+              formData.append("files_id", JSON.stringify(currFilesIds));
 
               let successCode = 0;
               let res = null;
