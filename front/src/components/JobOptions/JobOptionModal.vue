@@ -273,8 +273,8 @@ export default {
               formData.append("activity_id", this.activity.id);
 
               formData.append("topic", this.form.topic);
-              formData.append("skills", this.form.skills);
-              formData.append("methods", this.form.methods);
+              formData.append("skills", JSON.stringify(this.form.skills));
+              formData.append("methods", JSON.stringify(this.form.methods));
               formData.append("comment", this.form.comment);
 
               let allFilesIds = [];
@@ -284,7 +284,7 @@ export default {
                   formData.append(file.uid, file);
                 }
               });
-              formData.append("files", allFilesIds);
+              formData.append("files", JSON.stringify(allFilesIds));
 
               let successCode = 0;
               let res = null;

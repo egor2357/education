@@ -493,8 +493,8 @@ export default {
 
             const formData = new FormData();
             formData.append("topic", this.form.topic);
-            formData.append("reports", this.form.reports);
-            formData.append("methods", this.form.methods);
+            formData.append("reports", JSON.stringify(this.form.reports));
+            formData.append("methods", JSON.stringify(this.form.methods));
             formData.append("comment", this.form.comment);
 
             let allFilesIds = [];
@@ -504,7 +504,7 @@ export default {
                 formData.append(file.uid, file);
               }
             });
-            formData.append("files", allFilesIds);
+            formData.append("files", JSON.stringify(allFilesIds));
 
             let res = await patch(
               this.$axios,

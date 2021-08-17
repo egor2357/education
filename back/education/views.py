@@ -6,6 +6,8 @@ from django.db.models import Q
 
 from django.contrib.auth import login, logout
 
+import json
+
 from .models import *
 from .serializers import *
 from .filters import *
@@ -113,8 +115,7 @@ class JobView(viewsets.ModelViewSet):
     job = self.get_object()
 
     if 'files' in request.data:
-      files = request.data.get('files', '')
-      files = files.split(',') if files else []
+      files = json.loads(request.data['files'])
       files_to_save = []
       remaining_files = []
       for file in files:
@@ -129,8 +130,7 @@ class JobView(viewsets.ModelViewSet):
       Job_file.objects.bulk_create(files_to_save)
 
     if 'reports' in request.data:
-      skills = request.data.get('reports', '')
-      skills = [int(report) for report in skills.split(',')] if skills else []
+      skills = json.loads(request.data['reports'])
 
       curr_skill_reports_ids = list(job.skill_report_set.all().values_list('skill_id', flat=True))
 
@@ -150,8 +150,7 @@ class JobView(viewsets.ModelViewSet):
       Skill_report.objects.bulk_create(skills_to_save)
 
     if 'methods' in request.data:
-      methods = request.data.get('methods', '')
-      methods = [int(method) for method in methods.split(',')] if methods else []
+      methods = json.loads(request.data['methods'])
       methods = Method.objects.filter(pk__in=methods)
       job.methods.set(methods)
 
@@ -318,7 +317,6 @@ class ScheduleView(viewsets.ModelViewSet):
     Job.objects.bulk_create(new_jobs)
 
     return Response(data={}, status=200)
-    # return Response(JobView.get_between(start_date, end_date))
 
   @action(
     detail=True, methods=['post'],
@@ -421,8 +419,7 @@ class OptionView(viewsets.ModelViewSet):
     option = self.get_object()
 
     if 'files' in request.data:
-      files = request.data.get('files', '')
-      files = files.split(',') if files else []
+      files = json.loads(request.data['files'])
       files_to_save = []
       remaining_files = []
       for file in files:
@@ -437,15 +434,13 @@ class OptionView(viewsets.ModelViewSet):
       Option_file.objects.bulk_create(files_to_save)
 
     if 'skills' in request.data:
-      skills = request.data.get('skills', '')
-      skills = [int(report) for report in skills.split(',')] if skills else []
+      skills = json.loads(request.data['skills'])
       skills = Skill.objects.filter(pk__in=skills)
       option.skills.clear()
       option.skills.set(skills)
 
     if 'methods' in request.data:
-      methods = request.data.get('methods', '')
-      methods = [int(method) for method in methods.split(',')] if methods else []
+      methods = json.loads(request.data['methods'])
       methods = Method.objects.filter(pk__in=methods)
       option.methods.set(methods)
 
@@ -467,8 +462,7 @@ class OptionView(viewsets.ModelViewSet):
     option.specialist = request.user.specialist
 
     if 'files' in request.data:
-      files = request.data.get('files', '')
-      files = files.split(',') if files else []
+      files = json.loads(request.data['files'])
       files_to_save = []
       for file in files:
         if file in request.FILES:
@@ -479,14 +473,12 @@ class OptionView(viewsets.ModelViewSet):
       Option_file.objects.bulk_create(files_to_save)
 
     if 'skills' in request.data:
-      skills = request.data.get('skills', '')
-      skills = [int(report) for report in skills.split(',')] if skills else []
+      skills = json.loads(request.data['skills'])
       skills = Skill.objects.filter(pk__in=skills)
       option.skills.set(skills)
 
     if 'methods' in request.data:
-      methods = request.data.get('methods', '')
-      methods = [int(method) for method in methods.split(',')] if methods else []
+      methods = json.loads(request.data['methods'])
       methods = Method.objects.filter(pk__in=methods)
       option.methods.set(methods)
 
