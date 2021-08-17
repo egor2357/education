@@ -721,6 +721,11 @@ class MissionView(viewsets.ModelViewSet):
       new_missions.update(status=1)
     return super().list(request)
 
+  def perform_create(self, serializer):
+    user = self.request.user
+    if user.specialist is not None:
+      serializer.save(director=user.specialist)
+
   @action(
     detail=True, methods=['get'],
     permission_classes=(permissions.IsAuthenticated,),

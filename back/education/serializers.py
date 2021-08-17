@@ -670,10 +670,6 @@ class Skill_reportSerializer(FlexFieldsModelSerializer):
     )
 
 class MissionSerializer(FlexFieldsModelSerializer):
-  director_id = serializers.PrimaryKeyRelatedField(
-    source='director', queryset=Specialist.objects.all(),
-    write_only=True, required=True, allow_null=False
-  )
   executor_id = serializers.PrimaryKeyRelatedField(
     source='executor', queryset=Specialist.objects.all(),
     write_only=True, required=True, allow_null=False
