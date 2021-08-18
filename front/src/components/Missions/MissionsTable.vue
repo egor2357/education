@@ -177,6 +177,7 @@ export default {
             filterDropdown: "filterDropdown",
             filterIcon: "filterIcon",
           },
+          class: "pre-wrap",
         },
         {
           title: "Постановщик",
@@ -229,6 +230,7 @@ export default {
             filterDropdown: "filterDropdown",
             filterIcon: "filterIcon",
           },
+          class: "pre-wrap",
         },
         {
           title: "Действия",
@@ -270,9 +272,7 @@ export default {
       if (res.status !== 200) {
         this.$message.error("Произошла ошибка при получении данных");
       }
-      if (this.data.pagination) {
-        this.pagination.total = this.data.pagination.count;
-      }
+      this.updatePaginationTotal();
       if (
         (this.filterQuery !== "" &&
           queryString !== this.$route.fullPath.replace(this.$route.path, "")) ||
@@ -336,6 +336,7 @@ export default {
         if (res.status === 204) {
           this.$message.success("Поручение успешно удалено");
           await this.fetchMissions();
+          this.updatePaginationTotal();
         } else {
           this.$message.error("Произошла ошибка");
         }
@@ -416,6 +417,11 @@ export default {
       });
       if (query.ordering && this.filterQuery.indexOf("ordering") === -1) {
         this.filterQuery += `&ordering=${query.ordering}`;
+      }
+    },
+    updatePaginationTotal() {
+      if (this.data.pagination) {
+        this.pagination.total = this.data.pagination.count;
       }
     },
   },
@@ -509,4 +515,6 @@ export default {
         margin-right: 0
       .execute-block__text
         font-size: 0.8rem
+    .pre-wrap
+      white-space: pre-wrap
 </style>

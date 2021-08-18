@@ -14,15 +14,13 @@
         @startLoading="loading = true"
         @loaded="loading = false"
         @displayEdit="displayEdit"
+        ref="mission-table"
       />
       <MissionsModal
         v-if="displayModal"
         :adding="modalAdding"
         :editableData="modalEditableData"
-        @closeSuccess="
-          displayModal = false;
-          fetchMissions();
-        "
+        @closeSuccess="closeModalSuccess"
         @close="displayModal = false"
       />
     </div>
@@ -73,6 +71,11 @@ export default {
       this.displayModal = true;
       this.modalAdding = false;
       this.modalEditableData = data;
+    },
+    async closeModalSuccess() {
+      this.displayModal = false;
+      await this.fetchMissions();
+      this.$refs['mission-table'].updatePaginationTotal();
     },
   },
 };
