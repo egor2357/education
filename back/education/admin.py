@@ -174,3 +174,17 @@ class MessageAdmin(admin.ModelAdmin):
   search_fields = ('text',)
 
 admin.site.register(Message, MessageAdmin)
+
+class Task_groupAdmin(admin.ModelAdmin):
+  list_filter = ('creation_date', 'deadline')
+  list_display = ('creation_date', 'author', 'text', 'solution', 'responsible', 'deadline', 'is_question')
+  search_fields = ('text', 'solution')
+
+admin.site.register(Task_group, Task_groupAdmin)
+
+class TalentAdmin(admin.ModelAdmin):
+  list_filter = ('creation_date',)
+  list_display = ('creation_date', 'specialist', 'area', 'text',)
+  search_fields = ('text',)
+
+admin.site.register(Talent, TalentAdmin)

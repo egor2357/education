@@ -796,7 +796,8 @@ class Task_group(models.Model):
     related_name='author_task_groups'
   )
   responsible = models.ForeignKey(
-    Specialist, null=True,
+    Specialist,
+    null=True, blank=True,
     on_delete=models.CASCADE, verbose_name='Ответственный',
     related_name='responsible_task_groups'
   )
@@ -841,7 +842,7 @@ class Talent(models.Model):
   class Meta:
     db_table = 'talent'
     verbose_name = 'Талант'
-    verbose_name_plural = 'Талант'
+    verbose_name_plural = 'Таланты'
     ordering = ['-creation_date',]
 
   def __str__(self):
