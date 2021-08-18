@@ -744,3 +744,59 @@ class MessageSerializer(FlexFieldsModelSerializer):
       'creation_date',
       'text', 'reply'
     )
+
+class Task_groupUserSerializer(FlexFieldsModelSerializer):
+  author = SpecialistSerializer(
+    read_only=True,
+    fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
+  )
+  responsible = SpecialistSerializer(
+    read_only=True,
+    fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
+  )
+
+  creation_date = serializers.DateTimeField(read_only=True)
+
+  class Meta:
+    model = Task_group
+    fields = (
+      'id',
+      'author', 'responsible',
+      'text', 'solution',
+      'deadline', 'is_question',
+      'creation_date',
+    )
+    read_only_fields = (
+      'id',
+      'author', 'responsible',
+      'solution',
+      'deadline',
+      'creation_date',
+    )
+
+class Task_groupAdminSerializer(FlexFieldsModelSerializer):
+  author = SpecialistSerializer(
+    read_only=True,
+    fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
+  )
+  responsible = SpecialistSerializer(
+    read_only=True,
+    fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
+  )
+  responsible_id = serializers.PrimaryKeyRelatedField(
+    write_only=True, required=False, allow_null=True,
+    source='responsible', queryset=Specialist.objects.all()
+  )
+
+  creation_date = serializers.DateTimeField(read_only=True)
+
+  class Meta:
+    model = Task_group
+    fields = (
+      'id',
+      'author',
+      'text', 'solution',
+      'responsible', 'responsible_id',
+      'deadline', 'is_question',
+      'creation_date'
+    )

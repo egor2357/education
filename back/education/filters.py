@@ -185,3 +185,26 @@ class MessageFilter(FilterSet):
       'text', 'creation_date',
       'reply',
     )
+
+class Task_groupFilter(FilterSet):
+  text = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
+  solution = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
+  creation_date = django_filters.DateFilter(
+    label='Дата создания', field_name='creation_date',
+    lookup_expr='date',
+  )
+  author_id = NumberInFilter()
+  responsible_id = NumberInFilter()
+
+  class Meta:
+    model = Task_group
+    fields = (
+      'author_id', 'responsible_id',
+      'text', 'solution',
+      'creation_date', 'deadline',
+      'is_question',
+    )

@@ -24,6 +24,7 @@ router.register(r'missions', MissionView, basename='Mission')
 router.register(r'announcement', AnnouncementView, basename='Announcement')
 router.register(r'appeals', AppealView, basename='Appeal')
 router.register(r'messages', MessageView, basename='Message')
+router.register(r'task_groups', Task_groupView, basename='Task_group')
 
 
 urlpatterns = [

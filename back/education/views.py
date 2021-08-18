@@ -30,6 +30,15 @@ class NotDeleteIfNotAdmin(permissions.BasePermission):
     else:
       return True
 
+class IsAdminOrReadCreateOnly(permissions.BasePermission):
+  def has_permission(self, request, view):
+    safe_methods = list(permissions.SAFE_METHODS[:])
+    safe_methods.append('POST')
+    if request.method in safe_methods:
+      return True
+    else:
+      return request.user.is_staff
+
 
 
 class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
@@ -714,3 +723,23 @@ class MessageView(CreateListRetrieveDestroyViewSet):
     user = self.request.user
     if user.specialist is not None:
       serializer.save(author=user.specialist, reply=user.is_staff)
+
+class Task_groupView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadCreateOnly)
+  filter_backends = (DjangoFilterBackend,)
+  queryset = Task_group.objects.all()
+  filterset_class = Task_groupFilter
+  pagination_class = CommonPagination
+
+  def perform_create(self, serializer):
+    user = self.request.user
+    if user.specialist is not None:
+      serializer.save(author=user.specialist)
+
+  def get_serializer_class(self):
+    user = self.request.user
+    if user.is_staff:
+      return Task_groupAdminSerializer
+    else:
+      return Task_groupUserSerializer
