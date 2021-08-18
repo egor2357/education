@@ -734,8 +734,11 @@ class Task_groupView(viewsets.ModelViewSet):
 
   def perform_create(self, serializer):
     user = self.request.user
-    if user.specialist is not None:
+    anonymously = serializer.validated_data.pop('anonymously', False)
+    if (not anonymously) and (user.specialist is not None):
       serializer.save(author=user.specialist)
+    else:
+      serializer.save()
 
   def get_serializer_class(self):
     user = self.request.user

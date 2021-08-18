@@ -756,6 +756,7 @@ class Task_groupUserSerializer(FlexFieldsModelSerializer):
   )
 
   creation_date = serializers.DateTimeField(read_only=True)
+  anonymously = serializers.BooleanField(write_only=True, required=False, default=False)
 
   class Meta:
     model = Task_group
@@ -765,6 +766,7 @@ class Task_groupUserSerializer(FlexFieldsModelSerializer):
       'text', 'solution',
       'deadline', 'is_question',
       'creation_date',
+      'anonymously',
     )
     read_only_fields = (
       'id',
@@ -789,6 +791,7 @@ class Task_groupAdminSerializer(FlexFieldsModelSerializer):
   )
 
   creation_date = serializers.DateTimeField(read_only=True)
+  anonymously = serializers.BooleanField(write_only=True, required=False, default=False)
 
   class Meta:
     model = Task_group
@@ -798,7 +801,8 @@ class Task_groupAdminSerializer(FlexFieldsModelSerializer):
       'text', 'solution',
       'responsible', 'responsible_id',
       'deadline', 'is_question',
-      'creation_date'
+      'creation_date',
+      'anonymously',
     )
 
 class TalentSerializer(FlexFieldsModelSerializer):
