@@ -211,9 +211,9 @@ export default {
           key: "status",
           scopedSlots: { customRender: "status" },
           filters: [
-            { value: "0", text: "Новое" },
-            { value: "1", text: "В процессе" },
-            { value: "2", text: "Исполнено" },
+            { value: 0, text: "Новое" },
+            { value: 1, text: "В процессе" },
+            { value: 2, text: "Исполнено" },
           ],
         },
         {
@@ -265,7 +265,10 @@ export default {
       if (res.status !== 200) {
         this.$message.error("Произошла ошибка при получении данных");
       }
-      if (queryString !== this.$route.fullPath.replace(this.$route.path, "")) {
+      if (
+        this.filterQuery !== "" &&
+        queryString !== this.$route.fullPath.replace(this.$route.path, "")
+      ) {
         this.$router.push(queryString);
       }
       this.$emit("loaded");
