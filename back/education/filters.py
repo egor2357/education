@@ -208,3 +208,22 @@ class Task_groupFilter(FilterSet):
       'creation_date', 'deadline',
       'is_question',
     )
+
+class TalentFilter(FilterSet):
+  text = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
+  creation_date = django_filters.DateFilter(
+    label='Дата создания', field_name='creation_date',
+    lookup_expr='date',
+  )
+  specialist_id = NumberInFilter()
+  area_id = NumberInFilter()
+
+  class Meta:
+    model = Talent
+    fields = (
+      'specialist_id', 'area_id',
+      'text',
+      'creation_date',
+    )

@@ -743,3 +743,17 @@ class Task_groupView(viewsets.ModelViewSet):
       return Task_groupAdminSerializer
     else:
       return Task_groupUserSerializer
+
+class TalentView(viewsets.ModelViewSet):
+  authentication_classes = (CsrfExemptSessionAuthentication,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadCreateOnly)
+  serializer_class = TalentSerializer
+  filter_backends = (DjangoFilterBackend,)
+  queryset = Talent.objects.all()
+  filterset_class = TalentFilter
+  pagination_class = CommonPagination
+
+  def perform_create(self, serializer):
+    user = self.request.user
+    if user.specialist is not None:
+      serializer.save(specialist=user.specialist)

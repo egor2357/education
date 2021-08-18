@@ -800,3 +800,28 @@ class Task_groupAdminSerializer(FlexFieldsModelSerializer):
       'deadline', 'is_question',
       'creation_date'
     )
+
+class TalentSerializer(FlexFieldsModelSerializer):
+  specialist = SpecialistSerializer(
+    read_only=True,
+    fields=['id', 'surname', 'name', 'patronymic', 'role', '__str__']
+  )
+  area_id = serializers.PrimaryKeyRelatedField(
+    write_only=True,
+    source='area', queryset=Educational_area.objects.all()
+  )
+  area_name = serializers.StringRelatedField(
+    read_only=True,
+  )
+
+  creation_date = serializers.DateTimeField(read_only=True)
+
+  class Meta:
+    model = Talent
+    fields = (
+      'id',
+      'specialist',
+      'area_id', 'area_name',
+      'text',
+      'creation_date'
+    )
