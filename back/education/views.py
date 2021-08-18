@@ -571,9 +571,10 @@ class MissionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = MissionSerializer
-  filter_backends = (DjangoFilterBackend,)
+  filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
   filterset_class = MissionFilter
   pagination_class = CommonPagination
+  ordering_fields = ['creation_date', 'status']
 
   def get_queryset(self):
     user = self.request.user

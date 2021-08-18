@@ -197,6 +197,8 @@ $border-color: #e8e8e8
   &-methods
     font-weight: bold
     margin-bottom: 10px
+  &-comment
+    white-space: pre-wrap
   &-files
     position: relative
     &-upload

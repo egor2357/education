@@ -41,8 +41,6 @@ const actions = {
       let res = await this.$axios.get(`/api/missions/${id}/execute/`);
       if (res.status === 200) {
         return res
-      } else {
-        console.log(res)
       }
     } catch (e) {
       return e
