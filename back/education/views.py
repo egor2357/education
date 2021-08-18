@@ -353,21 +353,20 @@ class Option_fileView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
   serializer_class = Option_fileSerializer
-
-  def get_queryset(self):
-    user = self.request.user
-    if user.is_staff:
-      return Option_file.objects.all()
-    else:
-      if user.specialist is None:
-        return Option_file.objects.none()
-      else:
-        return Option_file.objects.filter(option__specialist=user.specialist)
+  queryset = Option_file.objects.all()
 
 class OptionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
   serializer_class = OptionSerializer
+  queryset = (
+    Option.objects.all()
+                  .prefetch_related(
+                    'option_file_set',
+                    'skills__direction__area',
+                    'methods__form',
+                  )
+  )
   filter_backends = (DjangoFilterBackend,)
   filterset_class = OptionFilter
 
@@ -390,18 +389,6 @@ class OptionView(viewsets.ModelViewSet):
       option_update_related(option, request)
       option.refresh_from_db()
     return Response(OptionSerializer(option, context={'request': request}).data, status=201)
-
-  def get_queryset(self):
-    user = self.request.user
-    if user.is_staff:
-      qs = Option.objects.all()
-    else:
-      if user.specialist is not None:
-        qs = Option.objects.filter(specialist=user.specialist)
-      else:
-        qs = Option.objects.none()
-    qs = (qs.prefetch_related('option_file_set', 'skills__direction__area', 'methods__form'))
-    return qs
 
 class PresenceView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication, IsAdminOrReadOnly)
