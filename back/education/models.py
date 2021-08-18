@@ -764,7 +764,7 @@ class Message(models.Model):
   text = models.TextField(blank=True, verbose_name='Текст')
   file = models.FileField(
     null=True, blank=True,
-    upload_to='message_files/',
+    upload_to='message_files/%Y/%m/%d/',
     max_length=255,
     verbose_name='Прикрепленный файл'
   )

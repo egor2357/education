@@ -733,12 +733,14 @@ class MessageSerializer(FlexFieldsModelSerializer):
   )
   creation_date = serializers.DateTimeField(read_only=True)
   reply = serializers.BooleanField(read_only=True)
+  file = serializers.FileField(required=False)
 
   class Meta:
     model = Message
     fields = (
       'id',
       'author', 'appeal_id',
+      'file',
       'creation_date',
       'text', 'reply'
     )
