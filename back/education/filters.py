@@ -103,15 +103,11 @@ class Skill_reportFilter(FilterSet):
     ]
 
 class OptionFilter(FilterSet):
-  activity_id = django_filters.NumberFilter(
-    label='Идентификатор вида деятельности', field_name='activity_id',
-    lookup_expr='exact'
-  )
-
   class Meta:
     model = Option
     fields = [
       'activity_id',
+      'specialist_id',
     ]
 
 class MissionFilter(FilterSet):
