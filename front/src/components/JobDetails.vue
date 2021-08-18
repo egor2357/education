@@ -252,8 +252,8 @@
       </div>
       <job-option-select
         v-if="isModalShown"
+        :job="job"
         @closeModal="closeModal($event)"
-        :options="options"
       />
     </a-spin>
   </div>
@@ -284,8 +284,6 @@ export default {
       activeTab: "1",
 
       isModalShown: false,
-      isOptionFetched: false,
-      options: [],
 
       job: null,
       form: {
@@ -373,18 +371,19 @@ export default {
       areas: "skills/getAreas",
       formsFetched: "forms/getFetched",
       forms: "forms/getForms",
+      specialistsFetched: "specialists/getFetched",
+      activitiesFetched: "activities/getFetched",
     }),
   },
   methods: {
     ...mapActions({
       fetchAreas: "skills/fetchAreas",
       fetchForms: "forms/fetchForms",
+      fetchSpecialists: "specialists/fetchSpecialists",
+      fetchActivities: "activities/fetchActivities",
     }),
 
     async showModal() {
-      if (!this.isOptionFetched) {
-        await this.fetchOptions();
-      }
       this.isModalShown = true;
     },
     async closeModal(optionId) {
@@ -575,29 +574,17 @@ export default {
       this.form.job_files = [...this.form.job_files, file];
       return false;
     },
-
-    async fetchOptions() {
-      try {
-        this.loading = true;
-        let queryParams = `?activity_id=${this.job.activity.id}`;
-        let res = await this.$axios.get(`/api/options/${queryParams}`);
-        if (res.status === 200) {
-          this.options = res.data;
-          this.isOptionFetched = true;
-        } else if (res.status === 400) {
-          this.$message.error("Ошибка при загрузке планов занятий специалиста");
-        } else {
-          this.$message.error("Ошибка при загрузке планов занятий специалиста");
-        }
-      } catch (e) {
-        this.$message.error("Ошибка при загрузке планов занятий специалиста");
-      } finally {
-        this.loading = false;
-      }
-    },
   },
   async created() {
     let fetches = [];
+
+    if (!this.specialistsFetched) {
+      fetches.push(this.fetchSpecialists());
+    }
+
+    if (!this.activitiesFetched) {
+      fetches.push(this.fetchActivities());
+    }
 
     if (!this.areasFetched) {
       fetches.push(this.fetchAreas());
