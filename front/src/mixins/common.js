@@ -11,5 +11,8 @@ export default {
         ? `${specialist.surname} ${specialist.name} ${specialist.patronymic}`
         : `${specialist.surname} ${specialist.name}`;
     },
+    isOnlyPositiveDigit(value) {
+      return /^\d+$/.test(value);
+    }
   },
 };
