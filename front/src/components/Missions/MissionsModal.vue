@@ -66,7 +66,7 @@
 </template>
 
 <script>
-import {mapGetters} from "vuex";
+import { mapGetters } from "vuex";
 export default {
   name: "MissionsModal",
   props: {
@@ -206,7 +206,8 @@ export default {
       if (
         event.type === "keydown" &&
         event.keyCode === 13 &&
-        this.$refs.form !== undefined
+        this.$refs.form !== undefined &&
+        event.srcElement.localName !== "textarea"
       ) {
         this.handleOk();
       }
@@ -251,7 +252,7 @@ export default {
   computed: {
     ...mapGetters({
       specialists: "specialists/getOnlySpecialists",
-      admins: "specialists/getOnlyAdmins"
+      admins: "specialists/getOnlyAdmins",
     }),
   },
 };

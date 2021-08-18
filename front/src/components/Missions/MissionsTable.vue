@@ -17,20 +17,22 @@
           Изменить
         </a>
         <a @click="displayDelete(item)">Удалить</a>
+      </div>
+    </span>
+    <template slot="status" slot-scope="status, item">
+      <a-tag v-if="status === 0" color="cyan">Новое</a-tag>
+      <template v-else-if="status === 1">
+        <a-tag class="execute-block__tag" color="purple">В процессе</a-tag>
         <a
+          class="execute-block__text"
           @click="setExecute(item.id)"
           v-if="
-            item.status !== 2 &&
-            (userInfo.id === item.director.id ||
-              (item.controller && userInfo.id === item.controller.id))
+            userInfo.id === item.director.id ||
+            (item.controller && userInfo.id === item.controller.id)
           "
           >Завершить</a
         >
-      </div>
-    </span>
-    <template slot="status" slot-scope="status">
-      <a-tag v-if="status === 0" color="cyan">Новое</a-tag>
-      <a-tag v-else-if="status === 1" color="purple">В процессе</a-tag>
+      </template>
       <a-tag v-else-if="status === 2" color="green">Исполнено</a-tag>
     </template>
     <div
@@ -211,6 +213,7 @@ export default {
           dataIndex: "status",
           key: "status",
           sorter: true,
+          class: "execute-block",
           scopedSlots: { customRender: "status" },
           filters: [
             { value: 0, text: "Новое" },
@@ -267,6 +270,9 @@ export default {
       if (res.status !== 200) {
         this.$message.error("Произошла ошибка при получении данных");
       }
+      if (this.data.pagination) {
+        this.pagination.total = this.data.pagination.count;
+      }
       if (
         (this.filterQuery !== "" &&
           queryString !== this.$route.fullPath.replace(this.$route.path, "")) ||
@@ -284,12 +290,12 @@ export default {
       this.columns.forEach((column) => {
         if (column.sortOrder && sorter.field !== column.key) {
           column.sortOrder = false;
-        } else if (sorter.field === column.key && sorter.order === 'descend') {
-          column.sortOrder = 'descend'
-        } else if (sorter.field === column.key && sorter.order === 'ascend') {
-          column.sortOrder = 'ascend'
+        } else if (sorter.field === column.key && sorter.order === "descend") {
+          column.sortOrder = "descend";
+        } else if (sorter.field === column.key && sorter.order === "ascend") {
+          column.sortOrder = "ascend";
         } else if (sorter.field === column.key && sorter.order === undefined) {
-          column.sortOrder = false
+          column.sortOrder = false;
         }
       });
       if (sorter.order) {
@@ -408,8 +414,8 @@ export default {
           }
         }
       });
-      if (query.ordering && this.filterQuery.indexOf('ordering') === -1) {
-        this.filterQuery += `&ordering=${query.ordering}`
+      if (query.ordering && this.filterQuery.indexOf("ordering") === -1) {
+        this.filterQuery += `&ordering=${query.ordering}`;
       }
     },
   },
@@ -480,4 +486,27 @@ export default {
     width: 200px
     margin-bottom: 8px
     display: block
+
+.missions-block
+  .ant-table-thead
+    .ant-table-header-column
+      .ant-table-column-sorters
+        display: flex
+      .ant-table-column-title
+        order: 2
+      .ant-table-column-sorter
+        align-self: center
+        .ant-table-column-sorter-inner
+          margin-right: 0.57142857em
+          margin-left: 0
+
+  .ant-table-tbody
+    .execute-block
+      text-align: center
+      max-width: 120px
+      .execute-block__tag
+        margin-bottom: 5px
+        margin-right: 0
+      .execute-block__text
+        font-size: 0.8rem
 </style>
