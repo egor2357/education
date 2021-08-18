@@ -313,17 +313,7 @@ class ActivityView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = ActivitySerializer
-
-  def get_queryset(self):
-    user = self.request.user
-    if user.is_staff:
-      return Activity.objects.all().prefetch_related('skills')
-    else:
-      if user.specialist is None:
-        return Activity.objects.none()
-      else:
-        return (Activity.objects.filter(specialty__specialist=user.specialist)
-                                  .prefetch_related('skills'))
+  queryset = Activity.objects.all().prefetch_related('skills')
 
   @action(detail=True, methods=['get'], serializer_class=Activity_skillSerializer)
   def skills(self, request, *args, **kwargs):
