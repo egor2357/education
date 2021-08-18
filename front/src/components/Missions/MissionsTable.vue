@@ -158,6 +158,7 @@ export default {
           title: "Дата",
           dataIndex: "creation_date",
           key: "creation_date",
+          sorter: true,
           customRender: (date) => {
             return date ? this.formatDate(date) : "";
           },
@@ -209,6 +210,7 @@ export default {
           title: "Статус",
           dataIndex: "status",
           key: "status",
+          sorter: true,
           scopedSlots: { customRender: "status" },
           filters: [
             { value: 0, text: "Новое" },
@@ -266,15 +268,35 @@ export default {
         this.$message.error("Произошла ошибка при получении данных");
       }
       if (
-        this.filterQuery !== "" &&
-        queryString !== this.$route.fullPath.replace(this.$route.path, "")
+        (this.filterQuery !== "" &&
+          queryString !== this.$route.fullPath.replace(this.$route.path, "")) ||
+        (this.filterQuery === "" &&
+          this.$route.fullPath
+            .replace(this.$route.path, "")
+            .indexOf("ordering") !== -1)
       ) {
         this.$router.push(queryString);
       }
       this.$emit("loaded");
     },
-    async tableChanged(pagination, filters) {
+    async tableChanged(pagination, filters, sorter) {
       this.filterQuery = "";
+      this.columns.forEach((column) => {
+        if (column.sortOrder && sorter.field !== column.key) {
+          column.sortOrder = false;
+        } else if (sorter.field === column.key && sorter.order === 'descend') {
+          column.sortOrder = 'descend'
+        } else if (sorter.field === column.key && sorter.order === 'ascend') {
+          column.sortOrder = 'ascend'
+        } else if (sorter.field === column.key && sorter.order === undefined) {
+          column.sortOrder = false
+        }
+      });
+      if (sorter.order) {
+        sorter.order === "ascend"
+          ? (this.filterQuery += `&ordering=${sorter.field}`)
+          : (this.filterQuery += `&ordering=-${sorter.field}`);
+      }
       this.pagination.page = pagination.current;
       this.pagination.pageSize = pagination.pageSize;
       for (let key in filters) {
@@ -372,6 +394,23 @@ export default {
           });
         }
       }
+      this.columns.forEach((column) => {
+        if (
+          query.ordering &&
+          (query.ordering === column.key || query.ordering === `-${column.key}`)
+        ) {
+          if (query.ordering === column.key) {
+            column.sortOrder = "ascend";
+          } else if (query.ordering === `-${column.key}`) {
+            column.sortOrder = "descend";
+          } else if (column.sortOrder) {
+            column.sortOrder = [];
+          }
+        }
+      });
+      if (query.ordering && this.filterQuery.indexOf('ordering') === -1) {
+        this.filterQuery += `&ordering=${query.ordering}`
+      }
     },
   },
   computed: {
@@ -399,6 +438,7 @@ export default {
     window.onpopstate = function () {
       this.columns.forEach((column) => {
         column.filteredValue = [];
+        column.sortOrder = false;
       });
       this.loadFiltersFromQuery();
       this.getData();
@@ -419,6 +459,9 @@ export default {
 <style lang="sass">
 .ant-table-filter-dropdown
   min-width: 150px
+
+  .ant-dropdown-menu
+    max-height: 300px
 
 .filter-dropdown
   padding: 8px
