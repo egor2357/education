@@ -752,7 +752,6 @@ class Message(models.Model):
   '''
     Сообщение в теме обращения к руководству
   '''
-
   appeal = models.ForeignKey(
     Appeal, null=False,
     on_delete=models.CASCADE, verbose_name='Обращение'
@@ -762,20 +761,88 @@ class Message(models.Model):
     on_delete=models.CASCADE, verbose_name='Автор'
   )
 
+  text = models.TextField(blank=True, verbose_name='Текст')
+  file = models.FileField(
+    null=True, blank=True,
+    upload_to='message_files/',
+    max_length=255,
+    verbose_name='Прикрепленный файл'
+  )
+  reply = models.BooleanField(
+    default=False, verbose_name='Ответ руководства'
+  )
   creation_date = models.DateTimeField(
     auto_now_add=True,
     null=False, verbose_name='Дата-время написания'
   )
-  text = models.TextField(blank=False, verbose_name='Текст')
-  reply = models.BooleanField(
-    default=False, verbose_name='Ответ руководства'
-  )
+
 
   class Meta:
     db_table = 'message'
     verbose_name = 'Сообщение обращения'
     verbose_name_plural = 'Сообщения обращения'
     ordering = ['creation_date',]
+
+  def __str__(self):
+    return self.text
+
+class Task_group(models.Model):
+  '''
+    Интервенционная группа
+  '''
+  author = models.ForeignKey(
+    Specialist, null=True,
+    on_delete=models.CASCADE, verbose_name='Автор записи',
+    related_name='author_task_groups'
+  )
+  responsible = models.ForeignKey(
+    Specialist, null=True,
+    on_delete=models.CASCADE, verbose_name='Ответственный',
+    related_name='responsible_task_groups'
+  )
+
+  text = models.TextField(blank=False, verbose_name='Текст')
+  solution = models.TextField(blank=True, verbose_name='Решение')
+  deadline = models.DateField(blank=True, null=True, verbose_name='Срок')
+  is_question = models.BooleanField(default=False, verbose_name='Является ли вопросом')
+  creation_date = models.DateTimeField(
+    auto_now_add=True,
+    null=False, verbose_name='Дата-время написания'
+  )
+
+  class Meta:
+    db_table = 'task_group'
+    verbose_name = 'Интервенционная группа'
+    verbose_name_plural = 'Интервенционные группы'
+    ordering = ['-creation_date',]
+
+  def __str__(self):
+    return self.text
+
+class Talent(models.Model):
+  '''
+    Талант
+  '''
+  specialist = models.ForeignKey(
+    Specialist, null=False,
+    on_delete=models.CASCADE, verbose_name='Специалист'
+  )
+  area = models.ForeignKey(
+    Educational_area, null=False,
+    on_delete=models.CASCADE, verbose_name='Образовательная область'
+  )
+
+  text = models.TextField(blank=False, verbose_name='Описание')
+  creation_date = models.DateTimeField(
+    auto_now_add=True,
+    null=False, verbose_name='Дата-время написания'
+  )
+
+  class Meta:
+    db_table = 'talent'
+    verbose_name = 'Талант'
+    verbose_name_plural = 'Талант'
+    ordering = ['-creation_date',]
 
   def __str__(self):
     return self.text
