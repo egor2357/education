@@ -20,20 +20,20 @@
       </div>
     </span>
     <template slot="status" slot-scope="status, item">
-      <a-tag v-if="status === 0" color="cyan">Новое</a-tag>
+      <a-tag class="execute-block__tag" v-if="status === 0" color="cyan">Новая</a-tag>
       <template v-else-if="status === 1">
         <a-tag class="execute-block__tag" color="purple">В процессе</a-tag>
         <a
           class="execute-block__text"
           @click="setExecute(item.id)"
           v-if="
-            userInfo.id === item.director.id ||
-            (item.controller && userInfo.id === item.controller.id)
+            userInfo.specialistId === item.director.id ||
+            (item.controller && userInfo.specialistId === item.controller.id)
           "
           >Завершить</a
         >
       </template>
-      <a-tag v-else-if="status === 2" color="green">Исполнено</a-tag>
+      <a-tag class="execute-block__tag" v-else-if="status === 2" color="green">Исполнено</a-tag>
     </template>
     <div
       slot="filterDropdown"
@@ -201,6 +201,7 @@ export default {
           title: "Срок",
           dataIndex: "deadline",
           key: "deadline",
+          sorter: true,
           customRender: (date) => {
             return date ? this.formatDate(date) : "";
           },
@@ -444,9 +445,11 @@ export default {
     },
   },
   mounted() {
-    this.$set(this.columns[2], "filters", this.adminsForFilter);
-    this.$set(this.columns[3], "filters", this.specialistsForFilter);
-    this.$set(this.columns[4], "filters", this.specialistsForFilter);
+    if (this.userInfo.staff) {
+      this.$set(this.columns[2], "filters", this.adminsForFilter);
+      this.$set(this.columns[3], "filters", this.specialistsForFilter);
+      this.$set(this.columns[4], "filters", this.specialistsForFilter);
+    }
     window.onpopstate = function () {
       this.columns.forEach((column) => {
         column.filteredValue = [];
@@ -458,11 +461,15 @@ export default {
   },
   watch: {
     specialistsForFilter(values) {
-      this.columns[3].filters = values;
-      this.columns[4].filters = values;
+      if (this.userInfo.staff) {
+        this.columns[3].filters = values;
+        this.columns[4].filters = values;
+      }
     },
     adminsForFilter(values) {
-      this.columns[2].filters = values;
+      if (this.userInfo.staff) {
+        this.columns[2].filters = values;
+      }
     },
   },
 };

@@ -596,7 +596,7 @@ class MissionView(viewsets.ModelViewSet):
   filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
   filterset_class = MissionFilter
   pagination_class = CommonPagination
-  ordering_fields = ['creation_date', 'status']
+  ordering_fields = ['creation_date', 'status', 'deadline']
 
   def get_queryset(self):
     user = self.request.user
