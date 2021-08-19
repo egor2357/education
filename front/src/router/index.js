@@ -18,7 +18,7 @@ const router = new VueRouter({
     },
     {
       path: "/",
-      component: () => import ("@/components/Layout"),
+      component: () => import("@/components/Layout"),
       meta: {
         staffOnly: false,
         specOnly: false,
@@ -26,7 +26,7 @@ const router = new VueRouter({
       children: [
         {
           path: "",
-          redirect: "jobs"
+          redirect: "jobs",
         },
         {
           path: "skills",
@@ -103,13 +103,14 @@ const router = new VueRouter({
             {
               path: ":id",
               name: "JobDetails",
-              component: () => import("@/components/JobSchedule/JobDetailWrapper"),
+              component: () =>
+                import("@/components/JobSchedule/JobDetailWrapper"),
               meta: {
                 staffOnly: false,
                 specOnly: false,
               },
             },
-          ]
+          ],
         },
         {
           path: "skill-development",
@@ -122,7 +123,8 @@ const router = new VueRouter({
             {
               path: "/",
               name: "AllSkills",
-              component: () => import("@/components/SkillDevelopment/AllSkills"),
+              component: () =>
+                import("@/components/SkillDevelopment/AllSkills"),
               meta: {
                 staffOnly: false,
                 specOnly: false,
@@ -131,18 +133,20 @@ const router = new VueRouter({
             {
               path: ":id",
               name: "SkillDetails",
-              component: () => import("@/components/SkillDevelopment/SkillDetails"),
+              component: () =>
+                import("@/components/SkillDevelopment/SkillDetails"),
               meta: {
                 staffOnly: false,
                 specOnly: false,
               },
             },
-          ]
+          ],
         },
         {
           path: "specialist-profile",
           name: "SpecialistProfile",
-          component: () => import("@/components/SpecialistProfile/SpecialistProfile"),
+          component: () =>
+            import("@/components/SpecialistProfile/SpecialistProfile"),
           meta: {
             staffOnly: false,
             specOnly: true,
@@ -157,10 +161,19 @@ const router = new VueRouter({
             specOnly: true,
           },
         },
-         {
+        {
           path: "missions",
           name: "Missions",
           component: () => import("@/views/Missions"),
+          meta: {
+            staffOnly: false,
+            specOnly: false,
+          },
+        },
+        {
+          path: "task-groups",
+          name: "TaskGroups",
+          component: () => import("@/views/TaskGroups"),
           meta: {
             staffOnly: false,
             specOnly: false,
@@ -175,12 +188,10 @@ const router = new VueRouter({
             specOnly: false,
           },
         },
-
-      ]
+      ],
     },
   ],
 });
-
 
 router.beforeEach(async (to, from, next) => {
   if (store.getters["auth/getIsAuth"] === null) {
@@ -194,7 +205,7 @@ router.beforeEach(async (to, from, next) => {
     if (to.name == "Login") {
       next();
     } else {
-      next({name: "Login"});
+      next({ name: "Login" });
     }
   } else {
     let userInfo = store.getters["auth/getUserInfo"];
@@ -205,19 +216,19 @@ router.beforeEach(async (to, from, next) => {
         if (userInfo.staff) {
           next();
         } else {
-          next({name: "Page404"});
+          next({ name: "Page404" });
         }
       } else if (to.meta.specOnly) {
         if (!userInfo.staff) {
           next();
         } else {
-          next({name: "Page404"});
+          next({ name: "Page404" });
         }
       } else {
-        next({name: "Page404"});
+        next({ name: "Page404" });
       }
     } else {
-      next({name: "Page404"});
+      next({ name: "Page404" });
     }
   }
 });

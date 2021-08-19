@@ -19,26 +19,6 @@
         <a @click="displayDelete(item)">Удалить</a>
       </div>
     </span>
-    <template slot="status" slot-scope="status, item">
-      <a-tag class="execute-block__tag" v-if="status === 0" color="cyan"
-        >Новая</a-tag
-      >
-      <template v-else-if="status === 1">
-        <a-tag class="execute-block__tag" color="purple">В процессе</a-tag>
-        <a
-          class="execute-block__text"
-          @click="setExecute(item.id)"
-          v-if="
-            userInfo.specialistId === item.director.id ||
-            (item.controller && userInfo.specialistId === item.controller.id)
-          "
-          >Завершить</a
-        >
-      </template>
-      <a-tag class="execute-block__tag" v-else-if="status === 2" color="green"
-        >Исполнено</a-tag
-      >
-    </template>
     <div
       slot="filterDropdown"
       slot-scope="{
@@ -148,8 +128,11 @@ import datetime from "@/mixins/datetime";
 import common from "@/mixins/common";
 import tableFilterSort from "@/mixins/tableFilterSort";
 export default {
-  name: "MissionsTable",
+  name: "TaskGroupsTable",
   mixins: [datetime, common, tableFilterSort],
+  props: {
+    questionsSelected: Boolean,
+  },
   data() {
     return {
       columns: [
@@ -167,9 +150,9 @@ export default {
           },
         },
         {
-          title: "Наименование",
-          dataIndex: "caption",
-          key: "caption",
+          title: "Содержание",
+          dataIndex: "text",
+          key: "text",
           scopedSlots: {
             filterDropdown: "filterDropdown",
             filterIcon: "filterIcon",
@@ -177,21 +160,15 @@ export default {
           class: "pre-wrap",
         },
         {
-          title: "Постановщик",
-          dataIndex: "director.__str__",
-          key: "director_id",
+          title: "Автор",
+          dataIndex: "author.__str__",
+          key: "author_id",
           filters: [],
         },
         {
-          title: "Исполнитель",
-          dataIndex: "executor.__str__",
-          key: "executor_id",
-          filters: [],
-        },
-        {
-          title: "Контролёр",
-          dataIndex: "controller.__str__",
-          key: "controller_id",
+          title: "Ответственный",
+          dataIndex: "responsible.__str__",
+          key: "responsible_id",
           filters: [],
         },
         {
@@ -208,22 +185,9 @@ export default {
           },
         },
         {
-          title: "Статус",
-          dataIndex: "status",
-          key: "status",
-          sorter: true,
-          class: "execute-block",
-          scopedSlots: { customRender: "status" },
-          filters: [
-            { value: 0, text: "Новое" },
-            { value: 1, text: "В процессе" },
-            { value: 2, text: "Исполнено" },
-          ],
-        },
-        {
-          title: "Комментарий",
-          dataIndex: "comment",
-          key: "comment",
+          title: "Решение",
+          dataIndex: "solution",
+          key: "solution",
           scopedSlots: {
             filterDropdown: "filterDropdown",
             filterIcon: "filterIcon",
@@ -245,7 +209,7 @@ export default {
       this.loadFiltersFromQuery();
       await this.getData();
       if (!this.userInfo.staff) {
-        this.columns.splice(8);
+        this.columns.splice(6);
       }
     } catch (e) {
       this.$message.error("Произошла ошибка при получении данных");
@@ -253,20 +217,20 @@ export default {
   },
   methods: {
     ...mapActions({
-      fetchMissions: "missions/fetchMissions",
-      deleteMission: "missions/deleteMission",
-      setExecuteMission: "missions/setExecuteMission",
+      fetchTaskGroups: "taskGroups/fetchTaskGroups",
+      deleteTaskGroup: "taskGroups/deleteTaskGroup",
     }),
     ...mapMutations({
-      setQueryParams: "missions/setQueryParams",
+      setQueryParams: "taskGroups/setQueryParams",
     }),
-    async getData() {
+    async getData(questionsSelected = this.questionsSelected) {
       this.$emit("startLoading");
       let queryString =
-        `?page=${this.pagination.page}&per_page=${this.pagination.pageSize}` +
-        this.filterQuery;
+        `?page=${this.pagination.page}&per_page=${
+          this.pagination.pageSize
+        }&is_question=${questionsSelected === true}` + this.filterQuery;
       this.setQueryParams(queryString);
-      let res = await this.fetchMissions();
+      let res = await this.fetchTaskGroups();
       if (res.status !== 200) {
         this.$message.error("Произошла ошибка при получении данных");
       }
@@ -274,10 +238,10 @@ export default {
       this.routerCheckAndPush(queryString);
       this.$emit("loaded");
     },
-    displayDelete({ id, caption }) {
+    displayDelete({ id, text }) {
       let that = this;
       this.$confirm({
-        title: `Задача "${caption} будет удалена."`,
+        title: `Интервенционная группа "${text} будет удалена."`,
         content: `Продолжить?`,
         okType: "danger",
         onOk() {
@@ -287,24 +251,11 @@ export default {
     },
     async deleteRecord(id) {
       try {
-        let res = await this.deleteMission(id);
+        let res = await this.deleteTaskGroup(id);
         if (res.status === 204) {
-          this.$message.success("Задача успешно удалена");
-          await this.fetchMissions();
+          this.$message.success("Интервенционная группа успешно удалена");
+          await this.fetchTaskGroups();
           this.updatePaginationTotal();
-        } else {
-          this.$message.error("Произошла ошибка");
-        }
-      } catch (e) {
-        this.$message.error("Произошла ошибка");
-      }
-    },
-    async setExecute(id) {
-      try {
-        let res = await this.setExecuteMission(id);
-        if (res.status === 200) {
-          this.$message.success("Статус задачи успешно изменён");
-          await this.fetchMissions();
         } else {
           this.$message.error("Произошла ошибка");
         }
@@ -315,27 +266,26 @@ export default {
   },
   computed: {
     ...mapGetters({
-      data: "missions/getMissions",
+      data: "taskGroups/getTaskGroups",
       userInfo: "auth/getUserInfo",
-      specialists: "specialists/getOnlySpecialists",
-      admins: "specialists/getOnlyAdmins",
+      onlySpecialists: "specialists/getOnlySpecialists",
+      allSpecialists: "specialists/getSpecialists",
     }),
-    specialistsForFilter() {
-      return this.specialists.map((admin) => {
+    onlySpecialistsForFilter() {
+      return this.onlySpecialists.map((admin) => {
         return { value: admin.id, text: admin.__str__ };
       });
     },
-    adminsForFilter() {
-      return this.admins.map((admin) => {
+    allSpecialistsForFilter() {
+      return this.allSpecialists.map((admin) => {
         return { value: admin.id, text: admin.__str__ };
       });
     },
   },
   mounted() {
     if (this.userInfo.staff) {
-      this.$set(this.columns[2], "filters", this.adminsForFilter);
-      this.$set(this.columns[3], "filters", this.specialistsForFilter);
-      this.$set(this.columns[4], "filters", this.specialistsForFilter);
+      this.$set(this.columns[2], "filters", this.allSpecialistsForFilter);
+      this.$set(this.columns[3], "filters", this.onlySpecialistsForFilter);
     }
     window.onpopstate = function () {
       this.columns.forEach((column) => {
@@ -347,15 +297,14 @@ export default {
     }.bind(this);
   },
   watch: {
-    specialistsForFilter(values) {
-      if (this.userInfo.staff) {
-        this.columns[3].filters = values;
-        this.columns[4].filters = values;
-      }
-    },
-    adminsForFilter(values) {
+    allSpecialistsForFilter(values) {
       if (this.userInfo.staff) {
         this.columns[2].filters = values;
+      }
+    },
+    onlySpecialistsForFilter(values) {
+      if (this.userInfo.staff) {
+        this.columns[3].filters = values;
       }
     },
   },
@@ -387,7 +336,7 @@ export default {
     margin-bottom: 8px
     display: block
 
-.missions-block
+.task-groups-block
   .ant-table-thead
     .ant-table-header-column
       .ant-table-column-sorters

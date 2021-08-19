@@ -33,10 +33,14 @@
             </a-menu-item>
           </a-sub-menu>
           <a-menu-item :key="item.key" v-else-if="item.childrens.length === 0">
-            <router-link :to="item.to">
-              <a-icon :type="item.icon" />
-              <span>{{ item.title }}</span></router-link
+            <router-link
+              :to="item.to"
+              :class="item.twoLines ? 'menu-two-lines' : ''"
             >
+              <a-icon :type="item.icon" />
+              <span v-if="!item.twoLines">{{ item.title }}</span>
+              <div v-else>{{ item.title }}</div>
+            </router-link>
           </a-menu-item>
         </template>
       </a-menu>
@@ -52,16 +56,12 @@
             <p class="user-info__status" v-if="userInfo.staff">Администратор</p>
             <p class="user-info__status" v-else>Специалист</p>
           </div>
-          <a-icon
-            class="icon-button icon-exit"
-            type="import"
-            @click="logout"
-          />
+          <a-icon class="icon-button icon-exit" type="import" @click="logout" />
         </div>
       </a-layout-header>
       <a-layout-content style="margin: 15px">
         <div class="content">
-          <router-view/>
+          <router-view />
         </div>
       </a-layout-content>
     </a-layout>
@@ -102,6 +102,16 @@ export default {
           specOnly: false,
           to: { name: "Missions" },
           childrens: [],
+        },
+        {
+          icon: "solution",
+          title: "Интервенционные группы",
+          key: "6",
+          staffOnly: false,
+          specOnly: false,
+          to: { name: "TaskGroups" },
+          childrens: [],
+          twoLines: true,
         },
         {
           icon: "setting",
@@ -180,7 +190,7 @@ export default {
       await this.$store.dispatch("auth/logout");
       this.clearStore();
     },
-    setSelectedMenuItem(to){
+    setSelectedMenuItem(to) {
       if (this.openKeys.length) this.openKeys.splice(0);
       if (this.selectedKeys.length) this.selectedKeys.splice(0);
       let matched = false;
@@ -203,20 +213,20 @@ export default {
         }
         if (matched) break;
       }
-    }
+    },
   },
   computed: {
     ...mapGetters({
       userInfo: "auth/getUserInfo",
     }),
   },
-  beforeRouteUpdate(to, from, next){
+  beforeRouteUpdate(to, from, next) {
     this.setSelectedMenuItem(to);
     next();
   },
-  created(){
+  created() {
     this.setSelectedMenuItem(this.$route);
-  }
+  },
 };
 </script>
 
@@ -276,6 +286,25 @@ export default {
 .submenu--two-lines
   line-height: 20px
   white-space: normal
+
+.ant-menu
+  .ant-menu-item
+    .menu-two-lines
+      display: flex
+      flex-direction: row
+      .anticon
+        align-self: center
+      div
+        line-height: 16px
+        padding: 2px 0 2px 0
+        white-space: normal
+
+    .anticon
+      font-size: 18px
+
+  .ant-menu-submenu
+    .anticon
+      font-size: 18px
 
 .content
   .ant-spin-nested-loading
