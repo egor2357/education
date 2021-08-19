@@ -727,10 +727,11 @@ class MessageView(CreateListRetrieveDestroyViewSet):
 class Task_groupView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadCreateOnly)
-  filter_backends = (DjangoFilterBackend,)
+  filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
   queryset = Task_group.objects.all()
   filterset_class = Task_groupFilter
   pagination_class = CommonPagination
+  ordering_fields = ['creation_date', 'deadline']
 
   def perform_create(self, serializer):
     user = self.request.user
