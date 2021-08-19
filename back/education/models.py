@@ -833,7 +833,8 @@ class Talent(models.Model):
     on_delete=models.CASCADE, verbose_name='Образовательная область'
   )
 
-  text = models.TextField(blank=False, verbose_name='Описание')
+  name = models.TextField(blank=False, verbose_name='Название')
+  text = models.TextField(blank=True, verbose_name='Описание')
   creation_date = models.DateTimeField(
     auto_now_add=True,
     null=False, verbose_name='Дата-время написания'

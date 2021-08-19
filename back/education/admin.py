@@ -184,7 +184,7 @@ admin.site.register(Task_group, Task_groupAdmin)
 
 class TalentAdmin(admin.ModelAdmin):
   list_filter = ('creation_date',)
-  list_display = ('creation_date', 'specialist', 'area', 'text',)
-  search_fields = ('text',)
+  list_display = ('creation_date', 'specialist', 'area', 'name',)
+  search_fields = ('text', 'name')
 
 admin.site.register(Talent, TalentAdmin)

@@ -206,6 +206,9 @@ class Task_groupFilter(FilterSet):
     )
 
 class TalentFilter(FilterSet):
+  name = django_filters.CharFilter(
+    lookup_expr='icontains'
+  )
   text = django_filters.CharFilter(
     lookup_expr='icontains'
   )

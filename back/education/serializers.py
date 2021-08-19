@@ -477,7 +477,7 @@ class FilteredEducational_areaListSerializer(serializers.ListSerializer):
         qs = Educational_area.objects.none()
     return super(FilteredEducational_areaListSerializer, self).to_representation(qs)
 
-class Educational_areaSerializer(serializers.ModelSerializer):
+class Educational_areaSerializer(FlexFieldsModelSerializer):
   development_directions = Development_directionSerializer(
     source='development_direction_set', many=True, read_only=True,
   )
@@ -836,8 +836,8 @@ class TalentSerializer(FlexFieldsModelSerializer):
     write_only=True,
     source='area', queryset=Educational_area.objects.all()
   )
-  area_name = serializers.StringRelatedField(
-    read_only=True,
+  area = Educational_areaSerializer(
+    read_only=True, omit=['development_directions']
   )
 
   creation_date = serializers.DateTimeField(read_only=True)
@@ -847,7 +847,7 @@ class TalentSerializer(FlexFieldsModelSerializer):
     fields = (
       'id',
       'specialist',
-      'area_id', 'area_name',
-      'text',
+      'area_id', 'area',
+      'name', 'text',
       'creation_date'
     )
