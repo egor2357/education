@@ -240,18 +240,22 @@ class PresenceSerializer(serializers.ModelSerializer):
       'summary'
     )
 
-class SpecialistSerializer(FlexFieldsModelSerializer):
+class UserSpecialistSerializer(FlexFieldsModelSerializer):
+  activities_id = serializers.PrimaryKeyRelatedField(
+    source='activities', many=True, queryset=Activity.objects.all()
+  )
   class Meta:
     model = Specialist
     fields = (
       'id',
       'surname', 'name',
       'patronymic', 'role',
+      'activities_id',
       '__str__',
     )
 
 class UserSerializer(FlexFieldsModelSerializer):
-  specialist = SpecialistSerializer(read_only=True)
+  specialist = UserSpecialistSerializer(read_only=True)
   class Meta:
     model = User
     fields = [

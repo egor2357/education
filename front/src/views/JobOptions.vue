@@ -5,14 +5,14 @@
         <div class="job-options__header-filler"></div>
         <div>Планы занятий</div>
         <div class="job-options__header-filler">
-          <a-button @click="showModal(null)" v-if="activities.length">
+          <a-button @click="showModal(null)" v-if="filteredActivities.length">
             <a-icon type="plus"/>Добавить план занятия
           </a-button>
         </div>
       </div>
-      <div class="job-options__tabs" v-if="activities.length">
+      <div class="job-options__tabs" v-if="filteredActivities.length">
         <a-tabs v-model="activeTab">
-          <a-tab-pane v-for="activity in activities" :key="activity.id">
+          <a-tab-pane v-for="activity in filteredActivities" :key="activity.id">
             <span slot="tab">
               {{ activity.name }}
             </span>
@@ -93,8 +93,8 @@ export default {
     await Promise.all(fetches);
     this.loading = false;
 
-    if (this.activities.length) {
-      this.activeTab = this.activities[0].id;
+    if (this.filteredActivities.length) {
+      this.activeTab = this.filteredActivities[0].id;
     }
 
   },
@@ -102,7 +102,9 @@ export default {
     async fetchOptions(){
       try {
         this.loading = true;
-        let res = await this.$axios.get("/api/options/");
+        let res = await this.$axios.get(
+          `/api/options/?specialist_id=${this.userInfo.specialistId}`
+        );
         if (res.status === 200) {
           this.options = res.data;
         } else if (res.status === 400) {
@@ -175,7 +177,14 @@ export default {
     ...mapGetters({
       activitiesFetched: "activities/getFetched",
       activities: "activities/getActivities",
+      userInfo: "auth/getUserInfo",
     }),
+
+    filteredActivities(){
+      return this.activities.filter((item)=>{
+        return this.userInfo.activitiesId.includes(item.id);
+      })
+    },
 
     currentActivityOptions(){
       return this.options.filter((option)=>{
@@ -184,7 +193,7 @@ export default {
     },
 
     currentActivity(){
-      return this.activities.find((activity)=>{
+      return this.filteredActivities.find((activity)=>{
         return activity.id == this.activeTab;
       })
     },

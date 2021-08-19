@@ -5,6 +5,7 @@ const state = () => ({
     staff: false,
     id: null,
     specialistId: null,
+    activitiesId: [],
   },
 });
 
@@ -30,6 +31,7 @@ const actions = {
           specialistId: res.data.specialist === null
             ? null
             : res.data.specialist.id,
+          activitiesId: res.data.specialist.activities_id,
         });
       }
       return res;
@@ -40,6 +42,7 @@ const actions = {
         staff: false,
         id: null,
         specialistId: null,
+        activitiesId: [],
       });
       if (e.response) {
         return e.response;
@@ -58,6 +61,7 @@ const actions = {
           staff: false,
           id: null,
           specialistId: null,
+          activitiesId: [],
         });
       }
       return res;
@@ -81,6 +85,7 @@ const actions = {
           specialistId: res.data.specialist === null
             ? null
             : res.data.specialist.id,
+          activitiesId: res.data.specialist.activities_id,
         });
       }
       return res;
@@ -91,6 +96,7 @@ const actions = {
         staff: false,
         id: null,
         specialistId: null,
+        activitiesId: [],
       });
       if (e.response) {
         return e.response;
