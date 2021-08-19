@@ -199,12 +199,6 @@ class JobView(viewsets.ModelViewSet):
     except:
       return Response({}, status=404)
 
-    if option.activity != job.activity:
-      return Response({}, status=400)
-
-    if option.specialist != job.specialist:
-      return Response({}, status=403)
-
     job.topic = option.topic
     job.comment = option.comment
 
