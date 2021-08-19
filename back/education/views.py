@@ -61,6 +61,21 @@ class IsAdminOrOption_fileOwnerOrNoUpdateDelete(permissions.BasePermission):
     else:
       return request.method in permissions.SAFE_METHODS
 
+class CreateOptionIfHaveSpecialtyOrIsAdmin(permissions.BasePermission):
+  def has_permission(self, request, view):
+    if request.method == 'POST':
+      user = request.user
+      if user.is_staff:
+        return True
+      elif user.specialist is not None:
+        activity_id = request.POST.get('activity_id', None)
+        if activity_id is None:
+          return False
+        return user.specialist.activities.filter(pk=activity_id).exists()
+      else:
+        return False
+    else:
+      return True
 
 
 class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
@@ -363,7 +378,11 @@ class Option_fileView(viewsets.ModelViewSet):
 
 class OptionView(viewsets.ModelViewSet):
   authentication_classes = (CsrfExemptSessionAuthentication,)
-  permission_classes = (permissions.IsAuthenticated, IsAdminOrOptionOwnerOrNoUpdateDelete)
+  permission_classes = (
+    permissions.IsAuthenticated,
+    IsAdminOrOptionOwnerOrNoUpdateDelete,
+    CreateOptionIfHaveSpecialtyOrIsAdmin,
+  )
   serializer_class = OptionSerializer
   queryset = (
     Option.objects.all()
