@@ -85,15 +85,6 @@ class SkillSerializer(FlexFieldsModelSerializer):
     list_serializer_class = FilteredSkillListSerializer
 
 class SkillSerializerUnfiltered(SkillSerializer):
-  def get_has_specialty(self, instance):
-    request = self.context['request']
-    user = request.user
-    if user.specialist is not None:
-      return user.specialist.skills.filter(pk=instance.id).exists()
-    else:
-      return False
-  has_specialty = serializers.SerializerMethodField()
-
   class Meta:
     model = Skill
     fields = (
@@ -102,7 +93,6 @@ class SkillSerializerUnfiltered(SkillSerializer):
       'direction_id',
       'direction_number',
       'area_number',
-      'has_specialty',
     )
     list_serializer_class = serializers.ListSerializer
 
@@ -267,6 +257,10 @@ class UserSpecialistSerializer(FlexFieldsModelSerializer):
   activities_id = serializers.PrimaryKeyRelatedField(
     source='activities', many=True, queryset=Activity.objects.all()
   )
+  skills_id = serializers.PrimaryKeyRelatedField(
+    source='skills', many=True, queryset=Skill.objects.all()
+  )
+
   class Meta:
     model = Specialist
     fields = (
@@ -274,6 +268,7 @@ class UserSpecialistSerializer(FlexFieldsModelSerializer):
       'surname', 'name',
       'patronymic', 'role',
       'activities_id',
+      'skills_id',
       '__str__',
     )
 

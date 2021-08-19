@@ -11,7 +11,9 @@
         <template v-if="option.skills.length">
           <div
             class="job-option-skill"
-            :class="{'disabled': !skill.has_specialty}"
+            :class="{
+              'disabled': (!userInfo.skillsId.includes(skill.id)) && !userInfo.staff
+            }"
             v-for="skill in option.skills"
             :key="skill.id"
           >
@@ -71,6 +73,7 @@
 
 <script>
 import consts from "@/const";
+import { mapGetters } from "vuex";
 import MediaLightBox from "@/components/MediaLightBox";
 export default {
   name: "JobOption",
@@ -92,6 +95,9 @@ export default {
     };
   },
   computed: {
+    ...mapGetters({
+      userInfo: "auth/getUserInfo",
+    }),
     files() {
       return this.option.option_files.map((file) => {
         return {
