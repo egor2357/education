@@ -20,7 +20,9 @@
       </div>
     </span>
     <template slot="status" slot-scope="status, item">
-      <a-tag class="execute-block__tag" v-if="status === 0" color="cyan">Новая</a-tag>
+      <a-tag class="execute-block__tag" v-if="status === 0" color="cyan"
+        >Новая</a-tag
+      >
       <template v-else-if="status === 1">
         <a-tag class="execute-block__tag" color="purple">В процессе</a-tag>
         <a
@@ -33,7 +35,9 @@
           >Завершить</a
         >
       </template>
-      <a-tag class="execute-block__tag" v-else-if="status === 2" color="green">Исполнено</a-tag>
+      <a-tag class="execute-block__tag" v-else-if="status === 2" color="green"
+        >Исполнено</a-tag
+      >
     </template>
     <div
       slot="filterDropdown"
@@ -142,19 +146,12 @@
 import { mapGetters, mapActions, mapMutations } from "vuex";
 import datetime from "@/mixins/datetime";
 import common from "@/mixins/common";
+import tableFilterSort from "@/mixins/tableFilterSort";
 export default {
   name: "MissionsTable",
-  mixins: [datetime, common],
+  mixins: [datetime, common, tableFilterSort],
   data() {
     return {
-      pagination: {
-        total: 0,
-        page: 1,
-        pageSize: 10,
-        showSizeChanger: true,
-        locale: { items_per_page: " на странице" },
-        pageSizeOptions: ["10", "20", "30"],
-      },
       columns: [
         {
           title: "Дата",
@@ -274,56 +271,13 @@ export default {
         this.$message.error("Произошла ошибка при получении данных");
       }
       this.updatePaginationTotal();
-      if (
-        (this.filterQuery !== "" &&
-          queryString !== this.$route.fullPath.replace(this.$route.path, "")) ||
-        (this.filterQuery === "" &&
-          this.$route.fullPath
-            .replace(this.$route.path, "")
-            .indexOf("ordering") !== -1)
-      ) {
-        this.$router.push(queryString);
-      }
+      this.routerCheckAndPush(queryString);
       this.$emit("loaded");
-    },
-    async tableChanged(pagination, filters, sorter) {
-      this.filterQuery = "";
-      this.columns.forEach((column) => {
-        if (column.sortOrder && sorter.field !== column.key) {
-          column.sortOrder = false;
-        } else if (sorter.field === column.key && sorter.order === "descend") {
-          column.sortOrder = "descend";
-        } else if (sorter.field === column.key && sorter.order === "ascend") {
-          column.sortOrder = "ascend";
-        } else if (sorter.field === column.key && sorter.order === undefined) {
-          column.sortOrder = false;
-        }
-      });
-      if (sorter.order) {
-        sorter.order === "ascend"
-          ? (this.filterQuery += `&ordering=${sorter.field}`)
-          : (this.filterQuery += `&ordering=-${sorter.field}`);
-      }
-      this.pagination.page = pagination.current;
-      this.pagination.pageSize = pagination.pageSize;
-      for (let key in filters) {
-        if (Array.isArray(filters[key])) {
-          this.filterQuery += `&${key}=${filters[key].join(",")}`;
-        } else {
-          this.filterQuery += `&${key}=${filters[key]}`;
-        }
-        this.columns.forEach((column) => {
-          if (column.key === key) {
-            if (filters[key] !== "") column.filteredValue = filters[key];
-          }
-        });
-      }
-      await this.getData();
     },
     displayDelete({ id, caption }) {
       let that = this;
       this.$confirm({
-        title: `Поручение "${caption} будет удалено."`,
+        title: `Задача "${caption} будет удалена."`,
         content: `Продолжить?`,
         okType: "danger",
         onOk() {
@@ -335,7 +289,7 @@ export default {
       try {
         let res = await this.deleteMission(id);
         if (res.status === 204) {
-          this.$message.success("Поручение успешно удалено");
+          this.$message.success("Задача успешно удалена");
           await this.fetchMissions();
           this.updatePaginationTotal();
         } else {
@@ -349,80 +303,13 @@ export default {
       try {
         let res = await this.setExecuteMission(id);
         if (res.status === 200) {
-          this.$message.success("Статус поручения успешно изменён");
+          this.$message.success("Статус задачи успешно изменён");
           await this.fetchMissions();
         } else {
           this.$message.error("Произошла ошибка");
         }
       } catch (e) {
         this.$message.error("Произошла ошибка");
-      }
-    },
-    handleSearch(selectedKeys, confirm, dataIndex) {
-      confirm();
-      this.searchText = selectedKeys[0];
-      this.searchedColumn = dataIndex;
-    },
-    handleReset(clearFilters) {
-      clearFilters();
-      this.searchText = "";
-    },
-    loadFiltersFromQuery() {
-      this.filterQuery = "";
-      let query = this.$route.query;
-      for (let key in this.$route.query) {
-        if (key === "page") {
-          this.pagination.page = Number(query.page);
-        } else if (key === "per_page") {
-          this.pagination.pageSize = Number(query.per_page);
-        } else {
-          let queryValue = null;
-          if (query[key].indexOf(",") !== -1) {
-            queryValue = query[key].split(",");
-          } else {
-            queryValue = query[key];
-          }
-          this.columns.forEach((column) => {
-            if (column.key === key) {
-              if (queryValue !== "") {
-                if (Array.isArray(queryValue)) {
-                  column.filteredValue = queryValue.map(Number);
-                } else {
-                  if (this.isOnlyPositiveDigit(queryValue)) {
-                    column.filteredValue = [Number(queryValue)];
-                  } else {
-                    column.filteredValue = [queryValue];
-                  }
-                }
-                this.filterQuery += `&${key}=${query[key]}`;
-              } else {
-                column.filteredValue = [];
-              }
-            }
-          });
-        }
-      }
-      this.columns.forEach((column) => {
-        if (
-          query.ordering &&
-          (query.ordering === column.key || query.ordering === `-${column.key}`)
-        ) {
-          if (query.ordering === column.key) {
-            column.sortOrder = "ascend";
-          } else if (query.ordering === `-${column.key}`) {
-            column.sortOrder = "descend";
-          } else if (column.sortOrder) {
-            column.sortOrder = [];
-          }
-        }
-      });
-      if (query.ordering && this.filterQuery.indexOf("ordering") === -1) {
-        this.filterQuery += `&ordering=${query.ordering}`;
-      }
-    },
-    updatePaginationTotal() {
-      if (this.data.pagination) {
-        this.pagination.total = this.data.pagination.count;
       }
     },
   },
