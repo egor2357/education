@@ -10,6 +10,7 @@ import schedule from "@/store/admin/schedule";
 import forms from "@/store/admin/forms";
 import presence from "@/store/admin/presence";
 import missions from "@/store/missions";
+import taskGroups from "@/store/taskGroups";
 
 Vue.use(Vuex);
 
@@ -22,7 +23,8 @@ const store = new Vuex.Store({
     schedule,
     forms,
     presence,
-    missions
+    missions,
+    taskGroups
   },
 });
 store.$axios = axios;
