@@ -11,6 +11,7 @@ import forms from "@/store/admin/forms";
 import presence from "@/store/admin/presence";
 import missions from "@/store/missions";
 import taskGroups from "@/store/taskGroups";
+import talents from "@/store/talents";
 
 Vue.use(Vuex);
 
@@ -24,7 +25,8 @@ const store = new Vuex.Store({
     forms,
     presence,
     missions,
-    taskGroups
+    taskGroups,
+    talents,
   },
 });
 store.$axios = axios;

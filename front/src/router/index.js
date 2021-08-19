@@ -180,6 +180,15 @@ const router = new VueRouter({
           },
         },
         {
+          path: "talents",
+          name: "Talents",
+          component: () => import("@/views/Talents"),
+          meta: {
+            staffOnly: false,
+            specOnly: false,
+          },
+        },
+        {
           path: "*",
           name: "Page404",
           component: () => import("@/views/Page404"),

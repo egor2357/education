@@ -9,7 +9,7 @@ export default {
         locale: { items_per_page: " на странице" },
         pageSizeOptions: ["10", "20", "30"],
       },
-    }
+    };
   },
   methods: {
     updatePaginationTotal() {
@@ -85,8 +85,8 @@ export default {
       });
       if (sorter.order) {
         sorter.order === "ascend"
-          ? (this.filterQuery += `&ordering=${sorter.field}`)
-          : (this.filterQuery += `&ordering=-${sorter.field}`);
+          ? (this.filterQuery += `&ordering=${sorter.column.key}`)
+          : (this.filterQuery += `&ordering=-${sorter.column.key}`);
       }
       this.pagination.page = pagination.current;
       this.pagination.pageSize = pagination.pageSize;
@@ -104,7 +104,7 @@ export default {
       }
       await this.getData();
     },
-    routerCheckAndPush(queryString = '') {
+    routerCheckAndPush(queryString = "") {
       if (
         (this.filterQuery !== "" &&
           queryString !== this.$route.fullPath.replace(this.$route.path, "")) ||

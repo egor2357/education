@@ -6,11 +6,16 @@ import deleteAxios from "@/middleware/deleteAxios";
 const state = () => ({
   areas: [],
   fetched: false,
+  areasAll: [],
+  fetchedAll: false,
 });
 
 const getters = {
   getAreas(state) {
     return state.areas;
+  },
+  getAreasAll(state) {
+    return state.areasAll;
   },
   getFilteredAreas(state) {
     return state.areas.map(area => {
@@ -37,6 +42,17 @@ const actions = {
     }
     catch (e) {
       commit("setAreas", {data: [], success: false});
+    }
+  },
+  async fetchAreasAll({commit}) {
+    try {
+      let res = await this.$axios.get("/api/educational_areas_all/");
+      if (res.status === 200) {
+        commit("setAreasAll", {data: res.data, success: true})
+      }
+    }
+    catch (e) {
+      commit("setAreasAll", {data: [], success: false});
     }
   },
   async addArea(context, payload) {
@@ -76,6 +92,10 @@ const mutations = {
   setAreas(state, payload) {
     state.areas = payload.data;
     state.fetched = payload.success;
+  },
+  setAreasAll(state, payload) {
+    state.areasAll = payload.data;
+    state.fetchedAll = payload.success;
   },
 };
 
