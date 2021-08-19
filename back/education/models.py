@@ -200,25 +200,6 @@ class Presence(models.Model):
       job.clear_params()
       job.save()
 
-  @classmethod
-  def check_spec_clashes(self, specialist, date_from, date_to):
-    spec_presense_qs = Presence.objects.filter(specialist=specialist)
-    clashes_qs = spec_presense_qs.exclude(date_to__lt=date_from)
-    clashes_qs = clashes_qs.exclude(date_from__gt=date_to)
-
-    if clashes_qs.exists():
-      raise ValidationError(
-        {
-          'non_field_errors': [
-            'Выбранный период пересекается с периодом {0} - {1}'
-            .format(
-              clashes_qs[0].date_from.strftime('%d.%m.%Y'),
-              clashes_qs[0].date_to.strftime('%d.%m.%Y')
-            )
-          ]
-        }
-      )
-
   class Meta:
     db_table = 'presence'
     verbose_name = 'Присутствие'

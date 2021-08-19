@@ -77,3 +77,23 @@ def job_update_related(job, request):
       skill_report.coefficient = coeff_by_skill_id[skill_report.skill_id]
       skill_report.mark = mark['mark']
       skill_report.save()
+
+def check_presence_clashes(specialist, date_from, date_to, exclude_presence=None):
+  spec_presense_qs = Presence.objects.filter(specialist=specialist)
+  if exclude_presence is not None:
+    spec_presense_qs = spec_presense_qs.exclude(exclude_presence)
+  clashes_qs = spec_presense_qs.exclude(date_to__lt=date_from)
+  clashes_qs = clashes_qs.exclude(date_from__gt=date_to)
+
+  if clashes_qs.exists():
+    raise ValidationError(
+      {
+        'non_field_errors': [
+          'Выбранный период пересекается с периодом {0} - {1}'
+          .format(
+            clashes_qs[0].date_from.strftime('%d.%m.%Y'),
+            clashes_qs[0].date_to.strftime('%d.%m.%Y')
+          )
+        ]
+      }
+    )

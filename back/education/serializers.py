@@ -7,6 +7,7 @@ from django.db.models import Q
 
 from .models import *
 
+from .service import check_presence_clashes
 #create your serializers here.
 
 # /////////////////////////////////////////////////
@@ -188,7 +189,7 @@ class PresenceSerializer(serializers.ModelSerializer):
     date_to = validated_data.pop('date_to')
     specialist = validated_data.pop('specialist')
 
-    Presence.check_spec_clashes(
+    check_presence_clashes(
       specialist,
       date_from, date_to
     )
