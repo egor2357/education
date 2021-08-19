@@ -114,6 +114,15 @@ export default {
           twoLines: true,
         },
         {
+          icon: "bulb",
+          title: "Таланты",
+          key: "7",
+          staffOnly: false,
+          specOnly: false,
+          to: { name: "Talents" },
+          childrens: [],
+        },
+        {
           icon: "setting",
           key: "3",
           title: "Настройки",

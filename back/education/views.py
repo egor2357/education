@@ -676,12 +676,18 @@ class Task_groupView(viewsets.ModelViewSet):
 class TalentView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadCreateOnly)
   serializer_class = TalentSerializer
-  filter_backends = (DjangoFilterBackend,)
+  filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
   queryset = Talent.objects.all()
   filterset_class = TalentFilter
   pagination_class = CommonPagination
+  ordering_fields = ['creation_date', 'area_id', 'specialist_id']
 
   def perform_create(self, serializer):
     user = self.request.user
     if user.specialist is not None:
       serializer.save(specialist=user.specialist)
+
+class EducationalAreasAllView(viewsets.GenericViewSet, mixins.ListModelMixin):
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
+  queryset = Educational_area.objects.all().prefetch_related('development_direction_set__skill_set__direction__area')
+  serializer_class = EducationalAreaOnlySerializer

@@ -5,6 +5,7 @@ from .views import *
 router = routers.DefaultRouter()
 router.register(r'users', UserView, basename='User')
 router.register(r'educational_areas', Educational_areaView, basename='Educational_area')
+router.register(r'educational_areas_all', EducationalAreasAllView, basename='EducationalAreasAll')
 router.register(r'development_directions', Development_directionView, basename='Development_direction')
 router.register(r'skills', SkillView, basename='Skill')
 router.register(r'forms', FormView, basename='Form')

@@ -486,6 +486,11 @@ class Educational_areaSerializer(FlexFieldsModelSerializer):
     fields = ('id', 'name', 'number', 'development_directions')
     list_serializer_class = FilteredEducational_areaListSerializer
 
+class EducationalAreaOnlySerializer(FlexFieldsModelSerializer):
+  class Meta:
+    model = Educational_area
+    fields = ('id', 'name', 'number')
+
 class MethodSerializer(serializers.ModelSerializer):
   form_id = serializers.PrimaryKeyRelatedField(
     source='form', queryset=Form.objects.all()
