@@ -112,7 +112,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 #Django Rest Framework settings
 
 REST_FRAMEWORK = {
-    'DATE_INPUT_FORMATS': ['iso-8601', '%Y-%m-%dT%H:%M:%S.%f%z']
+    'DATE_INPUT_FORMATS': [
+        'iso-8601', '%Y-%m-%dT%H:%M:%S.%f%z'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'education.authentication.CsrfExemptSessionAuthentication'
+    ]
 }
 
 LOGIN_REDIRECT_URL = '/'

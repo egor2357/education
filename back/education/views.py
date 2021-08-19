@@ -12,11 +12,6 @@ from .serializers import *
 from .filters import *
 from .service import (option_update_related, job_update_related)
 
-from rest_framework.authentication import SessionAuthentication
-class CsrfExemptSessionAuthentication(SessionAuthentication):
-  def enforce_csrf(self, request):
-    return
-
 class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
                                         mixins.ListModelMixin,
                                         mixins.RetrieveModelMixin,
@@ -31,7 +26,6 @@ class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
 
 # Create your views here.
 class UserView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   queryset = User.objects.all().prefetch_related('specialist')
   serializer_class = UserSerializer
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
@@ -58,37 +52,31 @@ class UserView(viewsets.ModelViewSet):
     return Response(UserSerializer(user).data)
 
 class Educational_areaView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Educational_area.objects.all().prefetch_related('development_direction_set__skill_set__direction__area')
   serializer_class = Educational_areaSerializer
 
 class Development_directionView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Development_direction.objects.all().prefetch_related('skill_set__direction__area')
   serializer_class = Development_directionSerializer
 
 class SkillView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Skill.objects.all().select_related('direction__area')
   serializer_class = SkillSerializer
 
 class FormView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Form.objects.all().prefetch_related('method_set')
   serializer_class = FormSerializer
 
 class MethodView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Method.objects.all().select_related('form')
   serializer_class = MethodSerializer
 
 class JobView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
   serializer_class = JobSerializer
   filter_backends = (DjangoFilterBackend,)
@@ -203,7 +191,6 @@ class JobView(viewsets.ModelViewSet):
                   ))
 
 class ScheduleView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Schedule.objects.all().select_related('activity')
   serializer_class = ScheduleSerializer
@@ -280,7 +267,6 @@ class ScheduleView(viewsets.ModelViewSet):
     return Response(JobSerializer(new_job).data)
 
 class ActivityView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = ActivitySerializer
   queryset = Activity.objects.all().prefetch_related('skills')
@@ -310,13 +296,11 @@ class ActivityView(viewsets.ModelViewSet):
     return Response(ActivitySerializer(activity, fields=['skills']).data)
 
 class Option_fileView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrOption_fileOwnerOrNoUpdateDelete)
   serializer_class = Option_fileSerializer
   queryset = Option_file.objects.all()
 
 class OptionView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (
     permissions.IsAuthenticated,
     IsAdminOrOptionOwnerOrNoUpdateDelete,
@@ -355,8 +339,7 @@ class OptionView(viewsets.ModelViewSet):
     return Response(OptionSerializer(option, context={'request': request}).data, status=201)
 
 class PresenceView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication, IsAdminOrReadOnly)
-  permission_classes = (permissions.IsAuthenticated,)
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Presence.objects.all().select_related('main_interval', 'presence')
   serializer_class = PresenceSerializer
   filter_backends = (DjangoFilterBackend,)
@@ -378,7 +361,6 @@ class PresenceView(viewsets.ModelViewSet):
     return res
 
 class SpecialistView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = (Specialist.objects.all().filter(is_active=True)
                                   .select_related('user')
@@ -406,13 +388,11 @@ class SpecialistView(viewsets.ModelViewSet):
     return Response(SpecialistSerializer(specialist).data, status=204)
 
 class Job_fileView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
   queryset = Job_file.objects.all()
   serializer_class = Job_fileSerializer
 
 class Skill_reportView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
   serializer_class = Skill_reportSerializer
   filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
@@ -494,7 +474,6 @@ class Skill_reportView(viewsets.ModelViewSet):
     return Response({'absent': absent_coeffs})
 
 class CompetenceView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = CompetenceSerializer
 
@@ -510,7 +489,6 @@ class CompetenceView(viewsets.ModelViewSet):
                                   .select_related('skill'))
 
 class SpecialtyView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = SpecialtySerializer
 
@@ -542,7 +520,6 @@ class SpecialtyView(viewsets.ModelViewSet):
 
 
 class MissionView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = MissionSerializer
   filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
@@ -596,7 +573,6 @@ class MissionView(viewsets.ModelViewSet):
 
 
 class AnnouncementView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = AnnouncementSerializer
   queryset = Announcement.objects.all()
@@ -605,7 +581,6 @@ class AnnouncementView(viewsets.ModelViewSet):
   pagination_class = CommonPagination
 
 class AppealView(CreateListRetrieveDestroyViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, NotDeleteIfNotAdmin)
   serializer_class = AppealSerializer
   filter_backends = (DjangoFilterBackend,)
@@ -654,7 +629,6 @@ class AppealView(CreateListRetrieveDestroyViewSet):
     return Response(serializer.data, status=200)
 
 class MessageView(CreateListRetrieveDestroyViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, NotDeleteIfNotAdmin)
   serializer_class = MessageSerializer
   filter_backends = (DjangoFilterBackend,)
@@ -677,7 +651,6 @@ class MessageView(CreateListRetrieveDestroyViewSet):
       serializer.save(author=user.specialist, reply=user.is_staff)
 
 class Task_groupView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadCreateOnly)
   filter_backends = (DjangoFilterBackend,)
   queryset = Task_group.objects.all()
@@ -700,7 +673,6 @@ class Task_groupView(viewsets.ModelViewSet):
       return Task_groupUserSerializer
 
 class TalentView(viewsets.ModelViewSet):
-  authentication_classes = (CsrfExemptSessionAuthentication,)
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadCreateOnly)
   serializer_class = TalentSerializer
   filter_backends = (DjangoFilterBackend,)
