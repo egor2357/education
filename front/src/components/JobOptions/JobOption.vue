@@ -11,6 +11,7 @@
         <template v-if="option.skills.length">
           <div
             class="job-option-skill"
+            :class="{'disabled': !skill.has_specialty}"
             v-for="skill in option.skills"
             :key="skill.id"
           >
@@ -189,6 +190,9 @@ $border-color: #e8e8e8
     color: white
     margin-right: 5px
     margin-bottom: 5px
+
+    &.disabled
+      background-color: #b3b3b3
 
     &--empty
       background-color: #f9f9f9
