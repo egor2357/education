@@ -104,7 +104,7 @@ export default {
           childrens: [],
         },
         {
-          icon: "bulb",
+          icon: "solution",
           title: "Интервенционные группы",
           key: "6",
           staffOnly: false,
@@ -287,16 +287,24 @@ export default {
   line-height: 20px
   white-space: normal
 
-.ant-menu-item
-  .menu-two-lines
-    display: flex
-    flex-direction: row
+.ant-menu
+  .ant-menu-item
+    .menu-two-lines
+      display: flex
+      flex-direction: row
+      .anticon
+        align-self: center
+      div
+        line-height: 16px
+        padding: 2px 0 2px 0
+        white-space: normal
+
     .anticon
-      align-self: center
-    div
-      line-height: 16px
-      padding: 2px 0 2px 0
-      white-space: normal
+      font-size: 18px
+
+  .ant-menu-submenu
+    .anticon
+      font-size: 18px
 
 .content
   .ant-spin-nested-loading
