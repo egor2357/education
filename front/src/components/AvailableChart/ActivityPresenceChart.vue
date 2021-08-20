@@ -106,6 +106,16 @@
                         >
                           <span> Удалить </span>
                         </a-menu-item>
+                        <a-menu-item
+                          key="3"
+                          @click="
+                            $emit('displayEditSummary', {
+                              presence: interval.editableData,
+                            })
+                          "
+                        >
+                          Отчет
+                        </a-menu-item>
                       </a-menu>
                     </a-dropdown>
                   </div>

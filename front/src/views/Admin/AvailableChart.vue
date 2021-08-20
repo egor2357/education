@@ -42,6 +42,7 @@
             :tableData="tableData"
             :activities="activities"
             @displayEdit="displayEdit"
+            @displayEditSummary="displayEditSummary"
             @displayDeleteConfirm="displayDeleteConfirm($event)"
           />
         </div>
