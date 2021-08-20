@@ -342,6 +342,10 @@ class PresenceView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Presence.objects.all().select_related('main_interval', 'presence')
   serializer_class = PresenceSerializer
+  permission_classes = (
+    permissions.IsAuthenticated,
+    IsAdminOrReadPartialUpdateOnly,
+  )
   filter_backends = (DjangoFilterBackend,)
   filterset_class = PresenceFilter
 

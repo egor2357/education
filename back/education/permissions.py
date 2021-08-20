@@ -60,3 +60,13 @@ class CreateOptionIfHaveSpecialtyOrIsAdmin(permissions.BasePermission):
         return False
     else:
       return True
+
+class IsAdminOrReadPartialUpdateOnly(permissions.BasePermission):
+  def has_permission(self, request, view):
+    safe_methods = list(permissions.SAFE_METHODS)
+    safe_methods.append('PATCH')
+
+    if request.method in safe_methods:
+      return True
+    else:
+      return request.user.is_staff
