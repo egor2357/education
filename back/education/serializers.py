@@ -138,6 +138,13 @@ class ScheduleSerializer(serializers.ModelSerializer):
       'activity_id', 'activity',
     )
 
+class PresenceSummarySerializer(serializers.ModelSerializer):
+  summary = serializers.CharField()
+
+  class Meta:
+    model = Presence
+    fields = ('summary',)
+
 class PresenceSerializer(serializers.ModelSerializer):
   specialist_id = serializers.PrimaryKeyRelatedField(
     source='specialist', queryset=Specialist.objects.all()
@@ -180,66 +187,6 @@ class PresenceSerializer(serializers.ModelSerializer):
         )
 
     return data
-
-  def create(self, validated_data):
-    with_quarantine = validated_data.pop('with_quarantine', False)
-    quarantine_days = validated_data.pop('quarantine_days', 0)
-
-    date_from = validated_data.pop('date_from')
-    date_to = validated_data.pop('date_to')
-    specialist = validated_data.pop('specialist')
-
-    check_presence_clashes(
-      specialist,
-      date_from, date_to
-    )
-
-    presence_start = date_from
-
-    if with_quarantine and (quarantine_days != 0):
-      quarantine_start = date_from
-      quarantine_end = quarantine_start + datetime.timedelta(days=quarantine_days-1)
-      quarantine = Presence(
-        specialist=specialist,
-        main_interval=None,
-        date_from=quarantine_start,
-        date_to=quarantine_end,
-        is_available=False
-      )
-      quarantine.save()
-
-      presence_start = quarantine_end + datetime.timedelta(days=1)
-
-    presence = Presence(
-      specialist=specialist,
-      main_interval=None,
-      date_from=presence_start,
-      date_to=date_to,
-      is_available=True
-    )
-
-    presence.save()
-
-    if with_quarantine and (quarantine_days != 0):
-      quarantine.main_interval = presence
-      quarantine.save()
-
-    presence.set_jobs()
-
-    return presence
-
-  def update(self, instance, validated_data):
-    instance.clear_jobs()
-
-    presence = instance
-    if presence.main_interval != None:
-      presence = presence.main_interval
-
-    instance.delete()
-
-    Specialist.set_to_period(presence.date_from, presence.date_to)
-
-    return self.create(validated_data)
 
   class Meta:
     model = Presence

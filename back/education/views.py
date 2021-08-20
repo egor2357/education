@@ -338,14 +338,71 @@ class OptionView(viewsets.ModelViewSet):
       option.refresh_from_db()
     return Response(OptionSerializer(option, context={'request': request}).data, status=201)
 
+def presence_create(request):
+  serializer = PresenceSerializer(data=request.data)
+  if not serializer.is_valid(raise_exception=True):
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+  with_quarantine = serializer.validated_data.pop('with_quarantine', False)
+  quarantine_days = serializer.validated_data.pop('quarantine_days', 0)
+
+  date_from = serializer.validated_data.pop('date_from')
+  date_to = serializer.validated_data.pop('date_to')
+  specialist = serializer.validated_data.pop('specialist')
+
+  check_presence_clashes(
+    specialist,
+    date_from, date_to
+  )
+
+  presence_start = date_from
+
+  if with_quarantine and (quarantine_days != 0):
+    quarantine_start = date_from
+    quarantine_end = quarantine_start + datetime.timedelta(days=quarantine_days-1)
+    quarantine = Presence(
+      specialist=specialist,
+      main_interval=None,
+      date_from=quarantine_start,
+      date_to=quarantine_end,
+      is_available=False
+    )
+    quarantine.save()
+
+    presence_start = quarantine_end + datetime.timedelta(days=1)
+
+  presence = Presence(
+    specialist=specialist,
+    main_interval=None,
+    date_from=presence_start,
+    date_to=date_to,
+    is_available=True
+  )
+
+  presence.save()
+
+  if with_quarantine and (quarantine_days != 0):
+    quarantine.main_interval = presence
+    quarantine.save()
+
+  presence.set_jobs()
+
+  serializer = PresenceSerializer(presence)
+  return serializer
+
 class PresenceView(viewsets.ModelViewSet):
-  serializer_class = PresenceSerializer
   permission_classes = (
     permissions.IsAuthenticated,
     IsAdminOrReadPartialUpdateOnly,
   )
   filter_backends = (DjangoFilterBackend,)
   filterset_class = PresenceFilter
+
+  def get_serializer_class(self):
+    if self.request.method == 'PATCH':
+      return PresenceSummarySerializer
+    else:
+      return PresenceSerializer
 
   def get_queryset(self):
     user = self.request.user
@@ -357,6 +414,44 @@ class PresenceView(viewsets.ModelViewSet):
       else:
         qs = Presence.objects.none()
     return qs.select_related('main_interval', 'presence')
+
+  def create(self, request):
+    serializer = presence_create(request)
+    return Response(serializer.data, status=201)
+
+  def update(self, request, pk=None):
+    instance = self.get_object()
+    instance.clear_jobs()
+
+    presence = instance
+    if presence.main_interval != None:
+      presence = presence.main_interval
+
+    instance.delete()
+
+    Specialist.set_to_period(presence.date_from, presence.date_to)
+
+    serializer = presence_create(request)
+
+    return Response(serializer.data, status=200)
+
+  def partial_update(self, request, pk=None):
+    serializer = PresenceSummarySerializer(data=request.data)
+    if not serializer.is_valid(raise_exception=True):
+      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    presence = self.get_object()
+    print(presence)
+    if presence.main_interval != None:
+      presence = presence.main_interval
+
+    presence.summary = serializer.validated_data['summary']
+    presence.save()
+
+    serializer = PresenceSerializer(presence)
+
+    return Response(serializer.data, status=200)
+
   def destroy(self, request, *args, **kwargs):
     presence = self.get_object()
 
