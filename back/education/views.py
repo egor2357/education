@@ -338,7 +338,7 @@ class OptionView(viewsets.ModelViewSet):
       option.refresh_from_db()
     return Response(OptionSerializer(option, context={'request': request}).data, status=201)
 
-def presence_create(request):
+def presence_create(request, summary=''):
   serializer = PresenceSerializer(data=request.data)
   if not serializer.is_valid(raise_exception=True):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -365,7 +365,8 @@ def presence_create(request):
       main_interval=None,
       date_from=quarantine_start,
       date_to=quarantine_end,
-      is_available=False
+      is_available=False,
+      summary=summary,
     )
     quarantine.save()
 
@@ -376,7 +377,8 @@ def presence_create(request):
     main_interval=None,
     date_from=presence_start,
     date_to=date_to,
-    is_available=True
+    is_available=True,
+    summary=summary,
   )
 
   presence.save()
@@ -421,6 +423,8 @@ class PresenceView(viewsets.ModelViewSet):
 
   def update(self, request, pk=None):
     instance = self.get_object()
+    summary = instance.summary
+
     instance.clear_jobs()
 
     presence = instance
@@ -431,7 +435,7 @@ class PresenceView(viewsets.ModelViewSet):
 
     Specialist.set_to_period(presence.date_from, presence.date_to)
 
-    serializer = presence_create(request)
+    serializer = presence_create(request, summary)
 
     return Response(serializer.data, status=200)
 
@@ -441,7 +445,9 @@ class PresenceView(viewsets.ModelViewSet):
       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     presence = self.get_object()
-    print(presence)
+    presence.summary = serializer.validated_data['summary']
+    presence.save()
+
     if presence.main_interval != None:
       presence = presence.main_interval
 
