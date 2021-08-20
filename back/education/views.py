@@ -339,8 +339,6 @@ class OptionView(viewsets.ModelViewSet):
     return Response(OptionSerializer(option, context={'request': request}).data, status=201)
 
 class PresenceView(viewsets.ModelViewSet):
-  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Presence.objects.all().select_related('main_interval', 'presence')
   serializer_class = PresenceSerializer
   permission_classes = (
     permissions.IsAuthenticated,
@@ -349,6 +347,16 @@ class PresenceView(viewsets.ModelViewSet):
   filter_backends = (DjangoFilterBackend,)
   filterset_class = PresenceFilter
 
+  def get_queryset(self):
+    user = self.request.user
+    if user.is_staff:
+      qs =  Presence.objects.all()
+    else:
+      if user.specialist is not None:
+        qs = Presence.objects.filter(specialist=user.specialist)
+      else:
+        qs = Presence.objects.none()
+    return qs.select_related('main_interval', 'presence')
   def destroy(self, request, *args, **kwargs):
     presence = self.get_object()
 
