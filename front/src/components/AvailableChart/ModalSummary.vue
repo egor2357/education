@@ -6,6 +6,7 @@
         :key="fields[0].name"
         :validateStatus="fields[0].validateStatus"
         :help="fields[0].help"
+        class="modal-form-item"
       >
         <a-textarea
           v-model="form[fields[0].name]"
@@ -109,7 +110,8 @@ export default {
       if (
         event.type === "keydown" &&
         event.keyCode === 13 &&
-        this.$refs.form !== undefined
+        this.$refs.form !== undefined &&
+        event.srcElement.localName !== "textarea"
       ) {
         this.handleOk();
       }
@@ -132,6 +134,7 @@ export default {
 };
 </script>
 
-<style scoped>
-
+<style lang="sass">
+.modal-form-item
+  margin-bottom: 0
 </style>
