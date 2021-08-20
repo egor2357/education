@@ -32,6 +32,7 @@
             v-if="specialistMode"
             :tableData="tableData"
             @displayEdit="displayEdit"
+            @displayEditSummary="displayEditSummary"
             @displayDeleteConfirm="displayDeleteConfirm($event)"
             :specReadOnly="specReadOnly"
           />
@@ -41,6 +42,7 @@
             :tableData="tableData"
             :activities="activities"
             @displayEdit="displayEdit"
+            @displayEditSummary="displayEditSummary"
             @displayDeleteConfirm="displayDeleteConfirm($event)"
           />
         </div>
@@ -54,6 +56,10 @@
             updateData();
           "
         />
+        <ModalSummary
+          v-if="showEditSummary"
+          :editableData="modalEditableData"
+          @close="closeSummaryModal($event)"/>
       </div>
     </a-spin>
   </div>
@@ -62,6 +68,7 @@
 <script>
 import moment from "moment";
 import ModalPeriod from "@/components/AvailableChart/ModalPeriod";
+import ModalSummary from "@/components/AvailableChart/ModalSummary";
 import PresenceChart from "@/components/AvailableChart/PresenceChart";
 import ActivityPresenceChart from "@/components/AvailableChart/ActivityPresenceChart";
 import { mapGetters, mapActions } from "vuex";
@@ -69,6 +76,7 @@ export default {
   name: "AvailableChart",
   components: {
     ModalPeriod,
+    ModalSummary,
     PresenceChart,
     ActivityPresenceChart,
   },
@@ -85,6 +93,7 @@ export default {
   data() {
     return {
       displayModal: false,
+      showEditSummary: false,
       modalEditableData: {},
       modalAdding: true,
       specialistMode: true,
@@ -268,6 +277,10 @@ export default {
       this.modalAdding = false;
       this.displayModal = true;
     },
+    displayEditSummary(item) {
+      this.modalEditableData = item;
+      this.showEditSummary = true;
+    },
     onAddPeriod() {
       this.modalAdding = true;
       this.modalEditableData = {};
@@ -319,6 +332,12 @@ export default {
       await this.makeTableData();
       this.loading = false;
     },
+    closeSummaryModal(isSuccess=false){
+      this.showEditSummary = false;
+      if (isSuccess) {
+        this.updateData()
+      }
+    },
     keydown(event) {
       if (event.type === "keydown" && event.keyCode === 39) {
         this.changeMonth(true);
@@ -346,9 +365,6 @@ export default {
   &--one
     height: auto
     min-height: 140px
-
-    .presence-interval-day
-      cursor: default
 
     .presence-chart__table-body-chart-holder
       margin: 5px 10px

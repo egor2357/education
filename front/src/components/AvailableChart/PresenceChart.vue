@@ -65,9 +65,10 @@
                         : ""
                     }}
                   </div>
-                  <a-menu slot="overlay" v-if="!specReadOnly">
+                  <a-menu slot="overlay">
                     <a-menu-item
                       key="1"
+                      v-if="!specReadOnly"
                       @click="
                         $emit('displayEdit', {
                           presence: interval.editableData,
@@ -78,6 +79,7 @@
                     </a-menu-item>
                     <a-menu-item
                       key="2"
+                      v-if="!specReadOnly"
                       @click="
                         $emit('displayDeleteConfirm', {
                           specialist: row.fullName,
@@ -86,6 +88,16 @@
                       "
                     >
                       <span> Удалить </span>
+                    </a-menu-item>
+                    <a-menu-item
+                      key="3"
+                      @click="
+                        $emit('displayEditSummary', {
+                          presence: interval.editableData,
+                        })
+                      "
+                    >
+                      Отчет
                     </a-menu-item>
                   </a-menu>
                 </a-dropdown>
