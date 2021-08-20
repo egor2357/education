@@ -688,6 +688,6 @@ class TalentView(viewsets.ModelViewSet):
       serializer.save(specialist=user.specialist)
 
 class EducationalAreasAllView(viewsets.GenericViewSet, mixins.ListModelMixin):
-  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Educational_area.objects.all().prefetch_related('development_direction_set__skill_set__direction__area')
+  permission_classes = (permissions.IsAuthenticated, )
+  queryset = Educational_area.objects.all()
   serializer_class = EducationalAreaOnlySerializer

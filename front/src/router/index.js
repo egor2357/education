@@ -190,12 +190,31 @@ const router = new VueRouter({
         },
         {
           path: "appeals",
-          name: "Appeals",
-          component: () => import("@/views/Appeals"),
+          component: () => import("@/views/AppealsWrapper"),
           meta: {
             staffOnly: false,
             specOnly: false,
           },
+          children: [
+            {
+              path: "/",
+              name: "Appeals",
+              component: () => import("@/components/Appeals/Appeals"),
+              meta: {
+                staffOnly: false,
+                specOnly: false,
+              },
+            },
+            {
+              path: ":id",
+              name: "AppealDetails",
+              component: () => import("@/components/Appeals/AppealDetails"),
+              meta: {
+                staffOnly: false,
+                specOnly: false,
+              },
+            },
+          ],
         },
         {
           path: "*",

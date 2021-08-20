@@ -131,6 +131,7 @@ export default {
           to: { name: "Appeals" },
           childrens: [],
           twoLines: true,
+          childrenRoutes: ["AppealDetails"],
         },
         {
           icon: "bell",
@@ -237,6 +238,13 @@ export default {
             this.openKeys.push(parent.key);
             this.selectedKeys.push(parent.key);
             matched = true;
+          } else if (
+            parent.childrenRoutes &&
+            parent.childrenRoutes.indexOf(to.name) !== -1
+          ) {
+            this.openKeys.push(parent.key);
+            this.selectedKeys.push(parent.key);
+            matched = true;
           }
         }
         if (matched) break;
@@ -327,6 +335,9 @@ export default {
         padding: 2px 0 2px 0
         white-space: normal
 
+    .anticon
+      font-size: 18px
+
   &.ant-menu-inline-collapsed
     .ant-menu-item
       .menu-two-lines
@@ -336,9 +347,6 @@ export default {
         .anticon
           align-self: baseline
           margin-top: 2px
-
-    .anticon
-      font-size: 18px
 
   .ant-menu-submenu
     .anticon

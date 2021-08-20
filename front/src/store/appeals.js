@@ -6,11 +6,19 @@ const state = () => ({
   appeals: {},
   fetched: false,
   queryParams: "",
+  appealInfo: {},
+  messages: [],
 });
 
 const getters = {
   getAppeals(state) {
     return state.appeals;
+  },
+  getAppealInfo(state) {
+    return state.appealInfo;
+  },
+  getMessages(state) {
+    return state.messages;
   },
 };
 
@@ -19,12 +27,37 @@ const actions = {
     try {
       let res = await this.$axios.get(`/api/appeals/${state.queryParams}`);
       if (res.status === 200) {
-        commit("setAppeals", {data: res.data, success: true});
-        return res
+        commit("setAppeals", { data: res.data, success: true });
+        return res;
       }
     } catch (e) {
-      commit("setAppeals", {data: {}, success: false});
-      return e
+      commit("setAppeals", { data: {}, success: false });
+      return e;
+    }
+  },
+  async fetchAppealInfo({ state, commit, dispatch }, id) {
+    try {
+      let res = await this.$axios.get(`/api/appeals/${id}/`);
+      if (res.status === 200) {
+        commit("setAppealInfo", res.data);
+        dispatch("fetchMessages", id);
+        return res;
+      }
+    } catch (e) {
+      commit("setAppeals", {});
+      return e;
+    }
+  },
+  async fetchMessages({ state, commit }, id) {
+    try {
+      let res = await this.$axios.get(`/api/messages/?appeal_id=${id}`);
+      if (res.status === 200) {
+        commit("setMessages", res.data);
+        return res;
+      }
+    } catch (e) {
+      commit("setMessages", []);
+      return e;
     }
   },
   async addAppeal(context, payload) {
@@ -45,7 +78,13 @@ const mutations = {
   },
   setQueryParams(state, payload) {
     state.queryParams = payload;
-  }
+  },
+  setAppealInfo(state, payload) {
+    state.appealInfo = payload;
+  },
+  setMessages(state, payload) {
+    state.messages = payload;
+  },
 };
 
 export default {

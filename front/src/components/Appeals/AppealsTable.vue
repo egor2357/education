@@ -11,14 +11,6 @@
       filterConfirm: 'Поиск',
     }"
   >
-    <span slot="actions" slot-scope="text, item">
-      <div class="flex-column">
-        <a @click="$emit('displayEdit', item)" v-if="item.status !== 2">
-          Изменить
-        </a>
-        <a @click="displayDelete(item)">Удалить</a>
-      </div>
-    </span>
     <div
       slot="filterDropdown"
       slot-scope="{
@@ -119,6 +111,9 @@
       type="calendar"
       :style="{ color: filtered ? '#108ee9' : undefined }"
     />
+    <template slot="theme" slot-scope="theme, item">
+      <a @click.prevent="goToDetail(item)">{{ theme }}</a>
+    </template>
   </a-table>
 </template>
 
@@ -152,6 +147,7 @@ export default {
           key: "theme",
           filters: [],
           class: "pre-wrap",
+          scopedSlots: { customRender: "theme" },
         },
         {
           title: "Статус",
@@ -209,29 +205,12 @@ export default {
       this.routerCheckAndPush(queryString);
       this.$emit("loaded");
     },
-    displayDelete({ id, name }) {
-      let that = this;
-      this.$confirm({
-        title: `Обращение к руководству "${name}" будет удалено.`,
-        content: `Продолжить?`,
-        okType: "danger",
-        onOk() {
-          that.deleteRecord(id);
-        },
-      });
-    },
-    async deleteRecord(id) {
-      try {
-        let res = await this.deleteAppeal(id);
-        if (res.status === 204) {
-          this.$message.success("Обращение к руководству успешно удалено");
-          await this.fetchAppeals();
-          this.updatePaginationTotal();
-        } else {
-          this.$message.error("Произошла ошибка");
-        }
-      } catch (e) {
-        this.$message.error("Произошла ошибка");
+    goToDetail(item) {
+      if (item.id) {
+        this.$router.push({
+          name: "AppealDetails",
+          params: { id: item.id, theme: item.theme },
+        });
       }
     },
   },
