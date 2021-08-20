@@ -123,6 +123,25 @@ export default {
           childrens: [],
         },
         {
+          icon: "mail",
+          title: "Обращения к руководству",
+          key: "8",
+          staffOnly: false,
+          specOnly: false,
+          to: { name: "Appeals" },
+          childrens: [],
+          twoLines: true,
+        },
+        {
+          icon: "bell",
+          title: "Важная информация",
+          key: "9",
+          staffOnly: false,
+          specOnly: false,
+          to: { name: "Talents" },
+          childrens: [],
+        },
+        {
           icon: "setting",
           key: "3",
           title: "Настройки",
@@ -307,6 +326,16 @@ export default {
         line-height: 16px
         padding: 2px 0 2px 0
         white-space: normal
+
+  &.ant-menu-inline-collapsed
+    .ant-menu-item
+      .menu-two-lines
+        div
+          opacity: 0
+          max-width: 0
+        .anticon
+          align-self: baseline
+          margin-top: 2px
 
     .anticon
       font-size: 18px
