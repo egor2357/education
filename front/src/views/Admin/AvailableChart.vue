@@ -58,7 +58,7 @@
         <ModalSummary
           v-if="showEditSummary"
           :editableData="modalEditableData"
-          @close="showEditSummary = false"/>
+          @close="closeSummaryModal($event)"/>
       </div>
     </a-spin>
   </div>
@@ -330,6 +330,12 @@ export default {
       );
       await this.makeTableData();
       this.loading = false;
+    },
+    closeSummaryModal(isSuccess=false){
+      this.showEditSummary = false;
+      if (isSuccess) {
+        this.updateData()
+      }
     },
     keydown(event) {
       if (event.type === "keydown" && event.keyCode === 39) {

@@ -1,5 +1,5 @@
 <template>
-  <a-modal :visible="true" :title="title" @cancel="handleCancel">
+  <a-modal :visible="true" :title="title" @cancel="handleCancel(false)">
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <a-form-model-item
         :prop="fields[0].name"
@@ -16,7 +16,7 @@
       </a-form-model-item>
     </a-form-model>
     <template slot="footer">
-      <a-button @click="handleCancel"> Отмена </a-button>
+      <a-button @click="handleCancel(false)"> Отмена </a-button>
       <a-button
         type="primary"
         :loading="loadingButton"
@@ -68,9 +68,13 @@ export default {
     };
   },
   methods: {
-    handleCancel() {
+    handleCancel(isSuccess=false) {
       this.form.summary = '';
-      this.$emit("close");
+      if (isSuccess) {
+        this.$emit("close", true);
+      } else {
+        this.$emit("close", false);
+      }
     },
     async handleOk() {
       if (!this.loadingButton) {
@@ -84,7 +88,7 @@ export default {
             );
             if (res.status === 200) {
               this.$message.success("Отчет по пребыванию сохранен");
-              this.handleCancel();
+              this.handleCancel(true);
             } else if (res.status === 400) {
               this.$message.error("Проверьте введённые данные");
             } else {
