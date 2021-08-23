@@ -139,7 +139,7 @@ export default {
           key: "9",
           staffOnly: false,
           specOnly: false,
-          to: { name: "Talents" },
+          to: { name: "Announcements" },
           childrens: [],
         },
         {

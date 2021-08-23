@@ -217,6 +217,15 @@ const router = new VueRouter({
           ],
         },
         {
+          path: "announcements",
+          name: "Announcements",
+          component: () => import("@/views/Announcements"),
+          meta: {
+            staffOnly: false,
+            specOnly: false,
+          },
+        },
+        {
           path: "*",
           name: "Page404",
           component: () => import("@/views/Page404"),
