@@ -36,7 +36,7 @@ export default {
 
 <style lang="sass">
 html
-  min-height: 600px
+  min-height: 800px
   min-width: 1300px
 
 #app
@@ -76,4 +76,7 @@ html
 
 .ant-layout-sider .ant-layout-sider-trigger
   position: absolute
+
+.ant-menu-item:not(:last-child)
+  margin-bottom: unset !important
 </style>

@@ -348,9 +348,12 @@ export default {
           align-self: baseline
           margin-top: 2px
 
+      .anticon
+        font-size: 18px
+
   .ant-menu-submenu
     .anticon
-      font-size: 18px
+      font-size: 18px !important
 
 .content
   .ant-spin-nested-loading

@@ -153,7 +153,11 @@ export default {
           key: "theme",
           filters: [],
           class: "pre-wrap",
-          scopedSlots: { customRender: "theme" },
+          scopedSlots: {
+            customRender: "theme",
+            filterDropdown: "filterDropdown",
+            filterIcon: "filterIcon",
+          },
         },
         {
           title: "Статус",
