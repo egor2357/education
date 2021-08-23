@@ -7,6 +7,9 @@
             <a-button icon="left" @click="$router.go(-1)">Назад</a-button>
           </div>
           <div class="label">Обращения к руководству</div>
+          <div class="button-close" @click="displayClose">
+            <a-button :disabled="appealInfo.closed">Закрыть обращение</a-button>
+          </div>
         </div>
         <div class="theme">Тема: {{ appealInfo.theme }}</div>
       </div>
@@ -45,6 +48,7 @@
             v-model="text"
             class="message-send-block__text-input"
             :rows="4"
+            :disabled="appealInfo.closed"
           />
           <div class="buttons">
             <a-upload
@@ -57,12 +61,15 @@
                 }
               "
             >
-              <a-button> <a-icon type="upload" /> Прикрепить файл </a-button>
+              <a-button :disabled="appealInfo.closed">
+                <a-icon type="upload" /> Прикрепить файл
+              </a-button>
             </a-upload>
             <a-button
               class="buttons__send-button"
               type="primary"
               @click="sendMessage"
+              :disabled="appealInfo.closed"
               >Отправить</a-button
             >
           </div>
@@ -95,6 +102,7 @@ export default {
       fetchAppealInfo: "appeals/fetchAppealInfo",
       fetchMessages: "appeals/fetchMessages",
       addMessage: "appeals/addMessage",
+      setClosed: "appeals/setAppealClosed",
     }),
     ...mapMutations({
       setMessages: "appeals/setMessages",
@@ -127,6 +135,30 @@ export default {
         this.file = info.file;
       } else {
         this.file = null;
+      }
+    },
+    displayClose() {
+      let that = this;
+      this.$confirm({
+        title: `Данная тема будет закрыта.`,
+        content: `Продолжить?`,
+        okType: "danger",
+        onOk() {
+          that.closeTheme();
+        },
+      });
+    },
+    async closeTheme() {
+      try {
+        let res = await this.setClosed(this.appealInfo.id);
+        if (res.status === 200) {
+          await this.fetchAppealInfo(this.$route.params.id);
+          this.$message.success("Тема успешно закрыта");
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка");
       }
     },
   },
@@ -177,6 +209,7 @@ export default {
       font-size: 1rem
       text-align: center
       margin-left: 92px
+      margin-right: 162px
 
 
   &__content

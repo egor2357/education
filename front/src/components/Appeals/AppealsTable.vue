@@ -114,6 +114,12 @@
     <template slot="theme" slot-scope="theme, item">
       <a @click.prevent="goToDetail(item)">{{ theme }}</a>
     </template>
+    <template slot="status" slot-scope="closed">
+      <a-tag class="status-block__tag" color="blue" v-if="!closed"
+        >Открыто</a-tag
+      >
+      <a-tag class="status-block__tag" color="green" v-else>Закрыто</a-tag>
+    </template>
   </a-table>
 </template>
 
@@ -157,8 +163,10 @@ export default {
             { value: false, text: "Открыто" },
             { value: true, text: "Закрыто" },
           ],
-          customRender: (closed) => {
-            return closed ? "Закрыто" : "Открыто";
+          class: "status-block",
+          width: "120px",
+          scopedSlots: {
+            customRender: "status",
           },
         },
         {
@@ -284,13 +292,13 @@ export default {
           margin-left: 0
 
   .ant-table-tbody
-    .execute-block
+    .status-block
       text-align: center
       max-width: 120px
-      .execute-block__tag
+      .status-block__tag
         margin-bottom: 5px
         margin-right: 0
-      .execute-block__text
+      .status-block__text
         font-size: 0.8rem
     .pre-wrap
       white-space: pre-wrap

@@ -72,6 +72,9 @@ const actions = {
   async deleteAppeal(context, id) {
     return deleteAxios(this.$axios, `/api/appeals/${id}/`, {});
   },
+  async setAppealClosed(context, id) {
+    return await this.$axios.get(`/api/appeals/${id}/close/`);
+  },
 };
 
 const mutations = {
