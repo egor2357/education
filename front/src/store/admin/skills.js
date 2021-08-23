@@ -30,6 +30,9 @@ const getters = {
   getFetched(state) {
     return state.fetched;
   },
+  getFetchedAll(state) {
+    return state.fetchedAll;
+  },
 };
 
 const actions = {

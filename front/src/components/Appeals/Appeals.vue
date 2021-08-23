@@ -87,7 +87,6 @@ export default {
     display: flex
     margin-bottom: 10px
     line-height: 32px
-    padding: 0 10%
 
     .title
       font-size: 1rem

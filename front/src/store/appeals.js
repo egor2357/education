@@ -63,6 +63,9 @@ const actions = {
   async addAppeal(context, payload) {
     return post(this.$axios, "/api/appeals/", payload);
   },
+  async addMessage(context, payload) {
+    return post(this.$axios, "/api/messages/", payload);
+  },
   async editAppeal(context, payload) {
     return put(this.$axios, `/api/appeals/${payload.id}/`, payload);
   },

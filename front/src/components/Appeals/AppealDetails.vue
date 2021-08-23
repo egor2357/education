@@ -25,6 +25,14 @@
             <div class="message-block-wrapper__text">
               {{ message.text }}
             </div>
+            <a
+              class="message-block-wrapper__file"
+              target="_blank"
+              :href="message.file"
+              v-if="message.file"
+            >
+              {{ message.filename }}
+            </a>
             <div class="message-block-wrapper__time">
               {{ formatDateTime(message.creation_date) }}
             </div>
@@ -39,10 +47,22 @@
             :rows="4"
           />
           <div class="buttons">
-            <a-upload name="file">
+            <a-upload
+              name="file"
+              :fileList="fileList"
+              @change="changeFiles"
+              :beforeUpload="
+                () => {
+                  return false;
+                }
+              "
+            >
               <a-button> <a-icon type="upload" /> Прикрепить файл </a-button>
             </a-upload>
-            <a-button class="buttons__send-button" type="primary"
+            <a-button
+              class="buttons__send-button"
+              type="primary"
+              @click="sendMessage"
               >Отправить</a-button
             >
           </div>
@@ -62,6 +82,8 @@ export default {
     return {
       loading: true,
       text: "",
+      file: null,
+      fileList: [],
     };
   },
   async created() {
@@ -71,10 +93,42 @@ export default {
   methods: {
     ...mapActions({
       fetchAppealInfo: "appeals/fetchAppealInfo",
+      fetchMessages: "appeals/fetchMessages",
+      addMessage: "appeals/addMessage",
     }),
     ...mapMutations({
       setMessages: "appeals/setMessages",
     }),
+    async sendMessage() {
+      let formData = new FormData();
+      formData.set("appeal_id", this.$route.params.id);
+      formData.set("text", this.text);
+      if (this.file) {
+        formData.append("file", this.file, this.file.name);
+      }
+      let res = await this.addMessage(formData);
+      if (res.status === 201) {
+        this.$message.success("Сообщение успешно отправлено");
+        this.text = "";
+        this.fileList = [];
+        this.file = null;
+      } else {
+        this.$message.error("При отправке сообщения произошла ошибка");
+      }
+      await this.fetchMessages(this.$route.params.id);
+    },
+    changeFiles(info) {
+      if (info.fileList.length > 1) {
+        this.fileList = info.fileList.splice(1, 1);
+      } else {
+        this.fileList = info.fileList;
+      }
+      if (!info.file.status) {
+        this.file = info.file;
+      } else {
+        this.file = null;
+      }
+    },
   },
   computed: {
     ...mapGetters({
@@ -82,6 +136,16 @@ export default {
       appealInfo: "appeals/getAppealInfo",
       userInfo: "auth/getUserInfo",
     }),
+  },
+  watch: {
+    messages(value) {
+      const element = document.getElementsByClassName(
+        "appeal-details__content"
+      )[0];
+      this.$nextTick(() => {
+        element.scrollTop = element.scrollHeight - element.clientHeight;
+      });
+    },
   },
   destroyed() {
     this.setMessages([]);
@@ -125,19 +189,30 @@ export default {
       display: flex
       flex-direction: column
 
-      &_my
-        align-items: flex-end
-
-      &_other
-        align-items: flex-start
-
       .message-block-wrapper
-        border: 3px solid
+        border: 1px solid
         border-radius: 10px
         padding: 10px
 
         &__time
           font-size: 0.8rem
+
+        &__text
+          white-space: pre-line
+
+      &_other
+        align-items: flex-start
+
+        .message-block-wrapper
+          border-color: #90c6e6
+          background: #eaf7ff
+
+      &_my
+        align-items: flex-end
+
+        .message-block-wrapper
+          border-color: #a7deab
+          background: #ecffec
 
   &__bottom
     .message-send-block
@@ -152,4 +227,7 @@ export default {
 
       &__send-button
         margin-top: 5px
+
+      .ant-upload-list-item-name
+        margin-right: 15px
 </style>
