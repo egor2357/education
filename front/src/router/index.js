@@ -189,6 +189,43 @@ const router = new VueRouter({
           },
         },
         {
+          path: "appeals",
+          component: () => import("@/views/AppealsWrapper"),
+          meta: {
+            staffOnly: false,
+            specOnly: false,
+          },
+          children: [
+            {
+              path: "/",
+              name: "Appeals",
+              component: () => import("@/components/Appeals/Appeals"),
+              meta: {
+                staffOnly: false,
+                specOnly: false,
+              },
+            },
+            {
+              path: ":id",
+              name: "AppealDetails",
+              component: () => import("@/components/Appeals/AppealDetails"),
+              meta: {
+                staffOnly: false,
+                specOnly: false,
+              },
+            },
+          ],
+        },
+        {
+          path: "announcements",
+          name: "Announcements",
+          component: () => import("@/views/Announcements"),
+          meta: {
+            staffOnly: false,
+            specOnly: false,
+          },
+        },
+        {
           path: "*",
           name: "Page404",
           component: () => import("@/views/Page404"),

@@ -757,6 +757,11 @@ class Message(models.Model):
     null=False, verbose_name='Дата-время написания'
   )
 
+  def filename(self):
+    if (self.file):
+      return os.path.basename(self.file.name)
+    else:
+      return None
 
   class Meta:
     db_table = 'message'

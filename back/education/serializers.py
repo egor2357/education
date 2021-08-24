@@ -717,7 +717,8 @@ class MessageSerializer(FlexFieldsModelSerializer):
       'author', 'appeal_id',
       'file',
       'creation_date',
-      'text', 'reply'
+      'text', 'reply',
+      'filename'
     )
 
 class Task_groupUserSerializer(FlexFieldsModelSerializer):

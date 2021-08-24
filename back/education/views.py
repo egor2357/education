@@ -696,9 +696,10 @@ class AnnouncementView(viewsets.ModelViewSet):
 class AppealView(CreateListRetrieveDestroyViewSet):
   permission_classes = (permissions.IsAuthenticated, NotDeleteIfNotAdmin)
   serializer_class = AppealSerializer
-  filter_backends = (DjangoFilterBackend,)
+  filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
   filterset_class = AppealFilter
   pagination_class = CommonPagination
+  ordering_fields = ['creation_date', 'creator_id']
 
   def get_queryset(self):
     user = self.request.user
@@ -801,6 +802,6 @@ class TalentView(viewsets.ModelViewSet):
       serializer.save(specialist=user.specialist)
 
 class EducationalAreasAllView(viewsets.GenericViewSet, mixins.ListModelMixin):
-  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Educational_area.objects.all().prefetch_related('development_direction_set__skill_set__direction__area')
+  permission_classes = (permissions.IsAuthenticated, )
+  queryset = Educational_area.objects.all()
   serializer_class = EducationalAreaOnlySerializer

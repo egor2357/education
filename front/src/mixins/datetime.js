@@ -18,6 +18,9 @@ export default {
     formatDate(date) {
       return moment(date, "YYYY-MM-DD").format("DD.MM.YYYY");
     },
+    formatDateTime(datetime) {
+      return moment(datetime).format("DD.MM.YYYY HH:mm");
+    },
   },
 
 

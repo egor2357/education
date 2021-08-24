@@ -123,6 +123,26 @@ export default {
           childrens: [],
         },
         {
+          icon: "mail",
+          title: "Обращения к руководству",
+          key: "8",
+          staffOnly: false,
+          specOnly: false,
+          to: { name: "Appeals" },
+          childrens: [],
+          twoLines: true,
+          childrenRoutes: ["AppealDetails"],
+        },
+        {
+          icon: "bell",
+          title: "Важная информация",
+          key: "9",
+          staffOnly: false,
+          specOnly: false,
+          to: { name: "Announcements" },
+          childrens: [],
+        },
+        {
           icon: "setting",
           key: "3",
           title: "Настройки",
@@ -215,6 +235,13 @@ export default {
           }
         } else {
           if (parent.to.name === to.name) {
+            this.openKeys.push(parent.key);
+            this.selectedKeys.push(parent.key);
+            matched = true;
+          } else if (
+            parent.childrenRoutes &&
+            parent.childrenRoutes.indexOf(to.name) !== -1
+          ) {
             this.openKeys.push(parent.key);
             this.selectedKeys.push(parent.key);
             matched = true;
@@ -311,9 +338,22 @@ export default {
     .anticon
       font-size: 18px
 
+  &.ant-menu-inline-collapsed
+    .ant-menu-item
+      .menu-two-lines
+        div
+          opacity: 0
+          max-width: 0
+        .anticon
+          align-self: baseline
+          margin-top: 2px
+
+      .anticon
+        font-size: 18px
+
   .ant-menu-submenu
     .anticon
-      font-size: 18px
+      font-size: 18px !important
 
 .content
   .ant-spin-nested-loading

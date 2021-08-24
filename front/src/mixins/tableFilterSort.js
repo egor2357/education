@@ -73,13 +73,13 @@ export default {
     async tableChanged(pagination, filters, sorter) {
       this.filterQuery = "";
       this.columns.forEach((column) => {
-        if (column.sortOrder && sorter.field !== column.key) {
+        if (column.sortOrder && sorter.columnKey !== column.key) {
           column.sortOrder = false;
-        } else if (sorter.field === column.key && sorter.order === "descend") {
+        } else if (sorter.columnKey === column.key && sorter.order === "descend") {
           column.sortOrder = "descend";
-        } else if (sorter.field === column.key && sorter.order === "ascend") {
+        } else if (sorter.columnKey === column.key && sorter.order === "ascend") {
           column.sortOrder = "ascend";
-        } else if (sorter.field === column.key && sorter.order === undefined) {
+        } else if (sorter.columnKey === column.key && sorter.order === undefined) {
           column.sortOrder = false;
         }
       });
