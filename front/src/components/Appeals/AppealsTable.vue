@@ -164,8 +164,8 @@ export default {
           dataIndex: "closed",
           key: "closed",
           filters: [
-            { value: false, text: "Открыто" },
-            { value: true, text: "Закрыто" },
+            { value: 0, text: "Открыто" },
+            { value: 1, text: "Закрыто" },
           ],
           class: "status-block",
           width: "120px",

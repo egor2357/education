@@ -268,14 +268,8 @@ export default {
     ...mapGetters({
       data: "taskGroups/getTaskGroups",
       userInfo: "auth/getUserInfo",
-      onlySpecialists: "specialists/getOnlySpecialists",
       allSpecialists: "specialists/getSpecialists",
     }),
-    onlySpecialistsForFilter() {
-      return this.onlySpecialists.map((admin) => {
-        return { value: admin.id, text: admin.__str__ };
-      });
-    },
     allSpecialistsForFilter() {
       return this.allSpecialists.map((admin) => {
         return { value: admin.id, text: admin.__str__ };
@@ -285,7 +279,7 @@ export default {
   mounted() {
     if (this.userInfo.staff) {
       this.$set(this.columns[2], "filters", this.allSpecialistsForFilter);
-      this.$set(this.columns[3], "filters", this.onlySpecialistsForFilter);
+      this.$set(this.columns[3], "filters", this.allSpecialistsForFilter);
     }
     window.onpopstate = function () {
       this.columns.forEach((column) => {
@@ -300,10 +294,6 @@ export default {
     allSpecialistsForFilter(values) {
       if (this.userInfo.staff) {
         this.columns[2].filters = values;
-      }
-    },
-    onlySpecialistsForFilter(values) {
-      if (this.userInfo.staff) {
         this.columns[3].filters = values;
       }
     },

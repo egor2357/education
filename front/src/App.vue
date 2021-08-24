@@ -66,6 +66,9 @@ html
 .ant-modal-body
   max-height: 500px
   overflow: auto
+  padding-bottom: 0 !important
+  .ant-modal-confirm-body-wrapper
+    padding-bottom: 24px
 .content
   .ant-upload-list-picture
     .ant-upload-list-item-name

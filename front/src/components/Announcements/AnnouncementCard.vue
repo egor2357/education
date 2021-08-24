@@ -26,7 +26,7 @@ export default {
     displayDelete({ id, caption }) {
       let that = this;
       this.$confirm({
-        title: `Объявление "${caption}" будет удалено.`,
+        title: `Запись "${caption}" будет удалена.`,
         content: `Продолжить?`,
         okType: "danger",
         onOk() {
@@ -39,7 +39,7 @@ export default {
         this.$emit("startLoading");
         let res = await this.deleteAnnouncement(id);
         if (res.status === 204) {
-          this.$message.success("Объявление успешно удалено");
+          this.$message.success("Запись успешно удалена");
           this.fetchAnnouncements();
         } else {
           this.$message.error("Произошла ошибка");

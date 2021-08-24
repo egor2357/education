@@ -80,14 +80,14 @@ export default {
           {
             trigger: "blur",
             required: true,
-            message: "Пожалуйста, введите наименование",
+            message: "Пожалуйста, введите тему",
           },
         ],
         text: [
           {
             trigger: "blur",
             required: true,
-            message: "Пожалуйста, введите наименование",
+            message: "Пожалуйста, введите текст",
           },
         ],
       },
@@ -110,7 +110,7 @@ export default {
             if (this.adding) {
               dispatchName = "announcements/addAnnouncement";
               successCode = 201;
-              successMessage = "Объявление успешно добавлено";
+              successMessage = "Запись успешно добавлена";
             }
             try {
               let res = await this.$store.dispatch(dispatchName, this.form);
@@ -158,7 +158,7 @@ export default {
   },
   created() {
     if (this.adding) {
-      this.title += "Добавление объявления";
+      this.title += "Добавление записи";
     }
     document.addEventListener("keydown", this.keydown);
   },
