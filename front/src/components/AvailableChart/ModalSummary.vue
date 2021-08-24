@@ -6,7 +6,6 @@
         :key="fields[0].name"
         :validateStatus="fields[0].validateStatus"
         :help="fields[0].help"
-        class="modal-form-item"
       >
         <a-textarea
           v-model="form[fields[0].name]"
@@ -41,7 +40,7 @@ export default {
   data() {
     return {
       form: {
-        summary: ''
+        summary: "",
       },
       title: "Отчет по пребыванию",
       layout: {
@@ -69,8 +68,8 @@ export default {
     };
   },
   methods: {
-    handleCancel(isSuccess=false) {
-      this.form.summary = '';
+    handleCancel(isSuccess = false) {
+      this.form.summary = "";
       if (isSuccess) {
         this.$emit("close", true);
       } else {
@@ -92,10 +91,11 @@ export default {
               this.handleCancel(true);
             } else if (res.status === 400) {
               this.$message.error("Проверьте введённые данные");
+              this.loadingButton = false;
             } else {
               this.$message.error("Произошла ошибка");
+              this.loadingButton = false;
             }
-
           } else {
             return false;
           }
@@ -129,12 +129,8 @@ export default {
   beforeDestroy() {
     document.removeEventListener("keydown", this.keydown);
   },
-  computed: {
-  },
+  computed: {},
 };
 </script>
 
-<style lang="sass">
-.modal-form-item
-  margin-bottom: 0
-</style>
+<style lang="sass"></style>

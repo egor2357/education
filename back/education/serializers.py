@@ -139,7 +139,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
     )
 
 class PresenceSummarySerializer(serializers.ModelSerializer):
-  summary = serializers.CharField()
+  summary = serializers.CharField(allow_blank=True)
 
   class Meta:
     model = Presence
