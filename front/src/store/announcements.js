@@ -13,9 +13,9 @@ const getters = {
 };
 
 const actions = {
-  async fetchAnnouncements({ state, commit }) {
+  async fetchAnnouncements({ state, commit }, params = '') {
     try {
-      let res = await this.$axios.get(`/api/announcement/`);
+      let res = await this.$axios.get(`/api/announcement/${params}`);
       if (res.status === 200) {
         commit("setAnnouncements", { data: res.data, success: true });
         return res;

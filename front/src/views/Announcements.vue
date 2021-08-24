@@ -10,14 +10,25 @@
           </a-button>
         </div>
       </div>
-      <div class="announcements-block__cards">
-        <AnnouncementCard
-          v-for="announcement in announcements.results"
-          :key="announcement.id"
-          :data="announcement"
-          @startLoading="loading = true"
-          @endLoading="enterF"
-        />
+      <div class="announcements-block-cards flex-column">
+        <template v-if="pagination.total > 0">
+          <div class="announcements-block-cards__cards-list">
+            <AnnouncementCard
+              v-for="announcement in announcements.results"
+              :key="announcement.id"
+              :data="announcement"
+              @startLoading="loading = true"
+              @endLoading="loading = false"
+            />
+          </div>
+          <a-pagination
+            class="announcements-block-cards__pagination"
+            :total="pagination.total"
+            :current="pagination.page"
+            @change="paginationChanged"
+          />
+        </template>
+        <a-empty v-else :image="simpleImage" />
       </div>
       <AnnouncementsModal
         v-if="displayModal"
@@ -34,6 +45,7 @@
 import AnnouncementsModal from "@/components/Announcements/AnnouncementsModal";
 import AnnouncementCard from "@/components/Announcements/AnnouncementCard";
 import { mapActions, mapGetters } from "vuex";
+import { Empty } from "ant-design-vue";
 export default {
   name: "Announcements",
   components: {
@@ -49,8 +61,11 @@ export default {
     };
   },
   async created() {
-    await this.fetchAnnouncements();
+    await this.fetchAnnouncements(`?page=${this.pagination.page}`);
     this.loading = false;
+  },
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   methods: {
     ...mapActions({
@@ -63,12 +78,13 @@ export default {
     async closeModalSuccess() {
       this.displayModal = false;
       this.loading = true;
-      await this.fetchAnnouncements();
+      await this.fetchAnnouncements(`?page=${this.pagination.page}`);
       this.loading = false;
     },
-    enterF() {
-      console.log(this.loading);
-      console.log("e");
+    async paginationChanged(page) {
+      this.loading = true;
+      this.pagination.page = page;
+      await this.fetchAnnouncements(`?page=${this.pagination.page}`);
       this.loading = false;
     },
   },
@@ -78,6 +94,18 @@ export default {
     }),
     isStaff() {
       return this.$store.getters["auth/getUserInfo"].staff;
+    },
+    pagination() {
+      let total = 0;
+      let page = 1;
+      if (this.announcements.pagination) {
+        total = this.announcements.pagination.count;
+        page = this.announcements.pagination.page;
+      }
+      return {
+        total: total,
+        page: page,
+      };
     },
   },
 };
@@ -106,9 +134,18 @@ export default {
     &.right
       text-align: right
 
-  &__cards
+  &-cards
     padding: 0 20%
+    overflow: hidden
 
-    @media (max-width: 1300px)
-      padding: 0 5%
+
+    .ant-pagination
+      text-align: right
+      margin: 5px 15px 0 15px
+
+    &__cards-list
+      overflow-y: auto
+
+      @media (max-width: 1300px)
+        padding: 0 5%
 </style>

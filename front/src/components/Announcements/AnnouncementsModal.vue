@@ -20,6 +20,7 @@
             v-model="form[field.name]"
             @change="fieldChanged(field)"
             :ref="`field${index}`"
+            :rows="4"
           />
         </a-form-model-item>
       </template>
