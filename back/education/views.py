@@ -693,6 +693,12 @@ class AnnouncementView(viewsets.ModelViewSet):
   filterset_class = AnnouncementFilter
   pagination_class = CommonPagination
 
+  def perform_create(self, serializer):
+    serializer.save()
+    users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
+    for user in users:
+      Notification.objects.create(user_id=user, type=2)
+
 class AppealView(CreateListRetrieveDestroyViewSet):
   permission_classes = (permissions.IsAuthenticated, NotDeleteIfNotAdmin)
   serializer_class = AppealSerializer

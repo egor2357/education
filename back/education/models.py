@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_save
 from django.dispatch.dispatcher import receiver
 from django.core.files.base import ContentFile
 
@@ -680,6 +680,13 @@ class Mission(models.Model):
   def __str__(self):
     return self.caption
 
+@receiver(post_save, sender=Mission)
+def mission_create_notifications(sender, instance, **kwargs):
+  if (instance.executor):
+    Notification.objects.create(user_id=instance.executor.user.id, type=0)
+  if (instance.controller):
+    Notification.objects.create(user_id=instance.controller.user.id, type=0)
+
 class Announcement(models.Model):
   '''
     Обращения руководства
@@ -694,8 +701,8 @@ class Announcement(models.Model):
 
   class Meta:
     db_table = 'announcement'
-    verbose_name = 'Обращение руководсва'
-    verbose_name_plural = 'Обращения руководсва'
+    verbose_name = 'Обращение руководства'
+    verbose_name_plural = 'Обращения руководства'
     ordering = ['-creation_date',]
 
   def __str__(self):
@@ -771,6 +778,19 @@ class Message(models.Model):
 
   def __str__(self):
     return self.text
+
+@receiver(post_save, sender=Message)
+def messages_create_notifications(sender, instance, **kwargs):
+  if (instance.author.user.is_staff == False):
+    admins = User.objects.filter(is_staff = True).values_list('id', flat=True)
+    for admin in admins:
+      Notification.objects.create(user_id=admin, type=1)
+  elif (instance.author.user.is_staff == True and instance.appeal.creator_id == instance.author_id):
+    admins = User.objects.exclude(id=instance.author_id, is_staff=False).values_list('id', flat=True)
+    for admin in admins:
+      Notification.objects.create(user_id=admin, type=1)
+  elif (instance.author.user.is_staff == True and instance.appeal.creator_id != instance.author_id):
+    Notification.objects.create(user_id=instance.appeal.creator_id, type=1)
 
 class Task_group(models.Model):
   '''
