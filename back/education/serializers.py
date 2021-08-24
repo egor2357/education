@@ -805,3 +805,10 @@ class TalentSerializer(FlexFieldsModelSerializer):
       'name', 'text',
       'creation_date'
     )
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Notification
+    fields = ('type', 'user')
+

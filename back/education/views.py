@@ -805,3 +805,22 @@ class EducationalAreasAllView(viewsets.GenericViewSet, mixins.ListModelMixin):
   permission_classes = (permissions.IsAuthenticated, )
   queryset = Educational_area.objects.all()
   serializer_class = EducationalAreaOnlySerializer
+
+
+class NotificationView(viewsets.GenericViewSet, mixins.ListModelMixin):
+  permission_classes = (permissions.IsAuthenticated, )
+  queryset = Notification.objects.all()
+  serializer_class = NotificationSerializer
+
+  def list(self, request):
+    self.queryset = self.get_queryset().filter(user=self.request.user)
+    return super().list(request)
+
+  @action(detail=False)
+  def calculated(self, request, *args, **kwargs):
+    result = {}
+    result['user_id'] = request.user.id
+    for type in Notification.type_choices:
+      result[type[0]] = Notification.objects.filter(user_id = request.user.id, type=type[0]).count()
+    return Response(result)
+

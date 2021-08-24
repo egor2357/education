@@ -834,3 +834,26 @@ class Talent(models.Model):
 
   def __str__(self):
     return self.text
+
+class Notification(models.Model):
+  '''
+    Уведомление
+  '''
+  type_choices = [
+    (0, 'Задачи'),
+    (1, 'Обращения к руководству'),
+    (2, 'Важная информация'),
+  ]
+  type = models.PositiveSmallIntegerField(
+    choices=type_choices, null=False, verbose_name='Тип уведомления'
+  )
+
+  user = models.ForeignKey(
+    User, null=False,
+    on_delete=models.CASCADE, verbose_name='Пользователь'
+  )
+
+  class Meta:
+    db_table = 'notification'
+    verbose_name = 'Уведомление'
+    verbose_name_plural = 'Уведомления'
