@@ -34,7 +34,8 @@ import {
   Upload,
   Empty,
   Tag,
-  Pagination
+  Pagination,
+  Badge,
 } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
@@ -72,6 +73,7 @@ Vue.use(Upload);
 Vue.use(Empty);
 Vue.use(Tag);
 Vue.use(Pagination);
+Vue.use(Badge);
 
 Vue.prototype.$message = message;
 Vue.prototype.$confirm = Modal.confirm;

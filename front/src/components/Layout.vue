@@ -40,6 +40,11 @@
               <a-icon :type="item.icon" />
               <span v-if="!item.twoLines">{{ item.title }}</span>
               <div v-else>{{ item.title }}</div>
+              <a-badge
+                v-if="item.unread && notifications[item.unread]"
+                :number-style="{ backgroundColor: '#52c41a', 'box-shadow': 'unset' }"
+                :count="notifications[item.unread]"
+              />
             </router-link>
           </a-menu-item>
         </template>
@@ -68,7 +73,7 @@
   </a-layout>
 </template>
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 export default {
   data() {
     return {
@@ -102,6 +107,7 @@ export default {
           specOnly: false,
           to: { name: "Missions" },
           childrens: [],
+          unread: "0",
         },
         {
           icon: "solution",
@@ -132,6 +138,7 @@ export default {
           childrens: [],
           twoLines: true,
           childrenRoutes: ["AppealDetails"],
+          unread: "1",
         },
         {
           icon: "bell",
@@ -141,6 +148,8 @@ export default {
           specOnly: false,
           to: { name: "Announcements" },
           childrens: [],
+          twoLines: true,
+          unread: "2",
         },
         {
           icon: "setting",
@@ -206,6 +215,9 @@ export default {
     };
   },
   methods: {
+    ...mapActions({
+      fetchNotifications: "auth/fetchNotifications",
+    }),
     clearStore() {
       this.$store.commit("activities/clear");
       this.$store.commit("forms/clear");
@@ -254,13 +266,15 @@ export default {
   computed: {
     ...mapGetters({
       userInfo: "auth/getUserInfo",
+      notifications: "auth/getNotifications",
     }),
   },
   beforeRouteUpdate(to, from, next) {
     this.setSelectedMenuItem(to);
     next();
   },
-  created() {
+  async created() {
+    await this.fetchNotifications();
     this.setSelectedMenuItem(this.$route);
   },
 };
@@ -325,6 +339,10 @@ export default {
 
 .ant-menu
   .ant-menu-item
+    .ant-badge
+      float: right
+      margin-top: 10px
+
     .menu-two-lines
       display: flex
       flex-direction: row
@@ -338,9 +356,16 @@ export default {
     .anticon
       font-size: 18px
 
+
   &.ant-menu-inline-collapsed
+    .ant-badge
+      float: unset
+      margin-bottom: 10px
     .ant-menu-item
       .menu-two-lines
+        .ant-badge
+          margin-bottom: 0
+          margin-top: 15px
         div
           opacity: 0
           max-width: 0

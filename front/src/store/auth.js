@@ -8,6 +8,7 @@ const state = () => ({
     activitiesId: [],
     skillsId: [],
   },
+  notifications: {}
 });
 
 const getters = {
@@ -17,6 +18,9 @@ const getters = {
   getUserInfo(state) {
     return state.userInfo;
   },
+  getNotifications(state) {
+    return state.notifications;
+  }
 };
 
 const actions = {
@@ -111,6 +115,18 @@ const actions = {
       }
     }
   },
+  async fetchNotifications({ commit }) {
+    try {
+      let res = await this.$axios.get(`/api/notifications/calculated/`);
+      if (res.status === 200) {
+        commit("setNotifications", res.data);
+        return res;
+      }
+    } catch (e) {
+      commit("setNotifications", {});
+      return e;
+    }
+  },
 };
 
 const mutations = {
@@ -119,6 +135,9 @@ const mutations = {
   },
   setUserInfo(state, payload) {
     state.userInfo = payload;
+  },
+  setNotifications(state, payload) {
+    state.notifications = payload;
   },
 };
 
