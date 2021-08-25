@@ -1,9 +1,11 @@
+import json
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete, post_save
 from django.dispatch.dispatcher import receiver
 from django.core.files.base import ContentFile
-
+from django.contrib.postgres.fields import JSONField
 from rest_framework.serializers import ValidationError
 
 import datetime
@@ -784,13 +786,14 @@ def messages_create_notifications(sender, instance, **kwargs):
   if (instance.author.user.is_staff == False):
     admins = User.objects.filter(is_staff = True).values_list('id', flat=True)
     for admin in admins:
-      Notification.objects.create(user_id=admin, type=1)
+      Notification.objects.create(user_id=admin, type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
   elif (instance.author.user.is_staff == True and instance.appeal.creator_id == instance.author_id):
     admins = User.objects.exclude(id=instance.author.user_id, is_staff=False).values_list('id', flat=True)
     for admin in admins:
-      Notification.objects.create(user_id=admin, type=1)
+      Notification.objects.create(user_id=admin, type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
   elif (instance.author.user.is_staff == True and instance.appeal.creator_id != instance.author_id):
-    Notification.objects.create(user_id=instance.appeal.creator.user_id, type=1)
+    Notification.objects.create(user_id=instance.appeal.creator.user_id,
+                                type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
 
 class Task_group(models.Model):
   '''
@@ -864,14 +867,15 @@ class Notification(models.Model):
     (1, 'Обращения к руководству'),
     (2, 'Важная информация'),
   ]
+
   type = models.PositiveSmallIntegerField(
     choices=type_choices, null=False, verbose_name='Тип уведомления'
   )
-
   user = models.ForeignKey(
     User, null=False,
     on_delete=models.CASCADE, verbose_name='Пользователь'
   )
+  meta = JSONField(verbose_name='Meta', blank=True, null=True)
 
   class Meta:
     db_table = 'notification'

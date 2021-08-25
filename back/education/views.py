@@ -724,11 +724,6 @@ class AppealView(CreateListRetrieveDestroyViewSet):
         qs = Appeal.objects.filter(creator=user.specialist)
     return qs.select_related('creator')
 
-  def list(self, request):
-    notifications = Notification.objects.filter(user_id = request.user.id, type = 1)
-    notifications._raw_delete(notifications.db)
-    return super().list(request)
-
   def perform_create(self, serializer):
     user = self.request.user
     if user.specialist is not None:
@@ -776,6 +771,14 @@ class MessageView(CreateListRetrieveDestroyViewSet):
       if user.specialist is not None:
         qs = Message.objects.filter(appeal__creator=user.specialist)
     return qs.select_related('author')
+
+  def list(self, request):
+    if ('appeal_id') in request.query_params:
+      notifications = Notification.objects\
+        .filter(user_id=request.user.id, type=1,
+                meta__contains="{\"appeal_id\": %s}" % request.query_params['appeal_id'])
+      notifications._raw_delete(notifications.db)
+    return super().list(request)
 
   def perform_create(self, serializer):
     user = self.request.user
