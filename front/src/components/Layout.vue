@@ -224,6 +224,9 @@ export default {
         1: "Appeals",
         2: "Announcements",
       },
+      wasClosed0: false,
+      wasClosed1: false,
+      wasClosed2: false,
     };
   },
   methods: {
@@ -297,7 +300,10 @@ export default {
           );
         },
         key: "0",
-        onClose: close,
+        onClose: () => {
+          this.wasClosed0 = true;
+          close()
+        },
       });
     },
     openAppealNotification() {
@@ -323,7 +329,10 @@ export default {
           );
         },
         key: "1",
-        onClose: close,
+        onClose: () => {
+          this.wasClosed1 = true;
+          close()
+        },
       });
     },
     openAnnouncementNotification() {
@@ -349,7 +358,10 @@ export default {
           );
         },
         key: "2",
-        onClose: close,
+        onClose: () => {
+          this.wasClosed2 = true;
+          close()
+        },
       });
     },
   },
@@ -383,7 +395,9 @@ export default {
           this.$notification.close("0");
         }, 5000);
       } else {
-        await this.openMissionNotification();
+        if (!this.wasClosed0) {
+          await this.openMissionNotification();
+        }
       }
 
       if (values[1] === 0) {
@@ -391,7 +405,9 @@ export default {
           this.$notification.close("1");
         }, 5000);
       } else {
-        await this.openAppealNotification();
+        if (!this.wasClosed1) {
+          await this.openAppealNotification();
+        }
       }
 
       if (values[2] === 0) {
@@ -399,7 +415,9 @@ export default {
           this.$notification.close("2");
         }, 5000);
       } else {
-        await this.openAnnouncementNotification();
+        if (!this.wasClosed2) {
+          await this.openAnnouncementNotification();
+        }
       }
     },
   },
