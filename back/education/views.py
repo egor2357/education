@@ -658,6 +658,8 @@ class MissionView(viewsets.ModelViewSet):
     if (not user.is_staff) and (user.specialist is not None):
       new_missions = qs.filter(executor=user.specialist, status=0)
       new_missions.update(status=1)
+    notifications = Notification.objects.filter(user_id = user.id, type = 0)
+    notifications._raw_delete(notifications.db)
     return super().list(request)
 
   def perform_create(self, serializer):
@@ -693,6 +695,11 @@ class AnnouncementView(viewsets.ModelViewSet):
   filterset_class = AnnouncementFilter
   pagination_class = CommonPagination
 
+  def list(self, request):
+    notifications = Notification.objects.filter(user_id = request.user.id, type = 2)
+    notifications._raw_delete(notifications.db)
+    return super().list(request)
+
   def perform_create(self, serializer):
     serializer.save()
     users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
@@ -716,6 +723,11 @@ class AppealView(CreateListRetrieveDestroyViewSet):
       if user.specialist is not None:
         qs = Appeal.objects.filter(creator=user.specialist)
     return qs.select_related('creator')
+
+  def list(self, request):
+    notifications = Notification.objects.filter(user_id = request.user.id, type = 1)
+    notifications._raw_delete(notifications.db)
+    return super().list(request)
 
   def perform_create(self, serializer):
     user = self.request.user
