@@ -786,11 +786,11 @@ def messages_create_notifications(sender, instance, **kwargs):
     for admin in admins:
       Notification.objects.create(user_id=admin, type=1)
   elif (instance.author.user.is_staff == True and instance.appeal.creator_id == instance.author_id):
-    admins = User.objects.exclude(id=instance.author_id, is_staff=False).values_list('id', flat=True)
+    admins = User.objects.exclude(id=instance.author.user_id, is_staff=False).values_list('id', flat=True)
     for admin in admins:
       Notification.objects.create(user_id=admin, type=1)
   elif (instance.author.user.is_staff == True and instance.appeal.creator_id != instance.author_id):
-    Notification.objects.create(user_id=instance.appeal.creator_id, type=1)
+    Notification.objects.create(user_id=instance.appeal.creator.user_id, type=1)
 
 class Task_group(models.Model):
   '''
