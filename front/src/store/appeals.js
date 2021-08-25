@@ -35,12 +35,11 @@ const actions = {
       return e;
     }
   },
-  async fetchAppealInfo({ state, commit, dispatch }, id) {
+  async fetchAppealInfo({ state, commit }, id) {
     try {
       let res = await this.$axios.get(`/api/appeals/${id}/`);
       if (res.status === 200) {
         commit("setAppealInfo", res.data);
-        dispatch("fetchMessages", id);
         return res;
       }
     } catch (e) {

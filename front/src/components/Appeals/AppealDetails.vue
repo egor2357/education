@@ -95,6 +95,8 @@ export default {
   },
   async created() {
     await this.fetchAppealInfo(this.$route.params.id);
+    await this.fetchMessages(this.$route.params.id);
+    await this.fetchNotifications();
     this.loading = false;
   },
   methods: {
@@ -103,6 +105,7 @@ export default {
       fetchMessages: "appeals/fetchMessages",
       addMessage: "appeals/addMessage",
       setClosed: "appeals/setAppealClosed",
+      fetchNotifications: "auth/fetchNotifications",
     }),
     ...mapMutations({
       setMessages: "appeals/setMessages",

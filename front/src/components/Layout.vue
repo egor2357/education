@@ -221,7 +221,7 @@ export default {
       ],
       notificationKeysRoutes: {
         0: "Missions",
-        1: "Appeals",
+        1: "",
         2: "Announcements",
       },
       wasClosed0: false,
@@ -322,6 +322,7 @@ export default {
               on: {
                 click: () => {
                   this.$router.push({ name: "Appeals" });
+                  this.wasClosed1 = true;
                 },
               },
             },
