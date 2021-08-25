@@ -160,6 +160,13 @@ export default {
           },
         },
         {
+          title: "Непрочитанных сообщений",
+          dataIndex: "count_unreaded",
+          key: "count_unreaded",
+          width: "150px",
+          class: 'count-block'
+        },
+        {
           title: "Статус",
           dataIndex: "closed",
           key: "closed",
@@ -300,7 +307,6 @@ export default {
   .ant-table-tbody
     .status-block
       text-align: center
-      max-width: 120px
       .status-block__tag
         margin-bottom: 5px
         margin-right: 0
@@ -308,4 +314,6 @@ export default {
         font-size: 0.8rem
     .pre-wrap
       white-space: pre-wrap
+    .count-block
+      text-align: center
 </style>
