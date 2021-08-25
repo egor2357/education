@@ -42,7 +42,10 @@
               <div v-else>{{ item.title }}</div>
               <a-badge
                 v-if="item.unread && notifications[item.unread]"
-                :number-style="{ backgroundColor: '#52c41a', 'box-shadow': 'unset' }"
+                :number-style="{
+                  backgroundColor: '#52c41a',
+                  'box-shadow': 'unset',
+                }"
                 :count="notifications[item.unread]"
               />
             </router-link>
@@ -262,6 +265,90 @@ export default {
         if (matched) break;
       }
     },
+    openMissionNotification() {
+      if (this.notifications[0] && this.notifications[0] > 0) {
+        this.$notification.open({
+          message: "Задачи",
+          description: `Количество новых задач: ${this.notifications[0]}`,
+          duration: 0,
+          btn: (h) => {
+            return h(
+              "a-button",
+              {
+                props: {
+                  type: "primary",
+                  size: "small",
+                },
+                on: {
+                  click: () => {
+                    this.$router.push({ name: "Missions" });
+                  },
+                },
+              },
+              "Просмотреть"
+            );
+          },
+          key: 0,
+          onClose: close,
+        });
+      }
+    },
+    openAppealNotification() {
+      if (this.notifications[1] && this.notifications[1] > 0) {
+        this.$notification.open({
+          message: "Обращения к руководству",
+          description: `Количество новых сообщений: ${this.notifications[1]}`,
+          duration: 0,
+          btn: (h) => {
+            return h(
+              "a-button",
+              {
+                props: {
+                  type: "primary",
+                  size: "small",
+                },
+                on: {
+                  click: () => {
+                    this.$router.push({ name: "Appeals" });
+                  },
+                },
+              },
+              "Просмотреть"
+            );
+          },
+          key: 1,
+          onClose: close,
+        });
+      }
+    },
+    openAnnouncementNotification() {
+      if (this.notifications[2] && this.notifications[2] > 0) {
+        this.$notification.open({
+          message: "Важная информация",
+          description: `Количество новых сообщений: ${this.notifications[2]}`,
+          duration: 0,
+          btn: (h) => {
+            return h(
+              "a-button",
+              {
+                props: {
+                  type: "primary",
+                  size: "small",
+                },
+                on: {
+                  click: () => {
+                    this.$router.push({ name: "Announcements" });
+                  },
+                },
+              },
+              "Просмотреть"
+            );
+          },
+          key: 2,
+          onClose: close,
+        });
+      }
+    },
   },
   computed: {
     ...mapGetters({
@@ -277,6 +364,14 @@ export default {
     await this.fetchNotifications();
     this.setSelectedMenuItem(this.$route);
   },
+  watch: {
+    async notifications() {
+      await this.openMissionNotification();
+      await this.openAppealNotification();
+      await this.openAnnouncementNotification();
+    },
+  },
+
 };
 </script>
 
