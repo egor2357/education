@@ -113,6 +113,9 @@
     />
     <template slot="theme" slot-scope="theme, item">
       <a @click.prevent="goToDetail(item)">{{ theme }}</a>
+      <div class="message-count" v-if="item.count_unreaded">
+        Непрочитанных сообщений: {{ item.count_unreaded }}
+      </div>
     </template>
     <template slot="status" slot-scope="closed">
       <a-tag class="status-block__tag" color="blue" v-if="!closed"
@@ -152,19 +155,12 @@ export default {
           dataIndex: "theme",
           key: "theme",
           filters: [],
-          class: "pre-wrap",
+          class: "pre-wrap theme-block",
           scopedSlots: {
             customRender: "theme",
             filterDropdown: "filterDropdown",
             filterIcon: "filterIcon",
           },
-        },
-        {
-          title: "Непрочитанных сообщений",
-          dataIndex: "count_unreaded",
-          key: "count_unreaded",
-          width: "150px",
-          class: 'count-block'
         },
         {
           title: "Статус",
@@ -314,6 +310,9 @@ export default {
         font-size: 0.8rem
     .pre-wrap
       white-space: pre-wrap
-    .count-block
-      text-align: center
+    .theme-block
+      .message-count
+        font-size: 12px
+        color: #aaa
+        margin: 0 0 -10px -3px
 </style>

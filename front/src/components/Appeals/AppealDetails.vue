@@ -16,7 +16,7 @@
       <div class="appeal-details__content">
         <div
           class="message-block"
-          v-for="message in messages.results"
+          v-for="message in messages"
           :key="message.id"
           :class="
             message.author.id === userInfo.specialistId

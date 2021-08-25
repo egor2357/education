@@ -760,7 +760,7 @@ class MessageView(CreateListRetrieveDestroyViewSet):
   serializer_class = MessageSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = MessageFilter
-  pagination_class = CommonPagination
+  #pagination_class = CommonPagination
 
   def get_queryset(self):
     user = self.request.user
