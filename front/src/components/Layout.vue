@@ -41,7 +41,11 @@
               <span v-if="!item.twoLines">{{ item.title }}</span>
               <div v-else>{{ item.title }}</div>
               <a-badge
-                v-if="item.unread && notifications[item.unread]"
+                v-if="
+                  item.unread &&
+                  notificationKeysRoutes[item.unread] !== $route.name &&
+                  notifications[item.unread]
+                "
                 :number-style="{
                   backgroundColor: '#52c41a',
                   'box-shadow': 'unset',
@@ -215,6 +219,11 @@ export default {
           ],
         },
       ],
+      notificationKeysRoutes: {
+        "0": "Missions",
+        "1": "Appeals",
+        "2": "Announcements",
+      },
     };
   },
   methods: {
@@ -266,88 +275,85 @@ export default {
       }
     },
     openMissionNotification() {
-      if (this.notifications[0] && this.notifications[0] > 0) {
-        this.$notification.open({
-          message: "Задачи",
-          description: `Количество новых задач: ${this.notifications[0]}`,
-          duration: 0,
-          btn: (h) => {
-            return h(
-              "a-button",
-              {
-                props: {
-                  type: "primary",
-                  size: "small",
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({ name: "Missions" });
-                  },
+      this.$notification["info"]({
+        message: "Задачи",
+        description: `Количество новых задач: ${this.notifications[0]}`,
+        duration: 0,
+        btn: (h) => {
+          return h(
+            "a-button",
+            {
+              props: {
+                type: "primary",
+                size: "small",
+              },
+              on: {
+                click: () => {
+                  this.$router.push({ name: "Missions" });
+                  this.$notification.close("0");
                 },
               },
-              "Просмотреть"
-            );
-          },
-          key: 0,
-          onClose: close,
-        });
-      }
+            },
+            "Просмотреть"
+          );
+        },
+        key: "0",
+        onClose: close,
+      });
     },
     openAppealNotification() {
-      if (this.notifications[1] && this.notifications[1] > 0) {
-        this.$notification.open({
-          message: "Обращения к руководству",
-          description: `Количество новых сообщений: ${this.notifications[1]}`,
-          duration: 0,
-          btn: (h) => {
-            return h(
-              "a-button",
-              {
-                props: {
-                  type: "primary",
-                  size: "small",
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({ name: "Appeals" });
-                  },
+      this.$notification["info"]({
+        message: "Обращения к руководству",
+        description: `Количество новых сообщений: ${this.notifications[1]}`,
+        duration: 0,
+        btn: (h) => {
+          return h(
+            "a-button",
+            {
+              props: {
+                type: "primary",
+                size: "small",
+              },
+              on: {
+                click: () => {
+                  this.$router.push({ name: "Appeals" });
+                  this.$notification.close("1");
                 },
               },
-              "Просмотреть"
-            );
-          },
-          key: 1,
-          onClose: close,
-        });
-      }
+            },
+            "Просмотреть"
+          );
+        },
+        key: "1",
+        onClose: close,
+      });
     },
     openAnnouncementNotification() {
-      if (this.notifications[2] && this.notifications[2] > 0) {
-        this.$notification.open({
-          message: "Важная информация",
-          description: `Количество новых сообщений: ${this.notifications[2]}`,
-          duration: 0,
-          btn: (h) => {
-            return h(
-              "a-button",
-              {
-                props: {
-                  type: "primary",
-                  size: "small",
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({ name: "Announcements" });
-                  },
+      this.$notification["info"]({
+        message: "Важная информация",
+        description: `Количество новых сообщений: ${this.notifications[2]}`,
+        duration: 0,
+        btn: (h) => {
+          return h(
+            "a-button",
+            {
+              props: {
+                type: "primary",
+                size: "small",
+              },
+              on: {
+                click: () => {
+                  this.$router.push({ name: "Announcements" });
+                  this.$notification.close("2");
                 },
               },
-              "Просмотреть"
-            );
-          },
-          key: 2,
-          onClose: close,
-        });
-      }
+            },
+            "Просмотреть"
+          );
+        },
+        key: "2",
+        onClose: close,
+      });
     },
   },
   computed: {
@@ -356,22 +362,41 @@ export default {
       notifications: "auth/getNotifications",
     }),
   },
-  beforeRouteUpdate(to, from, next) {
+  async beforeRouteUpdate(to, from, next) {
     this.setSelectedMenuItem(to);
     next();
   },
   async created() {
-    await this.fetchNotifications();
     this.setSelectedMenuItem(this.$route);
+    await this.fetchNotifications();
   },
   watch: {
-    async notifications() {
-      await this.openMissionNotification();
-      await this.openAppealNotification();
-      await this.openAnnouncementNotification();
+    async notifications(values) {
+      if (values[0] === 0) {
+        setTimeout(() => {
+          this.$notification.close("0");
+        }, 5000);
+      } else {
+        await this.openMissionNotification();
+      }
+
+      if (values[1] === 0) {
+        setTimeout(() => {
+          this.$notification.close("1");
+        }, 5000);
+      } else {
+        await this.openAppealNotification();
+      }
+
+      if (values[2] === 0) {
+        setTimeout(() => {
+          this.$notification.close("2");
+        }, 5000);
+      } else {
+        await this.openAnnouncementNotification();
+      }
     },
   },
-
 };
 </script>
 
@@ -447,6 +472,7 @@ export default {
         line-height: 16px
         padding: 2px 0 2px 0
         white-space: normal
+        max-width: 125px
 
     .anticon
       font-size: 18px

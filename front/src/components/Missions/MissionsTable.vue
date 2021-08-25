@@ -244,6 +244,7 @@ export default {
     try {
       this.loadFiltersFromQuery();
       await this.getData();
+      await this.fetchNotifications();
       if (!this.userInfo.staff) {
         this.columns.splice(8);
       }
@@ -256,6 +257,7 @@ export default {
       fetchMissions: "missions/fetchMissions",
       deleteMission: "missions/deleteMission",
       setExecuteMission: "missions/setExecuteMission",
+      fetchNotifications: "auth/fetchNotifications",
     }),
     ...mapMutations({
       setQueryParams: "missions/setQueryParams",

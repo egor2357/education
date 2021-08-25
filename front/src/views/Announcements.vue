@@ -62,6 +62,7 @@ export default {
   },
   async created() {
     await this.fetchAnnouncements(`?page=${this.pagination.page}`);
+    await this.fetchNotifications();
     this.loading = false;
   },
   beforeCreate() {
@@ -70,6 +71,7 @@ export default {
   methods: {
     ...mapActions({
       fetchAnnouncements: "announcements/fetchAnnouncements",
+      fetchNotifications: "auth/fetchNotifications",
     }),
     displayAdd() {
       this.displayModal = true;

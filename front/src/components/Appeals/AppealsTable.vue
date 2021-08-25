@@ -188,6 +188,7 @@ export default {
     try {
       this.loadFiltersFromQuery();
       await this.getData();
+      await this.fetchNotifications();
       if (!this.userInfo.staff) {
         this.columns.splice(3);
       }
@@ -199,6 +200,7 @@ export default {
     ...mapActions({
       fetchAppeals: "appeals/fetchAppeals",
       deleteAppeal: "appeals/deleteAppeal",
+      fetchNotifications: "auth/fetchNotifications",
     }),
     ...mapMutations({
       setQueryParams: "appeals/setQueryParams",
