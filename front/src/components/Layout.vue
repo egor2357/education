@@ -220,9 +220,9 @@ export default {
         },
       ],
       notificationKeysRoutes: {
-        "0": "Missions",
-        "1": "Appeals",
-        "2": "Announcements",
+        0: "Missions",
+        1: "Appeals",
+        2: "Announcements",
       },
     };
   },
@@ -290,7 +290,6 @@ export default {
               on: {
                 click: () => {
                   this.$router.push({ name: "Missions" });
-                  this.$notification.close("0");
                 },
               },
             },
@@ -317,7 +316,6 @@ export default {
               on: {
                 click: () => {
                   this.$router.push({ name: "Appeals" });
-                  this.$notification.close("1");
                 },
               },
             },
@@ -344,7 +342,6 @@ export default {
               on: {
                 click: () => {
                   this.$router.push({ name: "Announcements" });
-                  this.$notification.close("2");
                 },
               },
             },
@@ -364,6 +361,15 @@ export default {
   },
   async beforeRouteUpdate(to, from, next) {
     this.setSelectedMenuItem(to);
+    if (to.name === "Missions") {
+      this.$notification.close("0");
+    }
+    if (to.name === "Appeals") {
+      this.$notification.close("1");
+    }
+    if (to.name === "Announcements") {
+      this.$notification.close("2");
+    }
     next();
   },
   async created() {
