@@ -376,12 +376,15 @@ export default {
     this.setSelectedMenuItem(to);
     if (to.name === "Missions") {
       this.$notification.close("0");
+      this.wasClosed0 = true;
     }
     if (to.name === "Appeals") {
       this.$notification.close("1");
+      this.wasClosed1 = true;
     }
     if (to.name === "Announcements") {
       this.$notification.close("2");
+      this.wasClosed2 = true;
     }
     next();
   },

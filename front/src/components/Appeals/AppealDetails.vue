@@ -25,6 +25,9 @@
           "
         >
           <div class="message-block-wrapper">
+            <div class="message-block-wrapper__author">
+              {{ message.author.__str__ }}
+            </div>
             <div class="message-block-wrapper__text">
               {{ message.text }}
             </div>
@@ -44,12 +47,7 @@
       </div>
       <div class="appeal-details__bottom">
         <div class="message-send-block">
-          <a-textarea
-            v-model="text"
-            class="message-send-block__text-input"
-            :rows="4"
-            :disabled="appealInfo.closed"
-          />
+          <a-textarea v-model="text" :rows="4" :disabled="appealInfo.closed" />
           <div class="buttons">
             <a-upload
               name="file"
@@ -60,16 +58,18 @@
                   return false;
                 }
               "
+              class="file-input"
             >
-              <a-button :disabled="appealInfo.closed">
+              <a-button :disabled="appealInfo.closed" v-if="!fileList.length">
                 <a-icon type="upload" /> Прикрепить файл
               </a-button>
             </a-upload>
             <a-button
-              class="buttons__send-button"
               type="primary"
               @click="sendMessage"
-              :disabled="appealInfo.closed"
+              :disabled="
+                appealInfo.closed || (!fileList.length && text.trim() === '')
+              "
               >Отправить</a-button
             >
           </div>
@@ -218,7 +218,8 @@ export default {
   &__content
     flex: 1 1 auto
     overflow-y: auto
-    margin-bottom: 10px
+    margin: 0 auto 10px auto
+    width: 900px
 
     .message-block
       margin: 10px
@@ -232,12 +233,20 @@ export default {
 
         &__time
           font-size: 0.8rem
+          opacity: 0.65
+          text-align: right
+
+        &__author
+          font-size: 0.8rem
+          opacity: 0.65
+          text-align: left
 
         &__text
           white-space: pre-line
 
       &_other
         align-items: flex-start
+        max-width: 60%
 
         .message-block-wrapper
           border-color: #90c6e6
@@ -245,25 +254,30 @@ export default {
 
       &_my
         align-items: flex-end
+        margin-left: 40%
 
         .message-block-wrapper
           border-color: #a7deab
           background: #ecffec
 
   &__bottom
+    width: 900px
+    margin: 0 auto
+
     .message-send-block
       display: flex
-      flex-direction: row
-
-    .buttons
-      padding-left: 10px
-      display: flex
       flex-direction: column
-      justify-content: space-between
 
-      &__send-button
-        margin-top: 5px
+      .buttons
+        display: flex
+        flex-direction: row
+        justify-content: space-between
+        margin-top: 10px
+        height: 35px
+
+        .file-input
+          max-width: 795px
 
       .ant-upload-list-item-name
-        margin-right: 15px
+        padding-right: 10px
 </style>
