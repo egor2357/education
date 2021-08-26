@@ -80,7 +80,7 @@
   </a-layout>
 </template>
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions, mapMutations } from "vuex";
 export default {
   data() {
     return {
@@ -231,7 +231,11 @@ export default {
   },
   methods: {
     ...mapActions({
-      fetchNotifications: "auth/fetchNotifications",
+      fetchNotifications: "notifications/fetchNotifications",
+      fetchAnnouncements: "announcements/fetchAnnouncements",
+    }),
+    ...mapMutations({
+      setSocket: "notifications/setSocket",
     }),
     clearStore() {
       this.$store.commit("activities/clear");
@@ -302,7 +306,7 @@ export default {
         key: "0",
         onClose: () => {
           this.wasClosed0 = true;
-          close()
+          close();
         },
       });
     },
@@ -332,7 +336,7 @@ export default {
         key: "1",
         onClose: () => {
           this.wasClosed1 = true;
-          close()
+          close();
         },
       });
     },
@@ -341,35 +345,70 @@ export default {
         message: "Важная информация",
         description: `Количество новых сообщений: ${this.notifications[2]}`,
         duration: 0,
-        btn: (h) => {
-          return h(
-            "a-button",
-            {
-              props: {
-                type: "primary",
-                size: "small",
-              },
-              on: {
-                click: () => {
-                  this.$router.push({ name: "Announcements" });
-                },
-              },
-            },
-            "Просмотреть"
-          );
-        },
+        btn:
+          this.$route.name !== "Announcements"
+            ? (h) => {
+                return h(
+                  "a-button",
+                  {
+                    props: {
+                      type: "primary",
+                      size: "small",
+                    },
+                    on: {
+                      click: () => {
+                        this.$router.push({ name: "Announcements" });
+                      },
+                    },
+                  },
+                  "Просмотреть"
+                );
+              }
+            : null,
         key: "2",
         onClose: () => {
           this.wasClosed2 = true;
-          close()
+          close();
         },
       });
+    },
+    socketConnect() {
+      let socket = new WebSocket("ws://192.168.137.100:8765");
+      const that = this;
+      socket.onmessage = async function (message) {
+        let data = JSON.parse(message.data);
+        if (data.action === "notifications.update.0") {
+          that.wasClosed0 = false;
+          await that.fetchNotifications();
+        }
+        if (data.action === "notifications.update.1") {
+          that.wasClosed1 = false; // eslint-disable-line
+          await that.fetchNotifications();
+        }
+        if (data.action === "notifications.update.2") {
+          that.wasClosed2 = false; // eslint-disable-line
+          await that.fetchNotifications();
+          if (that.$route.name === "Announcements") {
+            await that.fetchAnnouncements();
+            await that.fetchNotifications();
+          }
+        }
+      };
+      socket.onopen = async function () {
+        that.setSocket(socket);
+        that.socketReg();
+      };
+    },
+    socketReg() {
+      let obj = { type: "reg", id: this.userInfo.id };
+      this.socket.send(JSON.stringify(obj));
     },
   },
   computed: {
     ...mapGetters({
       userInfo: "auth/getUserInfo",
-      notifications: "auth/getNotifications",
+      notifications: "notifications/getNotifications",
+      socket: "notifications/getSocket",
     }),
   },
   async beforeRouteUpdate(to, from, next) {
@@ -415,15 +454,28 @@ export default {
       }
 
       if (values[2] === 0) {
-        setTimeout(() => {
-          this.$notification.close("2");
-        }, 5000);
+        if (this.$route.name === "Announcements") {
+          setTimeout(() => {
+            this.$notification.close("2");
+          }, 5000);
+        }
       } else {
         if (!this.wasClosed2) {
           await this.openAnnouncementNotification();
         }
       }
     },
+    userInfo(value) {
+      if (value.id) {
+        this.socketReg();
+      }
+    },
+  },
+  async mounted() {
+    await this.socketConnect();
+  },
+  beforeDestroy() {
+    this.socket.close();
   },
 };
 </script>

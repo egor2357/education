@@ -44,7 +44,7 @@
 <script>
 import AnnouncementsModal from "@/components/Announcements/AnnouncementsModal";
 import AnnouncementCard from "@/components/Announcements/AnnouncementCard";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import { Empty } from "ant-design-vue";
 export default {
   name: "Announcements",
@@ -71,7 +71,10 @@ export default {
   methods: {
     ...mapActions({
       fetchAnnouncements: "announcements/fetchAnnouncements",
-      fetchNotifications: "auth/fetchNotifications",
+      fetchNotifications: "notifications/fetchNotifications",
+    }),
+    ...mapMutations({
+      setQueryParams: "announcements/setQueryParams",
     }),
     displayAdd() {
       this.displayModal = true;
@@ -80,13 +83,14 @@ export default {
     async closeModalSuccess() {
       this.displayModal = false;
       this.loading = true;
-      await this.fetchAnnouncements(`?page=${this.pagination.page}`);
+      await this.fetchAnnouncements();
       this.loading = false;
     },
     async paginationChanged(page) {
       this.loading = true;
       this.pagination.page = page;
-      await this.fetchAnnouncements(`?page=${this.pagination.page}`);
+      this.setQueryParams(`?page=${page}`);
+      await this.fetchAnnouncements();
       this.loading = false;
     },
   },

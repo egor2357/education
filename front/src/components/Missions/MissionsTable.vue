@@ -257,7 +257,7 @@ export default {
       fetchMissions: "missions/fetchMissions",
       deleteMission: "missions/deleteMission",
       setExecuteMission: "missions/setExecuteMission",
-      fetchNotifications: "auth/fetchNotifications",
+      fetchNotifications: "notifications/fetchNotifications",
     }),
     ...mapMutations({
       setQueryParams: "missions/setQueryParams",

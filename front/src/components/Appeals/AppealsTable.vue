@@ -203,7 +203,7 @@ export default {
     ...mapActions({
       fetchAppeals: "appeals/fetchAppeals",
       deleteAppeal: "appeals/deleteAppeal",
-      fetchNotifications: "auth/fetchNotifications",
+      fetchNotifications: "notifications/fetchNotifications",
     }),
     ...mapMutations({
       setQueryParams: "appeals/setQueryParams",

@@ -11,6 +11,8 @@ from .permissions import *
 from .serializers import *
 from .filters import *
 from .service import (option_update_related, job_update_related)
+from .utils import loop, send_message
+
 
 class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
                                         mixins.ListModelMixin,
@@ -705,6 +707,8 @@ class AnnouncementView(viewsets.ModelViewSet):
     users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
     for user in users:
       Notification.objects.create(user_id=user, type=2)
+    loop.run_until_complete(send_message({'action': 'notifications.update.2', 'type': 'exclude',
+                                          'exclude_id': self.request.user.id}, 'ws://192.168.137.100:8765'))
 
 class AppealView(CreateListRetrieveDestroyViewSet):
   permission_classes = (permissions.IsAuthenticated, NotDeleteIfNotAdmin)

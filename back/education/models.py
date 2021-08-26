@@ -7,6 +7,7 @@ from django.dispatch.dispatcher import receiver
 from django.core.files.base import ContentFile
 from django.contrib.postgres.fields import JSONField
 from rest_framework.serializers import ValidationError
+from .utils import send_message, loop
 
 import datetime
 
@@ -686,8 +687,12 @@ class Mission(models.Model):
 def mission_create_notifications(sender, instance, **kwargs):
   if (instance.executor):
     Notification.objects.create(user_id=instance.executor.user.id, type=0)
-  if (instance.controller):
+    loop.run_until_complete(send_message({'action': 'notifications.update.0', 'type': 'to',
+                                          'to_id': instance.executor.user.id}, 'ws://192.168.137.100:8765'))
+  if (instance.controller and instance.executor != instance.controller):
     Notification.objects.create(user_id=instance.controller.user.id, type=0)
+    loop.run_until_complete(send_message({'action': 'notifications.update.0', 'type': 'to',
+                                          'to_id': instance.controller.user.id}, 'ws://192.168.137.100:8765'))
 
 class Announcement(models.Model):
   '''
@@ -787,13 +792,19 @@ def messages_create_notifications(sender, instance, **kwargs):
     admins = User.objects.filter(is_staff = True).values_list('id', flat=True)
     for admin in admins:
       Notification.objects.create(user_id=admin, type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
+    loop.run_until_complete(send_message({'action': 'notifications.update.1', 'type': 'list',
+                                          'list_idx': list(admins)}, 'ws://192.168.137.100:8765'))
   elif (instance.author.user.is_staff == True and instance.appeal.creator_id == instance.author_id):
     admins = User.objects.exclude(id=instance.author.user_id, is_staff=False).values_list('id', flat=True)
     for admin in admins:
       Notification.objects.create(user_id=admin, type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
+    loop.run_until_complete(send_message({'action': 'notifications.update.1', 'type': 'list',
+                                          'list_idx': list(admins)}, 'ws://192.168.137.100:8765'))
   elif (instance.author.user.is_staff == True and instance.appeal.creator_id != instance.author_id):
     Notification.objects.create(user_id=instance.appeal.creator.user_id,
                                 type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
+    loop.run_until_complete(send_message({'action': 'notifications.update.1', 'type': 'to',
+                                          'to_id': instance.appeal.creator.user_id}, 'ws://192.168.137.100:8765'))
 
 class Task_group(models.Model):
   '''

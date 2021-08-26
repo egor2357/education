@@ -105,7 +105,7 @@ export default {
       fetchMessages: "appeals/fetchMessages",
       addMessage: "appeals/addMessage",
       setClosed: "appeals/setAppealClosed",
-      fetchNotifications: "auth/fetchNotifications",
+      fetchNotifications: "notifications/fetchNotifications",
     }),
     ...mapMutations({
       setMessages: "appeals/setMessages",
