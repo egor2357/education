@@ -406,11 +406,11 @@ export default {
             await this.fetchNotifications();
           }
           if (data.action === "notifications.update.1") {
-            this.wasClosed1 = false; // eslint-disable-line
+            this.wasClosed1 = false;
             await this.fetchNotifications();
           }
           if (data.action === "notifications.update.2") {
-            this.wasClosed2 = false; // eslint-disable-line
+            this.wasClosed2 = false;
             await this.fetchNotifications();
             if (this.$route.name === "Announcements") {
               await this.fetchAnnouncements();
@@ -419,7 +419,6 @@ export default {
           }
         };
         socket.onopen = async () => {
-          console.log("e");
           this.socketReg();
           this.reconnectInterval = null;
           clearInterval(this.timer);
