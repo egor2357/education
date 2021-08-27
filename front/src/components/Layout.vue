@@ -227,6 +227,9 @@ export default {
       wasClosed0: false,
       wasClosed1: false,
       wasClosed2: false,
+      reconnectInterval: null,
+      timer: null,
+      timer2: null,
     };
   },
   methods: {
@@ -373,31 +376,61 @@ export default {
       });
     },
     socketConnect() {
-      let socket = new WebSocket("ws://192.168.137.100:8765");
-      const that = this;
-      socket.onmessage = async function (message) {
-        let data = JSON.parse(message.data);
-        if (data.action === "notifications.update.0") {
-          that.wasClosed0 = false;
-          await that.fetchNotifications();
+      let socket = null;
+      if (this.socket === null) {
+        socket = new WebSocket("ws://192.168.137.100:8765");
+        if (!socket.onerror) {
+          socket.onerror = () => {
+            if (!this.timer && !this.timer2) {
+              if (!this.reconnectInterval) {
+                this.reconnectInterval = 3000;
+              }
+              const periodicall = () => {
+                this.reconnectInterval *= 2;
+                if (this.reconnectInterval < 30 * 60 * 1000) {
+                  this.socketConnect();
+                  this.timer2 = setTimeout(periodicall, this.reconnectInterval);
+                } else {
+                  clearInterval(this.timer);
+                  clearInterval(this.timer2);
+                }
+              };
+              this.timer = periodicall();
+            }
+          };
         }
-        if (data.action === "notifications.update.1") {
-          that.wasClosed1 = false; // eslint-disable-line
-          await that.fetchNotifications();
-        }
-        if (data.action === "notifications.update.2") {
-          that.wasClosed2 = false; // eslint-disable-line
-          await that.fetchNotifications();
-          if (that.$route.name === "Announcements") {
-            await that.fetchAnnouncements();
-            await that.fetchNotifications();
+        socket.onmessage = async (message) => {
+          let data = JSON.parse(message.data);
+          if (data.action === "notifications.update.0") {
+            this.wasClosed0 = false;
+            await this.fetchNotifications();
           }
-        }
-      };
-      socket.onopen = async function () {
-        that.setSocket(socket);
-        that.socketReg();
-      };
+          if (data.action === "notifications.update.1") {
+            this.wasClosed1 = false; // eslint-disable-line
+            await this.fetchNotifications();
+          }
+          if (data.action === "notifications.update.2") {
+            this.wasClosed2 = false; // eslint-disable-line
+            await this.fetchNotifications();
+            if (this.$route.name === "Announcements") {
+              await this.fetchAnnouncements();
+              await this.fetchNotifications();
+            }
+          }
+        };
+        socket.onopen = async () => {
+          console.log("e");
+          this.socketReg();
+          this.reconnectInterval = null;
+          clearInterval(this.timer);
+          clearInterval(this.timer2);
+        };
+        socket.onclose = () => {
+          this.setSocket(null);
+          this.socketConnect();
+        };
+        this.setSocket(socket);
+      }
     },
     socketReg() {
       let obj = { type: "reg", id: this.userInfo.id };
@@ -430,6 +463,7 @@ export default {
   async created() {
     this.setSelectedMenuItem(this.$route);
     await this.fetchNotifications();
+    await this.socketConnect();
   },
   watch: {
     async notifications(values) {
@@ -470,12 +504,6 @@ export default {
         this.socketReg();
       }
     },
-  },
-  async mounted() {
-    await this.socketConnect();
-  },
-  beforeDestroy() {
-    this.socket.close();
   },
 };
 </script>
