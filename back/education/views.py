@@ -704,11 +704,32 @@ class AnnouncementView(viewsets.ModelViewSet):
 
   def perform_create(self, serializer):
     serializer.save()
-    users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
-    for user in users:
-      Notification.objects.create(user_id=user, type=2)
-    loop.run_until_complete(send_message({'action': 'notifications.update.2', 'type': 'exclude',
-                                          'exclude_id': self.request.user.id}, 'ws://192.168.137.100:8765'))
+    try:
+      users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
+      for user in users:
+        Notification.objects.create(user_id=user, type=2)
+      loop.run_until_complete(send_message({'action': 'notifications.update.2', 'type': 'exclude',
+                                            'exclude_id': self.request.user.id}, 'ws://192.168.137.100:8765'))
+    except:
+      pass
+
+  def perform_update(self, serializer):
+    serializer.save()
+    try:
+      users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
+      loop.run_until_complete(send_message({'action': 'announcements.update', 'type': 'exclude',
+                                            'exclude_id': self.request.user.id}, 'ws://192.168.137.100:8765'))
+    except:
+      pass
+
+  def perform_destroy(self, instance):
+    instance.delete()
+    try:
+      users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
+      loop.run_until_complete(send_message({'action': 'announcements.update', 'type': 'exclude',
+                                            'exclude_id': self.request.user.id}, 'ws://192.168.137.100:8765'))
+    except:
+      pass
 
 class AppealView(CreateListRetrieveDestroyViewSet):
   permission_classes = (permissions.IsAuthenticated, NotDeleteIfNotAdmin)

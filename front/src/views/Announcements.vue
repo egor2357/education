@@ -17,8 +17,7 @@
               v-for="announcement in announcements.results"
               :key="announcement.id"
               :data="announcement"
-              @startLoading="loading = true"
-              @endLoading="loading = false"
+              @deleteRecord="deleteRecord"
             />
           </div>
           <a-pagination
@@ -72,6 +71,7 @@ export default {
     ...mapActions({
       fetchAnnouncements: "announcements/fetchAnnouncements",
       fetchNotifications: "notifications/fetchNotifications",
+      deleteAnnouncement: "announcements/deleteAnnouncement",
     }),
     ...mapMutations({
       setQueryParams: "announcements/setQueryParams",
@@ -93,10 +93,30 @@ export default {
       await this.fetchAnnouncements();
       this.loading = false;
     },
+    async deleteRecord(id) {
+      this.loading = true;
+      let res = await this.deleteAnnouncement(id);
+      if (res.status === 204) {
+        this.$message.success("Запись успешно удалена");
+        let res = await this.fetchAnnouncements();
+        if (res.status !== 200 && this.queryParams.indexOf("?page=") !== -1) {
+          let page = Number(this.queryParams.replace("?page=", ""));
+          if (page > 1) {
+            page -= 1;
+            this.setQueryParams(`?page=${page}`);
+            await this.fetchAnnouncements();
+          }
+        }
+      } else {
+        this.$message.error("Произошла ошибка");
+      }
+      this.loading = false;
+    },
   },
   computed: {
     ...mapGetters({
       announcements: "announcements/getAnnouncements",
+      queryParams: "announcements/getQueryParams",
     }),
     isStaff() {
       return this.$store.getters["auth/getUserInfo"].staff;

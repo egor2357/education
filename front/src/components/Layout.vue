@@ -417,6 +417,11 @@ export default {
               await this.fetchNotifications();
             }
           }
+          if (data.action === "announcements.update") {
+            if (this.$route.name === "Announcements") {
+              await this.fetchAnnouncements();
+            }
+          }
         };
         socket.onopen = async () => {
           this.socketReg();
