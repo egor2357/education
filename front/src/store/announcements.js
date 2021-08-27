@@ -11,6 +11,9 @@ const getters = {
   getAnnouncements(state) {
     return state.announcements;
   },
+  getQueryParams(state) {
+    return state.queryParams;
+  },
 };
 
 const actions = {

@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapMutations, mapGetters } from "vuex";
 
 export default {
   name: "AnnouncementCard",
@@ -17,11 +17,17 @@ export default {
     isStaff() {
       return this.$store.getters["auth/getUserInfo"].staff;
     },
+    ...mapGetters({
+      queryParams: "announcements/getQueryParams",
+    }),
   },
   methods: {
     ...mapActions({
       fetchAnnouncements: "announcements/fetchAnnouncements",
       deleteAnnouncement: "announcements/deleteAnnouncement",
+    }),
+    ...mapMutations({
+      setQueryParams: "announcements/setQueryParams",
     }),
     displayDelete({ id, caption }) {
       let that = this;
@@ -40,7 +46,15 @@ export default {
         let res = await this.deleteAnnouncement(id);
         if (res.status === 204) {
           this.$message.success("Запись успешно удалена");
-          this.fetchAnnouncements();
+          let res = this.fetchAnnouncements();
+          if (res.status !== 200) {
+            let page = Number(this.queryParams.replace("?page=", ""));
+            if (page > 1) {
+              page -= 1;
+            }
+            this.setQueryParams(`?page=${page}`);
+            this.fetchAnnouncements();
+          }
         } else {
           this.$message.error("Произошла ошибка");
         }
