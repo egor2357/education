@@ -237,6 +237,8 @@ export default {
       fetchNotifications: "notifications/fetchNotifications",
       fetchAnnouncements: "announcements/fetchAnnouncements",
       fetchMissions: "missions/fetchMissions",
+      fetchAppeals: "appeals/fetchAppeals",
+      fetchMessages: "appeals/fetchMessages",
     }),
     ...mapMutations({
       setSocket: "notifications/setSocket",
@@ -322,24 +324,27 @@ export default {
         message: "Обращения к руководству",
         description: `Количество новых сообщений: ${this.notifications[1]}`,
         duration: 0,
-        btn: (h) => {
-          return h(
-            "a-button",
-            {
-              props: {
-                type: "primary",
-                size: "small",
-              },
-              on: {
-                click: () => {
-                  this.$router.push({ name: "Appeals" });
-                  this.wasClosed1 = true;
-                },
-              },
-            },
-            "Просмотреть"
-          );
-        },
+        btn:
+          this.$route.name !== "Appeals"
+            ? (h) => {
+                return h(
+                  "a-button",
+                  {
+                    props: {
+                      type: "primary",
+                      size: "small",
+                    },
+                    on: {
+                      click: () => {
+                        this.$router.push({ name: "Appeals" });
+                        this.wasClosed1 = true;
+                      },
+                    },
+                  },
+                  "Просмотреть"
+                );
+              }
+            : null,
         key: "1",
         onClose: () => {
           this.wasClosed1 = true;
@@ -422,6 +427,15 @@ export default {
           if (data.action === "notifications.update.1") {
             this.wasClosed1 = false;
             await this.fetchNotifications();
+            if (this.$route.name === "Appeals") {
+              await this.fetchAppeals();
+              await this.fetchNotifications();
+            } else if (this.$route.name === "AppealDetails") {
+              if (data.appeal_id && data.appeal_id == this.$route.params.id) {
+                await this.fetchMessages(data.appeal_id);
+                await this.fetchNotifications();
+              }
+            }
           }
 
           if (data.action === "notifications.update.2") {
@@ -503,6 +517,11 @@ export default {
       } else {
         if (!this.wasClosed1) {
           await this.openAppealNotification();
+          if (this.$route.name === "Appeals") {
+            setTimeout(() => {
+              this.$notification.close("1");
+            }, 5000);
+          }
         }
       }
 

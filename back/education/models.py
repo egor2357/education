@@ -784,18 +784,21 @@ def messages_create_notifications(sender, instance, **kwargs):
       admins = User.objects.filter(is_staff = True).values_list('id', flat=True)
       for admin in admins:
         Notification.objects.create(user_id=admin, type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
-      loop.run_until_complete(send_message({'action': 'notifications.update.1', 'type': 'list',
+      loop.run_until_complete(send_message({'action': 'notifications.update.1', 'appeal_id': instance.appeal_id,
+                                            'type': 'list',
                                             'list_idx': list(admins)}, settings.WS_IP))
     elif (instance.author.user.is_staff == True and instance.appeal.creator_id == instance.author_id):
       admins = User.objects.exclude(id=instance.author.user_id, is_staff=False).values_list('id', flat=True)
       for admin in admins:
         Notification.objects.create(user_id=admin, type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
-      loop.run_until_complete(send_message({'action': 'notifications.update.1', 'type': 'list',
+      loop.run_until_complete(send_message({'action': 'notifications.update.1', 'appeal_id': instance.appeal_id,
+                                            'type': 'list',
                                             'list_idx': list(admins)}, settings.WS_IP))
     elif (instance.author.user.is_staff == True and instance.appeal.creator_id != instance.author_id):
       Notification.objects.create(user_id=instance.appeal.creator.user_id,
                                   type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
-      loop.run_until_complete(send_message({'action': 'notifications.update.1', 'type': 'to',
+      loop.run_until_complete(send_message({'action': 'notifications.update.1', 'appeal_id': instance.appeal_id,
+                                            'type': 'to',
                                             'to_id': instance.appeal.creator.user_id}, settings.WS_IP))
   except:
     pass
