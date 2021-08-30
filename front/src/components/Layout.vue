@@ -387,7 +387,13 @@ export default {
     socketConnect() {
       let socket = null;
       if (this.socket === null) {
-        socket = new WebSocket("ws://192.168.137.100:8765");
+        let wsIp = "";
+        if (process.env.NODE_ENV === 'developmment') {
+          wsIp = "ws://192.168.137.100:8765"
+        } else {
+          wsIp = "ws://127.0.0.1:8765"
+        }
+        socket = new WebSocket(wsIp);
         if (!socket.onerror) {
           socket.onerror = () => {
             if (!this.timer && !this.timer2) {
