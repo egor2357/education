@@ -1,10 +1,14 @@
+import json
+
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_save
 from django.dispatch.dispatcher import receiver
 from django.core.files.base import ContentFile
-
+from django.contrib.postgres.fields import JSONField
 from rest_framework.serializers import ValidationError
+from django.conf import settings
+from .utils import send_message, loop
 
 import datetime
 
@@ -680,6 +684,7 @@ class Mission(models.Model):
   def __str__(self):
     return self.caption
 
+
 class Announcement(models.Model):
   '''
     Обращения руководства
@@ -694,8 +699,8 @@ class Announcement(models.Model):
 
   class Meta:
     db_table = 'announcement'
-    verbose_name = 'Обращение руководсва'
-    verbose_name_plural = 'Обращения руководсва'
+    verbose_name = 'Обращение руководства'
+    verbose_name_plural = 'Обращения руководства'
     ordering = ['-creation_date',]
 
   def __str__(self):
@@ -772,6 +777,32 @@ class Message(models.Model):
   def __str__(self):
     return self.text
 
+@receiver(post_save, sender=Message)
+def messages_create_notifications(sender, instance, **kwargs):
+  try:
+    if (instance.author.user.is_staff == False):
+      admins = User.objects.filter(is_staff = True).values_list('id', flat=True)
+      for admin in admins:
+        Notification.objects.create(user_id=admin, type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
+      loop.run_until_complete(send_message({'action': 'notifications.update.1', 'appeal_id': instance.appeal_id,
+                                            'type': 'list',
+                                            'list_idx': list(admins)}, settings.WS_IP))
+    elif (instance.author.user.is_staff == True and instance.appeal.creator_id == instance.author_id):
+      admins = User.objects.exclude(id=instance.author.user_id, is_staff=False).values_list('id', flat=True)
+      for admin in admins:
+        Notification.objects.create(user_id=admin, type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
+      loop.run_until_complete(send_message({'action': 'notifications.update.1', 'appeal_id': instance.appeal_id,
+                                            'type': 'list',
+                                            'list_idx': list(admins)}, settings.WS_IP))
+    elif (instance.author.user.is_staff == True and instance.appeal.creator_id != instance.author_id):
+      Notification.objects.create(user_id=instance.appeal.creator.user_id,
+                                  type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
+      loop.run_until_complete(send_message({'action': 'notifications.update.1', 'appeal_id': instance.appeal_id,
+                                            'type': 'to',
+                                            'to_id': instance.appeal.creator.user_id}, settings.WS_IP))
+  except:
+    pass
+
 class Task_group(models.Model):
   '''
     Интервенционная группа
@@ -834,3 +865,27 @@ class Talent(models.Model):
 
   def __str__(self):
     return self.text
+
+class Notification(models.Model):
+  '''
+    Уведомление
+  '''
+  type_choices = [
+    (0, 'Задачи'),
+    (1, 'Обращения к руководству'),
+    (2, 'Важная информация'),
+  ]
+
+  type = models.PositiveSmallIntegerField(
+    choices=type_choices, null=False, verbose_name='Тип уведомления'
+  )
+  user = models.ForeignKey(
+    User, null=False,
+    on_delete=models.CASCADE, verbose_name='Пользователь'
+  )
+  meta = JSONField(verbose_name='Meta', blank=True, null=True)
+
+  class Meta:
+    db_table = 'notification'
+    verbose_name = 'Уведомление'
+    verbose_name_plural = 'Уведомления'

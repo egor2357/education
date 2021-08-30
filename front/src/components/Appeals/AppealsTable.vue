@@ -113,6 +113,9 @@
     />
     <template slot="theme" slot-scope="theme, item">
       <a @click.prevent="goToDetail(item)">{{ theme }}</a>
+      <div class="message-count" v-if="item.count_unreaded">
+        Непрочитанных сообщений: {{ item.count_unreaded }}
+      </div>
     </template>
     <template slot="status" slot-scope="closed">
       <a-tag class="status-block__tag" color="blue" v-if="!closed"
@@ -152,7 +155,7 @@ export default {
           dataIndex: "theme",
           key: "theme",
           filters: [],
-          class: "pre-wrap",
+          class: "pre-wrap theme-block",
           scopedSlots: {
             customRender: "theme",
             filterDropdown: "filterDropdown",
@@ -188,6 +191,7 @@ export default {
     try {
       this.loadFiltersFromQuery();
       await this.getData();
+      await this.fetchNotifications();
       if (!this.userInfo.staff) {
         this.columns.splice(3);
       }
@@ -199,6 +203,7 @@ export default {
     ...mapActions({
       fetchAppeals: "appeals/fetchAppeals",
       deleteAppeal: "appeals/deleteAppeal",
+      fetchNotifications: "notifications/fetchNotifications",
     }),
     ...mapMutations({
       setQueryParams: "appeals/setQueryParams",
@@ -298,7 +303,6 @@ export default {
   .ant-table-tbody
     .status-block
       text-align: center
-      max-width: 120px
       .status-block__tag
         margin-bottom: 5px
         margin-right: 0
@@ -306,4 +310,9 @@ export default {
         font-size: 0.8rem
     .pre-wrap
       white-space: pre-wrap
+    .theme-block
+      .message-count
+        font-size: 12px
+        color: #aaa
+        margin: 0 0 -10px -3px
 </style>

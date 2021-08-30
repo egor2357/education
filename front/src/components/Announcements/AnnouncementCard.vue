@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
 
 export default {
   name: "AnnouncementCard",
@@ -19,10 +18,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions({
-      fetchAnnouncements: "announcements/fetchAnnouncements",
-      deleteAnnouncement: "announcements/deleteAnnouncement",
-    }),
     displayDelete({ id, caption }) {
       let that = this;
       this.$confirm({
@@ -30,27 +25,11 @@ export default {
         content: `Продолжить?`,
         okType: "danger",
         onOk() {
-          that.deleteRecord(id);
+          that.$emit('deleteRecord', id);
         },
       });
     },
-    async deleteRecord(id) {
-      try {
-        this.$emit("startLoading");
-        let res = await this.deleteAnnouncement(id);
-        if (res.status === 204) {
-          this.$message.success("Запись успешно удалена");
-          this.fetchAnnouncements();
-        } else {
-          this.$message.error("Произошла ошибка");
-        }
-      } catch (e) {
-        this.$message.error("Произошла ошибка");
-      } finally {
-        this.$emit("endLoading");
-      }
-    },
-  },
+  }
 };
 </script>
 

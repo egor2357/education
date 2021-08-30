@@ -16,7 +16,7 @@ const getters = {
   },
   getUserInfo(state) {
     return state.userInfo;
-  },
+  }
 };
 
 const actions = {
@@ -110,7 +110,7 @@ const actions = {
         return e;
       }
     }
-  },
+  }
 };
 
 const mutations = {

@@ -1,6 +1,7 @@
 import Vue from "vue";
 import {
   message,
+  notification,
   Table,
   Layout,
   Menu,
@@ -34,7 +35,8 @@ import {
   Upload,
   Empty,
   Tag,
-  Pagination
+  Pagination,
+  Badge
 } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
@@ -72,8 +74,10 @@ Vue.use(Upload);
 Vue.use(Empty);
 Vue.use(Tag);
 Vue.use(Pagination);
+Vue.use(Badge);
 
 Vue.prototype.$message = message;
+Vue.prototype.$notification = notification;
 Vue.prototype.$confirm = Modal.confirm;
 
 export default Vue;

@@ -32,8 +32,7 @@
             userInfo.specialistId === item.director.id ||
             (item.controller && userInfo.specialistId === item.controller.id)
           "
-          >Завершить</a
-        >
+          >Завершить</a>
       </template>
       <a-tag class="execute-block__tag" v-else-if="status === 2" color="green"
         >Исполнено</a-tag
@@ -244,6 +243,7 @@ export default {
     try {
       this.loadFiltersFromQuery();
       await this.getData();
+      await this.fetchNotifications();
       if (!this.userInfo.staff) {
         this.columns.splice(8);
       }
@@ -256,6 +256,7 @@ export default {
       fetchMissions: "missions/fetchMissions",
       deleteMission: "missions/deleteMission",
       setExecuteMission: "missions/setExecuteMission",
+      fetchNotifications: "notifications/fetchNotifications",
     }),
     ...mapMutations({
       setQueryParams: "missions/setQueryParams",
@@ -403,7 +404,7 @@ export default {
   .ant-table-tbody
     .execute-block
       text-align: center
-      max-width: 120px
+      width: 120px
       .execute-block__tag
         margin-bottom: 5px
         margin-right: 0

@@ -17,8 +17,7 @@
               v-for="announcement in announcements.results"
               :key="announcement.id"
               :data="announcement"
-              @startLoading="loading = true"
-              @endLoading="loading = false"
+              @deleteRecord="deleteRecord"
             />
           </div>
           <a-pagination
@@ -44,7 +43,7 @@
 <script>
 import AnnouncementsModal from "@/components/Announcements/AnnouncementsModal";
 import AnnouncementCard from "@/components/Announcements/AnnouncementCard";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import { Empty } from "ant-design-vue";
 export default {
   name: "Announcements",
@@ -62,6 +61,7 @@ export default {
   },
   async created() {
     await this.fetchAnnouncements(`?page=${this.pagination.page}`);
+    await this.fetchNotifications();
     this.loading = false;
   },
   beforeCreate() {
@@ -70,6 +70,11 @@ export default {
   methods: {
     ...mapActions({
       fetchAnnouncements: "announcements/fetchAnnouncements",
+      fetchNotifications: "notifications/fetchNotifications",
+      deleteAnnouncement: "announcements/deleteAnnouncement",
+    }),
+    ...mapMutations({
+      setQueryParams: "announcements/setQueryParams",
     }),
     displayAdd() {
       this.displayModal = true;
@@ -78,19 +83,40 @@ export default {
     async closeModalSuccess() {
       this.displayModal = false;
       this.loading = true;
-      await this.fetchAnnouncements(`?page=${this.pagination.page}`);
+      await this.fetchAnnouncements();
       this.loading = false;
     },
     async paginationChanged(page) {
       this.loading = true;
       this.pagination.page = page;
-      await this.fetchAnnouncements(`?page=${this.pagination.page}`);
+      this.setQueryParams(`?page=${page}`);
+      await this.fetchAnnouncements();
+      this.loading = false;
+    },
+    async deleteRecord(id) {
+      this.loading = true;
+      let res = await this.deleteAnnouncement(id);
+      if (res.status === 204) {
+        this.$message.success("Запись успешно удалена");
+        let res = await this.fetchAnnouncements();
+        if (res.status !== 200 && this.queryParams.indexOf("?page=") !== -1) {
+          let page = Number(this.queryParams.replace("?page=", ""));
+          if (page > 1) {
+            page -= 1;
+            this.setQueryParams(`?page=${page}`);
+            await this.fetchAnnouncements();
+          }
+        }
+      } else {
+        this.$message.error("Произошла ошибка");
+      }
       this.loading = false;
     },
   },
   computed: {
     ...mapGetters({
       announcements: "announcements/getAnnouncements",
+      queryParams: "announcements/getQueryParams",
     }),
     isStaff() {
       return this.$store.getters["auth/getUserInfo"].staff;

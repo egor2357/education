@@ -11,6 +11,9 @@ from .permissions import *
 from .serializers import *
 from .filters import *
 from .service import (option_update_related, job_update_related)
+from .utils import loop, send_message
+from django.conf import settings
+
 
 class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
                                         mixins.ListModelMixin,
@@ -657,13 +660,60 @@ class MissionView(viewsets.ModelViewSet):
     user = self.request.user
     if (not user.is_staff) and (user.specialist is not None):
       new_missions = qs.filter(executor=user.specialist, status=0)
+      try:
+        users = list(set(list(new_missions.exclude(director=None).values_list('director__user_id', flat=True))
+                         + list(new_missions.exclude(controller=None).values_list('controller__user_id', flat=True))))
+        loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                              'list_idx': users}, settings.WS_IP))
+      except:
+        pass
       new_missions.update(status=1)
+    notifications = Notification.objects.filter(user_id = user.id, type = 0)
+    notifications._raw_delete(notifications.db)
     return super().list(request)
 
   def perform_create(self, serializer):
     user = self.request.user
     if user.specialist is not None:
       serializer.save(director=user.specialist)
+    try:
+      users = []
+      if (serializer.instance.executor):
+        Notification.objects.create(user_id=serializer.instance.executor.user_id, type=0)
+        users.append(serializer.instance.executor.user_id)
+      if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller):
+        Notification.objects.create(user_id=serializer.instance.controller.user_id, type=0)
+        users.append(serializer.instance.controller.user_id)
+      loop.run_until_complete(send_message({'action': 'notifications.update.0', 'type': 'list',
+                                            'list_idx': users}, settings.WS_IP))
+    except:
+      pass
+
+  def perform_update(self, serializer):
+    serializer.save()
+    try:
+      users = []
+      if (serializer.instance.executor):
+        users.append(serializer.instance.executor.user_id)
+      if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller):
+        users.append(serializer.instance.controller.user_id)
+      loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                            'list_idx': users}, settings.WS_IP))
+    except:
+      pass
+
+  def perform_destroy(self, instance):
+    instance.delete()
+    try:
+      users = []
+      if (instance.controller):
+        users.append(instance.controller.user_id)
+      if (instance.executor):
+        users.append(instance.executor.user_id)
+      loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                            'list_idx': users}, settings.WS_IP))
+    except:
+      pass
 
   @action(
     detail=True, methods=['get'],
@@ -680,6 +730,18 @@ class MissionView(viewsets.ModelViewSet):
       mission.status = 2
       mission.save()
       serializer = MissionSerializer(mission)
+      try:
+        users = []
+        if (mission.executor):
+          users.append(mission.executor.user_id)
+        if (mission.director and mission.controller and request.user.id == mission.controller.user_id):
+          users.append(mission.director.user_id)
+        if (mission.director and mission.controller and request.user.id == mission.director.user_id):
+          users.append(mission.controller.user_id)
+        loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                              'list_idx': users}, settings.WS_IP))
+      except:
+        pass
       return Response(serializer.data, status=200)
     else:
       return Response({'error': 'Вы не имеете права ставить отметку о выполнении этой задачи.'}, status=400)
@@ -692,6 +754,40 @@ class AnnouncementView(viewsets.ModelViewSet):
   filter_backends = (DjangoFilterBackend,)
   filterset_class = AnnouncementFilter
   pagination_class = CommonPagination
+
+  def list(self, request):
+    notifications = Notification.objects.filter(user_id = request.user.id, type = 2)
+    notifications._raw_delete(notifications.db)
+    return super().list(request)
+
+  def perform_create(self, serializer):
+    serializer.save()
+    try:
+      users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
+      for user in users:
+        Notification.objects.create(user_id=user, type=2)
+      loop.run_until_complete(send_message({'action': 'notifications.update.2', 'type': 'exclude',
+                                            'exclude_id': self.request.user.id}, settings.WS_IP))
+    except:
+      pass
+
+  def perform_update(self, serializer):
+    serializer.save()
+    try:
+      users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
+      loop.run_until_complete(send_message({'action': 'announcements.update', 'type': 'exclude',
+                                            'exclude_id': self.request.user.id}, settings.WS_IP))
+    except:
+      pass
+
+  def perform_destroy(self, instance):
+    instance.delete()
+    try:
+      users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
+      loop.run_until_complete(send_message({'action': 'announcements.update', 'type': 'exclude',
+                                            'exclude_id': self.request.user.id}, settings.WS_IP))
+    except:
+      pass
 
 class AppealView(CreateListRetrieveDestroyViewSet):
   permission_classes = (permissions.IsAuthenticated, NotDeleteIfNotAdmin)
@@ -747,7 +843,7 @@ class MessageView(CreateListRetrieveDestroyViewSet):
   serializer_class = MessageSerializer
   filter_backends = (DjangoFilterBackend,)
   filterset_class = MessageFilter
-  pagination_class = CommonPagination
+  #pagination_class = CommonPagination
 
   def get_queryset(self):
     user = self.request.user
@@ -758,6 +854,14 @@ class MessageView(CreateListRetrieveDestroyViewSet):
       if user.specialist is not None:
         qs = Message.objects.filter(appeal__creator=user.specialist)
     return qs.select_related('author')
+
+  def list(self, request):
+    if ('appeal_id') in request.query_params:
+      notifications = Notification.objects\
+        .filter(user_id=request.user.id, type=1,
+                meta__contains="{\"appeal_id\": %s}" % request.query_params['appeal_id'])
+      notifications._raw_delete(notifications.db)
+    return super().list(request)
 
   def perform_create(self, serializer):
     user = self.request.user
@@ -805,3 +909,22 @@ class EducationalAreasAllView(viewsets.GenericViewSet, mixins.ListModelMixin):
   permission_classes = (permissions.IsAuthenticated, )
   queryset = Educational_area.objects.all()
   serializer_class = EducationalAreaOnlySerializer
+
+
+class NotificationView(viewsets.GenericViewSet, mixins.ListModelMixin):
+  permission_classes = (permissions.IsAuthenticated, )
+  queryset = Notification.objects.all()
+  serializer_class = NotificationSerializer
+
+  def list(self, request):
+    self.queryset = self.get_queryset().filter(user=self.request.user)
+    return super().list(request)
+
+  @action(detail=False)
+  def calculated(self, request, *args, **kwargs):
+    result = {}
+    result['user_id'] = request.user.id
+    for type in Notification.type_choices:
+      result[type[0]] = Notification.objects.filter(user_id = request.user.id, type=type[0]).count()
+    return Response(result)
+

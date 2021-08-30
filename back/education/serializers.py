@@ -671,6 +671,11 @@ class AppealSerializer(FlexFieldsModelSerializer):
   )
   creation_date = serializers.DateTimeField(read_only=True)
   closed = serializers.BooleanField(read_only=True)
+  count_unreaded = serializers.SerializerMethodField(read_only=True)
+
+  def get_count_unreaded(self, obj):
+    return Notification.objects\
+      .filter(user_id=self.context['request'].user.id, type=1, meta__contains="{\"appeal_id\": %s}" % obj.id).count()
 
   class Meta:
     model = Appeal
@@ -678,7 +683,7 @@ class AppealSerializer(FlexFieldsModelSerializer):
       'id',
       'creator',
       'creation_date', 'theme',
-      'closed'
+      'closed', 'count_unreaded'
     )
 
 class AppealPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
@@ -805,3 +810,10 @@ class TalentSerializer(FlexFieldsModelSerializer):
       'name', 'text',
       'creation_date'
     )
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Notification
+    fields = ('type', 'user')
+

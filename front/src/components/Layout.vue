@@ -40,6 +40,18 @@
               <a-icon :type="item.icon" />
               <span v-if="!item.twoLines">{{ item.title }}</span>
               <div v-else>{{ item.title }}</div>
+              <a-badge
+                v-if="
+                  item.unread &&
+                  notificationKeysRoutes[item.unread] !== $route.name &&
+                  notifications[item.unread]
+                "
+                :number-style="{
+                  backgroundColor: '#52c41a',
+                  'box-shadow': 'unset',
+                }"
+                :count="notifications[item.unread]"
+              />
             </router-link>
           </a-menu-item>
         </template>
@@ -68,7 +80,7 @@
   </a-layout>
 </template>
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions, mapMutations } from "vuex";
 export default {
   data() {
     return {
@@ -102,6 +114,7 @@ export default {
           specOnly: false,
           to: { name: "Missions" },
           childrens: [],
+          unread: "0",
         },
         {
           icon: "solution",
@@ -132,6 +145,7 @@ export default {
           childrens: [],
           twoLines: true,
           childrenRoutes: ["AppealDetails"],
+          unread: "1",
         },
         {
           icon: "bell",
@@ -141,6 +155,8 @@ export default {
           specOnly: false,
           to: { name: "Announcements" },
           childrens: [],
+          twoLines: true,
+          unread: "2",
         },
         {
           icon: "setting",
@@ -203,9 +219,30 @@ export default {
           ],
         },
       ],
+      notificationKeysRoutes: {
+        0: "Missions",
+        1: "",
+        2: "Announcements",
+      },
+      wasClosed0: false,
+      wasClosed1: false,
+      wasClosed2: false,
+      reconnectInterval: null,
+      timer: null,
+      timer2: null,
     };
   },
   methods: {
+    ...mapActions({
+      fetchNotifications: "notifications/fetchNotifications",
+      fetchAnnouncements: "announcements/fetchAnnouncements",
+      fetchMissions: "missions/fetchMissions",
+      fetchAppeals: "appeals/fetchAppeals",
+      fetchMessages: "appeals/fetchMessages",
+    }),
+    ...mapMutations({
+      setSocket: "notifications/setSocket",
+    }),
     clearStore() {
       this.$store.commit("activities/clear");
       this.$store.commit("forms/clear");
@@ -250,18 +287,261 @@ export default {
         if (matched) break;
       }
     },
+    openMissionNotification() {
+      this.$notification["info"]({
+        message: "Задачи",
+        description: `Количество новых задач: ${this.notifications[0]}`,
+        duration: 0,
+        btn:
+          this.$route.name !== "Missions"
+            ? (h) => {
+                return h(
+                  "a-button",
+                  {
+                    props: {
+                      type: "primary",
+                      size: "small",
+                    },
+                    on: {
+                      click: () => {
+                        this.$router.push({ name: "Missions" });
+                      },
+                    },
+                  },
+                  "Просмотреть"
+                );
+              }
+            : null,
+        key: "0",
+        onClose: () => {
+          this.wasClosed0 = true;
+          close();
+        },
+      });
+    },
+    openAppealNotification() {
+      this.$notification["info"]({
+        message: "Обращения к руководству",
+        description: `Количество новых сообщений: ${this.notifications[1]}`,
+        duration: 0,
+        btn:
+          this.$route.name !== "Appeals"
+            ? (h) => {
+                return h(
+                  "a-button",
+                  {
+                    props: {
+                      type: "primary",
+                      size: "small",
+                    },
+                    on: {
+                      click: () => {
+                        this.$router.push({ name: "Appeals" });
+                        this.wasClosed1 = true;
+                      },
+                    },
+                  },
+                  "Просмотреть"
+                );
+              }
+            : null,
+        key: "1",
+        onClose: () => {
+          this.wasClosed1 = true;
+          close();
+        },
+      });
+    },
+    openAnnouncementNotification() {
+      this.$notification["info"]({
+        message: "Важная информация",
+        description: `Количество новых сообщений: ${this.notifications[2]}`,
+        duration: 0,
+        btn:
+          this.$route.name !== "Announcements"
+            ? (h) => {
+                return h(
+                  "a-button",
+                  {
+                    props: {
+                      type: "primary",
+                      size: "small",
+                    },
+                    on: {
+                      click: () => {
+                        this.$router.push({ name: "Announcements" });
+                      },
+                    },
+                  },
+                  "Просмотреть"
+                );
+              }
+            : null,
+        key: "2",
+        onClose: () => {
+          this.wasClosed2 = true;
+          close();
+        },
+      });
+    },
+    socketConnect() {
+      let socket = null;
+      if (this.socket === null) {
+        socket = new WebSocket("ws://192.168.137.100:8765");
+        if (!socket.onerror) {
+          socket.onerror = () => {
+            if (!this.timer && !this.timer2) {
+              if (!this.reconnectInterval) {
+                this.reconnectInterval = 3000;
+              }
+              const periodicall = () => {
+                this.reconnectInterval *= 2;
+                if (this.reconnectInterval < 30 * 60 * 1000) {
+                  this.socketConnect();
+                  this.timer2 = setTimeout(periodicall, this.reconnectInterval);
+                } else {
+                  clearInterval(this.timer);
+                  clearInterval(this.timer2);
+                }
+              };
+              this.timer = periodicall();
+            }
+          };
+        }
+        socket.onmessage = async (message) => {
+          let data = JSON.parse(message.data);
+          if (data.action === "notifications.update.0") {
+            this.wasClosed0 = false;
+            await this.fetchNotifications();
+            if (this.$route.name === "Missions") {
+              await this.fetchMissions();
+              await this.fetchNotifications();
+            }
+          }
+          if (data.action === "missions.update") {
+            if (this.$route.name === "Missions") {
+              await this.fetchMissions();
+            }
+          }
+
+          if (data.action === "notifications.update.1") {
+            this.wasClosed1 = false;
+            await this.fetchNotifications();
+            if (this.$route.name === "Appeals") {
+              await this.fetchAppeals();
+              await this.fetchNotifications();
+            } else if (this.$route.name === "AppealDetails") {
+              if (data.appeal_id && data.appeal_id == this.$route.params.id) {
+                await this.fetchMessages(data.appeal_id);
+                await this.fetchNotifications();
+              }
+            }
+          }
+
+          if (data.action === "notifications.update.2") {
+            this.wasClosed2 = false;
+            await this.fetchNotifications();
+            if (this.$route.name === "Announcements") {
+              await this.fetchAnnouncements();
+              await this.fetchNotifications();
+            }
+          }
+          if (data.action === "announcements.update") {
+            if (this.$route.name === "Announcements") {
+              await this.fetchAnnouncements();
+            }
+          }
+        };
+        socket.onopen = async () => {
+          this.socketReg();
+          this.reconnectInterval = null;
+          clearInterval(this.timer);
+          clearInterval(this.timer2);
+        };
+        socket.onclose = () => {
+          this.setSocket(null);
+          this.socketConnect();
+        };
+        this.setSocket(socket);
+      }
+    },
+    socketReg() {
+      let obj = { type: "reg", id: this.userInfo.id };
+      this.socket.send(JSON.stringify(obj));
+    },
   },
   computed: {
     ...mapGetters({
       userInfo: "auth/getUserInfo",
+      notifications: "notifications/getNotifications",
+      socket: "notifications/getSocket",
     }),
   },
-  beforeRouteUpdate(to, from, next) {
+  async beforeRouteUpdate(to, from, next) {
     this.setSelectedMenuItem(to);
+    if (to.name === "Missions") {
+      this.$notification.close("0");
+      this.wasClosed0 = true;
+    }
+    if (to.name === "Appeals") {
+      this.$notification.close("1");
+      this.wasClosed1 = true;
+    }
+    if (to.name === "Announcements") {
+      this.$notification.close("2");
+      this.wasClosed2 = true;
+    }
     next();
   },
-  created() {
+  async created() {
     this.setSelectedMenuItem(this.$route);
+    await this.fetchNotifications();
+    await this.socketConnect();
+  },
+  watch: {
+    async notifications(values) {
+      if (values[0] === 0) {
+        setTimeout(() => {
+          this.$notification.close("0");
+        }, 5000);
+      } else {
+        if (!this.wasClosed0) {
+          await this.openMissionNotification();
+        }
+      }
+
+      if (values[1] === 0) {
+        setTimeout(() => {
+          this.$notification.close("1");
+        }, 5000);
+      } else {
+        if (!this.wasClosed1) {
+          await this.openAppealNotification();
+          if (this.$route.name === "Appeals") {
+            setTimeout(() => {
+              this.$notification.close("1");
+            }, 5000);
+          }
+        }
+      }
+
+      if (values[2] === 0) {
+        if (this.$route.name === "Announcements") {
+          setTimeout(() => {
+            this.$notification.close("2");
+          }, 5000);
+        }
+      } else {
+        if (!this.wasClosed2) {
+          await this.openAnnouncementNotification();
+        }
+      }
+    },
+    userInfo(value) {
+      if (value.id) {
+        this.socketReg();
+      }
+    },
   },
 };
 </script>
@@ -325,6 +605,10 @@ export default {
 
 .ant-menu
   .ant-menu-item
+    .ant-badge
+      float: right
+      margin-top: 10px
+
     .menu-two-lines
       display: flex
       flex-direction: row
@@ -334,13 +618,21 @@ export default {
         line-height: 16px
         padding: 2px 0 2px 0
         white-space: normal
+        max-width: 125px
 
     .anticon
       font-size: 18px
 
+
   &.ant-menu-inline-collapsed
+    .ant-badge
+      float: unset
+      margin-bottom: 10px
     .ant-menu-item
       .menu-two-lines
+        .ant-badge
+          margin-bottom: 0
+          margin-top: 15px
         div
           opacity: 0
           max-width: 0

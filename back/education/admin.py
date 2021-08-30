@@ -188,3 +188,9 @@ class TalentAdmin(admin.ModelAdmin):
   search_fields = ('text', 'name')
 
 admin.site.register(Talent, TalentAdmin)
+
+class NotificationAdmin(admin.ModelAdmin):
+  list_filter = ('user', 'type')
+  list_display = ('user', 'type')
+
+admin.site.register(Notification, NotificationAdmin)
