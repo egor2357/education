@@ -32,8 +32,7 @@
             userInfo.specialistId === item.director.id ||
             (item.controller && userInfo.specialistId === item.controller.id)
           "
-          >Завершить</a
-        >
+          >Завершить</a>
       </template>
       <a-tag class="execute-block__tag" v-else-if="status === 2" color="green"
         >Исполнено</a-tag
@@ -405,7 +404,7 @@ export default {
   .ant-table-tbody
     .execute-block
       text-align: center
-      max-width: 120px
+      width: 120px
       .execute-block__tag
         margin-bottom: 5px
         margin-right: 0
