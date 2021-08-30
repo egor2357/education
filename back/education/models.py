@@ -683,19 +683,6 @@ class Mission(models.Model):
   def __str__(self):
     return self.caption
 
-@receiver(post_save, sender=Mission)
-def mission_create_notifications(sender, instance, **kwargs):
-  try:
-    if (instance.executor):
-      Notification.objects.create(user_id=instance.executor.user.id, type=0)
-      loop.run_until_complete(send_message({'action': 'notifications.update.0', 'type': 'to',
-                                            'to_id': instance.executor.user.id}, 'ws://192.168.137.100:8765'))
-    if (instance.controller and instance.executor != instance.controller):
-      Notification.objects.create(user_id=instance.controller.user.id, type=0)
-      loop.run_until_complete(send_message({'action': 'notifications.update.0', 'type': 'to',
-                                            'to_id': instance.controller.user.id}, 'ws://192.168.137.100:8765'))
-  except:
-    pass
 
 class Announcement(models.Model):
   '''

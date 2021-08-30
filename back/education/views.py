@@ -659,6 +659,13 @@ class MissionView(viewsets.ModelViewSet):
     user = self.request.user
     if (not user.is_staff) and (user.specialist is not None):
       new_missions = qs.filter(executor=user.specialist, status=0)
+      try:
+        users = list(set(list(new_missions.exclude(director=None).values_list('director_id', flat=True))
+                         + list(new_missions.exclude(controller=None).values_list('controller_id', flat=True))))
+        loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                              'list_idx': users}, 'ws://192.168.137.100:8765'))
+      except:
+        pass
       new_missions.update(status=1)
     notifications = Notification.objects.filter(user_id = user.id, type = 0)
     notifications._raw_delete(notifications.db)
@@ -668,6 +675,44 @@ class MissionView(viewsets.ModelViewSet):
     user = self.request.user
     if user.specialist is not None:
       serializer.save(director=user.specialist)
+    try:
+      users = []
+      if (serializer.instance.executor):
+        Notification.objects.create(user_id=serializer.instance.executor.user_id, type=0)
+        users.append(serializer.instance.executor.user_id)
+      if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller):
+        Notification.objects.create(user_id=serializer.instance.controller.user_id, type=0)
+        users.append(serializer.instance.controller.user_id)
+      loop.run_until_complete(send_message({'action': 'notifications.update.0', 'type': 'list',
+                                            'list_idx': users}, 'ws://192.168.137.100:8765'))
+    except:
+      pass
+
+  def perform_update(self, serializer):
+    serializer.save()
+    try:
+      users = []
+      if (serializer.instance.executor):
+        users.append(serializer.instance.executor.user_id)
+      if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller):
+        users.append(serializer.instance.controller.user_id)
+      loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                            'list_idx': users}, 'ws://192.168.137.100:8765'))
+    except:
+      pass
+
+  def perform_destroy(self, instance):
+    instance.delete()
+    try:
+      users = []
+      if (instance.controller):
+        users.append(instance.controller.user_id)
+      if (instance.executor):
+        users.append(instance.executor.user_id)
+      loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                            'list_idx': users}, 'ws://192.168.137.100:8765'))
+    except:
+      pass
 
   @action(
     detail=True, methods=['get'],
@@ -684,6 +729,18 @@ class MissionView(viewsets.ModelViewSet):
       mission.status = 2
       mission.save()
       serializer = MissionSerializer(mission)
+      try:
+        users = []
+        if (mission.executor):
+          users.append(mission.executor.user_id)
+        if (mission.director and mission.controller and request.user.id == mission.controller.user_id):
+          users.append(mission.director.user_id)
+        if (mission.director and mission.controller and request.user.id == mission.director.user_id):
+          users.append(mission.controller.user_id)
+        loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                              'list_idx': users}, 'ws://192.168.137.100:8765'))
+      except:
+        pass
       return Response(serializer.data, status=200)
     else:
       return Response({'error': 'Вы не имеете права ставить отметку о выполнении этой задачи.'}, status=400)
