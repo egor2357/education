@@ -236,6 +236,7 @@ export default {
     ...mapActions({
       fetchNotifications: "notifications/fetchNotifications",
       fetchAnnouncements: "announcements/fetchAnnouncements",
+      fetchMissions: "missions/fetchMissions",
     }),
     ...mapMutations({
       setSocket: "notifications/setSocket",
@@ -289,23 +290,26 @@ export default {
         message: "Задачи",
         description: `Количество новых задач: ${this.notifications[0]}`,
         duration: 0,
-        btn: (h) => {
-          return h(
-            "a-button",
-            {
-              props: {
-                type: "primary",
-                size: "small",
-              },
-              on: {
-                click: () => {
-                  this.$router.push({ name: "Missions" });
-                },
-              },
-            },
-            "Просмотреть"
-          );
-        },
+        btn:
+          this.$route.name !== "Missions"
+            ? (h) => {
+                return h(
+                  "a-button",
+                  {
+                    props: {
+                      type: "primary",
+                      size: "small",
+                    },
+                    on: {
+                      click: () => {
+                        this.$router.push({ name: "Missions" });
+                      },
+                    },
+                  },
+                  "Просмотреть"
+                );
+              }
+            : null,
         key: "0",
         onClose: () => {
           this.wasClosed0 = true;
@@ -404,11 +408,22 @@ export default {
           if (data.action === "notifications.update.0") {
             this.wasClosed0 = false;
             await this.fetchNotifications();
+            if (this.$route.name === "Missions") {
+              await this.fetchMissions();
+              await this.fetchNotifications();
+            }
           }
+          if (data.action === "missions.update") {
+            if (this.$route.name === "Missions") {
+              await this.fetchMissions();
+            }
+          }
+
           if (data.action === "notifications.update.1") {
             this.wasClosed1 = false;
             await this.fetchNotifications();
           }
+
           if (data.action === "notifications.update.2") {
             this.wasClosed2 = false;
             await this.fetchNotifications();
