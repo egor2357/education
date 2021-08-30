@@ -661,8 +661,8 @@ class MissionView(viewsets.ModelViewSet):
     if (not user.is_staff) and (user.specialist is not None):
       new_missions = qs.filter(executor=user.specialist, status=0)
       try:
-        users = list(set(list(new_missions.exclude(director=None).values_list('director_id', flat=True))
-                         + list(new_missions.exclude(controller=None).values_list('controller_id', flat=True))))
+        users = list(set(list(new_missions.exclude(director=None).values_list('director__user_id', flat=True))
+                         + list(new_missions.exclude(controller=None).values_list('controller__user_id', flat=True))))
         loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
                                               'list_idx': users}, settings.WS_IP))
       except:
