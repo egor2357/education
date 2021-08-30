@@ -387,7 +387,7 @@ export default {
     socketConnect() {
       let socket = null;
       if (this.socket === null) {
-        socket = new WebSocket(process.env.VUE_APP_WS_IP);
+        socket = new WebSocket(`ws://${document.location.hostname}:8765`);
         if (!socket.onerror) {
           socket.onerror = () => {
             if (!this.timer && !this.timer2) {
