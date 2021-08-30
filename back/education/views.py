@@ -12,6 +12,7 @@ from .serializers import *
 from .filters import *
 from .service import (option_update_related, job_update_related)
 from .utils import loop, send_message
+from django.conf import settings
 
 
 class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
@@ -663,7 +664,7 @@ class MissionView(viewsets.ModelViewSet):
         users = list(set(list(new_missions.exclude(director=None).values_list('director_id', flat=True))
                          + list(new_missions.exclude(controller=None).values_list('controller_id', flat=True))))
         loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
-                                              'list_idx': users}, 'ws://192.168.137.100:8765'))
+                                              'list_idx': users}, settings.WS_IP))
       except:
         pass
       new_missions.update(status=1)
@@ -684,7 +685,7 @@ class MissionView(viewsets.ModelViewSet):
         Notification.objects.create(user_id=serializer.instance.controller.user_id, type=0)
         users.append(serializer.instance.controller.user_id)
       loop.run_until_complete(send_message({'action': 'notifications.update.0', 'type': 'list',
-                                            'list_idx': users}, 'ws://192.168.137.100:8765'))
+                                            'list_idx': users}, settings.WS_IP))
     except:
       pass
 
@@ -697,7 +698,7 @@ class MissionView(viewsets.ModelViewSet):
       if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller):
         users.append(serializer.instance.controller.user_id)
       loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
-                                            'list_idx': users}, 'ws://192.168.137.100:8765'))
+                                            'list_idx': users}, settings.WS_IP))
     except:
       pass
 
@@ -710,7 +711,7 @@ class MissionView(viewsets.ModelViewSet):
       if (instance.executor):
         users.append(instance.executor.user_id)
       loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
-                                            'list_idx': users}, 'ws://192.168.137.100:8765'))
+                                            'list_idx': users}, settings.WS_IP))
     except:
       pass
 
@@ -738,7 +739,7 @@ class MissionView(viewsets.ModelViewSet):
         if (mission.director and mission.controller and request.user.id == mission.director.user_id):
           users.append(mission.controller.user_id)
         loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
-                                              'list_idx': users}, 'ws://192.168.137.100:8765'))
+                                              'list_idx': users}, settings.WS_IP))
       except:
         pass
       return Response(serializer.data, status=200)
@@ -766,7 +767,7 @@ class AnnouncementView(viewsets.ModelViewSet):
       for user in users:
         Notification.objects.create(user_id=user, type=2)
       loop.run_until_complete(send_message({'action': 'notifications.update.2', 'type': 'exclude',
-                                            'exclude_id': self.request.user.id}, 'ws://192.168.137.100:8765'))
+                                            'exclude_id': self.request.user.id}, settings.WS_IP))
     except:
       pass
 
@@ -775,7 +776,7 @@ class AnnouncementView(viewsets.ModelViewSet):
     try:
       users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
       loop.run_until_complete(send_message({'action': 'announcements.update', 'type': 'exclude',
-                                            'exclude_id': self.request.user.id}, 'ws://192.168.137.100:8765'))
+                                            'exclude_id': self.request.user.id}, settings.WS_IP))
     except:
       pass
 
@@ -784,7 +785,7 @@ class AnnouncementView(viewsets.ModelViewSet):
     try:
       users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
       loop.run_until_complete(send_message({'action': 'announcements.update', 'type': 'exclude',
-                                            'exclude_id': self.request.user.id}, 'ws://192.168.137.100:8765'))
+                                            'exclude_id': self.request.user.id}, settings.WS_IP))
     except:
       pass
 

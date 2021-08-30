@@ -7,6 +7,7 @@ from django.dispatch.dispatcher import receiver
 from django.core.files.base import ContentFile
 from django.contrib.postgres.fields import JSONField
 from rest_framework.serializers import ValidationError
+from django.conf import settings
 from .utils import send_message, loop
 
 import datetime
@@ -784,18 +785,18 @@ def messages_create_notifications(sender, instance, **kwargs):
       for admin in admins:
         Notification.objects.create(user_id=admin, type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
       loop.run_until_complete(send_message({'action': 'notifications.update.1', 'type': 'list',
-                                            'list_idx': list(admins)}, 'ws://192.168.137.100:8765'))
+                                            'list_idx': list(admins)}, settings.WS_IP))
     elif (instance.author.user.is_staff == True and instance.appeal.creator_id == instance.author_id):
       admins = User.objects.exclude(id=instance.author.user_id, is_staff=False).values_list('id', flat=True)
       for admin in admins:
         Notification.objects.create(user_id=admin, type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
       loop.run_until_complete(send_message({'action': 'notifications.update.1', 'type': 'list',
-                                            'list_idx': list(admins)}, 'ws://192.168.137.100:8765'))
+                                            'list_idx': list(admins)}, settings.WS_IP))
     elif (instance.author.user.is_staff == True and instance.appeal.creator_id != instance.author_id):
       Notification.objects.create(user_id=instance.appeal.creator.user_id,
                                   type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
       loop.run_until_complete(send_message({'action': 'notifications.update.1', 'type': 'to',
-                                            'to_id': instance.appeal.creator.user_id}, 'ws://192.168.137.100:8765'))
+                                            'to_id': instance.appeal.creator.user_id}, settings.WS_IP))
   except:
     pass
 
