@@ -686,16 +686,21 @@ class MissionView(viewsets.ModelViewSet):
         users.append(serializer.instance.controller.user_id)
       loop.run_until_complete(send_message({'action': 'notifications.update.0', 'type': 'list',
                                             'list_idx': users}, settings.WS_IP))
+      admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+      loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                            'list_idx': admins}, settings.WS_IP))
+
     except:
       pass
 
   def perform_update(self, serializer):
     serializer.save()
     try:
-      users = []
-      if (serializer.instance.executor):
+      users = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+      if (serializer.instance.executor and serializer.instance.executor.user_id not in users):
         users.append(serializer.instance.executor.user_id)
-      if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller):
+      if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller
+              and serializer.instance.controller.user_id not in users):
         users.append(serializer.instance.controller.user_id)
       loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
                                             'list_idx': users}, settings.WS_IP))
@@ -705,10 +710,10 @@ class MissionView(viewsets.ModelViewSet):
   def perform_destroy(self, instance):
     instance.delete()
     try:
-      users = []
-      if (instance.controller):
+      users = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+      if (instance.controller and instance.controller.user_id not in users):
         users.append(instance.controller.user_id)
-      if (instance.executor):
+      if (instance.executor and instance.executor.user_id not in users):
         users.append(instance.executor.user_id)
       loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
                                             'list_idx': users}, settings.WS_IP))
