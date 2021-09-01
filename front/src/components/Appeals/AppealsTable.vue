@@ -208,6 +208,7 @@ export default {
       await this.fetchNotifications();
       if (!this.userInfo.staff) {
         this.columns.splice(3);
+        this.columns.splice(4);
       }
     } catch (e) {
       this.$message.error("Произошла ошибка при получении данных");

@@ -826,6 +826,11 @@ class AppealView(CreateListRetrieveDestroyViewSet):
     if user.specialist is not None:
       serializer.save(creator=user.specialist)
 
+  def perform_destroy(self, instance):
+    notifications = Notification.objects.filter(type=1, meta__contains="{\"appeal_id\": %s}" % instance.id)
+    notifications._raw_delete(notifications.db)
+    instance.delete()
+
   @action(
     detail=True, methods=['get'],
     permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
