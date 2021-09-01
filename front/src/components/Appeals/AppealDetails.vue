@@ -8,7 +8,7 @@
           </div>
           <div class="label">Обращения к руководству</div>
           <div class="button-close" @click="displayClose">
-            <a-button :disabled="appealInfo.closed">Закрыть обращение</a-button>
+            <a-button :disabled="appealInfo.closed" v-if="userInfo.staff">Закрыть обращение</a-button>
           </div>
         </div>
         <div class="theme">Тема: {{ appealInfo.theme }}</div>
@@ -207,6 +207,9 @@ export default {
         flex: auto
         font-size: 1rem
         text-align: center
+
+      .button-close
+        width: 162px
 
     .theme
       font-size: 1rem

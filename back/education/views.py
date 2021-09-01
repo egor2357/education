@@ -851,12 +851,14 @@ class AppealView(CreateListRetrieveDestroyViewSet):
     serializer_class=AppealSerializer
   )
   def close(self, request, *args, **kwargs):
-    appeal = self.get_object()
 
-    appeal.closed = True
-    appeal.save()
-    serializer = AppealSerializer(appeal)
-    return Response(serializer.data, status=200)
+    try:
+      appeal = self.get_object()
+      appeal.closed = True
+      appeal.save()
+      return Response(status=200)
+    except:
+      return Response(status=400)
 
   @action(
     detail=True, methods=['get'],

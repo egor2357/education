@@ -674,8 +674,11 @@ class AppealSerializer(FlexFieldsModelSerializer):
   count_unreaded = serializers.SerializerMethodField(read_only=True)
 
   def get_count_unreaded(self, obj):
-    return Notification.objects\
+    if ('request' in self.context):
+      return Notification.objects\
       .filter(user_id=self.context['request'].user.id, type=1, meta__contains="{\"appeal_id\": %s}" % obj.id).count()
+    else:
+      return 0
 
   class Meta:
     model = Appeal
