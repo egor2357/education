@@ -825,10 +825,24 @@ class AppealView(CreateListRetrieveDestroyViewSet):
     user = self.request.user
     if user.specialist is not None:
       serializer.save(creator=user.specialist)
+    try:
+      admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+      loop.run_until_complete(send_message({'action': 'appeals.update', 'type': 'list',
+                                          'list_idx': admins}, settings.WS_IP))
+    except:
+      pass
 
   def perform_destroy(self, instance):
     notifications = Notification.objects.filter(type=1, meta__contains="{\"appeal_id\": %s}" % instance.id)
     notifications._raw_delete(notifications.db)
+    try:
+      admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+      if (instance.creator.user_id not in admins):
+        admins.append(instance.creator.user_id)
+      loop.run_until_complete(send_message({'action': 'appeals.update', 'type': 'list',
+                                            'list_idx': admins}, settings.WS_IP))
+    except:
+      pass
     instance.delete()
 
   @action(

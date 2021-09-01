@@ -437,6 +437,11 @@ export default {
               }
             }
           }
+          if (data.action === "appeals.update") {
+            if (this.$route.name === "Appeals") {
+              await this.fetchAppeals();
+            }
+          }
 
           if (data.action === "notifications.update.2") {
             this.wasClosed2 = false;
