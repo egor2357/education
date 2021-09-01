@@ -851,14 +851,19 @@ class AppealView(CreateListRetrieveDestroyViewSet):
     serializer_class=AppealSerializer
   )
   def close(self, request, *args, **kwargs):
-
+    appeal = self.get_object()
+    appeal.closed = True
+    appeal.save()
     try:
-      appeal = self.get_object()
-      appeal.closed = True
-      appeal.save()
-      return Response(status=200)
+      admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+      if (appeal.creator.user_id not in admins):
+        admins.append(appeal.creator.user_id)
+      loop.run_until_complete(send_message({'action': 'appeals.update', 'type': 'list',
+                                            'list_idx': admins}, settings.WS_IP))
     except:
-      return Response(status=400)
+      pass
+    return Response(status=200)
+
 
   @action(
     detail=True, methods=['get'],
