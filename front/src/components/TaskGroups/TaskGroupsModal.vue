@@ -105,6 +105,14 @@ export default {
           help: "",
         },
         {
+          name: "solution",
+          label: "Решение",
+          type: "textarea",
+          validateStatus: "",
+          help: "",
+          staffOnly: true,
+        },
+        {
           name: "responsible_id",
           label: "Ответственный",
           type: "select",
@@ -120,14 +128,7 @@ export default {
           help: "",
           staffOnly: true,
         },
-        {
-          name: "solution",
-          label: "Решение",
-          type: "textarea",
-          validateStatus: "",
-          help: "",
-          staffOnly: true,
-        },
+
         {
           name: "anonymously",
           label: "Анонимно",
