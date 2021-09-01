@@ -123,6 +123,11 @@
       >
       <a-tag class="status-block__tag" color="green" v-else>Закрыто</a-tag>
     </template>
+    <span slot="actions" slot-scope="text, item">
+      <div class="flex-column">
+        <a @click="displayDelete(item)">Удалить</a>
+      </div>
+    </span>
   </a-table>
 </template>
 
@@ -142,6 +147,7 @@ export default {
           dataIndex: "creation_date",
           key: "creation_date",
           sorter: true,
+          width: "140px",
           customRender: (date) => {
             return date ? this.formatDate(date) : "";
           },
@@ -182,6 +188,14 @@ export default {
           key: "creator_id",
           filters: [],
           sorter: true,
+          width: "250px",
+        },
+        {
+          title: "Действия",
+          dataIndex: "actions",
+          key: "actions",
+          width: "120px",
+          scopedSlots: { customRender: "actions" },
         },
       ],
       filterQuery: "",
@@ -228,6 +242,31 @@ export default {
           name: "AppealDetails",
           params: { id: item.id, theme: item.theme },
         });
+      }
+    },
+    displayDelete({ id, theme }) {
+      let that = this;
+      this.$confirm({
+        title: `Обращение "${theme}" будет удалено.`,
+        content: `Будут удалены все сообщения. Продолжить?`,
+        okType: "danger",
+        onOk() {
+          that.deleteRecord(id);
+        },
+      });
+    },
+    async deleteRecord(id) {
+      try {
+        let res = await this.deleteAppeal(id);
+        if (res.status === 204) {
+          this.$message.success("Обращение успешно удалено");
+          await this.fetchAppeals();
+          this.updatePaginationTotal();
+        } else {
+          this.$message.error("Произошла ошибка");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка");
       }
     },
   },
