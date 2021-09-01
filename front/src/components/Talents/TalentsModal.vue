@@ -1,5 +1,5 @@
 <template>
-  <a-modal :visible="true" :title="title" @cancel="handleCancel">
+  <a-modal :visible="true" :title="title" @cancel="handleCancel" :width="'600px'">
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <template v-for="(field, index) in fields">
         <a-form-model-item
@@ -77,20 +77,20 @@ export default {
       },
       title: "",
       layout: {
-        labelCol: { span: 6 },
-        wrapperCol: { span: 18 },
+        labelCol: { span: 8 },
+        wrapperCol: { span: 16 },
       },
       fields: [
         {
           name: "area_id",
-          label: "Область",
+          label: "Образовательная область",
           type: "select",
           validateStatus: "",
           help: "",
         },
         {
           name: "name",
-          label: "Наименование",
+          label: "Наименование таланта",
           type: "text",
           validateStatus: "",
           help: "",
