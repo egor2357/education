@@ -245,7 +245,7 @@ export default {
           text-align: left
 
         &__text
-          white-space: pre-line
+          white-space: pre-wrap
 
       &_other
         align-items: flex-start

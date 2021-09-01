@@ -37,5 +37,5 @@ export default {
 .announcement-card
   margin: 15px
   &__text
-    white-space: pre-line
+    white-space: pre-wrap
 </style>
