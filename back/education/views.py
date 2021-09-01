@@ -661,8 +661,11 @@ class MissionView(viewsets.ModelViewSet):
     if (not user.is_staff) and (user.specialist is not None):
       new_missions = qs.filter(executor=user.specialist, status=0)
       try:
-        users = list(set(list(new_missions.exclude(director=None).values_list('director__user_id', flat=True))
-                         + list(new_missions.exclude(controller=None).values_list('controller__user_id', flat=True))))
+        users = list(set(
+          list(new_missions.exclude(director=None).values_list('director__user_id', flat=True)) +
+          list(new_missions.exclude(controller=None).values_list('controller__user_id', flat=True)) +
+          list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+        ))
         loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
                                               'list_idx': users}, settings.WS_IP))
       except:
@@ -736,12 +739,18 @@ class MissionView(viewsets.ModelViewSet):
       mission.save()
       serializer = MissionSerializer(mission)
       try:
-        users = []
-        if (mission.executor):
+        users = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+        if (mission.executor and mission.executor.user_id not in users):
           users.append(mission.executor.user_id)
-        if (mission.director and mission.controller and request.user.id == mission.controller.user_id):
+        if (mission.director
+                and mission.controller
+                and request.user.id == mission.controller.user_id
+                and mission.director.user_id not in users):
           users.append(mission.director.user_id)
-        if (mission.director and mission.controller and request.user.id == mission.director.user_id):
+        if (mission.director
+                and mission.controller
+                and request.user.id == mission.director.user_id
+                and mission.controller.user_id not in users):
           users.append(mission.controller.user_id)
         loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
                                               'list_idx': users}, settings.WS_IP))
