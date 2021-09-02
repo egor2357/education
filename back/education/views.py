@@ -779,7 +779,7 @@ class AnnouncementView(viewsets.ModelViewSet):
     try:
       users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
       for user in users:
-        Notification.objects.create(user_id=user, type=2)
+        Notification.objects.create(user_id=user, type=2, meta=json.dumps({'announcement_id': serializer.instance.id}))
       loop.run_until_complete(send_message({'action': 'notifications.update.2', 'type': 'exclude',
                                             'exclude_id': self.request.user.id}, settings.WS_IP))
     except:
@@ -795,6 +795,8 @@ class AnnouncementView(viewsets.ModelViewSet):
       pass
 
   def perform_destroy(self, instance):
+    notifications = Notification.objects.filter(type=2, meta__contains="{\"announcement_id\": %s}" % instance.id)
+    notifications._raw_delete(notifications.db)
     instance.delete()
     try:
       users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
