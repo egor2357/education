@@ -682,10 +682,12 @@ class MissionView(viewsets.ModelViewSet):
     try:
       users = []
       if (serializer.instance.executor):
-        Notification.objects.create(user_id=serializer.instance.executor.user_id, type=0)
+        Notification.objects.create(user_id=serializer.instance.executor.user_id, type=0,
+                                    meta=json.dumps({'mission_id': serializer.instance.id}))
         users.append(serializer.instance.executor.user_id)
       if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller):
-        Notification.objects.create(user_id=serializer.instance.controller.user_id, type=0)
+        Notification.objects.create(user_id=serializer.instance.controller.user_id, type=0,
+                                    meta=json.dumps({'mission_id': serializer.instance.id}))
         users.append(serializer.instance.controller.user_id)
       loop.run_until_complete(send_message({'action': 'notifications.update.0', 'type': 'list',
                                             'list_idx': users}, settings.WS_IP))
@@ -711,6 +713,8 @@ class MissionView(viewsets.ModelViewSet):
       pass
 
   def perform_destroy(self, instance):
+    notifications = Notification.objects.filter(type=0, meta__contains="{\"mission_id\": %s}" % instance.id)
+    notifications._raw_delete(notifications.db)
     instance.delete()
     try:
       users = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
