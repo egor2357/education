@@ -357,7 +357,8 @@ export default {
       if (
         event.type === "keydown" &&
         event.keyCode === 13 &&
-        this.$refs.form !== undefined
+        this.$refs.form !== undefined &&
+        event.srcElement.localName !== "textarea"
       ) {
         this.handleOk();
       }
