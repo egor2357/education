@@ -618,7 +618,7 @@ class Skill_report(models.Model):
   )
 
   coefficient = models.FloatField(
-    default=0,
+    default=1,
     verbose_name='Коэффициент навыка на момент отчета'
   )
   mark = models.PositiveSmallIntegerField(
