@@ -546,9 +546,9 @@ class Skill_reportView(viewsets.ModelViewSet):
 
       calls_by_id[skill_report.skill.id]['planned'] += 1
 
-      is_called = not skill_report.mark is None
-      calls_by_id[skill_report.skill.id]['called'] += 1 if is_called else 0
-      calls_by_id[skill_report.skill.id]['value'] += mark_coeffs[skill_report.mark]*skill_report.coefficient if is_called else 0
+      if not skill_report.mark is None:
+        calls_by_id[skill_report.skill.id]['called'] += 1
+        calls_by_id[skill_report.skill.id]['value'] += mark_coeffs[skill_report.mark]*skill_report.coefficient
 
     for skill_id in calls_by_id.keys():
       calls_by_id[skill_id]['value'] = round(calls_by_id[skill_id]['value'] / calls_by_id[skill_id]['planned'], 2)
