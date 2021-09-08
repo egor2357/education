@@ -96,6 +96,14 @@ export default {
       await this.$refs["task-groups-table"].getData(this.questionsSelected);
     },
   },
+  beforeRouteUpdate(to, from, next) {
+    if (!to.query.is_question) {
+      this.questionsSelected = false;
+    } else {
+      this.questionsSelected = true;
+    }
+    next()
+  },
 };
 </script>
 
