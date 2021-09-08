@@ -788,7 +788,7 @@ def messages_create_notifications(sender, instance, **kwargs):
                                             'type': 'list',
                                             'list_idx': list(admins)}, settings.WS_IP))
     elif (instance.author.user.is_staff == True and instance.appeal.creator_id == instance.author_id):
-      admins = User.objects.exclude(id=instance.author.user_id, is_staff=False).values_list('id', flat=True)
+      admins = User.objects.filter(is_staff=True).exclude(id=instance.author.user_id).values_list('id', flat=True)
       for admin in admins:
         Notification.objects.create(user_id=admin, type=1, meta=json.dumps({'appeal_id': instance.appeal_id}))
       loop.run_until_complete(send_message({'action': 'notifications.update.1', 'appeal_id': instance.appeal_id,
