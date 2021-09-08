@@ -238,6 +238,7 @@ export default {
       fetchAnnouncements: "announcements/fetchAnnouncements",
       fetchMissions: "missions/fetchMissions",
       fetchAppeals: "appeals/fetchAppeals",
+      fetchAppealInfo: "appeals/fetchAppealInfo",
       fetchMessages: "appeals/fetchMessages",
     }),
     ...mapMutations({
@@ -440,6 +441,8 @@ export default {
           if (data.action === "appeals.update") {
             if (this.$route.name === "Appeals") {
               await this.fetchAppeals();
+            } else if (this.$route.name === 'AppealDetails') {
+              await this.fetchAppealInfo(this.$route.params.id);
             }
           }
 
