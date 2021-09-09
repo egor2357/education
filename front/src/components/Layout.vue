@@ -512,7 +512,7 @@ export default {
         setTimeout(() => {
           this.$notification.close("0");
         }, 5000);
-      } else {
+      } else if (values[0]) {
         if (!this.wasClosed0) {
           await this.openMissionNotification();
         }
@@ -522,7 +522,7 @@ export default {
         setTimeout(() => {
           this.$notification.close("1");
         }, 5000);
-      } else {
+      } else if (values[1]) {
         if (!this.wasClosed1) {
           await this.openAppealNotification();
           if (this.$route.name === "Appeals") {
@@ -539,7 +539,7 @@ export default {
             this.$notification.close("2");
           }, 5000);
         }
-      } else {
+      } else if (values[2]) {
         if (!this.wasClosed2) {
           await this.openAnnouncementNotification();
         }
