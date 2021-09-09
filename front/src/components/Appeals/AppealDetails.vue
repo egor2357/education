@@ -28,9 +28,7 @@
             <div class="message-block-wrapper__author">
               {{ message.author.__str__ }}
             </div>
-            <div class="message-block-wrapper__text">
-              {{ message.text }}
-            </div>
+            <div class="message-block-wrapper__text" v-if="message.text">{{ message.text }}</div>
             <a
               class="message-block-wrapper__file"
               target="_blank"
