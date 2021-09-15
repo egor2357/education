@@ -206,14 +206,15 @@ export default {
         font-size: 1rem
         text-align: center
 
+      .button-close, .button-back
+        flex: 1
+
       .button-close
-        width: 162px
+        text-align: right
 
     .theme
       font-size: 1rem
       text-align: center
-      margin-left: 92px
-      margin-right: 162px
 
 
   &__content
