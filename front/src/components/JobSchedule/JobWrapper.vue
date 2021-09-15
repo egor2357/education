@@ -90,14 +90,15 @@ export default {
         display: flex
         flex-direction: row
         align-items: center
+        padding: 5px 10px
         &-day
-          margin: 4px 10px 4px 30px
           font-size: 18px
+          margin-right: 10px
+          flex: 1
         &-weekday
           font-size: 34px
           font-weight: bold
           text-align: center
-          flex: 1
         &.weekend
           .job-schedule__calendar__date-title-weekday
             color: #f55
