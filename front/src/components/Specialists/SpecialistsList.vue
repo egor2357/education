@@ -1,6 +1,6 @@
 <template>
   <div class="users-container">
-    <template v-if="!displayTabs">
+    <template v-if="!displayTabs && !displayJobOptionsTabs">
       <div class="top-bar">
         <div class="top-bar__side-block left">
           <a-radio-group v-model="staffSelected">
@@ -18,8 +18,8 @@
               modalAdding = true;
             "
           >
-          Добавить
-        </a-button>
+            Добавить
+          </a-button>
         </div>
       </div>
       <div class="specialists-container">
@@ -44,10 +44,14 @@
                 >
                 <a-divider type="vertical" />
                 <a @click="displayDelete(item)">Удалить</a>
-                <br />
-                <a v-if="!staffSelected" @click="displayActivitySkill(item.id)">
-                  Виды деятельности / навыки
-                </a>
+                <template v-if="!staffSelected">
+                  <br />
+                  <a @click="displayActivitySkill(item.id)">
+                    Виды деятельности / навыки
+                  </a>
+                  <br />
+                  <a @click="displayJobOptions(item.id)"> Планы занятий </a>
+                </template>
               </div>
 
               <a-list-item-meta style="width: 50px">
@@ -122,6 +126,11 @@
       v-if="displayTabs"
       @goBack="closeTabs"
     />
+    <JobOptionsTabs
+      :currentUser="currentUser"
+      v-if="displayJobOptionsTabs"
+      @goBack="closeTabs"
+    />
   </div>
 </template>
 
@@ -129,12 +138,14 @@
 import { mapActions, mapGetters } from "vuex";
 import ModalSpecialist from "@/components/Specialists/ModalSpecialist";
 import ActivitySkillTabs from "@/components/Specialists/ActivitySkillTabs";
+import JobOptionsTabs from "@/components/Specialists/JobOptionsTabs";
 import common from "@/mixins/common";
 export default {
   name: "SpecialistsList",
   components: {
     ModalSpecialist,
     ActivitySkillTabs,
+    JobOptionsTabs,
   },
   mixins: [common],
   data() {
@@ -145,6 +156,7 @@ export default {
       modalEditableData: {},
       staffSelected: false,
       displayTabs: false,
+      displayJobOptionsTabs: false,
       currentUser: {},
     };
   },
@@ -161,9 +173,7 @@ export default {
       let that = this;
       this.$confirm({
         title: `Вы действительно хотите удалить специалиста ${
-          item.surname
-            ? this.formatSpecialistFull(item)
-            : item.user.username
+          item.surname ? this.formatSpecialistFull(item) : item.user.username
         }?`,
         content: ``,
         okType: "danger",
@@ -192,17 +202,29 @@ export default {
       }
     },
     displayActivitySkill(userId) {
-      this.currentUser = this.specialists.find(user => user.id == userId) || {};
+      this.currentUser =
+        this.specialists.find((user) => user.id == userId) || {};
       this.displayTabs = true;
+    },
+    displayJobOptions(userId) {
+      this.currentUser =
+        this.specialists.find((user) => user.id == userId) || {};
+      if (this.currentUser.activities) {
+        this.currentUser.activitiesId = this.currentUser.activities.map(
+          (item) => item.activity.id
+        );
+      }
+      this.displayJobOptionsTabs = true;
     },
     async closeTabs() {
       this.displayTabs = false;
+      this.displayJobOptionsTabs = false;
     },
   },
   computed: {
     ...mapGetters({
       specialists: "specialists/getSpecialists",
-      specialistsFetched: "specialists/getFetched"
+      specialistsFetched: "specialists/getFetched",
     }),
   },
 };
