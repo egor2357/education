@@ -1,7 +1,7 @@
 from rest_framework import status, viewsets, views, filters, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from django.db.models import Q
+from django.db.models import Q, Count
 
 
 from django.contrib.auth import login, logout
@@ -193,16 +193,21 @@ class JobView(viewsets.ModelViewSet):
       competence_jobs = Q(reports__in=user.specialist.skills.all())
       jobs_qs = Job.objects.filter(own_jobs | competence_jobs).distinct()
 
-    return (jobs_qs.select_related(
-                    'activity',
-                    'schedule__activity',
-                    'specialist'
-                  )
-                  .prefetch_related(
-                    'job_file_set',
-                    'skill_report_set__skill__direction__area',
-                    'methods__form',
-                  ))
+    return (
+      jobs_qs.select_related(
+        'activity',
+        'schedule__activity',
+        'specialist'
+      )
+      .prefetch_related(
+        'job_file_set',
+        'skill_report_set__skill__direction__area',
+        'methods__form',
+      )
+      .annotate(
+        filled_reports_count=Count('skill_report', filter=Q(skill_report__mark__isnull=False))
+      )
+    )
 
 class ScheduleView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)

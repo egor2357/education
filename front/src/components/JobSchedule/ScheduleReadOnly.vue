@@ -60,6 +60,9 @@
                       :key="index"
                       :color="item.activity.color"
                     >
+                      <a-icon v-if="item.filled_reports_count"
+                        slot="dot" type="check-circle"
+                        :style="'color:'+item.activity.color"/>
                       <job-card
                         :job="item"
                         @deleteJob="deleteJob($event)"

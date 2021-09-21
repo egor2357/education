@@ -565,6 +565,8 @@ class JobSerializer(FlexFieldsModelSerializer):
     source='skill_report_set',
     many=True, read_only=True,
   )
+  filled_reports_count = serializers.IntegerField()
+
   job_files = Job_fileSerializer(
     source='job_file_set', many=True, read_only=True
   )
@@ -601,6 +603,7 @@ class JobSerializer(FlexFieldsModelSerializer):
       'date', 'start_time',
       'comment', 'topic',
       'report_comment',
+      'filled_reports_count',
     )
 
 class Skill_reportSerializer(FlexFieldsModelSerializer):
