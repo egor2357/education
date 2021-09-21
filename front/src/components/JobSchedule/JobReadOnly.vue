@@ -17,6 +17,9 @@
             </div>
           </div>
           <div class="job-details__header-title__date">
+            <div class="job-details__header-title__date-time">
+              {{ job.start_time.substr(0, 5) }}
+            </div>
             <div class="job-details__header-title__date-day">
               {{ jobDateMoment.format("D MMMM") }}
             </div>
