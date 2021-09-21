@@ -1,5 +1,7 @@
 import json
 from .models import *
+from .utils import (loop, send_message)
+from django.conf import settings
 
 def option_update_related(option, request):
   #Требует FormData для передачи файлов
@@ -97,3 +99,138 @@ def check_presence_clashes(specialist, date_from, date_to, exclude_presence=None
         ]
       }
     )
+
+
+def send_messages_after_list_mission(new_missions):
+  try:
+    users = list(set(
+      list(new_missions.exclude(director=None).values_list('director__user_id', flat=True)) +
+      list(new_missions.exclude(controller=None).values_list('controller__user_id', flat=True)) +
+      list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+    ))
+    loop.run_until_complete(send_message({
+      'action': 'missions.update',
+      'type': 'list',
+      'list_idx': users
+    }, settings.WS_IP))
+  except:
+    pass
+
+
+def send_messages_after_create_mission(serializer):
+  try:
+    users = []
+    if (serializer.instance.executor):
+      Notification.objects.create(user_id=serializer.instance.executor.user_id, type=0,
+                                  meta=json.dumps({'mission_id': serializer.instance.id}))
+      users.append(serializer.instance.executor.user_id)
+    if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller):
+      Notification.objects.create(user_id=serializer.instance.controller.user_id, type=0,
+                                  meta=json.dumps({'mission_id': serializer.instance.id}))
+      users.append(serializer.instance.controller.user_id)
+    loop.run_until_complete(send_message({'action': 'notifications.update.0', 'type': 'list',
+                                          'list_idx': users}, settings.WS_IP))
+    admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+    loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                          'list_idx': admins}, settings.WS_IP))
+  except:
+    pass
+
+def send_messages_after_update_mission(serializer):
+  try:
+    users = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+    if (serializer.instance.executor and serializer.instance.executor.user_id not in users):
+      users.append(serializer.instance.executor.user_id)
+    if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller
+            and serializer.instance.controller.user_id not in users):
+      users.append(serializer.instance.controller.user_id)
+    loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                          'list_idx': users}, settings.WS_IP))
+  except:
+    pass
+
+def send_messages_after_delete_mission(instance):
+  try:
+    users = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+    if (instance.controller and instance.controller.user_id not in users):
+      users.append(instance.controller.user_id)
+    if (instance.executor and instance.executor.user_id not in users):
+      users.append(instance.executor.user_id)
+    loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                          'list_idx': users}, settings.WS_IP))
+  except:
+    pass
+
+def send_messages_after_execute_mission(mission, user):
+  try:
+    users = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+    if (mission.executor and mission.executor.user_id not in users):
+      users.append(mission.executor.user_id)
+    if (mission.director
+            and mission.controller
+            and user.id == mission.controller.user_id
+            and mission.director.user_id not in users):
+      users.append(mission.director.user_id)
+    if (mission.director
+            and mission.controller
+            and user.id == mission.director.user_id
+            and mission.controller.user_id not in users):
+      users.append(mission.controller.user_id)
+    loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
+                                          'list_idx': users}, settings.WS_IP))
+  except:
+    pass
+
+def send_messages_after_create_announcement(request, serializer):
+  try:
+    users = User.objects.exclude(id=request.user.id).values_list('id', flat=True)
+    for user in users:
+      Notification.objects.create(user_id=user, type=2, meta=json.dumps({'announcement_id': serializer.instance.id}))
+    loop.run_until_complete(send_message({'action': 'notifications.update.2', 'type': 'exclude',
+                                          'exclude_id': request.user.id}, settings.WS_IP))
+  except:
+    pass
+
+def send_messages_after_update_announcement(request):
+  try:
+    users = User.objects.exclude(id=request.user.id).values_list('id', flat=True)
+    loop.run_until_complete(send_message({'action': 'announcements.update', 'type': 'exclude',
+                                          'exclude_id': request.user.id}, settings.WS_IP))
+  except:
+    pass
+
+def send_messages_after_delete_announcement(request):
+  try:
+    users = User.objects.exclude(id=request.user.id).values_list('id', flat=True)
+    loop.run_until_complete(send_message({'action': 'announcements.update', 'type': 'exclude',
+                                          'exclude_id': request.user.id}, settings.WS_IP))
+  except:
+    pass
+
+def send_messages_after_create_appeal():
+  try:
+    admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+    loop.run_until_complete(send_message({'action': 'appeals.update', 'type': 'list',
+                                        'list_idx': admins}, settings.WS_IP))
+  except:
+    pass
+
+def send_messages_after_delete_appeal(instance):
+  try:
+    admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+    if (instance.creator.user_id not in admins):
+      admins.append(instance.creator.user_id)
+    loop.run_until_complete(send_message({'action': 'appeals.update', 'type': 'list',
+                                          'list_idx': admins}, settings.WS_IP))
+  except:
+    pass
+
+def send_messages_after_close_appeal(appeal):
+  try:
+    admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
+    if (appeal.creator.user_id not in admins):
+      admins.append(appeal.creator.user_id)
+    loop.run_until_complete(send_message({'action': 'appeals.update', 'type': 'list',
+                                          'list_idx': admins}, settings.WS_IP))
+  except:
+    pass

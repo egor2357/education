@@ -10,10 +10,21 @@ from .models import *
 from .permissions import *
 from .serializers import *
 from .filters import *
-from .service import (option_update_related, job_update_related)
-from .utils import loop, send_message
-from django.conf import settings
+from .service import (
+  option_update_related, job_update_related, check_presence_clashes,
 
+  send_messages_after_list_mission, send_messages_after_create_mission,
+  send_messages_after_update_mission, send_messages_after_delete_mission,
+  send_messages_after_execute_mission,
+
+  send_messages_after_create_announcement, send_messages_after_update_announcement,
+  send_messages_after_delete_announcement,
+
+  send_messages_after_create_appeal, send_messages_after_delete_appeal,
+  send_messages_after_close_appeal,
+
+
+)
 
 class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
                                         mixins.ListModelMixin,
@@ -660,17 +671,9 @@ class MissionView(viewsets.ModelViewSet):
     user = self.request.user
     if (not user.is_staff) and (user.specialist is not None):
       new_missions = qs.filter(executor=user.specialist, status=0)
-      try:
-        users = list(set(
-          list(new_missions.exclude(director=None).values_list('director__user_id', flat=True)) +
-          list(new_missions.exclude(controller=None).values_list('controller__user_id', flat=True)) +
-          list(User.objects.filter(is_staff=True).values_list('id', flat=True))
-        ))
-        loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
-                                              'list_idx': users}, settings.WS_IP))
-      except:
-        pass
+      send_messages_after_list_mission(new_missions)
       new_missions.update(status=1)
+
     notifications = Notification.objects.filter(user_id = user.id, type = 0)
     notifications._raw_delete(notifications.db)
     return super().list(request)
@@ -679,53 +682,18 @@ class MissionView(viewsets.ModelViewSet):
     user = self.request.user
     if user.specialist is not None:
       serializer.save(director=user.specialist)
-    try:
-      users = []
-      if (serializer.instance.executor):
-        Notification.objects.create(user_id=serializer.instance.executor.user_id, type=0,
-                                    meta=json.dumps({'mission_id': serializer.instance.id}))
-        users.append(serializer.instance.executor.user_id)
-      if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller):
-        Notification.objects.create(user_id=serializer.instance.controller.user_id, type=0,
-                                    meta=json.dumps({'mission_id': serializer.instance.id}))
-        users.append(serializer.instance.controller.user_id)
-      loop.run_until_complete(send_message({'action': 'notifications.update.0', 'type': 'list',
-                                            'list_idx': users}, settings.WS_IP))
-      admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
-      loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
-                                            'list_idx': admins}, settings.WS_IP))
+    send_messages_after_create_mission(serializer)
 
-    except:
-      pass
 
   def perform_update(self, serializer):
     serializer.save()
-    try:
-      users = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
-      if (serializer.instance.executor and serializer.instance.executor.user_id not in users):
-        users.append(serializer.instance.executor.user_id)
-      if (serializer.instance.controller and serializer.instance.executor != serializer.instance.controller
-              and serializer.instance.controller.user_id not in users):
-        users.append(serializer.instance.controller.user_id)
-      loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
-                                            'list_idx': users}, settings.WS_IP))
-    except:
-      pass
+    send_messages_after_update_mission(serializer)
 
   def perform_destroy(self, instance):
     notifications = Notification.objects.filter(type=0, meta__contains="{\"mission_id\": %s}" % instance.id)
     notifications._raw_delete(notifications.db)
     instance.delete()
-    try:
-      users = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
-      if (instance.controller and instance.controller.user_id not in users):
-        users.append(instance.controller.user_id)
-      if (instance.executor and instance.executor.user_id not in users):
-        users.append(instance.executor.user_id)
-      loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
-                                            'list_idx': users}, settings.WS_IP))
-    except:
-      pass
+    send_messages_after_delete_mission(instance)
 
   @action(
     detail=True, methods=['get'],
@@ -742,24 +710,7 @@ class MissionView(viewsets.ModelViewSet):
       mission.status = 2
       mission.save()
       serializer = MissionSerializer(mission)
-      try:
-        users = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
-        if (mission.executor and mission.executor.user_id not in users):
-          users.append(mission.executor.user_id)
-        if (mission.director
-                and mission.controller
-                and request.user.id == mission.controller.user_id
-                and mission.director.user_id not in users):
-          users.append(mission.director.user_id)
-        if (mission.director
-                and mission.controller
-                and request.user.id == mission.director.user_id
-                and mission.controller.user_id not in users):
-          users.append(mission.controller.user_id)
-        loop.run_until_complete(send_message({'action': 'missions.update', 'type': 'list',
-                                              'list_idx': users}, settings.WS_IP))
-      except:
-        pass
+      send_messages_after_execute_mission(mission, user)
       return Response(serializer.data, status=200)
     else:
       return Response({'error': 'Вы не имеете права ставить отметку о выполнении этой задачи.'}, status=400)
@@ -780,34 +731,17 @@ class AnnouncementView(viewsets.ModelViewSet):
 
   def perform_create(self, serializer):
     serializer.save()
-    try:
-      users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
-      for user in users:
-        Notification.objects.create(user_id=user, type=2, meta=json.dumps({'announcement_id': serializer.instance.id}))
-      loop.run_until_complete(send_message({'action': 'notifications.update.2', 'type': 'exclude',
-                                            'exclude_id': self.request.user.id}, settings.WS_IP))
-    except:
-      pass
+    send_messages_after_create_announcement(self.request, serializer)
 
   def perform_update(self, serializer):
     serializer.save()
-    try:
-      users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
-      loop.run_until_complete(send_message({'action': 'announcements.update', 'type': 'exclude',
-                                            'exclude_id': self.request.user.id}, settings.WS_IP))
-    except:
-      pass
+    send_messages_after_update_announcement(self.request)
 
   def perform_destroy(self, instance):
     notifications = Notification.objects.filter(type=2, meta__contains="{\"announcement_id\": %s}" % instance.id)
     notifications._raw_delete(notifications.db)
     instance.delete()
-    try:
-      users = User.objects.exclude(id=self.request.user.id).values_list('id', flat=True)
-      loop.run_until_complete(send_message({'action': 'announcements.update', 'type': 'exclude',
-                                            'exclude_id': self.request.user.id}, settings.WS_IP))
-    except:
-      pass
+    send_messages_after_delete_announcement(self.request)
 
 class AppealView(CreateListRetrieveDestroyViewSet):
   permission_classes = (permissions.IsAuthenticated, NotDeleteIfNotAdmin)
@@ -831,24 +765,12 @@ class AppealView(CreateListRetrieveDestroyViewSet):
     user = self.request.user
     if user.specialist is not None:
       serializer.save(creator=user.specialist)
-    try:
-      admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
-      loop.run_until_complete(send_message({'action': 'appeals.update', 'type': 'list',
-                                          'list_idx': admins}, settings.WS_IP))
-    except:
-      pass
+    send_messages_after_create_appeal()
 
   def perform_destroy(self, instance):
     notifications = Notification.objects.filter(type=1, meta__contains="{\"appeal_id\": %s}" % instance.id)
     notifications._raw_delete(notifications.db)
-    try:
-      admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
-      if (instance.creator.user_id not in admins):
-        admins.append(instance.creator.user_id)
-      loop.run_until_complete(send_message({'action': 'appeals.update', 'type': 'list',
-                                            'list_idx': admins}, settings.WS_IP))
-    except:
-      pass
+    send_messages_after_delete_appeal(instance)
     instance.delete()
 
   @action(
@@ -860,14 +782,7 @@ class AppealView(CreateListRetrieveDestroyViewSet):
     appeal = self.get_object()
     appeal.closed = True
     appeal.save()
-    try:
-      admins = list(User.objects.filter(is_staff=True).values_list('id', flat=True))
-      if (appeal.creator.user_id not in admins):
-        admins.append(appeal.creator.user_id)
-      loop.run_until_complete(send_message({'action': 'appeals.update', 'type': 'list',
-                                            'list_idx': admins}, settings.WS_IP))
-    except:
-      pass
+    send_messages_after_close_appeal(appeal)
     return Response(status=200)
 
 
