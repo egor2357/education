@@ -2,7 +2,11 @@
   <a-spin :spinning="loading">
     <div class="skill-development">
       <div class="top-bar">
-        <div class="top-bar__side-block left"></div>
+        <div class="top-bar__side-block left">
+          <a-checkbox v-model="doNotShowNotCalled">
+            Скрыть незатронутые навыки
+          </a-checkbox>
+        </div>
         <div class="title">Развитие навыков</div>
         <div class="top-bar__side-block right">
           <span class="date-range-label">Период:</span>
@@ -40,8 +44,8 @@
               </div>
             </div>
           </div>
-          <div class="table-body" v-if="areas.length">
-            <div class="table-row" v-for="area in areas" :key="area.id">
+          <div class="table-body" v-if="filteredAreas.length">
+            <div class="table-row" v-for="area in filteredAreas" :key="area.id">
               <div class="table-row__column table-row__column_area">
                 <div class="table-cell">
                   {{ [area.number, area.name].join(". ") }}
@@ -148,6 +152,7 @@ export default {
       loading: true,
 
       dateRange: [],
+      doNotShowNotCalled: false,
 
       reportsStatisticsById: {},
     };
@@ -242,6 +247,28 @@ export default {
       areasFetched: "skills/getFetched",
       areas: "skills/getFilteredAreas",
     }),
+    filteredAreas(){
+      if (!this.doNotShowNotCalled) {
+        return this.areas;
+      }
+
+      return this.areas.map(area => {
+        return {
+          id: area.id,
+          name: area.name,
+          number: area.number,
+          development_directions: area.development_directions.map(dir =>
+            {return {
+              id: dir.id,
+              area_id: dir.area_id,
+              name: dir.name,
+              number: dir.number,
+              skills: dir.skills.filter(skill => String(skill.id) in this.reportsStatisticsById)
+              }
+            }).filter(direction => direction.skills.length)
+        }
+      }).filter(area => area.development_directions.length)
+    }
   },
 
   beforeCreate() {
