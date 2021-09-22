@@ -565,7 +565,7 @@ class JobSerializer(FlexFieldsModelSerializer):
     source='skill_report_set',
     many=True, read_only=True,
   )
-  filled_reports_count = serializers.IntegerField()
+  filled_reports_count = serializers.IntegerField(read_only=True)
 
   job_files = Job_fileSerializer(
     source='job_file_set', many=True, read_only=True
