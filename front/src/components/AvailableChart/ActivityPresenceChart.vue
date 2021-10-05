@@ -77,6 +77,7 @@
                           quarantine: date <= interval.quarantineDaysCount,
                           available: date > interval.quarantineDaysCount,
                         }"
+                        @click="clickDayHandler(interval)"
                       >
                         {{
                           interval.labledDays.includes(date)
@@ -84,7 +85,7 @@
                             : ""
                         }}
                       </div>
-                      <a-menu slot="overlay">
+                      <a-menu v-if="isStaff" slot="overlay">
                         <a-menu-item
                           key="1"
                           @click="
@@ -147,6 +148,9 @@ export default {
         return [];
       },
     },
+    isStaff: {
+      type: Boolean
+    },
   },
   computed: {
     mainData() {
@@ -176,6 +180,15 @@ export default {
         activity.specialists.sort((a) => !a.isMainActivity);
       });
       return result;
+    },
+  },
+  methods: {
+    clickDayHandler(interval) {
+      if (!this.isStaff) {
+        this.$emit('displayEditSummary', {
+          presence: interval.editableData,
+        })
+      }
     },
   },
 };

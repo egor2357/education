@@ -58,6 +58,7 @@
                       quarantine: date <= interval.quarantineDaysCount,
                       available: date > interval.quarantineDaysCount,
                     }"
+                    @click="clickDayHandler(interval)"
                   >
                     {{
                       interval.labledDays.includes(date)
@@ -65,7 +66,7 @@
                         : ""
                     }}
                   </div>
-                  <a-menu slot="overlay">
+                  <a-menu v-if="isStaff" slot="overlay">
                     <a-menu-item
                       key="1"
                       v-if="!specReadOnly"
@@ -134,6 +135,18 @@ export default {
     specReadOnly: {
       type: Boolean,
       default: false,
+    },
+    isStaff: {
+      type: Boolean
+    },
+  },
+  methods: {
+    clickDayHandler(interval) {
+      if (!this.isStaff) {
+        this.$emit('displayEditSummary', {
+          presence: interval.editableData,
+        })
+      }
     },
   },
 };

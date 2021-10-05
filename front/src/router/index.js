@@ -226,6 +226,15 @@ const router = new VueRouter({
           },
         },
         {
+          path: "summary",
+          name: "Summary",
+          component: () => import("@/views/Admin/AvailableChart"),
+          meta: {
+            staffOnly: false,
+            specOnly: true,
+          },
+        },
+        {
           path: "*",
           name: "Page404",
           component: () => import("@/views/Page404"),

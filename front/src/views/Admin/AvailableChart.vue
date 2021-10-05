@@ -16,7 +16,7 @@
           </div>
           <div class="title">График присутствия специалистов</div>
           <div class="top-bar__side-block right">
-            <a-button icon="plus" @click="onAddPeriod"
+            <a-button v-if="isStaff" icon="plus" @click="onAddPeriod"
               >Добавить период</a-button
             >
           </div>
@@ -31,16 +31,18 @@
           <presence-chart
             v-if="specialistMode"
             :tableData="tableData"
+            :specReadOnly="specReadOnly"
+            :is-staff="isStaff"
             @displayEdit="displayEdit"
             @displayEditSummary="displayEditSummary"
             @displayDeleteConfirm="displayDeleteConfirm($event)"
-            :specReadOnly="specReadOnly"
           />
 
           <activity-presence-chart
             v-else
             :tableData="tableData"
             :activities="activities"
+            :is-staff="isStaff"
             @displayEdit="displayEdit"
             @displayEditSummary="displayEditSummary"
             @displayDeleteConfirm="displayDeleteConfirm($event)"
@@ -59,7 +61,9 @@
         <ModalSummary
           v-if="showEditSummary"
           :editableData="modalEditableData"
-          @close="closeSummaryModal($event)"/>
+          :is-staff="isStaff"
+          @close="closeSummaryModal($event)"
+        />
       </div>
     </a-spin>
   </div>
@@ -114,6 +118,9 @@ export default {
       activities: "activities/getActivities",
       activitiesFetched: "activities/getFetched",
     }),
+    isStaff() {
+      return this.$store.getters["auth/getUserInfo"].staff;
+    },
   },
   async created() {
     await this.fetchSpecialists("?is_staff=false&is_active=true");
@@ -332,10 +339,10 @@ export default {
       await this.makeTableData();
       this.loading = false;
     },
-    closeSummaryModal(isSuccess=false){
+    closeSummaryModal(isSuccess = false) {
       this.showEditSummary = false;
       if (isSuccess) {
-        this.updateData()
+        this.updateData();
       }
     },
     keydown(event) {

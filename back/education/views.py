@@ -418,23 +418,13 @@ class PresenceView(viewsets.ModelViewSet):
   )
   filter_backends = (DjangoFilterBackend,)
   filterset_class = PresenceFilter
+  queryset = Presence.objects.all().select_related('main_interval', 'presence')
 
   def get_serializer_class(self):
     if self.request.method == 'PATCH':
       return PresenceSummarySerializer
     else:
       return PresenceSerializer
-
-  def get_queryset(self):
-    user = self.request.user
-    if user.is_staff:
-      qs =  Presence.objects.all()
-    else:
-      if user.specialist is not None:
-        qs = Presence.objects.filter(specialist=user.specialist)
-      else:
-        qs = Presence.objects.none()
-    return qs.select_related('main_interval', 'presence')
 
   def create(self, request):
     serializer = presence_create(request)

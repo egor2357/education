@@ -178,6 +178,8 @@ export default {
                     this.$message.error(error);
                   }
                 }
+              } else if (res.status === 403) {
+                this.$message.error("Недостаточно прав");
               } else {
                 this.$message.error("Произошла ошибка");
               }

@@ -19,7 +19,7 @@
             v-if="
               (item.childrens.length && !item.staffOnly && !item.specOnly) ||
               (item.staffOnly && userInfo.staff) ||
-              (item.specOnly && !userInfo.staff)
+              (item.specOnly && !userInfo.staff && item.childrens.length)
             "
           >
             <span slot="title">
@@ -32,7 +32,12 @@
               >
             </a-menu-item>
           </a-sub-menu>
-          <a-menu-item :key="item.key" v-else-if="item.childrens.length === 0">
+          <a-menu-item
+            v-else-if="
+              item.childrens.length === 0 && !(userInfo.staff && item.specOnly)
+            "
+            :key="item.key"
+          >
             <router-link
               :to="item.to"
               :class="item.twoLines ? 'menu-two-lines' : ''"
@@ -157,6 +162,16 @@ export default {
           childrens: [],
           twoLines: true,
           unread: "2",
+        },
+        {
+          icon: "calendar",
+          title: "Итоговые отчёты",
+          key: "10",
+          staffOnly: false,
+          specOnly: true,
+          to: { name: "Summary" },
+          childrens: [],
+          twoLines: false,
         },
         {
           icon: "setting",
@@ -441,7 +456,7 @@ export default {
           if (data.action === "appeals.update") {
             if (this.$route.name === "Appeals") {
               await this.fetchAppeals();
-            } else if (this.$route.name === 'AppealDetails') {
+            } else if (this.$route.name === "AppealDetails") {
               await this.fetchAppealInfo(this.$route.params.id);
             }
           }

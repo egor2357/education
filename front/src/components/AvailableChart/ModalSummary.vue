@@ -1,5 +1,10 @@
 <template>
-  <a-modal :visible="true" :title="title" @cancel="handleCancel(false)">
+  <a-modal
+    :visible="true"
+    :title="title"
+    :footer="isStaff ? undefined : null"
+    @cancel="handleCancel(false)"
+  >
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <a-form-model-item
         :prop="fields[0].name"
@@ -9,14 +14,15 @@
       >
         <a-textarea
           v-model="form[fields[0].name]"
-          @change="fieldChanged(fields[0])"
           :rows="6"
           :ref="`field0`"
+          :disabled="!isStaff"
+          @change="fieldChanged(fields[0])"
         />
       </a-form-model-item>
     </a-form-model>
     <template slot="footer">
-      <a-button @click="handleCancel(false)"> Отмена </a-button>
+      <a-button @click="handleCancel(false)"> Отменить </a-button>
       <a-button
         type="primary"
         :loading="loadingButton"
@@ -36,6 +42,7 @@ export default {
   name: "ModalSummary",
   props: {
     editableData: Object,
+    isStaff: Boolean,
   },
   data() {
     return {
@@ -89,6 +96,9 @@ export default {
             if (res.status === 200) {
               this.$message.success("Отчет по пребыванию сохранен");
               this.handleCancel(true);
+            } else if (res.status === 403) {
+              this.$message.error("Недостаточно прав");
+              this.loadingButton = false;
             } else if (res.status === 400) {
               this.$message.error("Проверьте введённые данные");
               this.loadingButton = false;
