@@ -159,7 +159,12 @@ class PresenceSerializer(serializers.ModelSerializer):
     required=False,
     write_only=True, min_value=0
   )
-  summary = serializers.CharField(required=False)
+  # summary = serializers.CharField(required=False)
+  # Всегда берем summary от основного срока пребывания
+  def get_summary(self, instance):    
+    return instance.main_interval.summary if instance.main_interval is not None else instance.summary
+
+  summary = serializers.SerializerMethodField()
 
   def get_full_interval(self, instance):
     main_interval = instance.main_interval if instance.main_interval is not None else instance

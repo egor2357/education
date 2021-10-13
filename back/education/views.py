@@ -454,7 +454,8 @@ class PresenceView(viewsets.ModelViewSet):
       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     presence = self.get_object()
-    presence.summary = serializer.validated_data['summary']
+    # summary правим только у основного времени пребывания, у карантина нет summary
+    # presence.summary = serializer.validated_data['summary']
     presence.save()
 
     if presence.main_interval != None:
