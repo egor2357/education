@@ -4,6 +4,7 @@
     :title="title"
     :footer="isStaff ? undefined : null"
     @cancel="handleCancel(false)"
+    width='70%'
   >
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <a-form-model-item
