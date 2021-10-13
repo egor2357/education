@@ -144,7 +144,7 @@ export default {
 .specialist-container
   display: flex
   flex-direction: column
-  flex: 1
+  height: 100%
   overflow: hidden
 
   .top-bar
@@ -175,11 +175,11 @@ export default {
     flex-direction: column
     flex: 1
     overflow-y: auto
-    margin-top: 10px
-    width: 900px
-    margin: 10px auto 0
+    margin-top: 10px    
 
   &__card
     position: relative
     padding: 3px
+    width: 900px
+    margin: 0 auto
 </style>
