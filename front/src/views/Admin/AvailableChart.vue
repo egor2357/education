@@ -61,7 +61,8 @@
         <ModalSummary
           v-if="showEditSummary"
           :editableData="modalEditableData"
-          :is-staff="isStaff"
+          :editableSpecialist="editableSpecialist"
+          :is-staff="isStaff || (modalEditableData.presence.specialist_id == specialistId)"
           @close="closeSummaryModal($event)"
         />
       </div>
@@ -99,6 +100,7 @@ export default {
       displayModal: false,
       showEditSummary: false,
       modalEditableData: {},
+      editableSpecialist: '',
       modalAdding: true,
       specialistMode: true,
       loading: true,
@@ -121,6 +123,9 @@ export default {
     isStaff() {
       return this.$store.getters["auth/getUserInfo"].staff;
     },
+    specialistId(){
+      return this.$store.getters["auth/getUserInfo"].specialistId;
+    }
   },
   async created() {
     await this.fetchSpecialists("?is_staff=false&is_active=true");
@@ -286,6 +291,11 @@ export default {
     },
     displayEditSummary(item) {
       this.modalEditableData = item;
+      let specialist = this.specialists.find(spec => spec.id == item.presence.specialist_id);
+      if (specialist)
+        this.editableSpecialist = specialist.__str__;
+      else
+        this.editableSpecialist = '';
       this.showEditSummary = true;
     },
     onAddPeriod() {

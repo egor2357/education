@@ -12,13 +12,23 @@
         :validateStatus="fields[0].validateStatus"
         :help="fields[0].help"
       >
+        <div class="modal-summary__specialist">
+          <span class="modal-summary__specialist-label">Специалист:</span>
+          <span class="modal-summary__specialist-value">{{editableSpecialist}}</span>          
+        </div>
+        <div class="modal-summary__period">
+          <span class="modal-summary__period-label">Период:</span>
+          <span class="modal-summary__period-value">{{editableData.presence.full_interval.date_from.split('-').reverse().join('.')}} - {{editableData.presence.full_interval.date_to.split('-').reverse().join('.')}}</span>
+        </div>
+
         <a-textarea
           v-model="form[fields[0].name]"
           :rows="6"
           :ref="`field0`"
-          :disabled="!isStaff"
+          v-if = "isStaff"
           @change="fieldChanged(fields[0])"
         />
+        <div class="modal-summary__text" v-else :ref="`field0`">{{form[fields[0].name] || 'Отчет отсутствует'}}</div>
       </a-form-model-item>
     </a-form-model>
     <template slot="footer">
@@ -43,6 +53,7 @@ export default {
   props: {
     editableData: Object,
     isStaff: Boolean,
+    editableSpecialist: String,
   },
   data() {
     return {
@@ -143,4 +154,25 @@ export default {
 };
 </script>
 
-<style lang="sass"></style>
+<style lang="sass">
+  .modal-summary__specialist
+    line-height: 20px
+    margin-bottom: 10px
+
+  .modal-summary__specialist-label
+    margin-right: 10px
+    color: #999
+
+  .modal-summary__text
+    line-height: 20px
+    white-space: pre-wrap
+
+  .modal-summary__period
+    line-height: 10px
+    margin-bottom: 20px
+
+  .modal-summary__period-label
+    margin-right: 10px
+    color: #999
+
+</style>
