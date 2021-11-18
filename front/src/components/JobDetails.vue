@@ -389,34 +389,91 @@ export default {
     async showModal() {
       this.isModalShown = true;
     },
-    async closeModal(optionId) {
+    async closeModal(data) {
       this.isModalShown = false;
-      if (optionId) {
-        await this.setJobByOption(optionId);
+      if (data.option) {
+        if (data.replace) {
+          this.replaceJobByOption(data.option);
+        } else {
+          this.appendJobByOption(data.option);
+        }
       }
     },
-    async setJobByOption(optionId) {
-      try {
-        this.loading = true;
-        let res = await patch(
-          this.$axios,
-          `/api/jobs/${this.$route.params.id}/set_job_by_option/`,
-          { option_id: optionId }
-        );
-        if (res.status === 200) {
-          this.$message.success("Параметры занятия сохранены");
-          this.job = res.data;
-          this.setJobFormData(this.job);
-        } else if (res.status === 400) {
-          this.$message.error("Проверьте введённые данные");
-        } else {
-          this.$message.error("Произошла ошибка");
-        }
-      } catch (e) {
-        this.$message.error("Произошла ошибка");
-      } finally {
-        this.loading = false;
+    replaceJobByOption(option){
+      this.form.topic = option.topic;
+
+      this.form.reports.splice(0);
+      for (let skill of option.skills) {
+        this.form.reports.push(skill.id);
       }
+
+      this.form.methods.splice(0);
+      for (let method of option.methods) {
+        this.form.methods.push(method.id);
+      }
+
+      this.form.comment = option.comment;
+
+      this.form.job_files.splice(0);
+      for (let file of option.option_files) {
+        let copy = this.form.job_files.find((item, index)=>{
+          return (file.id == item.uid) && (file.option_id == item.option_id);
+        });
+
+        if (!copy) {
+          this.form.job_files.push(
+            {
+              uid: file.id,
+              name: file.name,
+              status: "done",
+              url: file.url,
+
+              option_id: file.option_id,
+            }
+          );
+        }
+      }
+    },
+    appendJobByOption(option) {
+      if (this.form.topic)
+        this.form.topic = this.form.topic + '; ';
+      this.form.topic = this.form.topic + option.topic;
+
+      for (let skill of option.skills) {
+        if (!this.form.reports.includes(skill.id))
+          this.form.reports.push(skill.id);
+      }
+
+      for (let method of option.methods) {
+        if (!this.form.methods.includes(method.id))
+          this.form.methods.push(method.id);
+      }
+
+      if (this.form.comment && option.comment)
+        this.form.comment = this.form.comment + ';\n\n';
+      if (option.comment)
+        this.form.comment = this.form.comment + option.comment;
+
+      for (let file of option.option_files) {
+        let copy = this.form.job_files.find((item, index)=>{
+          return (file.id == item.uid) && (file.option_id == item.option_id);
+        });
+
+        if (!copy) {
+          this.form.job_files.push(
+            {
+              uid: file.id,
+              name: file.name,
+              status: "done",
+              url: file.url,
+
+              option_id: file.option_id,
+            }
+          );
+        }
+      }
+
+
     },
 
     fieldChanged(value, key) {
@@ -499,11 +556,20 @@ export default {
             formData.append("methods", JSON.stringify(this.form.methods));
             formData.append("comment", this.form.comment);
 
+            formData.append(
+              "option_files",
+              JSON.stringify(
+                this.form.job_files.filter((item)=>{
+                  return (item.option_id != undefined);
+                })
+              )
+            );
+
             let currFilesIds = [];
             this.form.job_files.forEach((file) => {
               if (file.status != "done") {
                 formData.append("files", file);
-              } else {
+              } else if (file.option_id == undefined) {
                 currFilesIds.push(file.uid);
               }
             });

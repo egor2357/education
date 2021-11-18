@@ -161,7 +161,7 @@ class PresenceSerializer(serializers.ModelSerializer):
   )
   # summary = serializers.CharField(required=False)
   # Всегда берем summary от основного срока пребывания
-  def get_summary(self, instance):    
+  def get_summary(self, instance):
     return instance.main_interval.summary if instance.main_interval is not None else instance.summary
 
   summary = serializers.SerializerMethodField()
@@ -514,6 +514,7 @@ class Job_fileSerializer(serializers.ModelSerializer):
   def get_name(self, instance):
     return os.path.split(instance.file.name)[-1]
   name = serializers.SerializerMethodField()
+
   class Meta:
     model = Job_file
     fields = (

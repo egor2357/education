@@ -44,6 +44,24 @@ def job_update_related(job, request):
     job.job_file_set.exclude(pk__in=files_id).delete()
     Job_file.objects.bulk_create(files_to_save)
 
+  if 'option_files' in request.data:
+    option_files = json.loads(request.data['option_files'])
+    option_files_ids = [option_file['uid'] for option_file in option_files]
+    option_files_qs = Option_file.objects.filter(pk__in=option_files_ids)
+
+    option_files_to_save = []
+    for option_file in option_files_qs:
+
+      data_obj = ContentFile(option_file.file.read())
+      name = os.path.split(option_file.file.name)[-1]
+      data_obj.name = name
+      new_file = Job_file(job=job, file=data_obj)
+      new_file.create_thumbnail()
+      option_files_to_save.append(new_file)
+
+    Job_file.objects.bulk_create(option_files_to_save)
+
+
   if 'reports' in request.data:
     skills = json.loads(request.data['reports'])
 

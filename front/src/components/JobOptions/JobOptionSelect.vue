@@ -36,7 +36,12 @@
           <job-option :option="option">
             <div class="job-option-header-actions">
               <div class="job-option-header-action"
-                @click="closeModal(option.id)">
+                @click="closeModal(option, false)">
+                Добавить к существующему
+              </div>
+              <a-divider type="vertical"/>
+              <div class="job-option-header-action"
+                @click="closeModal(option, true)">
                 Выбрать
               </div>
             </div>
@@ -83,8 +88,8 @@ export default {
     }),
   },
   methods: {
-    closeModal(optionId=null){
-      this.$emit('closeModal', optionId);
+    closeModal(option=null, replace=true){
+      this.$emit('closeModal', {option, replace});
     },
     async fetchOptions() {
       try {
