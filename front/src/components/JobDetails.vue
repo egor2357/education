@@ -430,8 +430,7 @@ export default {
               name: file.name,
               status: "done",
               url: file.url,
-              file: file.file,
-              thumbnail: file.thumbnail,
+              thumbUrl: file.thumbnail,
 
               option_id: file.option_id,
             }
@@ -474,8 +473,7 @@ export default {
               name: file.name,
               status: "done",
               url: file.url,
-              file: file.file,
-              thumbnail: file.thumbnail,
+              thumbUrl: file.thumbnail,
 
               option_id: file.option_id,
             }
