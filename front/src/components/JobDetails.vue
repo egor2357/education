@@ -376,6 +376,7 @@ export default {
       forms: "forms/getForms",
       specialistsFetched: "specialists/getFetched",
       activitiesFetched: "activities/getFetched",
+      userInfo: "auth/getUserInfo",
     }),
   },
   methods: {
@@ -404,7 +405,9 @@ export default {
 
       this.form.reports.splice(0);
       for (let skill of option.skills) {
-        this.form.reports.push(skill.id);
+        if (this.userInfo.skillsId.includes(skill.id)) {
+          this.form.reports.push(skill.id);
+        }
       }
 
       this.form.methods.splice(0);
@@ -427,6 +430,8 @@ export default {
               name: file.name,
               status: "done",
               url: file.url,
+              file: file.file,
+              thumbnail: file.thumbnail,
 
               option_id: file.option_id,
             }
@@ -440,8 +445,11 @@ export default {
       this.form.topic = this.form.topic + option.topic;
 
       for (let skill of option.skills) {
-        if (!this.form.reports.includes(skill.id))
-          this.form.reports.push(skill.id);
+        if (this.userInfo.skillsId.includes(skill.id)) {
+          if (!this.form.reports.includes(skill.id)) {
+            this.form.reports.push(skill.id);
+          }
+        }
       }
 
       for (let method of option.methods) {
@@ -466,6 +474,8 @@ export default {
               name: file.name,
               status: "done",
               url: file.url,
+              file: file.file,
+              thumbnail: file.thumbnail,
 
               option_id: file.option_id,
             }

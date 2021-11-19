@@ -64,6 +64,9 @@ def job_update_related(job, request):
 
   if 'reports' in request.data:
     skills = json.loads(request.data['reports'])
+    available_skills = request.user.specialist.skills.all()
+    available_skills_ids = list(available_skills.values_list('id', flat=True))
+    skills = set(available_skills_ids) & set(skills)
 
     curr_skill_reports_ids = list(job.skill_report_set.all().values_list('skill_id', flat=True))
 
