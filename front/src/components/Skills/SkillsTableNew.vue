@@ -1,7 +1,7 @@
 <template>
   <div class="skill-table">
     <div>
-      <div v-if="tableData.length" class="skill-table__body" >
+      <div v-if="tableData.length" class="skill-table__body">
         <div v-for="area in tableData" :key="area.id">
           <div
             class="skill-table__cell skill-table__cell_sticky skill-table-area"
@@ -12,7 +12,7 @@
               @click="showArea[area.id] = !showArea[area.id]"
             />
             <span
-              >Образовательная область:
+              >
               {{ [area.number, area.name].join(". ") }}</span
             >
             <a-dropdown
@@ -79,7 +79,6 @@
                       "
                     />
                     <span>
-                      Направление развития:
                       {{
                         [area.number, direction.number].join(".") +
                           ". " +
@@ -158,7 +157,6 @@
                               "
                             />
                             <span>
-                              Навык:
                               {{
                                 [
                                   area.number,
@@ -225,22 +223,21 @@
                               v-if="showSkill[skill.id]"
                               class="skill-table-exercises"
                             >
-                              <div class="skill-table-exercises__title">
-                                Упражнения
-                              </div>
                               <div class="skill-table-exercises__content">
-                                <!--                          v-if="!skill.exercises.length"-->
-                                <div class="skill-table__cell">
-                                  <a
-                                    @click="
-                                      $emit('onAddItem', {
-                                        type: 4,
-                                        item: skill
-                                      })
-                                    "
-                                    >Добавить упражнение</a
-                                  >
-                                </div>
+<!--                                <div-->
+<!--                                  v-if="!skill.exercises.length"-->
+<!--                                  class="skill-table__cell"-->
+<!--                                >-->
+<!--                                  <a-->
+<!--                                    @click="-->
+<!--                                      $emit('onAddItem', {-->
+<!--                                        type: 4,-->
+<!--                                        item: skill-->
+<!--                                      })-->
+<!--                                    "-->
+<!--                                    >Добавить упражнение</a-->
+<!--                                  >-->
+<!--                                </div>-->
                                 <div>
                                   <div
                                     v-for="i in 3"
@@ -407,14 +404,13 @@ export default {
     top: 42px
     z-index: 3
     border-bottom: 1px solid #e8e8e8
-    padding-left: 25px
+    padding-left: 35px
 
   &-skill
     top: 83px
     z-index: 2
     border-bottom: 1px solid #e8e8e8
-    padding-left: 35px
-
+    padding-left: 55px
 
   &-exercises
     display: flex
@@ -427,9 +423,9 @@ export default {
 
     &__content
       flex: 1 1 90%
-      border-left: 1px solid #e8e8e8
 
       .skill-table__cell
+        padding-left: 90px
         border-top: 1px solid #e8e8e8
         &:first-child
           border-top: 0
