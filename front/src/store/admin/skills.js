@@ -8,6 +8,7 @@ const state = () => ({
   fetched: false,
   areasAll: [],
   fetchedAll: false,
+  scrollPosition: 0,
 });
 
 const getters = {
@@ -32,6 +33,9 @@ const getters = {
   },
   getFetchedAll(state) {
     return state.fetchedAll;
+  },
+  getScrollPosition(state) {
+    return state.scrollPosition;
   },
 };
 
@@ -100,6 +104,9 @@ const mutations = {
     state.areasAll = payload.data;
     state.fetchedAll = payload.success;
   },
+  setScrollPosition(state, payload) {
+    state.scrollPosition = payload;
+  }
 };
 
 export default {

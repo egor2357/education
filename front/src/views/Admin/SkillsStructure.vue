@@ -5,12 +5,14 @@
         <div class="top-bar__side-block left"></div>
         <div class="title">Структура навыков</div>
         <div class="top-bar__side-block right">
-          <a-button icon="plus" type="secondary" @click="openModalAdd(1)">Добавить образовательную область
+          <a-button icon="plus" type="secondary" @click="openModalAdd(1)"
+            >Добавить образовательную область
           </a-button>
         </div>
       </div>
       <div class="table-container">
         <skills-table
+          ref="table"
           :loading="loading"
           :tableData="areas"
           @onDeleteItem="displayConfirmDelete"
@@ -25,7 +27,7 @@
         :editableData="modalEditableData"
         @close="displayModal = false"
         @closeSuccess="closeSuccess"
-    />
+      />
     </div>
   </a-spin>
 </template>
@@ -33,7 +35,7 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import ModalSkills from "@/components/Modals/ModalSkills";
-import SkillsTable from "@/components/Skills/SkillsTable";
+import SkillsTable from "@/components/Skills/SkillsTableNew";
 export default {
   name: "SkillsStructure",
   components: {
@@ -46,32 +48,47 @@ export default {
       displayModal: false,
       modalAdding: true,
       modalType: 0,
-      modalEditableData: {},
+      modalEditableData: {}
     };
   },
   async created() {
     this.loading = true;
     await this.fetchAreas();
     this.loading = false;
+    this.$refs.table.prepareObjects();
   },
   methods: {
     ...mapActions({
-      fetchAreas: "skills/fetchAreas",
+      fetchAreas: "skills/fetchAreas"
     }),
     openModalAdd(type, item) {
       this.modalAdding = true;
       this.modalType = type;
       this.displayModal = true;
       if (type === 1) {
-        this.modalEditableData.lastNumberArea = this.areas.length ? this.areas[this.areas.length - 1].number + 1 : 1;
+        this.modalEditableData.lastNumberArea = this.areas.length
+          ? this.areas[this.areas.length - 1].number + 1
+          : 1;
       }
       if (type === 2) {
         this.modalEditableData.areaId = item.id;
-        this.modalEditableData.lastNumberDirection = item.development_directions.length ? item.development_directions[item.development_directions.length-1].number + 1 : 1;
+        this.modalEditableData.lastNumberDirection = item.development_directions
+          .length
+          ? item.development_directions[item.development_directions.length - 1]
+              .number + 1
+          : 1;
       }
       if (type === 3) {
         this.modalEditableData.directionId = item.id;
-        this.modalEditableData.lastNumberSkill = item.skills.length ? item.skills[item.skills.length - 1].number + 1 : 1;
+        this.modalEditableData.lastNumberSkill = item.skills.length
+          ? item.skills[item.skills.length - 1].number + 1
+          : 1;
+      }
+      if (type === 4) {
+        this.modalEditableData.skillId = item.id;
+        this.modalEditableData.lastNumberExercise = item.exercises.length
+          ? item.exercises[item.exercises.length - 1].number + 1
+          : 1;
       }
     },
     openModalEdit(payload) {
@@ -80,7 +97,7 @@ export default {
       this.modalEditableData = payload.item;
       this.displayModal = true;
     },
-    async closeSuccess(){
+    async closeSuccess() {
       this.displayModal = false;
       this.loading = true;
       await this.fetchAreas();
@@ -139,42 +156,42 @@ export default {
         okType: "danger",
         onOk() {
           that.deleteRecord(payload.id, type);
-        },
+        }
       });
-    },
+    }
   },
   computed: {
     ...mapGetters({
       areas: "skills/getAreas",
       fetched: "skills/getFetched"
-    }),
+    })
   }
 };
 </script>
 
 <style lang="sass">
-  .slills-structure
-    height: 100%
+.slills-structure
+  height: 100%
+  display: flex
+  flex-direction: column
+
+  .top-bar
     display: flex
-    flex-direction: column
+    margin-bottom: 10px
+    line-height: 32px
 
-    .top-bar
-      display: flex
-      margin-bottom: 10px
-      line-height: 32px
+    .title
+      font-size: 1rem
+      text-align: center
+      margin: 0 10px
 
-      .title
-        font-size: 1rem
-        text-align: center
-        margin: 0 10px
+  .top-bar__side-block
+    flex: 1
 
-    .top-bar__side-block
-      flex: 1
+    &.right
+      text-align: right
 
-      &.right
-        text-align: right
-
-    .table-container
-      flex: 1
-      overflow: hidden
+  .table-container
+    flex: 1
+    overflow: hidden
 </style>

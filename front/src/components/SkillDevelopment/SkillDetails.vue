@@ -188,6 +188,7 @@ export default {
         query: {
           dateFrom: this.$route.query.dateFrom,
           dateTo: this.$route.query.dateTo,
+          showCalled: String(this.$route.query.showCalled)
         },
       });
     },

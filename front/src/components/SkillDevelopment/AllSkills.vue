@@ -3,7 +3,7 @@
     <div class="skill-development">
       <div class="top-bar">
         <div class="top-bar__side-block left">
-          <a-checkbox v-model="doNotShowNotCalled">
+          <a-checkbox v-model="doNotShowNotCalled" @change="changeShowCalled">
             Скрыть незатронутые навыки
           </a-checkbox>
         </div>
@@ -21,7 +21,7 @@
         </div>
       </div>
 
-      <div class="table-holder">
+      <div id="table" class="table-holder">
         <div>
           <div class="table-header">
             <div class="table-header__column table-header__column_area">
@@ -61,8 +61,8 @@
                     <div class="table-cell">
                       {{
                         [area.number, direction.number].join(".") +
-                        ". " +
-                        direction.name
+                          ". " +
+                          direction.name
                       }}
                     </div>
                   </div>
@@ -76,7 +76,7 @@
                         <div class="table-cell">
                           <span
                             :class="{
-                              'skill-link': reportsStatisticsById[skill.id],
+                              'skill-link': reportsStatisticsById[skill.id]
                             }"
                             @click="goToSkill(skill.id)"
                           >
@@ -84,10 +84,10 @@
                               [
                                 area.number,
                                 direction.number,
-                                skill.number,
+                                skill.number
                               ].join(".") +
-                              ". " +
-                              skill.name
+                                ". " +
+                                skill.name
                             }}
                           </span>
                         </div>
@@ -112,7 +112,7 @@
                           {{
                             skill.id in reportsStatisticsById
                               ? reportsStatisticsById[skill.id].value
-                              : '-'
+                              : "-"
                           }}
                         </div>
                       </div>
@@ -132,7 +132,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import { Empty } from "ant-design-vue";
 import moment from "moment";
 
@@ -143,8 +143,8 @@ export default {
       type: Array,
       default() {
         return [moment(new Date()).weekday(0), moment(new Date()).weekday(6)];
-      },
-    },
+      }
+    }
   },
   name: "AllSkills",
   data() {
@@ -154,120 +154,43 @@ export default {
       dateRange: [],
       doNotShowNotCalled: false,
 
-      reportsStatisticsById: {},
+      reportsStatisticsById: {}
     };
   },
-  methods: {
-    ...mapActions({
-      fetchAreas: "skills/fetchAreas",
-    }),
-    async fetchSkillReportsStatistics() {
-      try {
-        this.loading = true;
-        let firstQParameter = `date_from=${this.dateRange[0].format(
-          "YYYY-MM-DD"
-        )}`;
-        let secondQParameter = `date_to=${this.dateRange[1].format(
-          "YYYY-MM-DD"
-        )}`;
-        let QParameters = `?${firstQParameter}&${secondQParameter}`;
-        let res = await this.$axios.get(`/api/skill_reports/statistics/${QParameters}`);
-        if (res.status === 200) {
-          this.reportsStatisticsById = res.data;
-        } else {
-          this.$message.error("Произошла ошибка при загрузке отчетов");
-        }
-      } catch (e) {
-        this.$message.error("Произошла ошибка при загрузке отчетов");
-      } finally {
-        this.loading = false;
-      }
-    },
-    goToSkill(skillId) {
-      if (this.reportsStatisticsById[skillId]) {
-        this.$router.push({
-          name: "SkillDetails",
-          params: { id: skillId },
-          query: {
-            dateFrom: this.$route.query.dateFrom,
-            dateTo: this.$route.query.dateTo,
-          },
-        });
-      }
-    },
-    dateRangeChange(value, replace = false) {
-      if (
-        value[0].format("YYYY-MM-DD") == this.$route.query.dateFrom &&
-        value[1].format("YYYY-MM-DD") == this.$route.query.dateTo
-      ) {
-        return;
-      }
 
-      let queryObj = {
-        dateFrom: value[0].format("YYYY-MM-DD"),
-        dateTo: value[1].format("YYYY-MM-DD"),
-      };
-
-      if (replace) {
-        this.$router
-          .replace({
-            name: this.$route.name,
-            query: queryObj,
-          })
-          .catch(() => {});
-      } else {
-        this.$router
-          .push({
-            name: this.$route.name,
-            query: queryObj,
-          })
-          .catch(() => {});
-      }
-    },
-    setDateRange(route) {
-      let query = route.query;
-      if (
-        !Object.prototype.hasOwnProperty.call(query, "dateFrom") ||
-        !Object.prototype.hasOwnProperty.call(query, "dateTo")
-      ) {
-        this.dateRange.splice(0);
-        this.dateRange.push(this.dateRangeInit[0].clone());
-        this.dateRange.push(this.dateRangeInit[1].clone());
-        return false;
-      } else {
-        this.dateRange.splice(0);
-        this.dateRange.push(moment(query.dateFrom, "YYYY-MM-DD"));
-        this.dateRange.push(moment(query.dateTo, "YYYY-MM-DD"));
-        return true;
-      }
-    },
-  },
   computed: {
     ...mapGetters({
       areasFetched: "skills/getFetched",
       areas: "skills/getFilteredAreas",
+      scrollPosition: "skills/getScrollPosition"
     }),
-    filteredAreas(){
+    filteredAreas() {
       if (!this.doNotShowNotCalled) {
         return this.areas;
       }
 
-      return this.areas.map(area => {
-        return {
-          id: area.id,
-          name: area.name,
-          number: area.number,
-          development_directions: area.development_directions.map(dir =>
-            {return {
-              id: dir.id,
-              area_id: dir.area_id,
-              name: dir.name,
-              number: dir.number,
-              skills: dir.skills.filter(skill => String(skill.id) in this.reportsStatisticsById)
-              }
-            }).filter(direction => direction.skills.length)
-        }
-      }).filter(area => area.development_directions.length)
+      return this.areas
+        .map(area => {
+          return {
+            id: area.id,
+            name: area.name,
+            number: area.number,
+            development_directions: area.development_directions
+              .map(dir => {
+                return {
+                  id: dir.id,
+                  area_id: dir.area_id,
+                  name: dir.name,
+                  number: dir.number,
+                  skills: dir.skills.filter(
+                    skill => String(skill.id) in this.reportsStatisticsById
+                  )
+                };
+              })
+              .filter(direction => direction.skills.length)
+          };
+        })
+        .filter(area => area.development_directions.length);
     }
   },
 
@@ -280,6 +203,10 @@ export default {
 
     if (!this.areasFetched) {
       fetches.push(this.fetchAreas());
+    }
+
+    if (this.$route.query.showCalled) {
+      this.doNotShowNotCalled = this.$route.query.showCalled === "true";
     }
 
     this.loading = true;
@@ -302,6 +229,129 @@ export default {
     this.fetchSkillReportsStatistics();
     next();
   },
+
+  updated() {
+    const table = document.getElementById("table");
+    if (table) {
+      if (this.scrollPosition) {
+        table.scrollTop = this.scrollPosition;
+      }
+      table.addEventListener("scroll", this.saveScrollPosition);
+    }
+  },
+
+  beforeDestroy() {
+    const table = document.getElementById("table");
+    if (table) {
+      table.removeEventListener("scroll", this.saveScrollPosition);
+    }
+  },
+
+  methods: {
+    ...mapActions({
+      fetchAreas: "skills/fetchAreas"
+    }),
+    ...mapMutations({
+      setScrollPosition: "skills/setScrollPosition"
+    }),
+    async fetchSkillReportsStatistics() {
+      try {
+        this.loading = true;
+        let firstQParameter = `date_from=${this.dateRange[0].format(
+          "YYYY-MM-DD"
+        )}`;
+        let secondQParameter = `date_to=${this.dateRange[1].format(
+          "YYYY-MM-DD"
+        )}`;
+        let QParameters = `?${firstQParameter}&${secondQParameter}`;
+        let res = await this.$axios.get(
+          `/api/skill_reports/statistics/${QParameters}`
+        );
+        if (res.status === 200) {
+          this.reportsStatisticsById = res.data;
+        } else {
+          this.$message.error("Произошла ошибка при загрузке отчетов");
+        }
+      } catch (e) {
+        this.$message.error("Произошла ошибка при загрузке отчетов");
+      } finally {
+        this.loading = false;
+      }
+    },
+    goToSkill(skillId) {
+      if (this.reportsStatisticsById[skillId]) {
+        this.$router.push({
+          name: "SkillDetails",
+          params: { id: skillId },
+          query: {
+            dateFrom: this.$route.query.dateFrom,
+            dateTo: this.$route.query.dateTo,
+            showCalled: this.$route.query.showCalled
+          }
+        });
+      }
+    },
+    dateRangeChange(value, replace = false) {
+      if (
+        value[0].format("YYYY-MM-DD") == this.$route.query.dateFrom &&
+        value[1].format("YYYY-MM-DD") == this.$route.query.dateTo
+      ) {
+        return;
+      }
+
+      let queryObj = {
+        dateFrom: value[0].format("YYYY-MM-DD"),
+        dateTo: value[1].format("YYYY-MM-DD"),
+        showCalled: this.doNotShowNotCalled
+      };
+
+      if (replace) {
+        this.$router
+          .replace({
+            name: this.$route.name,
+            query: queryObj
+          })
+          .catch(() => {});
+      } else {
+        this.$router
+          .push({
+            name: this.$route.name,
+            query: queryObj
+          })
+          .catch(() => {});
+      }
+    },
+    setDateRange(route) {
+      let query = route.query;
+      if (
+        !Object.prototype.hasOwnProperty.call(query, "dateFrom") ||
+        !Object.prototype.hasOwnProperty.call(query, "dateTo")
+      ) {
+        this.dateRange.splice(0);
+        this.dateRange.push(this.dateRangeInit[0].clone());
+        this.dateRange.push(this.dateRangeInit[1].clone());
+        return false;
+      } else {
+        this.dateRange.splice(0);
+        this.dateRange.push(moment(query.dateFrom, "YYYY-MM-DD"));
+        this.dateRange.push(moment(query.dateTo, "YYYY-MM-DD"));
+        return true;
+      }
+    },
+
+    changeShowCalled(event) {
+      if (this.$route.query.showCalled != event.target.checked) {
+        this.$router.replace({
+          name: this.$route.name,
+          query: { ...this.$route.query, showCalled: event.target.checked }
+        });
+      }
+    },
+
+    saveScrollPosition(e) {
+      this.setScrollPosition(e.target.scrollTop);
+    }
+  }
 };
 </script>
 
