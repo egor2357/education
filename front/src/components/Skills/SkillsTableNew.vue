@@ -342,7 +342,7 @@ export default {
   methods: {
     prepareObjects() {
       this.tableData.forEach(area => {
-        this.$set(this.showArea, area.id, false);
+        this.$set(this.showArea, area.id, true);
         area.development_directions.forEach(direction => {
           this.$set(this.showDirection, direction.id, false);
           direction.skills.forEach(skill => {
