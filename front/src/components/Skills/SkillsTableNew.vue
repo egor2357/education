@@ -8,7 +8,7 @@
           >
             <a-icon
               class="icon-button icon-show"
-              :type="showArea[area.id] ? 'caret-up' : 'caret-down'"
+              :type="showArea[area.id] ? 'caret-down' : 'caret-right'"
               @click="showArea[area.id] = !showArea[area.id]"
             />
             <span
@@ -70,7 +70,7 @@
                     <a-icon
                       class="icon-button icon-show"
                       :type="
-                        showDirection[direction.id] ? 'caret-up' : 'caret-down'
+                        showDirection[direction.id] ? 'caret-down' : 'caret-right'
                       "
                       @click="
                         showDirection[direction.id] = !showDirection[
@@ -150,7 +150,7 @@
                             <a-icon
                               class="icon-button icon-show"
                               :type="
-                                showSkill[skill.id] ? 'caret-up' : 'caret-down'
+                                showSkill[skill.id] ? 'caret-down' : 'caret-right'
                               "
                               @click="
                                 showSkill[skill.id] = !showSkill[skill.id]
