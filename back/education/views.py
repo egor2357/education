@@ -491,26 +491,34 @@ class Skill_reportView(viewsets.ModelViewSet):
                               'job__activity',
                               'job__specialist',
                             )
+
   @action(detail=False, methods=['get'])
   def statistics(self, request, *args, **kwargs):
     skill_reports = self.filter_queryset(self.get_queryset())
+    skill_reports = skill_reports.select_related(None)
+
+    skill_reports = skill_reports.values('skill_id', 'mark', 'coefficient')
 
     mark_coeffs = [0.33, 0.66, 1]
     calls_by_id = {}
 
     for skill_report in skill_reports:
-      if not skill_report.skill.id in calls_by_id.keys():
-        calls_by_id[skill_report.skill.id] = {
+      skill_id = skill_report['skill_id']
+
+      if not skill_id in calls_by_id.keys():
+        calls_by_id[skill_id] = {
           'planned': 0,
           'called': 0,
           'value': 0,
         }
 
-      calls_by_id[skill_report.skill.id]['planned'] += 1
+      call = calls_by_id[skill_report['skill_id']]
 
-      if not skill_report.mark is None:
-        calls_by_id[skill_report.skill.id]['called'] += 1
-        calls_by_id[skill_report.skill.id]['value'] += mark_coeffs[skill_report.mark]*skill_report.coefficient
+      call['planned'] += 1
+
+      if not skill_report['mark'] is None:
+        call['called'] += 1
+        call['value'] += mark_coeffs[skill_report['mark']] * skill_report['coefficient']
 
     for skill_id in calls_by_id.keys():
       calls_by_id[skill_id]['value'] = round(calls_by_id[skill_id]['value'] / calls_by_id[skill_id]['planned'], 2)
