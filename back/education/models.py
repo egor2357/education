@@ -605,8 +605,11 @@ def job_file_model_delete(sender, instance, **kwargs):
     instance.file.delete(False)
 
 class Skill_report(models.Model):
-  marks = ['Неудовлетворительно', 'Удовлетворительно', 'Хорошо']
-  mark_choices = [item for item in enumerate(marks)]
+  MARK_CHOICES = (
+    (0, 'Неудовлетворительно'),
+    (1, 'Удовлетворительно'),
+    (2, 'Хорошо'),
+  )
 
   job = models.ForeignKey(
     Job, null=False,
@@ -623,7 +626,7 @@ class Skill_report(models.Model):
   )
   mark = models.PositiveSmallIntegerField(
     null=True, blank=True, default=None,
-    choices=mark_choices,
+    choices=MARK_CHOICES,
     verbose_name='Успешность оттачивания навыка')
 
   class Meta:
@@ -636,7 +639,7 @@ class Skill_report(models.Model):
   def __str__(self):
     return 'Оценка за {0}: {1}'.format(
       self.job,
-      self.marks[self.mark] if self.mark else 'Не выставлена'
+      'Не выставлена' if self.mark is None else self.get_mark_display()
     )
 
 class Mission(models.Model):
