@@ -115,39 +115,6 @@ const actions = {
       commit("updateSpecialist", specialistRequest.data);
     return res;
   },
-
-  async addSpecialistSkill({ commit }, payload) {
-    let res = await post(this.$axios, "/api/competence/", payload);
-    let specialistRequest = await this.$axios.get(
-      `/api/specialists/${payload.specialist_id}/`
-    );
-    if (specialistRequest.status === 200)
-      commit("updateSpecialist", specialistRequest.data);
-    return res;
-  },
-  async editSpecialistSkill({ commit }, payload) {
-    let res = await patch(this.$axios, `/api/competence/${payload.linkId}/`, {
-      coefficient: payload.coefficient,
-    });
-    let specialistRequest = await this.$axios.get(
-      `/api/specialists/${payload.specialistId}/`
-    );
-    if (specialistRequest.status === 200)
-      commit("updateSpecialist", specialistRequest.data);
-    return res;
-  },
-  async deleteSpecialistSkill({ commit }, payload) {
-    let res = await deleteAxios(
-      this.$axios,
-      `/api/competence/${payload.linkId}/`
-    );
-    let specialistRequest = await this.$axios.get(
-      `/api/specialists/${payload.specialistId}/`
-    );
-    if (specialistRequest.status === 200)
-      commit("updateSpecialist", specialistRequest.data);
-    return res;
-  },
 };
 
 const mutations = {
@@ -164,7 +131,6 @@ const mutations = {
       (specialist) => specialist.id == payload.id
     );
     if (specialist) {
-      specialist.skills = payload.skills;
       specialist.activities = payload.activities;
       specialist.hasAdditionalActivity = !!specialist.activities.filter(
         (activity) => !activity.is_main
