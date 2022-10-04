@@ -8,7 +8,7 @@
           >
             <a-icon
               class="icon-button icon-show"
-              :type="showArea[area.id] ? 'caret-down' : 'caret-right'"
+              :type="showArea[area.id] ? 'down' : 'right'"
               @click="showArea[area.id] = !showArea[area.id]"
             />
             <span
@@ -70,7 +70,7 @@
                     <a-icon
                       class="icon-button icon-show"
                       :type="
-                        showDirection[direction.id] ? 'caret-down' : 'caret-right'
+                        showDirection[direction.id] ? 'down' : 'right'
                       "
                       @click="
                         showDirection[direction.id] = !showDirection[
@@ -150,7 +150,7 @@
                             <a-icon
                               class="icon-button icon-show"
                               :type="
-                                showSkill[skill.id] ? 'caret-down' : 'caret-right'
+                                showSkill[skill.id] ? 'down' : 'right'
                               "
                               @click="
                                 showSkill[skill.id] = !showSkill[skill.id]
@@ -372,6 +372,7 @@ export default {
     background-color: #fff
 
     .icon-show
+      padding: 5px
       margin-right: 5px
 
     i.icon-actions
