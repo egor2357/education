@@ -67,7 +67,11 @@ class UserView(viewsets.ModelViewSet):
 
 class Educational_areaView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Educational_area.objects.all().prefetch_related('development_direction_set__skill_set__direction__area')
+  queryset = Educational_area.objects.all().prefetch_related(
+    'development_direction_set',
+    'development_direction_set__skill_set',
+    'development_direction_set__skill_set__exercises',
+  )
   serializer_class = Educational_areaSerializer
 
 class Development_directionView(viewsets.ModelViewSet):

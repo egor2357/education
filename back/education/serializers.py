@@ -72,9 +72,12 @@ class ExerciseSerializer(FlexFieldsModelSerializer):
     )
 
 class SkillSerializer(FlexFieldsModelSerializer):
+  exercises = ExerciseSerializer(many=True, read_only=True)
+
   direction_id = serializers.PrimaryKeyRelatedField(
     source='direction', queryset=Development_direction.objects.all()
   )
+
   area_number = serializers.IntegerField(source='direction.area.number', read_only=True)
 
   direction_number = serializers.IntegerField(source='direction.number', read_only=True)
@@ -86,7 +89,8 @@ class SkillSerializer(FlexFieldsModelSerializer):
       'name', 'number',
       'direction_id',
       'direction_number',
-      'area_number'
+      'area_number',
+      'exercises',
     )
 
 class Activity_skillSerializer(serializers.ModelSerializer):

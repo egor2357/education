@@ -71,7 +71,7 @@ class Skill(models.Model):
 
 class Exercise(models.Model):
   skill = models.ForeignKey(
-    Skill, null=False,
+    Skill, null=False, related_name='exercises',
     on_delete=models.CASCADE, verbose_name='Навык'
   )
 
