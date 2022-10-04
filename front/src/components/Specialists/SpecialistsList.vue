@@ -47,7 +47,7 @@
                 <template v-if="!staffSelected">
                   <br />
                   <a @click="displayActivitySkill(item.id)">
-                    Виды деятельности / навыки
+                    Виды деятельности
                   </a>
                   <br />
                   <a @click="displayJobOptions(item.id)"> Планы занятий </a>
