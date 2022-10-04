@@ -69,6 +69,25 @@ class Skill(models.Model):
   def __str__(self):
     return self.name
 
+class Exercise(models.Model):
+  skill = models.ForeignKey(
+    Skill, null=False,
+    on_delete=models.CASCADE, verbose_name='Навык'
+  )
+
+  name = models.TextField(verbose_name='Название')
+  number = models.PositiveSmallIntegerField(verbose_name='Номер')
+
+  class Meta:
+    db_table = 'exercise'
+    verbose_name = 'Упражнение'
+    verbose_name_plural = 'Упражнения'
+    ordering = ['skill', 'number']
+    unique_together = ('skill', 'name',)
+
+  def __str__(self):
+    return self.name
+
 class Specialist(models.Model):
   user = models.OneToOneField(
     User, null=True, blank=True,
