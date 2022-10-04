@@ -441,7 +441,7 @@ class Job_fileSerializer(serializers.ModelSerializer):
       'name',
     )
 
-class Skill_reportSerializer(FlexFieldsModelSerializer):
+class Skill_reportForJobSerializer(FlexFieldsModelSerializer):
   job_id = serializers.PrimaryKeyRelatedField(
     source='job', queryset=Job.objects.all()
   )
@@ -485,7 +485,7 @@ class JobSerializer(FlexFieldsModelSerializer):
     read_only=True,
   )
   methods = MethodSerializer(read_only=True, many=True)
-  reports = Skill_reportSerializer(
+  reports = Skill_reportForJobSerializer(
     source='skill_report_set',
     many=True, read_only=True,
   )
