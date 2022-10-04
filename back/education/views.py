@@ -40,7 +40,7 @@ class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
 
 # Create your views here.
 class UserView(viewsets.ModelViewSet):
-  queryset = User.objects.all().prefetch_related('specialist')
+  queryset = User.objects.all().prefetch_related('specialist__activities')
   serializer_class = UserSerializer
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
 
