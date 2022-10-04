@@ -405,9 +405,7 @@ export default {
 
       this.form.reports.splice(0);
       for (let skill of option.skills) {
-        if (this.userInfo.skillsId.includes(skill.id)) {
-          this.form.reports.push(skill.id);
-        }
+        this.form.reports.push(skill.id);
       }
 
       this.form.methods.splice(0);
@@ -444,10 +442,8 @@ export default {
       this.form.topic = this.form.topic + option.topic;
 
       for (let skill of option.skills) {
-        if (this.userInfo.skillsId.includes(skill.id)) {
-          if (!this.form.reports.includes(skill.id)) {
-            this.form.reports.push(skill.id);
-          }
+        if (!this.form.reports.includes(skill.id)) {
+          this.form.reports.push(skill.id);
         }
       }
 
