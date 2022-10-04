@@ -50,91 +50,11 @@
       <a-divider orientation="left" v-else>
         Специалист не преподает ни одного вида деятельности
       </a-divider>
-      <div class="specialist-profile__header">Развиваемые навыки</div>
-      <div class="specialist-profile__competence" v-if="competence.length">
-        <div class="specialist-profile__table">
-          <div>
-            <div class="specialist-profile__table-header">
-              <div class="specialist-profile__table-area">
-                Образовательная область
-              </div>
-              <div class="specialist-profile__table-direction">
-                Направление развития
-              </div>
-              <div class="specialist-profile__table-skill">Навык</div>
-              <div class="specialist-profile__table-coefficient">
-                Коэффициент
-              </div>
-            </div>
-            <div class="specialist-profile__table-body">
-              <div class="specialist-profile__table-areas">
-                <div
-                  class="specialist-profile__table-area-row"
-                  v-for="area in areas"
-                  :key="area.id"
-                >
-                  <div class="specialist-profile__table-area">
-                    <div class="cell">
-                      {{ area.number }}. {{ area.name }}
-                    </div>
-                  </div>
-
-                  <div
-                    class="specialist-profile__table-directions"
-                    v-if="area.development_directions.length"
-                  >
-                    <div
-                      class="specialist-profile__table-direction-row"
-                      v-for="direction in area.development_directions"
-                      :key="direction.id"
-                    >
-                      <div class="specialist-profile__table-direction">
-                        <div class="cell">
-                          {{ area.number }}.{{ direction.number }}.
-                          {{ direction.name }}
-                        </div>
-                      </div>
-
-                      <div
-                        class="specialist-profile__table-skills"
-                        v-if="direction.skills.length"
-                      >
-                        <div
-                          class="specialist-profile__table-skill-row"
-                          v-for="skill in direction.skills"
-                          :key="skill.id"
-                        >
-                          <div class="specialist-profile__table-skill">
-                            <div class="cell">
-                              {{ area.number }}.{{ direction.number }}.{{
-                                skill.number
-                              }}. {{ skill.name }}
-                            </div>
-                          </div>
-                          <div class="specialist-profile__table-coefficient">
-                            <div class="cell">
-                              {{ coefficientBySkillId[skill.id] }}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <a-divider orientation="left" v-else>
-        Специалист не развивает ни одного навыка
-      </a-divider>
     </div>
   </a-spin>
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
 
 export default {
   components: {},
@@ -145,19 +65,13 @@ export default {
 
       userData: null,
       specialties: [],
-      competence: [],
-      coefficientBySkillId: {},
     };
   },
   async created() {
     let fetches = [];
 
-    if (!this.areasFetched) {
-      fetches.push(this.fetchAreas());
-    }
     fetches.push(this.fetchUserData());
     fetches.push(this.fetchSpecialties());
-    fetches.push(this.fetchCompetence());
 
     this.loading = true;
     await Promise.all(fetches);
@@ -205,38 +119,8 @@ export default {
       }
     },
 
-    setCoefficientBySkillId(competence) {
-      for (let comp of competence) {
-        this.coefficientBySkillId[comp.skill_id] = comp.coefficient;
-      }
-    },
-
-    async fetchCompetence() {
-      try {
-        let res = await this.$axios.get("/api/competence/");
-        if (res.status === 200) {
-          this.competence = res.data;
-          this.setCoefficientBySkillId(res.data);
-        } else if (res.status === 400) {
-          this.$message.error("Ошибка при загрузке навыков специалиста");
-        } else {
-          this.$message.error("Ошибка при загрузке навыков специалиста");
-        }
-      } catch (e) {
-        this.$message.error("Ошибка при загрузке навыков специалиста");
-      } finally {
-        this.loading = false;
-      }
-    },
-    ...mapActions({
-      fetchAreas: "skills/fetchAreas",
-    }),
   },
   computed: {
-    ...mapGetters({
-      areasFetched: "skills/getFetched",
-      areas: "skills/getFilteredAreas",
-    }),
     mainSpecialties() {
       return this.specialties.filter((specialty) => {
         return specialty.is_main;
@@ -320,50 +204,4 @@ export default {
       display: flex
       flex: 1
       flex-direction: column
-
-    &-areas, &-directions, &-skills
-      display: flex
-      flex: 1
-      flex-direction: column
-    &-area-row, &-direction-row, &-skill-row
-      display: flex
-      flex: 1 1 auto
-      flex-direction: row
-    &-area, &-direction, &-coefficient
-      position: sticky
-      position: -webkit-sticky
-      min-width: 200px
-      width: 200px
-      padding: 10px 15px
-      border-right: 1px solid #ccc
-      border-bottom: 1px solid #ccc
-      .cell
-        position: sticky
-        position: -webkit-sticky
-        z-index: 1
-        top: 64px
-        word-break: break-word
-
-    &-coefficient
-      width: 120px
-      min-width: 120px
-      text-align: center
-    &-skill
-      min-width: 200px
-      flex: 1
-      padding: 10px 15px
-      border-right: 1px solid #ccc
-      border-bottom: 1px solid #ccc
-      .cell
-        position: sticky
-        position: -webkit-sticky
-        z-index: 1
-        top: 64px
-        word-break: break-word
-      &-link
-        color: #1890ff
-        transition: all .3s cubic-bezier(.645,.045,.355,1)
-        cursor: pointer
-        &:hover
-          color: #40a9ff
 </style>
