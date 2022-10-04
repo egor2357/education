@@ -171,7 +171,7 @@ export default {
           this.momentDateArr.length - 1
         ].format("YYYY-MM-DD")}`;
         let res = await this.$axios.get(
-          `/api/jobs/?${firstQParameter}&${secondQParameter}&specialist_id=${this.userInfo.specialistId}`
+          `/api/jobs/?${firstQParameter}&${secondQParameter}`
         );
         if (res.status === 200) {
           this.jobs = res.data;
