@@ -75,6 +75,11 @@ class Development_directionView(viewsets.ModelViewSet):
   queryset = Development_direction.objects.all().prefetch_related('skill_set__direction__area')
   serializer_class = Development_directionSerializer
 
+class ExerciseView(viewsets.ModelViewSet):
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
+  queryset = Exercise.objects.all().select_related('skill__direction__area')
+  serializer_class = ExerciseSerializer
+
 class SkillView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   queryset = Skill.objects.all().select_related('direction__area')

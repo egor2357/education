@@ -8,6 +8,7 @@ router.register(r'educational_areas', Educational_areaView, basename='Educationa
 router.register(r'educational_areas_all', EducationalAreasAllView, basename='EducationalAreasAll')
 router.register(r'development_directions', Development_directionView, basename='Development_direction')
 router.register(r'skills', SkillView, basename='Skill')
+router.register(r'exercises', ExerciseView, basename='Exercise')
 router.register(r'forms', FormView, basename='Form')
 router.register(r'methods', MethodView, basename='Method')
 router.register(r'option_files', Option_fileView, basename='Option_file')

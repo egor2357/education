@@ -50,17 +50,34 @@ class LoginSerializer(serializers.Serializer):
 
     return {'user': user}
 
+class ExerciseSerializer(FlexFieldsModelSerializer):
+  skill_id = serializers.PrimaryKeyRelatedField(
+    source='skill', queryset=Skill.objects.all()
+  )
+  skill_number = serializers.IntegerField(source='skill.number', read_only=True)
+
+  area_number = serializers.IntegerField(source='skill.direction.area.number', read_only=True)
+
+  direction_number = serializers.IntegerField(source='skill.direction.number', read_only=True)
+
+  class Meta:
+    model = Exercise
+    fields = (
+      'id',
+      'name', 'number',
+      'skill_id',
+      'skill_number',
+      'direction_number',
+      'area_number',
+    )
+
 class SkillSerializer(FlexFieldsModelSerializer):
   direction_id = serializers.PrimaryKeyRelatedField(
     source='direction', queryset=Development_direction.objects.all()
   )
-  def get_area_number(self, instance):
-    return instance.direction.area.number
-  area_number = serializers.SerializerMethodField()
+  area_number = serializers.IntegerField(source='direction.area.number', read_only=True)
 
-  def get_direction_number(self, instance):
-    return instance.direction.number
-  direction_number = serializers.SerializerMethodField()
+  direction_number = serializers.IntegerField(source='direction.number', read_only=True)
 
   class Meta:
     model = Skill
