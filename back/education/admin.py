@@ -42,16 +42,6 @@ class MethodAdmin(admin.ModelAdmin):
 
 admin.site.register(Method, MethodAdmin)
 
-class CompetenceInline(admin.TabularInline):
-  model = Competence
-  extra = 0
-
-class CompetenceAdmin(admin.ModelAdmin):
-  list_display = ('specialist', 'skill', 'coefficient')
-  list_filter = ('specialist', 'skill')
-
-admin.site.register(Competence, CompetenceAdmin)
-
 class SpecialtyInline(admin.TabularInline):
   model = Specialty
   extra = 0
@@ -66,7 +56,7 @@ class SpecialistAdmin(admin.ModelAdmin):
   search_fields = ('surname', 'name', 'patronymic', 'role')
   list_display = ('__str__', 'user', 'is_active')
   list_filter = ('is_active',)
-  inlines = (CompetenceInline, SpecialtyInline)
+  inlines = (SpecialtyInline,)
 
 admin.site.register(Specialist, SpecialistAdmin)
 

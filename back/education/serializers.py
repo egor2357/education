@@ -50,18 +50,6 @@ class LoginSerializer(serializers.Serializer):
 
     return {'user': user}
 
-class FilteredSkillListSerializer(serializers.ListSerializer):
-  def to_representation(self, data):
-    user=self.context['request'].user
-    if user.is_staff:
-      qs =  data.all()
-    else:
-      if user.specialist is not None:
-        qs = data.filter(competence__specialist=user.specialist).distinct()
-      else:
-        qs = Skill.objects.none()
-    return super(FilteredSkillListSerializer, self).to_representation(qs)
-
 class SkillSerializer(FlexFieldsModelSerializer):
   direction_id = serializers.PrimaryKeyRelatedField(
     source='direction', queryset=Development_direction.objects.all()
@@ -83,20 +71,6 @@ class SkillSerializer(FlexFieldsModelSerializer):
       'direction_number',
       'area_number'
     )
-    list_serializer_class = FilteredSkillListSerializer
-
-class SkillSerializerUnfiltered(SkillSerializer):
-  class Meta:
-    model = Skill
-    fields = (
-      'id',
-      'name', 'number',
-      'direction_id',
-      'direction_number',
-      'area_number',
-    )
-    list_serializer_class = serializers.ListSerializer
-
 
 class Activity_skillSerializer(serializers.ModelSerializer):
   skill_id = serializers.PrimaryKeyRelatedField(
@@ -210,9 +184,6 @@ class UserSpecialistSerializer(FlexFieldsModelSerializer):
   activities_id = serializers.PrimaryKeyRelatedField(
     source='activities', many=True, queryset=Activity.objects.all()
   )
-  skills_id = serializers.PrimaryKeyRelatedField(
-    source='skills', many=True, queryset=Skill.objects.all()
-  )
 
   class Meta:
     model = Specialist
@@ -221,7 +192,6 @@ class UserSpecialistSerializer(FlexFieldsModelSerializer):
       'surname', 'name',
       'patronymic', 'role',
       'activities_id',
-      'skills_id',
       '__str__',
     )
 
@@ -257,27 +227,6 @@ class SpecialtySerializer(FlexFieldsModelSerializer):
       'activity'
     )
 
-class CompetenceSerializer(FlexFieldsModelSerializer):
-  skill_id = serializers.PrimaryKeyRelatedField(
-    source='skill', queryset=Skill.objects.all()
-  )
-  skill = SkillSerializer(
-    read_only=True,
-    fields=['id', 'name', 'number']
-  )
-  specialist_id = serializers.PrimaryKeyRelatedField(
-    source='specialist',queryset=Specialist.objects.all()
-  )
-  coefficient = serializers.FloatField(min_value= 0, max_value=1)
-  class Meta:
-    model = Competence
-    fields = (
-      'id',
-      'skill_id', 'specialist_id',
-      'coefficient',
-      'skill'
-    )
-
 class SpecialistSerializer(FlexFieldsModelSerializer):
   user = UserSerializer(
     read_only=True,
@@ -286,10 +235,6 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
   activities = SpecialtySerializer(
     source='specialty_set' , many=True, read_only=True,
     fields=['activity', 'is_main', 'id']
-  )
-  skills = CompetenceSerializer(
-    source='competence_set', many=True, read_only=True,
-    fields=['skill', 'coefficient', 'id']
   )
 
   is_active = serializers.BooleanField(required=False, read_only=True)
@@ -379,28 +324,15 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
       'surname', 'name',
       'patronymic', 'role',
       'is_active',
-      'skills', 'activities',
+      'activities',
       'user',
       'username', 'password', 'is_staff',
       '__str__'
     )
     expandable_fields = {
       'activities': ActivitySerializer,
-      'skills': SkillSerializer,
       'presence': PresenceSerializer,
     }
-
-class FilteredDevelopment_directionListSerializer(serializers.ListSerializer):
-  def to_representation(self, data):
-    user=self.context['request'].user
-    if user.is_staff:
-      qs =  data.all()
-    else:
-      if user.specialist is not None:
-        qs = data.filter(skill__competence__specialist=user.specialist).distinct()
-      else:
-        qs = Development_direction.objects.none()
-    return super(FilteredDevelopment_directionListSerializer, self).to_representation(qs)
 
 class Development_directionSerializer(serializers.ModelSerializer):
   area_id = serializers.PrimaryKeyRelatedField(
@@ -416,19 +348,6 @@ class Development_directionSerializer(serializers.ModelSerializer):
       'skills',
       'name', 'number',
     )
-    list_serializer_class = FilteredDevelopment_directionListSerializer
-
-class FilteredEducational_areaListSerializer(serializers.ListSerializer):
-  def to_representation(self, data):
-    user=self.context['request'].user
-    if user.is_staff:
-      qs = data.all()
-    else:
-      if user.specialist is not None:
-        qs = data.filter(development_direction__skill__competence__specialist=user.specialist).distinct()
-      else:
-        qs = Educational_area.objects.none()
-    return super(FilteredEducational_areaListSerializer, self).to_representation(qs)
 
 class Educational_areaSerializer(FlexFieldsModelSerializer):
   development_directions = Development_directionSerializer(
@@ -437,7 +356,6 @@ class Educational_areaSerializer(FlexFieldsModelSerializer):
   class Meta:
     model = Educational_area
     fields = ('id', 'name', 'number', 'development_directions')
-    list_serializer_class = FilteredEducational_areaListSerializer
 
 class EducationalAreaOnlySerializer(FlexFieldsModelSerializer):
   class Meta:
@@ -494,7 +412,7 @@ class OptionSerializer(serializers.ModelSerializer):
     source='option_file_set', many=True, read_only=True
   )
   methods = MethodSerializer(read_only=True, many=True)
-  skills = SkillSerializerUnfiltered(read_only=True, many=True)
+  skills = SkillSerializer(read_only=True, many=True)
 
   class Meta:
     model = Option

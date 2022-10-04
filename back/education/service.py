@@ -61,12 +61,8 @@ def job_update_related(job, request):
 
     Job_file.objects.bulk_create(option_files_to_save)
 
-
   if 'reports' in request.data:
     skills = json.loads(request.data['reports'])
-    available_skills = request.user.specialist.skills.all()
-    available_skills_ids = list(available_skills.values_list('id', flat=True))
-    skills = set(available_skills_ids) & set(skills)
 
     curr_skill_reports_ids = list(job.skill_report_set.all().values_list('skill_id', flat=True))
 
@@ -91,9 +87,6 @@ def job_update_related(job, request):
     job.methods.set(methods)
 
   if 'marks' in request.data:
-    user = request.user
-    coeff_by_skill_id = dict(list(user.specialist.competence_set.all().values_list('skill_id')))
-
     marks = request.data.get('marks', [])
     for mark in marks:
       skill_report = Skill_report.objects.get(pk=mark['id'])

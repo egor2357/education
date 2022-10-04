@@ -138,15 +138,7 @@ class JobView(viewsets.ModelViewSet):
     return jobs_by_day_arr
 
   def get_queryset(self):
-    user = self.request.user
-    jobs_qs = Job.objects.none()
-    if user.is_staff:
-      jobs_qs = Job.objects.all()
-    else:
-      jobs_qs = Job.objects.all()
-      own_jobs = Q(specialist=user.specialist)
-      competence_jobs = Q(reports__in=user.specialist.skills.all())
-      jobs_qs = Job.objects.filter(own_jobs | competence_jobs).distinct()
+    jobs_qs = Job.objects.all()
 
     return (
       jobs_qs.select_related(
@@ -443,7 +435,6 @@ class SpecialistView(viewsets.ModelViewSet):
   queryset = (Specialist.objects.all().filter(is_active=True)
                                   .select_related('user')
                                   .prefetch_related(
-                                    'competence_set__skill',
                                     'specialty_set__activity',
                                     'presence_set__presence',
                                     'presence_set__main_interval'
@@ -478,14 +469,8 @@ class Skill_reportView(viewsets.ModelViewSet):
   ordering_fields = ['job__date', 'job__activity__name', 'job__specialist__surname']
 
   def get_queryset(self):
-    user = self.request.user
-    if user.is_staff:
-      qs =  Skill_report.objects.all()
-    else:
-      if user.specialist is not None:
-        qs = Skill_report.objects.filter(skill__in=user.specialist.skills.all())
-      else:
-        qs = Skill_report.objects.none()
+    qs =  Skill_report.objects.all()
+
     return qs.select_related(
                               'skill__direction__area',
                               'job__activity',
@@ -525,21 +510,6 @@ class Skill_reportView(viewsets.ModelViewSet):
 
     return Response(calls_by_id)
 
-
-class CompetenceView(viewsets.ModelViewSet):
-  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  serializer_class = CompetenceSerializer
-
-  def get_queryset(self):
-    user = self.request.user
-    if user.is_staff:
-      return Competence.objects.all().select_related('skill')
-    else:
-      if user.specialist is None:
-        return Competence.objects.none()
-      else:
-        return (Competence.objects.filter(specialist=user.specialist)
-                                  .select_related('skill'))
 
 class SpecialtyView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
