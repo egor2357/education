@@ -497,7 +497,7 @@ class Skill_reportView(viewsets.ModelViewSet):
     skill_reports = self.filter_queryset(self.get_queryset())
     skill_reports = skill_reports.select_related(None)
 
-    skill_reports = skill_reports.values('skill_id', 'mark', 'coefficient')
+    skill_reports = skill_reports.values('skill_id', 'mark')
 
     mark_coeffs = [0.33, 0.66, 1]
     calls_by_id = {}
@@ -518,46 +518,13 @@ class Skill_reportView(viewsets.ModelViewSet):
 
       if not skill_report['mark'] is None:
         call['called'] += 1
-        call['value'] += mark_coeffs[skill_report['mark']] * skill_report['coefficient']
+        call['value'] += mark_coeffs[skill_report['mark']]
 
     for skill_id in calls_by_id.keys():
       calls_by_id[skill_id]['value'] = round(calls_by_id[skill_id]['value'] / calls_by_id[skill_id]['planned'], 2)
 
     return Response(calls_by_id)
 
-  @action(
-    detail=False, methods=['get'],
-    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
-    serializer_class=Skill_reportSerializer
-  )
-  def set_current_coefficients(self, request, *args, **kwargs):
-    skill_reports = self.filter_queryset(self.get_queryset())
-
-    coeff_by_spec_id_skill_id = {}
-    all_competence = Competence.objects.all()
-    for competence in all_competence:
-      if not competence.specialist_id in coeff_by_spec_id_skill_id.keys():
-        coeff_by_spec_id_skill_id[competence.specialist_id] = {}
-
-      coeff_by_spec_id_skill_id[competence.specialist_id][competence.skill_id] = competence.coefficient
-
-    absent_coeffs = []
-
-    for skill_report in skill_reports:
-      spec_id = skill_report.job.specialist_id
-      skill_id = skill_report.skill_id
-      try:
-        skill_report.coefficient = coeff_by_spec_id_skill_id[spec_id][skill_id]
-        skill_report.save()
-      except:
-        absent_coeffs.append(
-          '{0} не имеет навыка {1}'.format(
-            skill_report.job.specialist.__str__(),
-            skill_report.skill.name
-          )
-        )
-
-    return Response({'absent': absent_coeffs})
 
 class CompetenceView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)

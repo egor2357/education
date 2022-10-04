@@ -626,7 +626,6 @@ class Skill_reportSerializer(FlexFieldsModelSerializer):
   )
 
   skill = SkillSerializer(read_only=True)
-  coefficient = serializers.FloatField(read_only=True)
 
   class Meta:
     model = Skill_report
@@ -634,7 +633,7 @@ class Skill_reportSerializer(FlexFieldsModelSerializer):
       'id',
       'job_id', 'job',
       'skill_id', 'skill',
-      'coefficient', 'mark',
+      'mark',
     )
 
 class MissionSerializer(FlexFieldsModelSerializer):

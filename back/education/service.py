@@ -92,12 +92,11 @@ def job_update_related(job, request):
 
   if 'marks' in request.data:
     user = request.user
-    coeff_by_skill_id = dict(list(user.specialist.competence_set.all().values_list('skill_id', 'coefficient')))
+    coeff_by_skill_id = dict(list(user.specialist.competence_set.all().values_list('skill_id')))
 
     marks = request.data.get('marks', [])
     for mark in marks:
       skill_report = Skill_report.objects.get(pk=mark['id'])
-      skill_report.coefficient = coeff_by_skill_id[skill_report.skill_id]
       skill_report.mark = mark['mark']
       skill_report.save()
 

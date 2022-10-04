@@ -132,7 +132,7 @@ class Skill_reportInline(admin.TabularInline):
 
 class Skill_reportAdmin(admin.ModelAdmin):
   list_filter = ('job', 'skill')
-  list_display = ('job', 'skill', 'mark', 'coefficient',)
+  list_display = ('job', 'skill', 'mark')
 
 admin.site.register(Skill_report, Skill_reportAdmin)
 
