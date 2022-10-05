@@ -64,22 +64,22 @@ def job_update_related(job, request):
   if 'reports' in request.data:
     skills = json.loads(request.data['reports'])
 
-    curr_skill_reports_ids = list(job.skill_report_set.all().values_list('skill_id', flat=True))
+    curr_exercise_reports_ids = list(job.exercise_report_set.all().values_list('skill_id', flat=True))
 
     skills_to_save = []
     remaining_skills = []
 
     for skill_id in skills:
-      if skill_id not in curr_skill_reports_ids:
+      if skill_id not in curr_exercise_reports_ids:
         skills_to_save.append(
-          Skill_report(job=job, skill_id=skill_id)
+          Exercise_report(job=job, skill_id=skill_id)
         )
       else:
         remaining_skills.append(skill_id)
 
-    skill_reports_qs = job.skill_report_set.all()
-    skill_reports_qs.exclude(skill_id__in=remaining_skills).delete()
-    Skill_report.objects.bulk_create(skills_to_save)
+    exercise_reports_qs = job.exercise_report_set.all()
+    exercise_reports_qs.exclude(skill_id__in=remaining_skills).delete()
+    exercise_report.objects.bulk_create(skills_to_save)
 
   if 'methods' in request.data:
     methods = json.loads(request.data['methods'])
@@ -89,9 +89,9 @@ def job_update_related(job, request):
   if 'marks' in request.data:
     marks = request.data.get('marks', [])
     for mark in marks:
-      skill_report = Skill_report.objects.get(pk=mark['id'])
-      skill_report.mark = mark['mark']
-      skill_report.save()
+      exercise_report = exercise_report.objects.get(pk=mark['id'])
+      exercise_report.mark = mark['mark']
+      exercise_report.save()
 
 def check_presence_clashes(specialist, date_from, date_to, exclude_presence=None):
   spec_presense_qs = Presence.objects.filter(specialist=specialist)

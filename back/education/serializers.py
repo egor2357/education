@@ -462,7 +462,7 @@ class Job_fileSerializer(serializers.ModelSerializer):
       'name',
     )
 
-class Skill_reportForJobSerializer(FlexFieldsModelSerializer):
+class Exercise_reportForJobSerializer(FlexFieldsModelSerializer):
   job_id = serializers.PrimaryKeyRelatedField(
     source='job', queryset=Job.objects.all()
   )
@@ -473,7 +473,7 @@ class Skill_reportForJobSerializer(FlexFieldsModelSerializer):
   skill = SkillSerializer(read_only=True)
 
   class Meta:
-    model = Skill_report
+    model = Exercise_report
     fields = (
       'id',
       'job_id',
@@ -506,8 +506,8 @@ class JobSerializer(FlexFieldsModelSerializer):
     read_only=True,
   )
   methods = MethodSerializer(read_only=True, many=True)
-  reports = Skill_reportForJobSerializer(
-    source='skill_report_set',
+  reports = Exercise_reportForJobSerializer(
+    source='exercise_report_set',
     many=True, read_only=True,
   )
   filled_reports_count = serializers.IntegerField(read_only=True)
@@ -551,7 +551,7 @@ class JobSerializer(FlexFieldsModelSerializer):
       'filled_reports_count',
     )
 
-class Skill_reportSerializer(FlexFieldsModelSerializer):
+class Exercise_reportSerializer(FlexFieldsModelSerializer):
   job_id = serializers.PrimaryKeyRelatedField(
     source='job', queryset=Job.objects.all()
   )
@@ -567,7 +567,7 @@ class Skill_reportSerializer(FlexFieldsModelSerializer):
   skill = SkillSerializer(read_only=True)
 
   class Meta:
-    model = Skill_report
+    model = Exercise_report
     fields = (
       'id',
       'job_id', 'job',

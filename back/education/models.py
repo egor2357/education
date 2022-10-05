@@ -485,7 +485,7 @@ class Job(models.Model):
   )
   methods = models.ManyToManyField(Method, verbose_name='Формы')
 
-  reports = models.ManyToManyField('Skill', through='Skill_report', verbose_name='Отчеты по навыкам')
+  reports = models.ManyToManyField('Skill', through='Exercise_report', verbose_name='Отчеты по упражнениям')
 
   date = models.DateField(verbose_name='Дата проведения')
   start_time = models.TimeField(verbose_name='Время начала')
@@ -597,7 +597,7 @@ def job_file_model_delete(sender, instance, **kwargs):
   if instance.file.name:
     instance.file.delete(False)
 
-class Skill_report(models.Model):
+class Exercise_report(models.Model):
   MARK_CHOICES = (
     (0, 'Неудовлетворительно'),
     (1, 'Удовлетворительно'),
@@ -619,9 +619,9 @@ class Skill_report(models.Model):
     verbose_name='Успешность оттачивания навыка')
 
   class Meta:
-    db_table = 'skill_report'
-    verbose_name = 'Отчет по навыку'
-    verbose_name_plural = 'Отчеты по навыку'
+    db_table = 'exercise_report'
+    verbose_name = 'Отчет по упражнению'
+    verbose_name_plural = 'Отчеты по упражнению'
     ordering = ['job', 'skill']
     unique_together = ('job', 'skill')
 

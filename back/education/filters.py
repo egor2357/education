@@ -76,7 +76,7 @@ class SpecialistFilter(FilterSet):
 
     ]
 
-class Skill_reportFilter(FilterSet):
+class Exercise_reportFilter(FilterSet):
   date_from = django_filters.DateFilter(
     label='Начало интервала', field_name='job',
     lookup_expr='date__gte',
@@ -94,7 +94,7 @@ class Skill_reportFilter(FilterSet):
     lookup_expr='exact'
   )
   class Meta:
-    model = Skill_report
+    model = Exercise_report
     fields = [
       'date_from',
       'date_to',

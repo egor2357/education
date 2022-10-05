@@ -157,11 +157,11 @@ class JobView(viewsets.ModelViewSet):
       )
       .prefetch_related(
         'job_file_set',
-        'skill_report_set__skill__direction__area',
+        'exercise_report_set__skill__direction__area',
         'methods__form',
       )
       .annotate(
-        filled_reports_count=Count('skill_report', filter=Q(skill_report__mark__isnull=False))
+        filled_reports_count=Count('exercise_report', filter=Q(exercise_report__mark__isnull=False))
       )
     )
 
@@ -470,15 +470,15 @@ class Job_fileView(viewsets.ModelViewSet):
   queryset = Job_file.objects.all()
   serializer_class = Job_fileSerializer
 
-class Skill_reportView(viewsets.ModelViewSet):
+class Exercise_reportView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated,)
-  serializer_class = Skill_reportSerializer
+  serializer_class = Exercise_reportSerializer
   filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
-  filterset_class = Skill_reportFilter
+  filterset_class = Exercise_reportFilter
   ordering_fields = ['job__date', 'job__activity__name', 'job__specialist__surname']
 
   def get_queryset(self):
-    qs =  Skill_report.objects.all()
+    qs =  Exercise_report.objects.all()
 
     return qs.select_related(
                               'skill__direction__area',
@@ -488,16 +488,16 @@ class Skill_reportView(viewsets.ModelViewSet):
 
   @action(detail=False, methods=['get'])
   def statistics(self, request, *args, **kwargs):
-    skill_reports = self.filter_queryset(self.get_queryset())
-    skill_reports = skill_reports.select_related(None)
+    exercise_reports = self.filter_queryset(self.get_queryset())
+    exercise_reports = exercise_reports.select_related(None)
 
-    skill_reports = skill_reports.values('skill_id', 'mark')
+    exercise_reports = exercise_reports.values('skill_id', 'mark')
 
     mark_coeffs = [0.33, 0.66, 1]
     calls_by_id = {}
 
-    for skill_report in skill_reports:
-      skill_id = skill_report['skill_id']
+    for exercise_report in exercise_reports:
+      skill_id = exercise_report['skill_id']
 
       if not skill_id in calls_by_id.keys():
         calls_by_id[skill_id] = {
@@ -506,13 +506,13 @@ class Skill_reportView(viewsets.ModelViewSet):
           'value': 0,
         }
 
-      call = calls_by_id[skill_report['skill_id']]
+      call = calls_by_id[exercise_report['skill_id']]
 
       call['planned'] += 1
 
-      if not skill_report['mark'] is None:
+      if not exercise_report['mark'] is None:
         call['called'] += 1
-        call['value'] += mark_coeffs[skill_report['mark']]
+        call['value'] += mark_coeffs[exercise_report['mark']]
 
     for skill_id in calls_by_id.keys():
       calls_by_id[skill_id]['value'] = round(calls_by_id[skill_id]['value'] / calls_by_id[skill_id]['planned'], 2)
