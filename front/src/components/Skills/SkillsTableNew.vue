@@ -157,15 +157,8 @@
                               "
                             />
                             <span>
-                              {{
-                                [
-                                  area.number,
-                                  direction.number,
-                                  skill.number
-                                ].join(".") +
-                                  ". " +
-                                  skill.name
-                              }}
+                              {{ [ area.number, direction.number, skill.number].join(".") +
+                                  ". " + skill.name }}
                             </span>
                             <a-dropdown
                               :trigger="['click']"
@@ -187,12 +180,7 @@
                                 </a-menu-item>
                                 <a-menu-item
                                   key="1"
-                                  @click="
-                                    $emit('onEditItem', {
-                                      type: 3,
-                                      item: skill
-                                    })
-                                  "
+                                  @click="$emit('onEditItem', { type: 3, item: skill })"
                                 >
                                   Изменить
                                 </a-menu-item>
@@ -224,27 +212,26 @@
                               class="skill-table-exercises"
                             >
                               <div class="skill-table-exercises__content">
-<!--                                <div-->
-<!--                                  v-if="!skill.exercises.length"-->
-<!--                                  class="skill-table__cell"-->
-<!--                                >-->
-<!--                                  <a-->
-<!--                                    @click="-->
-<!--                                      $emit('onAddItem', {-->
-<!--                                        type: 4,-->
-<!--                                        item: skill-->
-<!--                                      })-->
-<!--                                    "-->
-<!--                                    >Добавить упражнение</a-->
-<!--                                  >-->
-<!--                                </div>-->
-                                <div>
+                                <div
+                                  v-if="!skill.exercises.length"
+                                  class="skill-table__cell"
+                                >
+                                  <a @click="$emit('onAddItem', {type: 4, item: skill})">
+                                    Добавить упражнение
+                                  </a>
+                                </div>
+                                <div v-else>
                                   <div
-                                    v-for="i in 3"
-                                    :key="i"
+                                    v-for="exercise in skill.exercises"
+                                    :key="exercise.id"
                                     class="skill-table__cell"
                                   >
-                                    <span>1.2.10.1 Броски {{ i }}</span>
+                                    <span>
+                                      {{
+                                        [ area.number, direction.number, skill.number, exercise.number].join(".") +
+                                        '. ' + exercise.name
+                                      }}
+                                    </span>
                                     <a-dropdown
                                       :trigger="['click']"
                                       placement="bottomLeft"
@@ -257,12 +244,7 @@
                                       <a-menu slot="overlay">
                                         <a-menu-item
                                           key="1"
-                                          @click="
-                                            $emit('onEditItem', {
-                                              type: 4,
-                                              item: exercise
-                                            })
-                                          "
+                                          @click="$emit('onEditItem', { type: 4, item: exercise })"
                                         >
                                           Изменить
                                         </a-menu-item>
@@ -270,7 +252,7 @@
                                           key="2"
                                           @click="
                                             $emit('onDeleteItem', {
-                                              id: direction.id,
+                                              id: exercise.id,
                                               name:
                                                 [
                                                   area.number,

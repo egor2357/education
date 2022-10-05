@@ -143,6 +143,14 @@ export default {
               dispatchName = "skills/editSkill";
               successCode = 200;
               successMessage = "Навык успешно изменен";
+            } else if (this.type === 4 && this.adding) {
+              dispatchName = "skills/addExercise";
+              successCode = 201;
+              successMessage = "Упражнение успешно добавлено";
+            } else if (this.type === 4 && !this.adding) {
+              dispatchName = "skills/editExercise";
+              successCode = 200;
+              successMessage = "Упражнение успешно изменено";
             }
             try {
               let res = await this.$store.dispatch(dispatchName, this.form);
@@ -219,6 +227,14 @@ export default {
         ? (this.form.number = this.editableData.lastNumberSkill)
         : "";
       this.title += "навыка";
+    } else if (this.type === 4) {
+      this.editableData.skillId
+        ? (this.form.skill_id = this.editableData.skillId)
+        : "";
+      this.editableData.lastNumberExercise
+        ? (this.form.number = this.editableData.lastNumberExercise)
+        : "";
+      this.title += "упражнения";
     }
     document.addEventListener("keydown", this.keydown);
   },

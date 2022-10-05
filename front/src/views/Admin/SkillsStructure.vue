@@ -116,6 +116,9 @@ export default {
       } else if (type === 3) {
         dispatchName = "skills/deleteSkill";
         successMessage = "Навык успешно удален";
+      } else if (type === 4) {
+        dispatchName = "skills/deleteExercise";
+        successMessage = "Упражнение успешно удален";
       } else {
         this.loading = false;
         return;
@@ -147,6 +150,9 @@ export default {
         content = "Будут удалены все связанные навыки.";
       } else if (type === 3) {
         title = `Вы действительно хотите удалить навык "${name}"?`;
+        content = "";
+      } else if (type === 4) {
+        title = `Вы действительно хотите удалить упражнение "${name}"?`;
         content = "";
       }
       let that = this;
