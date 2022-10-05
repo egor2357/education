@@ -19,11 +19,11 @@ def option_update_related(option, request):
     option.option_file_set.exclude(pk__in=files_id).delete()
     Option_file.objects.bulk_create(files_to_save)
 
-  if 'skills' in request.data:
-    skills = json.loads(request.data['skills'])
-    skills = Skill.objects.filter(pk__in=skills)
-    option.skills.clear()
-    option.skills.set(skills)
+  if 'exercises' in request.data:
+    exercises = json.loads(request.data['exercises'])
+    exercises = Exercise.objects.filter(pk__in=exercises)
+    option.exercises.clear()
+    option.exercises.set(exercises)
 
   if 'methods' in request.data:
     methods = json.loads(request.data['methods'])
@@ -62,24 +62,24 @@ def job_update_related(job, request):
     Job_file.objects.bulk_create(option_files_to_save)
 
   if 'reports' in request.data:
-    skills = json.loads(request.data['reports'])
+    exercises = json.loads(request.data['reports'])
 
-    curr_exercise_reports_ids = list(job.exercise_report_set.all().values_list('skill_id', flat=True))
+    curr_exercise_reports_ids = list(job.exercise_report_set.all().values_list('exercise_id', flat=True))
 
-    skills_to_save = []
-    remaining_skills = []
+    exercises_to_save = []
+    remaining_exercises = []
 
-    for skill_id in skills:
-      if skill_id not in curr_exercise_reports_ids:
-        skills_to_save.append(
-          Exercise_report(job=job, skill_id=skill_id)
+    for exercise_id in exercises:
+      if exercise_id not in curr_exercise_reports_ids:
+        exercises_to_save.append(
+          Exercise_report(job=job, exercise_id=exercise_id)
         )
       else:
-        remaining_skills.append(skill_id)
+        remaining_exercises.append(exercise_id)
 
     exercise_reports_qs = job.exercise_report_set.all()
-    exercise_reports_qs.exclude(skill_id__in=remaining_skills).delete()
-    exercise_report.objects.bulk_create(skills_to_save)
+    exercise_reports_qs.exclude(exercise_id__in=remaining_exercises).delete()
+    exercise_report.objects.bulk_create(exercises_to_save)
 
   if 'methods' in request.data:
     methods = json.loads(request.data['methods'])

@@ -433,7 +433,7 @@ class OptionSerializer(serializers.ModelSerializer):
     source='option_file_set', many=True, read_only=True
   )
   methods = MethodSerializer(read_only=True, many=True)
-  skills = SkillSerializer(read_only=True, many=True)
+  exercises = ExerciseSerializer(read_only=True, many=True)
 
   class Meta:
     model = Option
@@ -442,7 +442,7 @@ class OptionSerializer(serializers.ModelSerializer):
       'comment',
       'specialist_id',
       'activity_id', 'option_files',
-      'skills', 'methods',
+      'exercises', 'methods',
     )
 
 class Job_fileSerializer(serializers.ModelSerializer):
@@ -466,18 +466,18 @@ class Exercise_reportForJobSerializer(FlexFieldsModelSerializer):
   job_id = serializers.PrimaryKeyRelatedField(
     source='job', queryset=Job.objects.all()
   )
-  skill_id = serializers.PrimaryKeyRelatedField(
-    source='skill', queryset=Skill.objects.all()
+  exercise_id = serializers.PrimaryKeyRelatedField(
+    source='exercise', queryset=Exercise.objects.all()
   )
 
-  skill = SkillSerializer(read_only=True)
+  exercise = ExerciseSerializer(read_only=True)
 
   class Meta:
     model = Exercise_report
     fields = (
       'id',
       'job_id',
-      'skill_id', 'skill',
+      'exercise_id', 'exercise',
       'mark',
     )
 
@@ -555,8 +555,8 @@ class Exercise_reportSerializer(FlexFieldsModelSerializer):
   job_id = serializers.PrimaryKeyRelatedField(
     source='job', queryset=Job.objects.all()
   )
-  skill_id = serializers.PrimaryKeyRelatedField(
-    source='skill', queryset=Skill.objects.all()
+  exercise_id = serializers.PrimaryKeyRelatedField(
+    source='exercise', queryset=Exercise.objects.all()
   )
 
   job = JobSerializer(
@@ -564,14 +564,14 @@ class Exercise_reportSerializer(FlexFieldsModelSerializer):
     omit=['schedule', 'reports', 'methods', 'job_files']
   )
 
-  skill = SkillSerializer(read_only=True)
+  exercise = ExerciseSerializer(read_only=True)
 
   class Meta:
     model = Exercise_report
     fields = (
       'id',
       'job_id', 'job',
-      'skill_id', 'skill',
+      'exercise_id', 'exercise',
       'mark',
     )
 

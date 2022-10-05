@@ -89,8 +89,8 @@ class Exercise_reportFilter(FilterSet):
     label='Затронут ли навык', field_name='mark',
     lookup_expr='isnull', exclude=True,
   )
-  skill_id = django_filters.NumberFilter(
-    label='Идентификатор навыка', field_name='skill_id',
+  exercise_id = django_filters.NumberFilter(
+    label='Идентификатор упражнения', field_name='exercise_id',
     lookup_expr='exact'
   )
   class Meta:
@@ -99,7 +99,7 @@ class Exercise_reportFilter(FilterSet):
       'date_from',
       'date_to',
       'is_affected',
-      'skill_id',
+      'exercise_id',
     ]
 
 class OptionFilter(FilterSet):

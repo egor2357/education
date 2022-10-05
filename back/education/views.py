@@ -157,7 +157,7 @@ class JobView(viewsets.ModelViewSet):
       )
       .prefetch_related(
         'job_file_set',
-        'exercise_report_set__skill__direction__area',
+        'exercise_report_set__exercise__skill__direction__area',
         'methods__form',
       )
       .annotate(
@@ -286,7 +286,7 @@ class OptionView(viewsets.ModelViewSet):
     Option.objects.all()
                   .prefetch_related(
                     'option_file_set',
-                    'skills__direction__area',
+                    'exercises__skill__direction__area',
                     'methods__form',
                   )
   )
@@ -481,7 +481,7 @@ class Exercise_reportView(viewsets.ModelViewSet):
     qs =  Exercise_report.objects.all()
 
     return qs.select_related(
-                              'skill__direction__area',
+                              'exercise__skill__direction__area',
                               'job__activity',
                               'job__specialist',
                             )
@@ -491,22 +491,22 @@ class Exercise_reportView(viewsets.ModelViewSet):
     exercise_reports = self.filter_queryset(self.get_queryset())
     exercise_reports = exercise_reports.select_related(None)
 
-    exercise_reports = exercise_reports.values('skill_id', 'mark')
+    exercise_reports = exercise_reports.values('exercise_id', 'mark')
 
     mark_coeffs = [0.33, 0.66, 1]
     calls_by_id = {}
 
     for exercise_report in exercise_reports:
-      skill_id = exercise_report['skill_id']
+      exercise_id = exercise_report['exercise_id']
 
-      if not skill_id in calls_by_id.keys():
-        calls_by_id[skill_id] = {
+      if not exercise_id in calls_by_id.keys():
+        calls_by_id[exercise_id] = {
           'planned': 0,
           'called': 0,
           'value': 0,
         }
 
-      call = calls_by_id[exercise_report['skill_id']]
+      call = calls_by_id[exercise_report['exercise_id']]
 
       call['planned'] += 1
 
@@ -514,8 +514,8 @@ class Exercise_reportView(viewsets.ModelViewSet):
         call['called'] += 1
         call['value'] += mark_coeffs[exercise_report['mark']]
 
-    for skill_id in calls_by_id.keys():
-      calls_by_id[skill_id]['value'] = round(calls_by_id[skill_id]['value'] / calls_by_id[skill_id]['planned'], 2)
+    for exercise_id in calls_by_id.keys():
+      calls_by_id[exercise_id]['value'] = round(calls_by_id[exercise_id]['value'] / calls_by_id[exercise_id]['planned'], 2)
 
     return Response(calls_by_id)
 

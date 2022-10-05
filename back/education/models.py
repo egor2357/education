@@ -371,7 +371,7 @@ class Option(models.Model):
     on_delete=models.CASCADE, verbose_name='Вид деятельсности')
 
   methods = models.ManyToManyField(Method, verbose_name='Формы')
-  skills = models.ManyToManyField(Skill, verbose_name='Развиваемые на занятии навыки')
+  exercises = models.ManyToManyField(Exercise, verbose_name='Выполняемые на занятии упражнения')
 
   topic = models.TextField(verbose_name='Тема занятия')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
@@ -485,7 +485,7 @@ class Job(models.Model):
   )
   methods = models.ManyToManyField(Method, verbose_name='Формы')
 
-  reports = models.ManyToManyField('Skill', through='Exercise_report', verbose_name='Отчеты по упражнениям')
+  reports = models.ManyToManyField('Exercise', through='Exercise_report', verbose_name='Отчеты по упражнениям')
 
   date = models.DateField(verbose_name='Дата проведения')
   start_time = models.TimeField(verbose_name='Время начала')
@@ -608,9 +608,9 @@ class Exercise_report(models.Model):
     Job, null=False,
     on_delete=models.CASCADE, verbose_name='Занятие'
   )
-  skill = models.ForeignKey(
-    Skill, null=False,
-    on_delete=models.CASCADE, verbose_name='Навык'
+  exercise = models.ForeignKey(
+    Exercise, null=False,
+    on_delete=models.CASCADE, verbose_name='Упражнение'
   )
 
   mark = models.PositiveSmallIntegerField(
@@ -622,8 +622,8 @@ class Exercise_report(models.Model):
     db_table = 'exercise_report'
     verbose_name = 'Отчет по упражнению'
     verbose_name_plural = 'Отчеты по упражнению'
-    ordering = ['job', 'skill']
-    unique_together = ('job', 'skill')
+    ordering = ['job', 'exercise']
+    unique_together = ('job', 'exercise')
 
   def __str__(self):
     return 'Оценка за {0}: {1}'.format(

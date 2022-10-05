@@ -108,7 +108,7 @@ class OptionAdmin(admin.ModelAdmin):
   search_fields = ('topic', 'comment')
   list_display = ('specialist', 'activity', 'topic')
   list_filter = ('specialist', 'activity')
-  filter_horizontal = ('skills',)
+  filter_horizontal = ('exercises',)
   inlines = (Option_fileInline,)
 
 admin.site.register(Option, OptionAdmin)
@@ -127,8 +127,8 @@ class Exercise_reportInline(admin.TabularInline):
   extra = 0
 
 class Exercise_reportAdmin(admin.ModelAdmin):
-  list_filter = ('job', 'skill')
-  list_display = ('job', 'skill', 'mark')
+  list_filter = ('job', 'exercise')
+  list_display = ('job', 'exercise', 'mark')
 
 admin.site.register(Exercise_report, Exercise_reportAdmin)
 
