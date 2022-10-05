@@ -83,7 +83,7 @@
 
               <a-form-model-item
                 prop="reports"
-                label="Навыки"
+                label="Упражнения"
                 key="reports"
                 :validateStatus="fields['reports'].validateStatus"
                 :help="fields['reports'].help"
@@ -96,7 +96,7 @@
                     'max-width': '566px',
                     'overflow-y': 'auto',
                   }"
-                  placeholder="Выберите навыки"
+                  placeholder="Выберите упражнения"
                   allow-clear
                   multiple
                 >
@@ -117,10 +117,18 @@
                       <a-tree-select-node
                         v-for="skill in direction.skills"
                         :key="'skill' + skill.id"
-                        :value="skill.id"
+                        :value="'skill' + skill.id"
+                        :selectable="false"
                         :title="`${area.number}.${direction.number}.${skill.number}. ${skill.name}`"
-                        :isLeaf="true"
                       >
+                        <a-tree-select-node
+                          v-for="exercise in skill.exercises"
+                          :key="'exercise' + exercise.id"
+                          :value="exercise.id"
+                          :title="`${area.number}.${direction.number}.${skill.number}.${exercise.number}. ${exercise.name}`"
+                          :isLeaf="true"
+                        >
+                        </a-tree-select-node>
                       </a-tree-select-node>
                     </a-tree-select-node>
                   </a-tree-select-node>
@@ -222,9 +230,7 @@
                   :key="report.id"
                 >
                   <div class="job-details__report-name">
-                    {{ report.skill.area_number }}.{{
-                      report.skill.direction_number
-                    }}.{{ report.skill.number }}. {{ report.skill.name }}
+                    {{ `${report.exercise.area_number}.${report.exercise.direction_number}.${report.exercise.skill_number}.${report.exercise.number}. ${report.exercise.name}` }}
                   </div>
                   <div class="job-details__report-marks">
                     <div
@@ -341,7 +347,7 @@ export default {
           {
             trigger: "change",
             required: false,
-            message: "Пожалуйста, выберите затрагиваемые навыки",
+            message: "Пожалуйста, выберите выполняемые упражнения",
           },
         ],
         methods: [
@@ -404,8 +410,8 @@ export default {
       this.form.topic = option.topic;
 
       this.form.reports.splice(0);
-      for (let skill of option.skills) {
-        this.form.reports.push(skill.id);
+      for (let exercise of option.exercises) {
+        this.form.reports.push(exercise.id);
       }
 
       this.form.methods.splice(0);
@@ -441,9 +447,9 @@ export default {
         this.form.topic = this.form.topic + '; ';
       this.form.topic = this.form.topic + option.topic;
 
-      for (let skill of option.skills) {
-        if (!this.form.reports.includes(skill.id)) {
-          this.form.reports.push(skill.id);
+      for (let exercise of option.exercises) {
+        if (!this.form.reports.includes(exercise.id)) {
+          this.form.reports.push(exercise.id);
         }
       }
 
@@ -508,7 +514,7 @@ export default {
 
       this.form.reports.splice(0);
       this.form.reports = job.reports.map((report) => {
-        return report.skill_id;
+        return report.exercise_id;
       });
 
       this.form.methods.splice(0);

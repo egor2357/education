@@ -79,7 +79,7 @@ def job_update_related(job, request):
 
     exercise_reports_qs = job.exercise_report_set.all()
     exercise_reports_qs.exclude(exercise_id__in=remaining_exercises).delete()
-    exercise_report.objects.bulk_create(exercises_to_save)
+    Exercise_report.objects.bulk_create(exercises_to_save)
 
   if 'methods' in request.data:
     methods = json.loads(request.data['methods'])
@@ -89,7 +89,7 @@ def job_update_related(job, request):
   if 'marks' in request.data:
     marks = request.data.get('marks', [])
     for mark in marks:
-      exercise_report = exercise_report.objects.get(pk=mark['id'])
+      exercise_report = Exercise_report.objects.get(pk=mark['id'])
       exercise_report.mark = mark['mark']
       exercise_report.save()
 

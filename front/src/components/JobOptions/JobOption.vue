@@ -7,21 +7,18 @@
       <slot></slot>
     </div>
     <div class="job-option-body">
-      <div class="job-option-skills">
-        <template v-if="option.skills.length">
+      <div class="job-option-exercises">
+        <template v-if="option.exercises.length">
           <div
-            class="job-option-skill"
-            v-for="skill in option.skills"
-            :key="skill.id"
+            class="job-option-exercise"
+            v-for="exercise in option.exercises"
+            :key="exercise.id"
           >
-            {{ skill.area_number }}.{{ skill.direction_number }}.{{
-              skill.number
-            }}.
-            {{ skill.name }}
+            {{ `${exercise.area_number}.${exercise.direction_number}.${exercise.skill_number}.${exercise.number}. ${exercise.name}` }}
           </div>
         </template>
-        <div class="job-option-skill job-option-skill--empty" v-else>
-          Навыки не выбраны
+        <div class="job-option-exercise job-option-exercise--empty" v-else>
+          Упражнения не выбраны
         </div>
       </div>
       <div class="job-option-methods" v-if="option.methods.length">
@@ -176,13 +173,13 @@ $border-color: #e8e8e8
 
   &-body
     padding: 10px 15px
-  &-skills
+  &-exercises
     display: flex
     flex-direction: row
     flex-wrap: wrap
     align-items: center
     margin-bottom: 10px
-  &-skill
+  &-exercise
     padding: 4px 8px
     height: 30px
     border-radius: 15px

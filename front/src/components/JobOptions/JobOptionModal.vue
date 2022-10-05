@@ -5,7 +5,10 @@
     :title="title"
     @cancel="closeModal(false)"
   >
-    <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
+    <a-form-model
+      :model="form" v-bind="layout"
+      :rules="rules" ref="form"
+    >
       <a-form-model-item
         prop="topic"
         label="Тема занятия"
@@ -17,17 +20,21 @@
       </a-form-model-item>
 
       <a-form-model-item
-        prop="skills"
-        label="Навыки"
-        key="skills"
-        :validateStatus="fields['skills'].validateStatus"
-        :help="fields['skills'].help"
+        prop="exercises"
+        label="Упражнения"
+        key="exercises"
+        :validateStatus="fields['exercises'].validateStatus"
+        :help="fields['exercises'].help"
       >
         <a-tree-select
-          :value="form.skills"
-          @change="setSkills"
-          :dropdownStyle="{ 'max-height': '500px', 'max-width': '566px', 'overflow-y': 'auto' }"
-          placeholder="Выберите навыки"
+          :value="form.exercises"
+          @change="setExercises"
+          :dropdownStyle="{
+            'max-height': '500px',
+            'max-width': '566px',
+            'overflow-y': 'auto',
+          }"
+          placeholder="Выберите упражнения"
           allow-clear
           multiple
         >
@@ -48,10 +55,18 @@
               <a-tree-select-node
                 v-for="skill in direction.skills"
                 :key="'skill' + skill.id"
-                :value="skill.id"
+                :value="'skill' + skill.id"
+                :selectable="false"
                 :title="`${area.number}.${direction.number}.${skill.number}. ${skill.name}`"
-                :isLeaf="true"
               >
+                <a-tree-select-node
+                  v-for="exercise in skill.exercises"
+                  :key="'exercise' + exercise.id"
+                  :value="exercise.id"
+                  :title="`${area.number}.${direction.number}.${skill.number}.${exercise.number}. ${exercise.name}`"
+                  :isLeaf="true"
+                >
+                </a-tree-select-node>
               </a-tree-select-node>
             </a-tree-select-node>
           </a-tree-select-node>
@@ -166,7 +181,7 @@ export default {
       title: "",
       form: {
         topic: "",
-        skills: [],
+        exercises: [],
         methods: [],
         comment: "",
         option_files: [],
@@ -180,7 +195,7 @@ export default {
           validateStatus: "",
           help: "",
         },
-        skills: {
+        exercises: {
           validateStatus: "",
           help: "",
         },
@@ -205,11 +220,11 @@ export default {
             message: "Пожалуйста, введите название темы",
           },
         ],
-        skills: [
+        exercises: [
           {
             trigger: "change",
             required: false,
-            message: "Пожалуйста, выберите затрагиваемые навыки",
+            message: "Пожалуйста, выберите выполняемые упражнения",
           },
         ],
         methods: [
@@ -273,7 +288,7 @@ export default {
               formData.append("activity_id", this.activity.id);
 
               formData.append("topic", this.form.topic);
-              formData.append("skills", JSON.stringify(this.form.skills));
+              formData.append("exercises", JSON.stringify(this.form.exercises));
               formData.append("methods", JSON.stringify(this.form.methods));
               formData.append("comment", this.form.comment);
 
@@ -329,12 +344,12 @@ export default {
         });
       }
     },
-    setSkills(values, labels) {
-      this.form.skills.splice(0);
+    setExercises(values, labels) {
+      this.form.exercises.splice(0);
       for (let value of values) {
-        this.form.skills.push(value);
+        this.form.exercises.push(value);
       }
-      this.fieldChanged(values, "skills");
+      this.fieldChanged(values, "exercises");
     },
     setMethods(values, labels) {
       this.form.methods.splice(0);
@@ -381,9 +396,9 @@ export default {
       this.title = `${this.activity.name} | Изменение плана занятия`;
       this.form.topic = this.option.topic;
 
-      this.form.skills.splice(0);
-      this.form.skills = this.option.skills.map((skill) => {
-        return skill.id;
+      this.form.exercises.splice(0);
+      this.form.exercises = this.option.exercises.map((exercise) => {
+        return exercise.id;
       });
 
       this.form.methods.splice(0);

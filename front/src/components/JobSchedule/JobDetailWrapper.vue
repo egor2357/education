@@ -37,7 +37,7 @@ export default {
           this.job = res.data;
           if (!this.isEditable) {
             this.job.option_files = this.job.job_files;
-            this.job.skills = this.job.reports.map((item) => item.skill);
+            this.job.exercises = this.job.reports.map((item) => item.exercise);
           }
         } else {
           this.$message.error("Произошла ошибка при загрузке занятия");
