@@ -81,24 +81,38 @@
                               </span>
                             </div>
                             <div class="skill-table__skill__calls">
-                              {{
-                                skill.id in skillsStatisticsById
-                                  ? skillsStatisticsById[skill.id].called
-                                  : 0
-                              }}
-                              /
-                              {{
-                                skill.id in skillsStatisticsById
-                                  ? skillsStatisticsById[skill.id].planned
-                                  : 0
-                              }}
+                              <a-popover title="Выполнение плана" placement="left">
+                                {{
+                                  skill.id in skillsStatisticsById
+                                    ? skillsStatisticsById[skill.id].called
+                                    : 0
+                                }}
+                                /
+                                {{
+                                  skill.id in skillsStatisticsById
+                                    ? skillsStatisticsById[skill.id].planned
+                                    : 0
+                                }}
+                                <template #content>
+                                  <b>Слева</b> - количество действительно выполненных упражнений<br>
+                                  количество запланированных упражнений - <b>Справа</b>
+                                </template>
+                              </a-popover>
                             </div>
                             <div class="skill-table__skill__mark">
-                              {{
-                                skill.id in skillsStatisticsById
-                                  ? skillsStatisticsById[skill.id].value
-                                  : "-"
-                              }}
+                              <a-popover title="Уровень освоения" placement="left">
+                                {{
+                                  skill.id in skillsStatisticsById
+                                    ? skillsStatisticsById[skill.id].value
+                                    : "-"
+                                }}
+                                <template #content>
+                                  Среднее значение<br>
+                                  уровня выполнения всех<br>
+                                  <b>запланированных</b><br>
+                                  занятий
+                                </template>
+                              </a-popover>
                             </div>
                           </div>
                           <Transition name="show">
@@ -113,30 +127,51 @@
                                   class="skill-table__exercise-cell"
                                 >
                                   <div class="skill-table__exercise-cell__name">
-                                    {{
-                                      [ area.number, direction.number, skill.number, exercise.number].join(".") +
-                                      '. ' + exercise.name
-                                    }}
+                                    <span
+                                      :class="{
+                                        'exercise-link': reportsStatisticsById[exercise.id]
+                                      }"
+                                      @click="goToExercise(exercise.id)"
+                                    >
+                                      {{
+                                        [ area.number, direction.number, skill.number, exercise.number].join(".") +
+                                        '. ' + exercise.name
+                                      }}
+                                    </span>
                                   </div>
                                   <div class="skill-table__exercise-cell__calls">
-                                    {{
-                                      exercise.id in reportsStatisticsById
-                                        ? reportsStatisticsById[exercise.id].called
-                                        : 0
-                                    }}
-                                    /
-                                    {{
-                                      exercise.id in reportsStatisticsById
-                                        ? reportsStatisticsById[exercise.id].planned
-                                        : 0
-                                    }}
+                                    <a-popover title="Выполнение плана" placement="left">
+                                      {{
+                                        exercise.id in reportsStatisticsById
+                                          ? reportsStatisticsById[exercise.id].called
+                                          : 0
+                                      }}
+                                      /
+                                      {{
+                                        exercise.id in reportsStatisticsById
+                                          ? reportsStatisticsById[exercise.id].planned
+                                          : 0
+                                      }}
+                                      <template #content>
+                                        <b>Слева</b> - количество действительно выполненных упражнений<br>
+                                        количество запланированных упражнений - <b>Справа</b>
+                                      </template>
+                                    </a-popover>
                                   </div>
                                   <div class="skill-table__exercise-cell__mark">
-                                    {{
-                                      exercise.id in reportsStatisticsById
-                                        ? reportsStatisticsById[exercise.id].value
-                                        : "-"
-                                    }}
+                                    <a-popover title="Уровень освоения" placement="left">
+                                      {{
+                                        exercise.id in reportsStatisticsById
+                                          ? reportsStatisticsById[exercise.id].value
+                                          : "-"
+                                      }}
+                                      <template #content>
+                                        Среднее значение<br>
+                                        уровня выполнения всех<br>
+                                        <b>запланированных</b><br>
+                                        занятий
+                                      </template>
+                                    </a-popover>
                                   </div>
                                 </div>
                               </div>
@@ -331,20 +366,6 @@ export default {
       }
     },
 
-    goToSkill(skillId) {
-      if (this.reportsStatisticsById[skillId]) {
-        this.$router.push({
-          name: "SkillDetails",
-          params: { id: skillId },
-          query: {
-            dateFrom: this.$route.query.dateFrom,
-            dateTo: this.$route.query.dateTo,
-            showCalled: this.$route.query.showCalled
-          }
-        });
-      }
-    },
-
     dateRangeChange(value, replace = false) {
       if (
         value[0].format("YYYY-MM-DD") == this.$route.query.dateFrom &&
@@ -435,6 +456,20 @@ export default {
         this.shownSkills.splice(index, 1);
       } else {
         this.shownSkills.push(skillId);
+      }
+    },
+
+    goToExercise(exerciseId) {
+      if (this.reportsStatisticsById[exerciseId]) {
+        this.$router.push({
+          name: "ExerciseDetails",
+          params: { id: exerciseId },
+          query: {
+            dateFrom: this.$route.query.dateFrom,
+            dateTo: this.$route.query.dateTo,
+            showCalled: this.$route.query.showCalled
+          }
+        });
       }
     },
   }
@@ -546,6 +581,7 @@ export default {
 
 .skill-table__skill__calls,
 .skill-table__skill__mark
+  font-weight: bold
   display: flex
   justify-content: center
   align-items: center
@@ -568,8 +604,17 @@ export default {
   flex: 1
   padding: 10px 0
 
+.exercise-link
+  color: #1890ff
+  cursor: pointer
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)
+
+  &:hover
+    color: #40a9ff
+
 .skill-table__exercise-cell__calls,
 .skill-table__exercise-cell__mark
+  font-weight: bold
   display: flex
   justify-content: center
   align-items: center
