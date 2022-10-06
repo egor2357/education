@@ -1,15 +1,15 @@
 <template>
   <div class="skill-table">
     <div>
-      <div v-if="tableData.length" class="skill-table__body">
-        <div v-for="area in tableData" :key="area.id">
+      <div v-if="areas.length" class="skill-table__body">
+        <div v-for="area in areas" :key="area.id">
           <div
             class="skill-table__cell skill-table__cell_sticky skill-table-area"
           >
             <a-icon
               class="icon-button icon-show"
-              :type="showArea[area.id] ? 'down' : 'right'"
-              @click="showArea[area.id] = !showArea[area.id]"
+              :type="shownAreas.includes(area.id) ? 'down' : 'right'"
+              @click="toggleArea(area.id)"
             />
             <span
               >
@@ -50,7 +50,7 @@
             </a-dropdown>
           </div>
           <Transition name="show">
-            <div v-if="showArea[area.id]" class="skill-table-direction-wrapper">
+            <div v-if="shownAreas.includes(area.id)" class="skill-table-direction-wrapper">
               <div
                 class="skill-table__cell skill-table__cell_sticky"
                 v-if="!area.development_directions.length"
@@ -69,14 +69,8 @@
                   >
                     <a-icon
                       class="icon-button icon-show"
-                      :type="
-                        showDirection[direction.id] ? 'down' : 'right'
-                      "
-                      @click="
-                        showDirection[direction.id] = !showDirection[
-                          direction.id
-                        ]
-                      "
+                      :type="shownDirections.includes(direction.id) ? 'down' : 'right'"
+                      @click="toggleDirection(direction.id)"
                     />
                     <span>
                       {{
@@ -130,17 +124,16 @@
                     </a-dropdown>
                   </div>
                   <Transition name="show">
-                    <div v-if="showDirection[direction.id]">
+                    <div v-if="shownDirections.includes(direction.id)">
                       <div
                         v-if="!direction.skills.length"
                         class="skill-table__cell"
                       >
                         <a
-                          @click="
-                            $emit('onAddItem', { type: 3, item: direction })
-                          "
-                          >Добавить навык</a
+                          @click="$emit('onAddItem', { type: 3, item: direction })"
                         >
+                          Добавить навык
+                        </a>
                       </div>
                       <div v-else>
                         <div v-for="skill in direction.skills" :key="skill.id">
@@ -149,12 +142,8 @@
                           >
                             <a-icon
                               class="icon-button icon-show"
-                              :type="
-                                showSkill[skill.id] ? 'down' : 'right'
-                              "
-                              @click="
-                                showSkill[skill.id] = !showSkill[skill.id]
-                              "
+                              :type="shownSkills.includes(skill.id) ? 'down' : 'right'"
+                              @click="toggleSkill(skill.id)"
                             />
                             <span>
                               {{ [ area.number, direction.number, skill.number].join(".") +
@@ -208,7 +197,7 @@
                           </div>
                           <Transition name="show">
                             <div
-                              v-if="showSkill[skill.id]"
+                              v-if="shownSkills.includes(skill.id)"
                               class="skill-table-exercises"
                             >
                               <div class="skill-table-exercises__content">
@@ -297,7 +286,7 @@ import { Empty } from "ant-design-vue";
 export default {
   name: "SkillsTable",
   props: {
-    tableData: {
+    areas: {
       type: Array,
       default() {
         return [];
@@ -310,26 +299,45 @@ export default {
   },
   data() {
     return {
-      showArea: {},
-      showDirection: {},
-      showSkill: {}
+      shownAreas: [],
+      shownDirections: [],
+      shownSkills: [],
     };
   },
   beforeCreate() {
     this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   },
   methods: {
-    prepareObjects() {
-      this.tableData.forEach(area => {
-        this.$set(this.showArea, area.id, true);
-        area.development_directions.forEach(direction => {
-          this.$set(this.showDirection, direction.id, false);
-          direction.skills.forEach(skill => {
-            this.$set(this.showSkill, skill.id, false);
-          });
-        });
-      });
-    }
+    initShownAreas() {
+      for (let area of this.areas) {
+        this.shownAreas.push(area.id);
+      }
+    },
+
+    toggleArea(areaId) {
+      if (this.shownAreas.includes(areaId)) {
+        let index = this.shownAreas.findIndex((item)=>{return item==areaId;});
+        this.shownAreas.splice(index, 1);
+      } else {
+        this.shownAreas.push(areaId);
+      }
+    },
+    toggleDirection(directionId) {
+      if (this.shownDirections.includes(directionId)) {
+        let index = this.shownDirections.findIndex((item)=>{return item==directionId;});
+        this.shownDirections.splice(index, 1);
+      } else {
+        this.shownDirections.push(directionId);
+      }
+    },
+    toggleSkill(skillId) {
+      if (this.shownSkills.includes(skillId)) {
+        let index = this.shownSkills.findIndex((item)=>{return item==skillId;});
+        this.shownSkills.splice(index, 1);
+      } else {
+        this.shownSkills.push(skillId);
+      }
+    },
   }
 };
 </script>

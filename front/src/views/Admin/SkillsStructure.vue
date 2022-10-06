@@ -14,7 +14,7 @@
         <skills-table
           ref="table"
           :loading="loading"
-          :tableData="areas"
+          :areas="areas"
           @onDeleteItem="displayConfirmDelete"
           @onEditItem="openModalEdit"
           @onAddItem="openModalAdd($event.type, $event.item)"
@@ -55,7 +55,7 @@ export default {
     this.loading = true;
     await this.fetchAreas();
     this.loading = false;
-    this.$refs.table.prepareObjects();
+    this.$refs.table.initShownAreas();
   },
   methods: {
     ...mapActions({
