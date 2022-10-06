@@ -94,8 +94,7 @@
                                     : 0
                                 }}
                                 <template #content>
-                                  <b>Слева</b> - количество действительно выполненных упражнений<br>
-                                  количество запланированных упражнений - <b>Справа</b>
+                                  <b>Оцененные</b> упражнения <b>/</b> <b>Запланированные</b> упражнения
                                 </template>
                               </a-popover>
                             </div>
@@ -107,10 +106,8 @@
                                     : "-"
                                 }}
                                 <template #content>
-                                  Среднее значение<br>
-                                  уровня выполнения всех<br>
-                                  <b>запланированных</b><br>
-                                  занятий
+                                  Среднее значение уровня выполнения всех<br>
+                                  <b>запланированных</b> занятий
                                 </template>
                               </a-popover>
                             </div>
@@ -153,8 +150,7 @@
                                           : 0
                                       }}
                                       <template #content>
-                                        <b>Слева</b> - количество действительно выполненных упражнений<br>
-                                        количество запланированных упражнений - <b>Справа</b>
+                                        <b>Оцененные</b> упражнения <b>/</b> <b>Запланированные</b> упражнения
                                       </template>
                                     </a-popover>
                                   </div>
@@ -166,10 +162,8 @@
                                           : "-"
                                       }}
                                       <template #content>
-                                        Среднее значение<br>
-                                        уровня выполнения всех<br>
-                                        <b>запланированных</b><br>
-                                        занятий
+                                        Среднее значение уровня выполнения всех<br>
+                                        <b>запланированных</b> занятий
                                       </template>
                                     </a-popover>
                                   </div>
@@ -567,6 +561,7 @@ export default {
 .skill-table__skill-cell
   display: flex
   flex-direction: row
+  cursor: default
   top: 83px
   z-index: 2
   border-bottom: 1px solid #e8e8e8
@@ -591,6 +586,7 @@ export default {
 .skill-table__exercise-cell
   display: flex
   flex-direction: row
+  cursor: default
   border-top: 1px solid #e8e8e8
   padding-left: 108px
 
