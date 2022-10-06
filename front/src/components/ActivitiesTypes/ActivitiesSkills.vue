@@ -24,8 +24,8 @@
             <div class="activity-name">{{ activity.name }}</div>
           </div>
         </div>
-        <div class="table-body" v-if="filteredAreas.length">
-          <div class="table-row" v-for="area in filteredAreas" :key="area.id">
+        <div class="table-body" v-if="areas.length">
+          <div class="table-row" v-for="area in areas" :key="area.id">
             <div class="table-row__column table-row__column_area">
               <div class="table-cell">
                 {{ [area.number, area.name].join(". ") }}
@@ -103,7 +103,7 @@ export default {
     ...mapGetters({
       activities: "activities/getActivities",
       areasFetched: "skills/getFetched",
-      filteredAreas: "skills/getFilteredAreas",
+      areas: "skills/getAreas",
     }),
     handledActivities() {
       let res = {};

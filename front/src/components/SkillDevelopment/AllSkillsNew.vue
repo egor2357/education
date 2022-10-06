@@ -3,9 +3,15 @@
     <div class="skill-development">
       <div class="top-bar">
         <div class="top-bar__side-block left">
-          <a-checkbox v-model="doNotShowNotCalled" @change="changeShowCalled">
-            Скрыть упражнения, которые не выполняли
-          </a-checkbox>
+          <a-select
+            :value="displayMode"
+            @change="changeDisplayMode"
+            style="width: 330px"
+          >
+            <a-select-option value="all">Все навыки и упражнения</a-select-option>
+            <a-select-option value="called">Только затронутые навыки и упражнения</a-select-option>
+            <a-select-option value="notCalled">Только не затронутые навыки и упражнения</a-select-option>
+          </a-select>
         </div>
         <div class="title">Развитие навыков</div>
         <div class="top-bar__side-block right">
@@ -210,7 +216,7 @@ export default {
       loading: true,
 
       dateRange: [],
-      doNotShowNotCalled: false,
+      displayMode: "all",
 
       reportsStatisticsById: {},
       skillsStatisticsById: {},
@@ -225,13 +231,24 @@ export default {
 
     ...mapGetters({
       areasFetched: "skills/getFetched",
-      areas: "skills/getFilteredAreas",
+      areas: "skills/getAreas",
       scrollPosition: "skills/getScrollPosition"
     }),
 
     filteredAreas() {
-      if (!this.doNotShowNotCalled) {
-        return this.areas;
+      let checkFunction;
+      if (this.displayMode == "called") {
+        checkFunction = (exercise) => {
+          return String(exercise.id) in this.reportsStatisticsById;
+        }
+      } else if (this.displayMode == "notCalled") {
+        checkFunction = (exercise) => {
+          return !(String(exercise.id) in this.reportsStatisticsById);
+        }
+      } else {
+        checkFunction = (exercise) => {
+          return true;
+        }
       }
 
       return this.areas
@@ -254,9 +271,7 @@ export default {
                         direction_id: skill.direction_id,
                         name: skill.name,
                         number: skill.number,
-                        exercises: skill.exercises.filter(
-                          exercise => String(exercise.id) in this.reportsStatisticsById
-                        )
+                        exercises: skill.exercises.filter(checkFunction)
                       };
                     })
                     .filter(skill => skill.exercises.length)
@@ -266,7 +281,7 @@ export default {
           };
         })
         .filter(area => area.development_directions.length);
-    }
+    },
   },
 
   beforeCreate() {
@@ -280,8 +295,8 @@ export default {
       fetches.push(this.fetchAreas());
     }
 
-    if (this.$route.query.showCalled) {
-      this.doNotShowNotCalled = this.$route.query.showCalled === "true";
+    if (this.$route.query.displayMode) {
+      this.displayMode = this.$route.query.displayMode;
     }
 
     this.loading = true;
@@ -303,6 +318,11 @@ export default {
       this.dateRangeChange(this.dateRange, true);
       return;
     }
+
+    if (to.query.displayMode) {
+      this.displayMode = to.query.displayMode;
+    }
+
     this.fetchSkillReportsStatistics();
     next();
   },
@@ -371,7 +391,7 @@ export default {
       let queryObj = {
         dateFrom: value[0].format("YYYY-MM-DD"),
         dateTo: value[1].format("YYYY-MM-DD"),
-        showCalled: this.doNotShowNotCalled
+        displayMode: this.displayMode
       };
 
       if (replace) {
@@ -409,13 +429,14 @@ export default {
       }
     },
 
-    changeShowCalled(event) {
-      if (this.$route.query.showCalled != event.target.checked) {
-        this.$router.replace({
-          name: this.$route.name,
-          query: { ...this.$route.query, showCalled: event.target.checked }
-        });
-      }
+    changeDisplayMode(value) {
+      this.$router.replace({
+        name: this.$route.name,
+        query: {
+          ...this.$route.query,
+          displayMode: value,
+        }
+      });
     },
 
     saveScrollPosition(e) {
@@ -458,11 +479,7 @@ export default {
         this.$router.push({
           name: "ExerciseDetails",
           params: { id: exerciseId },
-          query: {
-            dateFrom: this.$route.query.dateFrom,
-            dateTo: this.$route.query.dateTo,
-            showCalled: this.$route.query.showCalled
-          }
+          query: this.$route.query,
         });
       }
     },

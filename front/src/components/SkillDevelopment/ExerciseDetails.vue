@@ -185,11 +185,7 @@ export default {
     goBack() {
       this.$router.push({
         name: "AllSkillsNew",
-        query: {
-          dateFrom: this.$route.query.dateFrom,
-          dateTo: this.$route.query.dateTo,
-          showCalled: String(this.$route.query.showCalled)
-        },
+        query: this.$route.query,
       });
     },
     dateRangeChange(value, replace = false) {

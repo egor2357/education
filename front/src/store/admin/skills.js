@@ -18,16 +18,6 @@ const getters = {
   getAreasAll(state) {
     return state.areasAll;
   },
-  getFilteredAreas(state) {
-    return state.areas.map(area => {
-      return {
-        id: area.id,
-        name: area.name,
-        number: area.number,
-        development_directions: area.development_directions.filter(direction => direction.skills.length)
-      }
-    }).filter(area => area.development_directions.length);
-  },
   getFetched(state) {
     return state.fetched;
   },
