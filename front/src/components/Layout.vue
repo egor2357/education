@@ -108,7 +108,7 @@ export default {
           key: "2",
           staffOnly: false,
           specOnly: false,
-          to: { name: "AllSkills" },
+          to: { name: "AllSkillsNew" },
           childrens: [],
         },
         {

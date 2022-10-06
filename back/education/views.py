@@ -491,33 +491,57 @@ class Exercise_reportView(viewsets.ModelViewSet):
     exercise_reports = self.filter_queryset(self.get_queryset())
     exercise_reports = exercise_reports.select_related(None)
 
-    exercise_reports = exercise_reports.values('exercise_id', 'mark')
+    exercise_reports = exercise_reports.values('exercise_id', 'mark', 'exercise__skill_id')
 
     mark_coeffs = [0.33, 0.66, 1]
-    calls_by_id = {}
+    exercise_calls_by_id = {}
+    skill_calls_by_id = {}
 
     for exercise_report in exercise_reports:
       exercise_id = exercise_report['exercise_id']
+      skill_id = exercise_report['exercise__skill_id']
 
-      if not exercise_id in calls_by_id.keys():
-        calls_by_id[exercise_id] = {
+      if not exercise_id in exercise_calls_by_id.keys():
+        exercise_calls_by_id[exercise_id] = {
           'planned': 0,
           'called': 0,
           'value': 0,
         }
 
-      call = calls_by_id[exercise_report['exercise_id']]
+      if not skill_id in skill_calls_by_id.keys():
+        skill_calls_by_id[skill_id] = {
+          'planned': 0,
+          'called': 0,
+          'value': 0,
+        }
 
-      call['planned'] += 1
+      exercise_call = exercise_calls_by_id[exercise_id]
+      skill_call = skill_calls_by_id[skill_id]
 
-      if not exercise_report['mark'] is None:
-        call['called'] += 1
-        call['value'] += mark_coeffs[exercise_report['mark']]
+      exercise_call['planned'] += 1
+      skill_call['planned'] += 1
 
-    for exercise_id in calls_by_id.keys():
-      calls_by_id[exercise_id]['value'] = round(calls_by_id[exercise_id]['value'] / calls_by_id[exercise_id]['planned'], 2)
+      mark = exercise_report['mark']
 
-    return Response(calls_by_id)
+      if not mark is None:
+        exercise_call['called'] += 1
+        exercise_call['value'] += mark_coeffs[mark]
+
+      if not mark is None:
+        skill_call['called'] += 1
+        skill_call['value'] += mark_coeffs[mark]
+
+    for exercise_id in exercise_calls_by_id.keys():
+      exercise_calls_by_id[exercise_id]['value'] = round(
+        exercise_calls_by_id[exercise_id]['value'] / exercise_calls_by_id[exercise_id]['planned'], 2
+      )
+
+    for skill_id in skill_calls_by_id.keys():
+      skill_calls_by_id[skill_id]['value'] = round(
+        skill_calls_by_id[skill_id]['value'] / skill_calls_by_id[skill_id]['planned'], 2
+      )
+
+    return Response({'reports': exercise_calls_by_id, 'skills': skill_calls_by_id})
 
 
 class SpecialtyView(viewsets.ModelViewSet):
