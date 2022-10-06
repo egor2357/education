@@ -122,9 +122,9 @@ const router = new VueRouter({
           children: [
             {
               path: "/",
-              name: "AllSkills",
+              name: "AllSkillsNew",
               component: () =>
-                import("@/components/SkillDevelopment/AllSkills"),
+                import("@/components/SkillDevelopment/AllSkillsNew"),
               meta: {
                 staffOnly: false,
                 specOnly: false,
