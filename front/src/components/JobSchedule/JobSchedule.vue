@@ -321,17 +321,19 @@ export default {
     },
     thisDateJobsNSchedule(currDateMoment) {
       let jobs = this.thisDateJobs(currDateMoment);
+
       if (this.isScheduleVisible) {
         let templates = this.thisDayRemainingSchedule(currDateMoment);
-        return jobs.concat(templates).sort((first, second) => {
-          return (
-            moment(first.start_time, "hh:mm:ss") -
-            moment(second.start_time, "hh:mm:ss")
-          );
-        });
-      } else {
-        return jobs;
+        jobs = jobs.concat(templates);
       }
+
+      return jobs.sort((first, second) => {
+        return (
+          moment(first.start_time, "hh:mm:ss") -
+          moment(second.start_time, "hh:mm:ss")
+        );
+      });
+
     },
     keydown(event) {
       if (event.type === "keydown" && event.keyCode === 39) {
