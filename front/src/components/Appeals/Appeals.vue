@@ -18,7 +18,7 @@
         v-if="displayModal"
         :adding="modalAdding"
         :editableData="modalEditableData"
-        @closeSuccess="closeModalSuccess"
+        @closeSuccess="closeModalSuccess($event)"
         @close="displayModal = false"
       />
     </div>
@@ -67,10 +67,12 @@ export default {
       this.modalAdding = false;
       this.modalEditableData = data;
     },
-    async closeModalSuccess() {
+    async closeModalSuccess(newAppealData) {
       this.displayModal = false;
-      await this.fetchAppeals();
-      this.$refs["appeals-table"].updatePaginationTotal();
+      this.$router.push({
+        name: "AppealDetails",
+        params: { id: newAppealData.id, theme: newAppealData.theme }},
+      );
     },
   },
 };

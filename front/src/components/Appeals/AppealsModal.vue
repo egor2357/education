@@ -100,7 +100,7 @@ export default {
               let res = await this.$store.dispatch(dispatchName, this.form);
               if (res.status === successCode) {
                 this.$message.success(successMessage);
-                this.$emit("closeSuccess");
+                this.$emit("closeSuccess", res.data);
               } else if (res.status === 400) {
                 this.$message.error("Проверьте введённые данные");
                 for (let key in res.data) {
