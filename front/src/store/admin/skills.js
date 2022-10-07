@@ -8,7 +8,13 @@ const state = () => ({
   fetched: false,
   areasAll: [],
   fetchedAll: false,
-  scrollPosition: 0,
+  skillDevelopmentTreeState: null,
+                          // {
+                          //   scrollPosition: 0,
+                          //   shownAreas: [],
+                          //   shownDirections: [],
+                          //   shownSkills: [],
+                          // }
 });
 
 const getters = {
@@ -24,8 +30,8 @@ const getters = {
   getFetchedAll(state) {
     return state.fetchedAll;
   },
-  getScrollPosition(state) {
-    return state.scrollPosition;
+  getSkillDevelopmentTreeState(state) {
+    return state.skillDevelopmentTreeState;
   },
 };
 
@@ -103,8 +109,8 @@ const mutations = {
     state.areasAll = payload.data;
     state.fetchedAll = payload.success;
   },
-  setScrollPosition(state, payload) {
-    state.scrollPosition = payload;
+  setSkillDevelopmentTreeState(state, payload) {
+    state.skillDevelopmentTreeState = payload;
   }
 };
 

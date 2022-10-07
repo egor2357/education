@@ -27,7 +27,7 @@
         </div>
       </div>
 
-      <div class="skill-table">
+      <div id="table" class="skill-table">
         <div>
           <div v-if="filteredAreas.length" class="skill-table__body">
             <div v-for="area in filteredAreas" :key="area.id">
@@ -232,7 +232,7 @@ export default {
     ...mapGetters({
       areasFetched: "skills/getFetched",
       areas: "skills/getAreas",
-      scrollPosition: "skills/getScrollPosition"
+      skillDevelopmentTreeState: "skills/getSkillDevelopmentTreeState"
     }),
 
     filteredAreas() {
@@ -303,46 +303,44 @@ export default {
     await Promise.all(fetches);
     this.loading = false;
 
-    this.initShownAreas();
-
     if (!this.setDateRange(this.$route)) {
       this.dateRangeChange(this.dateRange, true);
       return;
     }
 
-    this.fetchSkillReportsStatistics();
+    await this.fetchSkillReportsStatistics();
+    this.setupSkillDevelopmentTreeState();
   },
 
-  beforeRouteUpdate(to, from, next) {
+  async beforeRouteUpdate(to, from, next) {
     if (!this.setDateRange(to)) {
       this.dateRangeChange(this.dateRange, true);
       return;
     }
 
+    this.setupSkillDevelopmentTreeState();
+
     if (to.query.displayMode) {
       this.displayMode = to.query.displayMode;
     }
 
-    this.fetchSkillReportsStatistics();
+    await this.fetchSkillReportsStatistics();
+
     next();
   },
 
-  updated() {
-    const table = document.getElementById("table");
-    if (table) {
-      if (this.scrollPosition) {
-        table.scrollTop = this.scrollPosition;
-      }
-      table.addEventListener("scroll", this.saveScrollPosition);
+  async beforeRouteLeave(to, from, next) {
+    // Для всех путей,кроме просмотра отчета по упражнению
+    // Скидываем состояние дерева и скролла
+    if (to.name == 'ExerciseDetails') {
+      this.saveSkillDevelopmentTreeState();
+    } else {
+      this.clearSkillDevelopmentTreeState();
     }
+
+    next();
   },
 
-  beforeDestroy() {
-    const table = document.getElementById("table");
-    if (table) {
-      table.removeEventListener("scroll", this.saveScrollPosition);
-    }
-  },
 
   methods: {
 
@@ -351,7 +349,7 @@ export default {
     }),
 
     ...mapMutations({
-      setScrollPosition: "skills/setScrollPosition"
+      setSkillDevelopmentTreeState: "skills/setSkillDevelopmentTreeState"
     }),
 
     async fetchSkillReportsStatistics() {
@@ -439,14 +437,42 @@ export default {
       });
     },
 
-    saveScrollPosition(e) {
-      this.setScrollPosition(e.target.scrollTop);
-    },
 
-    initShownAreas() {
-      for (let area of this.areas) {
-        this.shownAreas.push(area.id);
+    setupSkillDevelopmentTreeState(){
+      if (this.skillDevelopmentTreeState) {
+        const table = document.getElementById("table");
+        if (table) {
+          this.shownAreas = this.skillDevelopmentTreeState.shownAreas;
+          this.shownDirections = this.skillDevelopmentTreeState.shownDirections;
+          this.shownSkills = this.skillDevelopmentTreeState.shownSkills;
+          this.$nextTick(()=>{
+            table.scrollTop = this.skillDevelopmentTreeState.scrollPosition;
+          });
+
+        }
+      } else {
+        for (let area of this.areas) {
+          this.shownAreas.push(area.id);
+        }
       }
+    },
+    saveSkillDevelopmentTreeState() {
+      const table = document.getElementById("table");
+
+      let scrollPosition = 0;
+      if (table) {
+        scrollPosition = table.scrollTop;
+      }
+
+      this.setSkillDevelopmentTreeState({
+        scrollPosition: scrollPosition,
+        shownAreas: this.shownAreas,
+        shownDirections: this.shownDirections,
+        shownSkills: this.shownSkills,
+      });
+    },
+    clearSkillDevelopmentTreeState() {
+      this.setSkillDevelopmentTreeState(null);
     },
 
     toggleArea(areaId) {
