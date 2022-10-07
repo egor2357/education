@@ -318,6 +318,10 @@ export default {
       return;
     }
 
+    if (from.name != 'ExerciseDetails') {
+      this.clearSkillDevelopmentTreeState();
+    }
+
     this.setupSkillDevelopmentTreeState();
 
     if (to.query.displayMode) {
