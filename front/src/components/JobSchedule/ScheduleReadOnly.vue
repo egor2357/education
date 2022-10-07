@@ -98,6 +98,15 @@
             </div>
           </div>
         </div>
+
+        <div>
+          <a-checkbox
+            class="job-schedule__switcher"
+            v-model="showOnlyMyJobs"
+          >
+            Показывать только мои занятия
+          </a-checkbox>
+        </div>
       </div>
     </div>
   </a-spin>
@@ -126,6 +135,8 @@ export default {
       modalEditableData: null,
 
       daysOfWeek: consts.daysOfWeek,
+
+      showOnlyMyJobs: false,
 
       jobs: [],
     };
@@ -198,7 +209,16 @@ export default {
 
     thisDateJobs(currDateMoment) {
       let currDateString = currDateMoment.format("YYYY-MM-DD");
-      return this.jobs.filter((job) => {
+      let jobs = this.jobs;
+      let userId = this.userInfo.specialistId;
+
+      if (this.showOnlyMyJobs) {
+        jobs = jobs.filter((job)=>{
+          return job.specialist && job.specialist.id == userId;
+        });
+      }
+
+      return jobs.filter((job) => {
         return job.date == currDateString;
       });
     },
