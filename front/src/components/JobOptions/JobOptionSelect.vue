@@ -42,10 +42,10 @@
           @change="fetchOptions"
           class="job-options__filters-select"
         >
-          <a-select-option value="ordering=-date">По дате добавления <a-icon type="caret-down" /></a-select-option>
-          <a-select-option value="ordering=date">По дате добавления <a-icon type="caret-up" /></a-select-option>
-          <a-select-option value="ordering=topic">По алфавиту <a-icon type="sort-ascending" /></a-select-option>
-          <a-select-option value="ordering=-topic">По алфавиту <a-icon type="sort-descending" /></a-select-option>
+          <a-select-option value="-date">По дате добавления <a-icon type="caret-down" /></a-select-option>
+          <a-select-option value="date">По дате добавления <a-icon type="caret-up" /></a-select-option>
+          <a-select-option value="topic">По алфавиту <a-icon type="sort-ascending" /></a-select-option>
+          <a-select-option value="-topic">По алфавиту <a-icon type="sort-descending" /></a-select-option>
         </a-select>
       </div>
 
@@ -96,7 +96,7 @@ export default {
 
       search: '',
       searchTimeoutId: 0,
-      orderingType: 'ordering=-date',
+      orderingType: '-date',
 
       options: [],
       currSpecialistId: this.job.specialist.id,
@@ -131,7 +131,7 @@ export default {
         this.loading = true;
         let activityParam = `activity_id=${this.currActivityId}`;
         let specialistParam = `specialist_id=${this.currSpecialistId}`;
-        let filterParams = `${this.orderingType}`;
+        let filterParams = `ordering=${this.orderingType}`;
         if (this.search) {
           filterParams += `&search=${this.search}`
         }
