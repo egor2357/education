@@ -290,7 +290,13 @@ class OptionView(viewsets.ModelViewSet):
                     'methods__form',
                   )
   )
-  filter_backends = (DjangoFilterBackend,)
+  filter_backends = (
+    DjangoFilterBackend,
+    filters.OrderingFilter,
+    filters.SearchFilter,
+  )
+  search_fields = ['topic', 'comment']
+  ordering_fields = ['topic', 'date']
   filterset_class = OptionFilter
 
   def partial_update(self, request, pk=None):
