@@ -19,6 +19,24 @@
           </a-tab-pane>
         </a-tabs>
       </div>
+      <div class="job-options__filters-container">
+        <a-input
+          v-model="search"
+          @change="searchOptions"
+          class="job-options__filters-search"
+          placeholder="Поиск по карточкам"
+        />
+        <a-select
+          v-model="orderingType"
+          @change="fetchOptions"
+          class="job-options__filters-select"
+        >
+          <a-select-option value="ordering=-date">По дате добавления <a-icon type="caret-down" /></a-select-option>
+          <a-select-option value="ordering=date">По дате добавления <a-icon type="caret-up" /></a-select-option>
+          <a-select-option value="ordering=topic">По алфавиту <a-icon type="sort-ascending" /></a-select-option>
+          <a-select-option value="ordering=-topic">По алфавиту <a-icon type="sort-descending" /></a-select-option>
+        </a-select>
+      </div>
       <div class="job-options__cards" v-if="currentActivityOptions.length">
         <div class="job-options__card" v-for="option in currentActivityOptions" :key="option.id">
           <job-option :option="option">
@@ -70,6 +88,10 @@ export default {
 
       activeTab: null,
 
+      search: '',
+      searchTimeoutId: 0,
+      orderingType: 'ordering=-date',
+
       options: [],
 
       displayModal: false,
@@ -102,8 +124,12 @@ export default {
     async fetchOptions(){
       try {
         this.loading = true;
+        let queryParams = `?specialist_id=${this.userInfo.specialistId}&${this.orderingType}`;
+        if (this.search) {
+          queryParams += `&search=${this.search}`
+        }
         let res = await this.$axios.get(
-          `/api/options/?specialist_id=${this.userInfo.specialistId}`
+          `/api/options/${queryParams}`
         );
         if (res.status === 200) {
           this.options = res.data;
@@ -119,6 +145,12 @@ export default {
       }
     },
 
+    searchOptions() {
+      if (this.searchTimeoutId) {
+        clearTimeout(this.searchTimeoutId);
+      }
+      this.searchTimeoutId = setTimeout(this.fetchOptions, 400);
+    },
 
     showModal(option=null){
       this.displayModal = true;
@@ -219,6 +251,18 @@ export default {
     &__tabs
       display: flex
       justify-content: center
+    &__filters-container
+      display: flex
+      flex-direction: row
+      align-items: center
+      width: 900px
+      margin: 10px auto 0
+      padding: 3px
+    &__filters-search
+      margin-right: 10px
+      flex: 2
+    &__filters-select
+      flex: 1
     &__cards
       display: flex
       flex-direction: column
