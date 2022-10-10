@@ -177,13 +177,6 @@ export default {
       this.$confirm(confirmObject);
     },
 
-    createOption(){
-
-    },
-    editOption(option){
-
-    },
-
     async deleteOption(optionId){
       try {
         this.loading = true;

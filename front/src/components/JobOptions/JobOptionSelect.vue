@@ -30,6 +30,24 @@
           </a-select-option>
         </a-select>
       </div>
+      <div class="job-options__filters-container">
+        <a-input
+          v-model="search"
+          @change="searchOptions"
+          class="job-options__filters-search"
+          placeholder="Поиск по карточкам"
+        />
+        <a-select
+          v-model="orderingType"
+          @change="fetchOptions"
+          class="job-options__filters-select"
+        >
+          <a-select-option value="ordering=-date">По дате добавления <a-icon type="caret-down" /></a-select-option>
+          <a-select-option value="ordering=date">По дате добавления <a-icon type="caret-up" /></a-select-option>
+          <a-select-option value="ordering=topic">По алфавиту <a-icon type="sort-ascending" /></a-select-option>
+          <a-select-option value="ordering=-topic">По алфавиту <a-icon type="sort-descending" /></a-select-option>
+        </a-select>
+      </div>
 
       <div class="job-option-select__cards" v-if="options.length">
         <div class="job-option-select__card" v-for="option in options" :key="option.id">
@@ -76,6 +94,10 @@ export default {
     return {
       loading: false,
 
+      search: '',
+      searchTimeoutId: 0,
+      orderingType: 'ordering=-date',
+
       options: [],
       currSpecialistId: this.job.specialist.id,
       currActivityId: this.job.activity.id,
@@ -87,6 +109,19 @@ export default {
       activities: "activities/getActivities",
     }),
   },
+
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
+  },
+  async created() {
+    let fetches = [];
+    fetches.push(this.fetchOptions());
+
+    this.loading = true;
+    await Promise.all(fetches);
+    this.loading = false;
+  },
+
   methods: {
     closeModal(option=null, replace=true){
       this.$emit('closeModal', {option, replace});
@@ -96,7 +131,11 @@ export default {
         this.loading = true;
         let activityParam = `activity_id=${this.currActivityId}`;
         let specialistParam = `specialist_id=${this.currSpecialistId}`;
-        let res = await this.$axios.get(`/api/options/?${activityParam}&${specialistParam}`);
+        let filterParams = `${this.orderingType}`;
+        if (this.search) {
+          filterParams += `&search=${this.search}`
+        }
+        let res = await this.$axios.get(`/api/options/?${activityParam}&${specialistParam}&${filterParams}`);
         if (res.status === 200) {
           this.options = res.data;
           this.isOptionFetched = true;
@@ -111,17 +150,13 @@ export default {
         this.loading = false;
       }
     },
-  },
-  beforeCreate() {
-    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
-  },
-  async created() {
-    let fetches = [];
-    fetches.push(this.fetchOptions());
 
-    this.loading = true;
-    await Promise.all(fetches);
-    this.loading = false;
+    searchOptions() {
+      if (this.searchTimeoutId) {
+        clearTimeout(this.searchTimeoutId);
+      }
+      this.searchTimeoutId = setTimeout(this.fetchOptions, 400);
+    },
   },
 };
 </script>
@@ -149,5 +184,18 @@ export default {
     height: 100%
     overflow-y: auto
     padding: 3px
+
+.job-options
+  &__filters-container
+    display: flex
+    flex-direction: row
+    align-items: center
+    width: 100%
+    padding: 3px
+  &__filters-search
+    margin-right: 10px
+    flex: 2
+  &__filters-select
+    flex: 1
 
 </style>
