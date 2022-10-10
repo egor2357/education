@@ -44,7 +44,8 @@
           </div>
 
           <div class="job-schedule__interval-link">
-            <a @click.stop.prevent="scheduleToCurrentWeek">К текущей неделе</a>
+            <a :disabled="isWeekCurrent"
+              @click.stop.prevent="scheduleToCurrentWeek">К текущей неделе</a>
           </div>
         </div>
         <a-icon
@@ -209,6 +210,9 @@ export default {
     endIntervalFormattedDate() {
       let date = this.momentDateArr[this.momentDateArr.length - 1];
       return {date: date.format("D MMMM"), year: date.format("YYYY")};
+    },
+    isWeekCurrent() {
+      return moment(new Date()).weekday(0).isSame(this.momentDateArr[0], 'day');
     },
 
     jobSheduleIndexes() {

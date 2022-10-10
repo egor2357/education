@@ -25,7 +25,8 @@
           <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
           <div class="month-container__month-wrapper">
             <span class="month-container__month-text">{{ monthLabel }}</span>
-            <a class="month-container__month-link"
+            <a :disabled="isMonthCurrent()"
+              class="month-container__month-link"
               @click.stop.prevent="presenceToCurrentMonth">К текущему месяцу</a>
           </div>
           <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
@@ -129,7 +130,7 @@ export default {
     },
     specialistId(){
       return this.$store.getters["auth/getUserInfo"].specialistId;
-    }
+    },
   },
   async created() {
     await this.fetchSpecialists("?is_staff=false&is_active=true");
@@ -189,6 +190,10 @@ export default {
       await this.makeTableData();
 
       this.loading = false;
+    },
+
+    isMonthCurrent() {
+      return moment().isSame(this.currentDate, 'month')
     },
 
     makeTableData() {
