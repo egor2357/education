@@ -30,8 +30,22 @@
           type="left"
           @click="switchDates(false)"
         />
-        <div class="job-schedule__interval-label">
-          {{ dateIntervalString }}
+        <div class="job-schedule__interval-center">
+          <div class="job-schedule__interval-label">
+            <div class="job-schedule__interval-item">
+              <div class="job-schedule__interval-date">{{ startIntervalFormattedDate.date }}</div>
+              <div class="job-schedule__interval-year">{{ startIntervalFormattedDate.year }}</div>
+            </div>
+            <div class="job-schedule__interval-divider">-</div>
+            <div class="job-schedule__interval-item">
+              <div class="job-schedule__interval-date">{{ endIntervalFormattedDate.date }}</div>
+              <div class="job-schedule__interval-year">{{ endIntervalFormattedDate.year }}</div>
+            </div>
+          </div>
+
+          <div class="job-schedule__interval-link">
+            <a @click.stop.prevent="scheduleToCurrentWeek">К текущей неделе</a>
+          </div>
         </div>
         <a-icon
           class="icon-button job-schedule__interval-shift job-schedule__interval-shift_right"
@@ -163,6 +177,54 @@ export default {
       isScheduleVisible: true,
     };
   },
+
+  computed: {
+    ...mapGetters({
+      specialists: "specialists/getSpecialists",
+      specialistsFetched: "activities/getFetched",
+      activities: "activities/getActivities",
+      activitiesFetched: "activities/getFetched",
+      schedule: "schedule/getJobs",
+      scheduleFetched: "schedule/getFetched",
+      selectedDay: "schedule/getSelectedDay",
+    }),
+
+    momentDateArr() {
+      let momentFrom = moment(this.dateFrom).clone().weekday(0);
+      let currMoment = momentFrom.clone();
+      let momentTo = currMoment.clone().weekday(6);
+
+      let dateArray = [];
+      while (currMoment <= momentTo) {
+        dateArray.push(currMoment.clone());
+        currMoment = currMoment.add(1, "days");
+      }
+      return dateArray;
+    },
+
+    startIntervalFormattedDate() {
+      let date = this.momentDateArr[0];
+      return {date: date.format("D MMMM"), year: date.format("YYYY")};
+    },
+    endIntervalFormattedDate() {
+      let date = this.momentDateArr[this.momentDateArr.length - 1];
+      return {date: date.format("D MMMM"), year: date.format("YYYY")};
+    },
+
+    jobSheduleIndexes() {
+      return this.jobs.map((job) => {
+        if (job.schedule) {
+          return job.schedule.id;
+        }
+      });
+    },
+    remainingSchedule() {
+      return this.schedule.filter((schedule) => {
+        return !this.jobSheduleIndexes.includes(schedule.id);
+      });
+    },
+  },
+
   async created() {
     let fetches = [];
 
@@ -187,6 +249,10 @@ export default {
     this.loading = false;
     document.addEventListener("keydown", this.keydown);
   },
+  beforeDestroy() {
+    document.removeEventListener("keydown", this.keydown);
+  },
+
   methods: {
     ...mapActions({
       fetchSpecialists: "specialists/fetchSpecialists",
@@ -243,6 +309,10 @@ export default {
         newMomentFrom = newMomentFrom.subtract(7, "days");
       }
       this.dateFrom = newMomentFrom.toDate();
+      this.fetchJobs();
+    },
+    scheduleToCurrentWeek() {
+      this.dateFrom = moment(new Date()).weekday(0).toDate();
       this.fetchJobs();
     },
 
@@ -343,51 +413,32 @@ export default {
       }
     },
   },
-  computed: {
-    ...mapGetters({
-      specialists: "specialists/getSpecialists",
-      specialistsFetched: "activities/getFetched",
-      activities: "activities/getActivities",
-      activitiesFetched: "activities/getFetched",
-      schedule: "schedule/getJobs",
-      scheduleFetched: "schedule/getFetched",
-      selectedDay: "schedule/getSelectedDay",
-    }),
-
-    momentDateArr() {
-      let momentFrom = moment(this.dateFrom).clone().weekday(0);
-      let currMoment = momentFrom.clone();
-      let momentTo = currMoment.clone().weekday(6);
-
-      let dateArray = [];
-      while (currMoment <= momentTo) {
-        dateArray.push(currMoment.clone());
-        currMoment = currMoment.add(1, "days");
-      }
-      return dateArray;
-    },
-    dateIntervalString() {
-      let momentFrom = this.momentDateArr[0];
-      let momentTo = this.momentDateArr[this.momentDateArr.length - 1];
-      return `${momentFrom.format("D MMMM")} - ${momentTo.format("D MMMM")}`;
-    },
-    jobSheduleIndexes() {
-      return this.jobs.map((job) => {
-        if (job.schedule) {
-          return job.schedule.id;
-        }
-      });
-    },
-    remainingSchedule() {
-      return this.schedule.filter((schedule) => {
-        return !this.jobSheduleIndexes.includes(schedule.id);
-      });
-    },
-  },
-  beforeDestroy() {
-    document.removeEventListener("keydown", this.keydown);
-  },
 };
 </script>
 
-<style lang="sass"></style>
+<style lang="sass">
+.job-schedule
+  &__interval-label
+    display: flex
+    flex-direction: row
+    align-items: center
+    padding: 0px 10px
+  &__interval-item
+    display: flex
+    flex-direction: column
+    flex-grow: 1
+    align-items: center
+  &__interval-divider
+    margin: 0px 6px
+    padding-top: 3px
+    color: #ccc
+  &__interval-date
+  &__interval-year
+    width: 100%
+    border-top: 1px solid #ccc
+    font-size: 14px
+
+  &__interval-link
+    font-size: 13px
+    text-align: center
+</style>

@@ -271,6 +271,10 @@ export default {
       this.dateFrom = newMomentFrom.toDate();
       this.fetchJobs();
     },
+    scheduleToCurrentWeek() {
+      this.dateFrom = moment(new Date()).weekday(0).toDate();
+      this.fetchJobs();
+    },
 
     thisDateJobs(currDateMoment) {
       let currDateString = currDateMoment.format("YYYY-MM-DD");
@@ -332,12 +336,6 @@ export default {
         }
       }
     },
-
-    scheduleToCurrentWeek() {
-      this.dateFrom = moment(new Date()).weekday(0).toDate();
-      this.fetchJobs();
-    },
-
   },
 };
 </script>
