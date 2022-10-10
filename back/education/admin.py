@@ -106,7 +106,7 @@ admin.site.register(Option_file, Option_fileAdmin)
 
 class OptionAdmin(admin.ModelAdmin):
   search_fields = ('topic', 'comment')
-  list_display = ('specialist', 'activity', 'topic')
+  list_display = ('specialist', 'activity', 'topic', 'date')
   list_filter = ('specialist', 'activity')
   filter_horizontal = ('exercises',)
   inlines = (Option_fileInline,)

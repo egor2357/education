@@ -376,6 +376,8 @@ class Option(models.Model):
   topic = models.TextField(verbose_name='Тема занятия')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
 
+  date = models.DateField(null=False, blank=True, auto_now_add=True, verbose_name='Дата добавления')
+
   class Meta:
     db_table = 'option'
     verbose_name = 'Вариант занятия'

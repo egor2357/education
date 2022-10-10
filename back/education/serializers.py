@@ -434,6 +434,7 @@ class OptionSerializer(serializers.ModelSerializer):
   )
   methods = MethodSerializer(read_only=True, many=True)
   exercises = ExerciseSerializer(read_only=True, many=True)
+  date = serializers.DateField(read_only=True)
 
   class Meta:
     model = Option
@@ -442,7 +443,7 @@ class OptionSerializer(serializers.ModelSerializer):
       'comment',
       'specialist_id',
       'activity_id', 'option_files',
-      'exercises', 'methods',
+      'exercises', 'methods', 'date'
     )
 
 class Job_fileSerializer(serializers.ModelSerializer):
