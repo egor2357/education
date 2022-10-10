@@ -45,7 +45,13 @@
       </div>
       <div class="appeal-details__bottom">
         <div class="message-send-block">
-          <a-textarea v-model="text" :rows="4" :disabled="appealInfo.closed" />
+          <a-textarea
+            v-model="text"
+            ref="messageTextarea"
+            :disabled="appealInfo.closed"
+            :rows="4"
+            placeholder="Введите текст сообщения"
+          />
           <div class="buttons">
             <a-upload
               name="file"
@@ -96,6 +102,7 @@ export default {
     await this.fetchMessages(this.$route.params.id);
     await this.fetchNotifications();
     this.loading = false;
+    this.$refs.messageTextarea.focus();
   },
   methods: {
     ...mapActions({
