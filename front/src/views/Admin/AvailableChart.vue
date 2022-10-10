@@ -23,7 +23,11 @@
         </div>
         <div class="month-container">
           <a-icon class="icon-button" type="left" @click="changeMonth(false)" />
-          <span class="text">{{ monthLabel }}</span>
+          <div class="month-container__month-wrapper">
+            <span class="month-container__month-text">{{ monthLabel }}</span>
+            <a class="month-container__month-link"
+              @click.stop.prevent="presenceToCurrentMonth">К текущему месяцу</a>
+          </div>
           <a-icon class="icon-button" type="right" @click="changeMonth(true)" />
         </div>
 
@@ -152,6 +156,7 @@ export default {
       fetchSpecialists: "specialists/fetchSpecialists",
       fetchActivities: "activities/fetchActivities",
     }),
+
     async changeMonth(next) {
       this.loading = true;
       if (next) {
@@ -169,6 +174,23 @@ export default {
       await this.makeTableData();
       this.loading = false;
     },
+    async presenceToCurrentMonth() {
+      this.loading = true;
+
+      this.currentDate = moment();
+
+      await this.fetchPresence(
+        `?interval_start=${`${this.currentDate.year()}-${
+          this.currentDate.month() + 1
+        }-01`}&interval_end=${`${this.currentDate.year()}-${
+          this.currentDate.month() + 1
+        }-${this.currentDate.daysInMonth()}`}`
+      );
+      await this.makeTableData();
+
+      this.loading = false;
+    },
+
     makeTableData() {
       this.monthLabel =
         this.currentDate.format("MMMM")[0].toUpperCase() +
@@ -381,7 +403,7 @@ export default {
   overflow: hidden
   &--one
     height: auto
-    min-height: 140px
+    min-height: 150px
 
     .presence-chart__table-body-chart-holder
       margin: 5px 10px
@@ -406,18 +428,30 @@ export default {
       text-align: right
 
   .month-container
-    text-align: center
+    display: flex
+    flex-direction: row
+    justify-content: center
+    align-items: center
     font-size: 18px
     line-height: 18px
     cursor: default
     line-height: 32px
     margin-bottom: 10px
 
-    .text
+    &__month-wrapper
+      display: flex
+      flex-direction: column
+      align-items: center
+    &__month-text
       padding: 0 10px
       width: 140px
       display: inline-block
       font-size: 1rem
+      text-align: center
+    &__month-link
+      font-size: 13px
+      text-align: center
+      line-height: 13px
 
   .table-presence
     flex: 1
