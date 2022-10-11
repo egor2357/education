@@ -398,7 +398,7 @@ export default {
     padding-left: 35px
 
   &-skill
-    top: 83px
+    top: 84px
     z-index: 2
     border-bottom: 1px solid #e8e8e8
     padding-left: 55px
@@ -416,7 +416,7 @@ export default {
       flex: 1 1 90%
 
       .skill-table__cell
-        padding-left: 90px
+        padding-left: 108px
         border-top: 1px solid #e8e8e8
         &:first-child
           border-top: 0
