@@ -58,7 +58,7 @@
         </a-tabs>
       </div>
       <div class="job-details__tab_content">
-        <JobOption :option="job" v-if="activeTab == 1" />
+        <JobOption :option="job" :showDate="false" v-if="activeTab == 1" />
 
         <div v-if="activeTab == 2" class="job-details__wrapper">
           <template v-if="reportForm.marks.length">

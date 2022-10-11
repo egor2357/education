@@ -7,7 +7,7 @@
       <slot></slot>
     </div>
     <div class="job-option-body">
-      <div class="job-option__date">{{ formatDate(option.date) }}</div>
+      <div v-if="showDate" class="job-option__date">{{ formatDate(option.date) }}</div>
       <div class="job-option-exercises">
         <template v-if="option.exercises.length">
           <div
@@ -83,6 +83,10 @@ export default {
       type: Object,
       default: null,
     },
+    showDate: {
+      type: Boolean,
+      default: true,
+    }
   },
   data() {
     return {
