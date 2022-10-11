@@ -7,6 +7,7 @@
       <slot></slot>
     </div>
     <div class="job-option-body">
+      <div class="job-option__date">{{ formatDate(option.date) }}</div>
       <div class="job-option-exercises">
         <template v-if="option.exercises.length">
           <div
@@ -69,12 +70,14 @@
 
 import consts from "@/const";
 import MediaLightBox from "@/components/MediaLightBox";
+import datetime from "@/mixins/datetime";
 
 export default {
   name: "JobOption",
   components: {
     MediaLightBox,
   },
+  mixins: [datetime],
   props: {
     option: {
       type: Object,
@@ -172,7 +175,14 @@ $border-color: #e8e8e8
         color: #40a9ff
 
   &-body
-    padding: 10px 15px
+    padding: 10px 15px 28px 15px
+    position: relative
+
+  &__date
+    position: absolute
+    bottom: 6px
+    right: 10px
+    color: rgba(0, 0, 0, 0.54)
   &-exercises
     display: flex
     flex-direction: row
