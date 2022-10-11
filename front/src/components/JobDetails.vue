@@ -734,7 +734,6 @@ export default {
     this.loading = false;
     this.$store.commit("schedule/setSelectedDay", this.job.date);
   },
-  beforeDestroy() {},
 };
 </script>
 
