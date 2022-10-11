@@ -156,7 +156,7 @@ class JobView(viewsets.ModelViewSet):
         'specialist'
       )
       .prefetch_related(
-        'job_file_set',
+        'job_file_set', 'job_report_file_set',
         'exercise_report_set__exercise__skill__direction__area',
         'methods__form',
       )
@@ -475,6 +475,11 @@ class Job_fileView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated,)
   queryset = Job_file.objects.all()
   serializer_class = Job_fileSerializer
+
+class Job_report_fileView(viewsets.ModelViewSet):
+  permission_classes = (permissions.IsAuthenticated,)
+  queryset = Job_report_file.objects.all()
+  serializer_class = Job_report_fileSerializer
 
 class Exercise_reportView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated,)

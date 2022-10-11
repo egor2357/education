@@ -44,6 +44,19 @@ def job_update_related(job, request):
     job.job_file_set.exclude(pk__in=files_id).delete()
     Job_file.objects.bulk_create(files_to_save)
 
+  if 'report_files_id' in request.data:
+    report_files_id = json.loads(request.data['report_files_id'])
+
+    report_files_to_save = []
+    report_files = request.FILES.getlist('report_files')
+    for report_file in report_files:
+      new_report_file = Job_report_file(job=job, file=report_file)
+      new_report_file.create_thumbnail()
+      report_files_to_save.append(new_report_file)
+
+    job.job_report_file_set.exclude(pk__in=report_files_id).delete()
+    Job_report_file.objects.bulk_create(report_files_to_save)
+
   if 'option_files' in request.data:
     option_files = json.loads(request.data['option_files'])
     option_files_ids = [option_file['uid'] for option_file in option_files]

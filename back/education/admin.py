@@ -122,6 +122,15 @@ class Job_fileAdmin(admin.ModelAdmin):
 
 admin.site.register(Job_file, Job_fileAdmin)
 
+class Job_report_fileInline(admin.TabularInline):
+  model = Job_report_file
+  extra = 0
+
+class Job_report_fileAdmin(admin.ModelAdmin):
+  list_filter = ('job',)
+
+admin.site.register(Job_report_file, Job_report_fileAdmin)
+
 class Exercise_reportInline(admin.TabularInline):
   model = Exercise_report
   extra = 0
@@ -139,7 +148,7 @@ class JobAdmin(admin.ModelAdmin):
     'specialist', 'schedule',
     'start_time', 'topic')
   list_filter = ('schedule',)
-  inlines = (Job_fileInline, Exercise_reportInline)
+  inlines = (Job_fileInline, Job_report_fileInline, Exercise_reportInline)
   date_hierarchy = 'date'
 
 admin.site.register(Job, JobAdmin)

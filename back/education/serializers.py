@@ -463,6 +463,24 @@ class Job_fileSerializer(serializers.ModelSerializer):
       'name',
     )
 
+class Job_report_fileSerializer(serializers.ModelSerializer):
+  job_id = serializers.PrimaryKeyRelatedField(
+    source='job', queryset=Job.objects.all()
+  )
+
+  def get_name(self, instance):
+    return os.path.split(instance.file.name)[-1]
+  name = serializers.SerializerMethodField()
+
+  class Meta:
+    model = Job_report_file
+    fields = (
+      'id', 'job_id',
+      'file', 'thumbnail',
+      'name',
+    )
+
+
 class Exercise_reportForJobSerializer(FlexFieldsModelSerializer):
   job_id = serializers.PrimaryKeyRelatedField(
     source='job', queryset=Job.objects.all()
@@ -517,6 +535,10 @@ class JobSerializer(FlexFieldsModelSerializer):
     source='job_file_set', many=True, read_only=True
   )
 
+  job_report_files = Job_report_fileSerializer(
+    source='job_report_file_set', many=True, read_only=True
+  )
+
   def update(self, instance, validated_data):
     has_change_spec = False
     has_change_act = False
@@ -545,7 +567,7 @@ class JobSerializer(FlexFieldsModelSerializer):
       'schedule_id', 'schedule',
       'reports',
       'methods',
-      'job_files',
+      'job_files', 'job_report_files',
       'date', 'start_time',
       'comment', 'topic',
       'report_comment',
@@ -562,7 +584,7 @@ class Exercise_reportSerializer(FlexFieldsModelSerializer):
 
   job = JobSerializer(
     read_only=True,
-    omit=['schedule', 'reports', 'methods', 'job_files']
+    omit=['schedule', 'reports', 'methods', 'job_files', 'job_report_files']
   )
 
   exercise = ExerciseSerializer(read_only=True)
