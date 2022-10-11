@@ -854,7 +854,7 @@ export default {
   &__report-files
     width: 100%
     max-height: 200px
-    overflow-y: scroll
+    overflow-y: auto
 
   &__report_comment
     margin-bottom: 24px

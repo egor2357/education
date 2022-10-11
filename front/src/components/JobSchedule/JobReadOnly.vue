@@ -98,21 +98,58 @@
               {{ reportForm.report_comment }}
             </div>
           </div>
+          <div class="job-details__report-files" v-if="files.length">
+            <a-divider orientation="left"> Файлы отчета по занятию </a-divider>
+            <div class="files-upload-with-arrows">
+              <a-icon
+                type="left"
+                class="arrow-left"
+                @click="clickLeftArrow"
+                v-if="scrollable"
+              />
+              <a-upload
+                multiple
+                disabled
+                list-type="picture"
+                :file-list="files"
+                class="job-option-files-upload"
+                @preview="clickOnFile($event)"
+                ref="files-list"
+              />
+              <a-icon
+                type="right"
+                class="arrow-right"
+                @click="clickRightArrow"
+                v-if="scrollable"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
+    <MediaLightBox
+      v-if="displayMedia"
+      :files="files"
+      @close="displayMedia = false"
+      :selectedFile="selectedFile"
+    />
   </div>
 </template>
 
 <script>
+
 import JobOption from "@/components/JobOptions/JobOption";
+import MediaLightBox from "@/components/MediaLightBox";
 import moment from "moment";
+import consts from "@/const";
 import getColorByMark from "@/mixins/getColorByMark";
 import { Empty } from "ant-design-vue";
+
 export default {
   name: "JobReadOnly",
   components: {
     JobOption,
+    MediaLightBox,
   },
   props: {
     job: {
@@ -128,8 +165,38 @@ export default {
       reportForm: {
         marks: [],
         report_comment: "",
+        job_report_files: [],
       },
+
+      photoFormats: consts.photoFormats,
+
+      selectedFile: null,
+      displayMedia: false,
+      filesEl: null,
     };
+  },
+  computed: {
+    files() {
+      return this.reportForm.job_report_files.map((file) => {
+        return {
+          uid: file.id,
+          name: file.name,
+          status: "done",
+          url: file.file,
+          thumbUrl: file.thumbnail,
+          photo:
+            file.name.split(".").pop() !== file.name &&
+            this.photoFormats.indexOf(file.name.split(".").pop()) !== -1,
+        };
+      });
+    },
+    scrollable() {
+      if (this.filesEl) {
+        return this.filesEl.scrollWidth > this.filesEl.clientWidth;
+      } else {
+        return false;
+      }
+    },
   },
   beforeCreate() {
     this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
@@ -137,7 +204,36 @@ export default {
   created() {
     this.reportForm.marks = this.job.reports.slice();
     this.reportForm.report_comment = this.job.report_comment;
+    this.reportForm.job_report_files = this.job.job_report_files;
     this.$store.commit("schedule/setSelectedDay", this.job.date);
+  },
+  watch: {
+    activeTab(val) {
+      if (val == 1) {
+        return;
+      }
+      this.$nextTick(() => {
+        if (this.files.length) {
+          this.filesEl = this.$refs["files-list"].$el.children[1];
+        }
+      });
+    }
+  },
+  methods: {
+    clickOnFile(file) {
+      if (file.photo) {
+        this.selectedFile = file;
+        this.displayMedia = true;
+      } else {
+        window.open(file.url);
+      }
+    },
+    clickRightArrow() {
+      this.filesEl.scrollLeft += 600;
+    },
+    clickLeftArrow() {
+      this.filesEl.scrollLeft -= 600;
+    },
   },
 };
 </script>
@@ -155,6 +251,10 @@ export default {
     &:not(.current)
       opacity: 0.2
 
+  .job-details__report-files
+    width: 100%
+    max-height: 200px
+    overflow-y: auto
 
   .job-details__report-comment
     width: 100%
