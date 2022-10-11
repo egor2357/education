@@ -551,11 +551,88 @@ class Job_file(models.Model):
     verbose_name='Миниатюра'
   )
 
+  def create_thumbnail(self):
+    try:
+      file_name, file_extension = os.path.splitext(self.file.name)
+
+      if file_extension in ['.jpg', '.jpeg']:
+        FTYPE = 'JPEG'
+      elif file_extension == '.gif':
+        FTYPE = 'GIF'
+      elif file_extension == '.png':
+        FTYPE = 'PNG'
+      else:
+        return
+
+      image = Image.open(self.file)
+      image.thumbnail((200,200), Image.ANTIALIAS)
+
+      temp_thumb = BytesIO()
+      image.save(temp_thumb, FTYPE)
+      temp_thumb.seek(0)
+
+      data_obj = ContentFile(temp_thumb.read())
+      data_obj.name = self.file.name
+
+      self.thumbnail = data_obj
+
+      temp_thumb.close()
+    except:
+      return
+
+  def __str__(self):
+    return self.file.name
+
+  def save(self, *args, **kwargs):
+    self.create_thumbnail()
+    super(Job_file, self).save(*args, **kwargs)
+
   class Meta:
     db_table = 'job_file'
     verbose_name = 'Файл занятия'
     verbose_name_plural = 'Файлы занятия'
     ordering = ['job']
+
+@receiver(pre_delete, sender=Job_file)
+def job_file_model_delete(sender, instance, **kwargs):
+  if instance.file.name:
+    instance.file.delete(False)
+
+
+class Job_report_file(models.Model):
+  def get_file_upload_to(instance, filename):
+    return 'job_report_files/{0}/{1}/{2}/{3}'.format(
+      instance.job.date.year,
+      instance.job.date.month,
+      instance.job.date.day,
+      filename
+    )
+  def get_thumbnail_upload_to(instance, filename):
+    return 'job_report_files/{0}/{1}/{2}/thumbnail_{3}'.format(
+      instance.job.date.year,
+      instance.job.date.month,
+      instance.job.date.day,
+      filename
+    )
+
+  job = models.ForeignKey(
+    Job, null=False,
+    on_delete=models.CASCADE, verbose_name='Занятие'
+  )
+
+  file = models.FileField(
+    upload_to=get_file_upload_to,
+    max_length=255,
+    verbose_name='Файл'
+  )
+
+  thumbnail = models.ImageField(
+    null=True,
+    default=None,
+    upload_to=get_thumbnail_upload_to,
+    max_length=255,
+    verbose_name='Миниатюра'
+  )
 
   def create_thumbnail(self):
     try:
@@ -593,11 +670,17 @@ class Job_file(models.Model):
     self.create_thumbnail()
     super(Job_file, self).save(*args, **kwargs)
 
+  class Meta:
+    db_table = 'job_report_file'
+    verbose_name = 'Файл отчета по занятию'
+    verbose_name_plural = 'Файлы отчета по занятию'
+    ordering = ['job']
 
-@receiver(pre_delete, sender=Job_file)
-def job_file_model_delete(sender, instance, **kwargs):
+@receiver(pre_delete, sender=Job_report_file)
+def job_report_file_model_delete(sender, instance, **kwargs):
   if instance.file.name:
     instance.file.delete(False)
+
 
 class Exercise_report(models.Model):
   MARK_CHOICES = (
