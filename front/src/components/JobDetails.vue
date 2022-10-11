@@ -855,6 +855,7 @@ export default {
     width: 100%
     max-height: 200px
     overflow-y: auto
+    margin-bottom: 24px
 
   &__report_comment
     margin-bottom: 24px
