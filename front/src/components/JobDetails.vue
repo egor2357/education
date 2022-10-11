@@ -252,6 +252,20 @@
                 :auto-size="{ minRows: 4, maxRows: 10 }"
                 type="textarea"
               />
+              <div class="job-details__report-files">
+                <a-upload
+                  multiple
+                  list-type="picture"
+                  :file-list="reportForm.job_report_files"
+                  :remove="handleRemoveJobReportFile"
+                  :before-upload="beforeUploadJobReportFile"
+                  class="job-details__body__form-files"
+                >
+                  <a-button>
+                    <a-icon type="upload" /> Прикрепить файл
+                  </a-button>
+                </a-upload>
+              </div>
               <a-button icon="check" type="primary" @click="saveReport">
                 Сохранить отчет
               </a-button>
@@ -306,6 +320,7 @@ export default {
       reportForm: {
         marks: [],
         report_comment: "",
+        job_report_files: [],
       },
 
       layout: {
@@ -535,6 +550,15 @@ export default {
 
       this.reportForm.marks = job.reports.slice();
       this.reportForm.report_comment = job.report_comment;
+      this.reportForm.job_report_files.splice(0);
+      for (let job_report_file of job.job_report_files) {
+        this.reportForm.job_report_files.push({
+          uid: job_report_file.id,
+          name: job_report_file.name,
+          status: "done",
+          url: job_report_file.file,
+        });
+      }
     },
     async fetchJob() {
       try {
@@ -623,10 +647,24 @@ export default {
     async saveReport() {
       this.loading = true;
       try {
+        const formData = new FormData();
+        formData.append("marks", JSON.stringify(this.reportForm.marks));
+        formData.append("report_comment", this.reportForm.report_comment);
+
+        let currFilesIds = [];
+        this.reportForm.job_report_files.forEach((file) => {
+          if (file.status != "done") {
+            formData.append("report_files", file);
+          } else {
+            currFilesIds.push(file.uid);
+          }
+        });
+        formData.append("report_files_id", JSON.stringify(currFilesIds));
+
         let res = await patch(
           this.$axios,
           `/api/jobs/${this.$route.params.id}/`,
-          this.reportForm
+          formData
         );
         if (res.status === 200) {
           this.$message.success("Отчет сохранен");
@@ -651,6 +689,17 @@ export default {
     },
     beforeUploadJobFile(file) {
       this.form.job_files = [...this.form.job_files, file];
+      return false;
+    },
+
+    handleRemoveJobReportFile(file) {
+      const index = this.reportForm.job_report_files.indexOf(file);
+      const newReportFileList = this.reportForm.job_report_files.slice();
+      newReportFileList.splice(index, 1);
+      this.reportForm.job_report_files = newReportFileList;
+    },
+    beforeUploadJobReportFile(file) {
+      this.reportForm.job_report_files = [...this.reportForm.job_report_files, file];
       return false;
     },
   },
@@ -801,6 +850,11 @@ export default {
         opacity: 1
       &.current
         opacity: 1
+
+  &__report-files
+    width: 100%
+    max-height: 200px
+    overflow-y: scroll
 
   &__report_comment
     margin-bottom: 24px

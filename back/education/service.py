@@ -100,7 +100,7 @@ def job_update_related(job, request):
     job.methods.set(methods)
 
   if 'marks' in request.data:
-    marks = request.data.get('marks', [])
+    marks = json.loads(request.data['marks'])
     for mark in marks:
       exercise_report = Exercise_report.objects.get(pk=mark['id'])
       exercise_report.mark = mark['mark']
