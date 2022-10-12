@@ -452,9 +452,9 @@ export default {
     border-color: #40a9ff
 
   .vue-treeselect__value-container
-    line-height: 21px
+    line-height: 18px
   .vue-treeselect__multi-value-item-container
-    line-height: 21px
+    line-height: 18px
   .vue-treeselect__multi-value-item
     border: 1px solid #e8e8e8
     background-color: #fafafa
