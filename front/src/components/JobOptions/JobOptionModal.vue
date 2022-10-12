@@ -1,6 +1,7 @@
 <template>
   <a-modal
     width="900px"
+    class="option-details"
     :visible="true"
     :title="title"
     @cancel="closeModal(false)"
@@ -26,51 +27,17 @@
         :validateStatus="fields['exercises'].validateStatus"
         :help="fields['exercises'].help"
       >
-        <a-tree-select
-          :value="form.exercises"
-          @change="setExercises"
-          :dropdownStyle="{
-            'max-height': '500px',
-            'max-width': '566px',
-            'overflow-y': 'auto',
-          }"
+        <treeselect
+          v-model="form.exercises"
+          :multiple="true"
+          :options="exercisesOptions"
           placeholder="Выберите упражнения"
-          allow-clear
-          multiple
-        >
-          <a-tree-select-node
-            v-for="area in areas"
-            :key="'area' + area.id"
-            :value="'area' + area.id"
-            :selectable="false"
-            :title="`${area.number}. ${area.name}`"
-          >
-            <a-tree-select-node
-              v-for="direction in area.development_directions"
-              :key="'direction' + direction.id"
-              :value="'direction' + direction.id"
-              :selectable="false"
-              :title="`${area.number}.${direction.number}. ${direction.name}`"
-            >
-              <a-tree-select-node
-                v-for="skill in direction.skills"
-                :key="'skill' + skill.id"
-                :value="'skill' + skill.id"
-                :selectable="false"
-                :title="`${area.number}.${direction.number}.${skill.number}. ${skill.name}`"
-              >
-                <a-tree-select-node
-                  v-for="exercise in skill.exercises"
-                  :key="'exercise' + exercise.id"
-                  :value="exercise.id"
-                  :title="`${area.number}.${direction.number}.${skill.number}.${exercise.number}. ${exercise.name}`"
-                  :isLeaf="true"
-                >
-                </a-tree-select-node>
-              </a-tree-select-node>
-            </a-tree-select-node>
-          </a-tree-select-node>
-        </a-tree-select>
+          valueConsistsOf="LEAF_PRIORITY"
+          :disableBranchNodes="true"
+          :backspaceRemoves="false"
+          noChildrenText="У этого узла нет элементов"
+          noOptionsText="Структура навыков не определена"
+        />
       </a-form-model-item>
 
       <a-form-model-item
@@ -80,31 +47,17 @@
         :validateStatus="fields['methods'].validateStatus"
         :help="fields['methods'].help"
       >
-        <a-tree-select
-          :value="form.methods"
-          @change="setMethods"
-          :dropdownStyle="{ 'max-height': '500px', 'max-width': '566px', 'overflow-y': 'auto' }"
-          placeholder="Выберите формы проведения занятия"
-          allow-clear
-          multiple
-        >
-          <a-tree-select-node
-            v-for="form in forms"
-            :key="'form' + form.id"
-            :value="'form' + form.id"
-            :selectable="false"
-            :title="`${form.name}`"
-          >
-            <a-tree-select-node
-              v-for="method in form.methods"
-              :key="'method' + method.id"
-              :value="method.id"
-              :title="`${method.name}`"
-              :isLeaf="true"
-            >
-            </a-tree-select-node>
-          </a-tree-select-node>
-        </a-tree-select>
+        <treeselect
+          v-model="form.methods"
+          :multiple="true"
+          :options="methodsOptions"
+          placeholder="Выберите упражнения"
+          valueConsistsOf="LEAF_PRIORITY"
+          :disableBranchNodes="true"
+          :backspaceRemoves="false"
+          noChildrenText="У этого узла нет элементов"
+          noOptionsText="Структура навыков не определена"
+        />
       </a-form-model-item>
 
       <a-form-model-item
@@ -164,8 +117,14 @@ import post from "@/middleware/post";
 import put from "@/middleware/put";
 import patch from "@/middleware/patch";
 
+import Treeselect from "@riophae/vue-treeselect";
+import "@riophae/vue-treeselect/dist/vue-treeselect.css";
+
 export default {
   name: "JobOptionModal",
+  components: {
+    Treeselect,
+  },
   props: {
     activity: {
       type: Object,
@@ -260,6 +219,63 @@ export default {
       formsFetched: "forms/getFetched",
       forms: "forms/getForms",
     }),
+
+    exercisesOptions() {
+      let options = [];
+      for (let area of this.areas) {
+        let areaNode = {
+          id: 'area' + area.id,
+          label: `${area.number}. ${area.name}`,
+          children: []
+        };
+        for (let direction of area.development_directions) {
+          let directionNode = {
+            id: 'direction' + direction.id,
+            label: `${area.number}.${direction.number}. ${direction.name}`,
+            children: [],
+          }
+          for (let skill of direction.skills) {
+            let skillNode = {
+              id: 'skill' + skill.id,
+              label: `${area.number}.${direction.number}.${skill.number}. ${skill.name}`,
+              children: [],
+            }
+            for (let exercise of skill.exercises) {
+              let exerciseNode = {
+                id: exercise.id,
+                label: `${area.number}.${direction.number}.${skill.number}.${exercise.number}. ${exercise.name}`,
+              }
+
+              skillNode.children.push(exerciseNode);
+            }
+            directionNode.children.push(skillNode);
+          }
+          areaNode.children.push(directionNode);
+        }
+        options.push(areaNode);
+      }
+      return options;
+    },
+
+    methodsOptions() {
+      let options = [];
+      for (let form of this.forms) {
+        let formNode = {
+          id: 'form' + form.id,
+          label: form.name,
+          children: []
+        };
+        for (let method of form.methods) {
+          let methodNode = {
+            id: method.id,
+            label: method.name,
+          }
+          formNode.children.push(methodNode);
+        }
+        options.push(formNode);
+      }
+      return options;
+    },
   },
   methods: {
     ...mapActions({
@@ -343,20 +359,6 @@ export default {
           }
         });
       }
-    },
-    setExercises(values, labels) {
-      this.form.exercises.splice(0);
-      for (let value of values) {
-        this.form.exercises.push(value);
-      }
-      this.fieldChanged(values, "exercises");
-    },
-    setMethods(values, labels) {
-      this.form.methods.splice(0);
-      for (let value of values) {
-        this.form.methods.push(value);
-      }
-      this.fieldChanged(values, "methods");
     },
     handleRemoveOptionFile(file) {
       const index = this.form.option_files.indexOf(file);
@@ -442,4 +444,32 @@ export default {
       .ant-upload-list-item
         min-width: 200px
         margin-right: 8px
+
+  .vue-treeselect--open.vue-treeselect--open-below .vue-treeselect__control
+    border-bottom-left-radius: 5px
+    border-bottom-right-radius: 5px
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2)
+    border-color: #40a9ff
+
+  .vue-treeselect__value-container
+    line-height: 21px
+  .vue-treeselect__multi-value-item-container
+    line-height: 21px
+  .vue-treeselect__multi-value-item
+    border: 1px solid #e8e8e8
+    background-color: #fafafa
+  .vue-treeselect__multi-value-label
+    font-size: 14px
+    color: rgba(0, 0, 0, 0.65)
+  .vue-treeselect__multi-value-remove
+    color: rgba(0, 0, 0, 0.65)
+  .vue-treeselect__value-remove
+    color: rgba(0, 0, 0, 0.65)
+
+  .vue-treeselect__menu
+    margin-top: 2px
+    border: none
+    border-radius: 4px
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px 0px
+
 </style>

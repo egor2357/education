@@ -408,7 +408,7 @@ export default {
         options.push(formNode);
       }
       return options;
-    }
+    },
   },
   methods: {
     ...mapActions({
@@ -910,6 +910,7 @@ export default {
 
   .vue-treeselect__menu
     margin-top: 2px
+    border: none
     border-radius: 4px
     box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px 0px
 
