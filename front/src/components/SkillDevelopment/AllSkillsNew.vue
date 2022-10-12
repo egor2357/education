@@ -580,7 +580,7 @@ export default {
     border-bottom: 1px solid #e8e8e8
 
   &-direction
-    top: 42px
+    top: 45px
     z-index: 3
     border-bottom: 1px solid #e8e8e8
     padding-left: 35px
