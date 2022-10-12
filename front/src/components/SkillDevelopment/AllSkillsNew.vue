@@ -609,7 +609,7 @@ export default {
   display: flex
   flex-direction: row
   cursor: default
-  top: 83px
+  top: 90px
   z-index: 2
   border-bottom: 1px solid #e8e8e8
   padding-left: 55px
