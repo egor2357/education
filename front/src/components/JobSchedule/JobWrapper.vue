@@ -55,7 +55,7 @@ export default {
       font-size: 18px
 
   .job-schedule__interval-label
-    min-width: 250px
+    min-width: 300px
     text-align: center
 
   &__calendar

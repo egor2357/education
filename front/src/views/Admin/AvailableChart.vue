@@ -449,7 +449,7 @@ export default {
       align-items: center
     &__month-text
       padding: 0 10px
-      width: 140px
+      width: 160px
       display: inline-block
       font-size: 1rem
       text-align: center
