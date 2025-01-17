@@ -233,7 +233,7 @@ export default {
     max-width: 50px
     flex: 1
     text-align: center
-    padding: 7px 0;
+    padding: 7px 0
     font-size: 16px
 
     &.weekend
