@@ -1,6 +1,6 @@
 <template>
   <a-spin :spinning="loading">
-    <div class="slills-structure">
+    <div class="skills-structure">
       <div class="top-bar">
         <div class="top-bar__side-block left"></div>
         <div class="title">Структура навыков</div>
@@ -19,6 +19,14 @@
           @onEditItem="openModalEdit"
           @onAddItem="openModalAdd($event.type, $event.item)"
         />
+      </div>
+      <div class="skills-structure__params-container">
+        <div class="skills-structure__param">
+          <a-checkbox v-model="showDeleted" @change="refetchAreas">Показывать удаленные элементы</a-checkbox>
+        </div>
+        <div class="skills-structure__param">
+
+        </div>
       </div>
       <ModalSkills
         v-if="displayModal"
@@ -48,7 +56,9 @@ export default {
       displayModal: false,
       modalAdding: true,
       modalType: 0,
-      modalEditableData: {}
+      modalEditableData: {},
+      showDeleted: false,
+      actualDate: null
     };
   },
   async created() {
@@ -164,6 +174,11 @@ export default {
           that.deleteRecord(payload.id, type);
         }
       });
+    },
+    async refetchAreas() {
+      this.loading = true;
+      await this.fetchAreas(this.showDeleted);
+      this.loading = false;
     }
   },
   computed: {
@@ -176,7 +191,7 @@ export default {
 </script>
 
 <style lang="sass">
-.slills-structure
+.skills-structure
   height: 100%
   display: flex
   flex-direction: column
@@ -200,4 +215,7 @@ export default {
   .table-container
     flex: 1
     overflow: hidden
+
+  &__params-container
+    margin-top: 20px
 </style>

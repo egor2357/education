@@ -9,7 +9,7 @@
             <a-icon
               class="icon-button icon-show"
               :type="shownAreas.includes(area.id) ? 'down' : 'right'"
-              @click="toggleArea(area.id)"
+              @click="toggleNode(shownAreas, area.id)"
             />
             <span
               >
@@ -50,17 +50,17 @@
             </a-dropdown>
           </div>
           <Transition name="show">
-            <div v-if="shownAreas.includes(area.id)" class="skill-table-direction-wrapper">
+            <div v-if="shownAreas.includes(area.id)">
               <div
-                class="skill-table__cell skill-table__cell_sticky"
+                class="skill-table__cell skill-table__cell_sticky skill-table-direction"
                 v-if="!area.development_directions.length"
               >
                 <a @click="$emit('onAddItem', { type: 2, item: area })"
                   >Добавить направление развития</a
                 >
               </div>
-              <template v-else>
-                <div
+              <div v-else>
+                <div 
                   v-for="direction in area.development_directions"
                   :key="direction.id"
                 >
@@ -70,7 +70,7 @@
                     <a-icon
                       class="icon-button icon-show"
                       :type="shownDirections.includes(direction.id) ? 'down' : 'right'"
-                      @click="toggleDirection(direction.id)"
+                      @click="toggleNode(shownDirections, direction.id)"
                     />
                     <span>
                       {{
@@ -127,7 +127,7 @@
                     <div v-if="shownDirections.includes(direction.id)">
                       <div
                         v-if="!direction.skills.length"
-                        class="skill-table__cell"
+                        class="skill-table__cell skill-table__cell_sticky skill-table-skill"
                       >
                         <a
                           @click="$emit('onAddItem', { type: 3, item: direction })"
@@ -143,7 +143,7 @@
                             <a-icon
                               class="icon-button icon-show"
                               :type="shownSkills.includes(skill.id) ? 'down' : 'right'"
-                              @click="toggleSkill(skill.id)"
+                              @click="toggleNode(shownSkills, skill.id)"
                             />
                             <span>
                               {{ [ area.number, direction.number, skill.number].join(".") +
@@ -196,80 +196,144 @@
                             </a-dropdown>
                           </div>
                           <Transition name="show">
-                            <div
-                              v-if="shownSkills.includes(skill.id)"
-                              class="skill-table-exercises"
-                            >
-                              <div class="skill-table-exercises__content">
+                            <div v-if="shownSkills.includes(skill.id)">
+                              <div
+                                v-if="!skill.exercises.length"
+                                class="skill-table__cell skill-table__cell_sticky skill-table-result"
+                              >
+                                <a @click="$emit('onAddItem', {type: 4, item: skill})">
+                                  Добавить ожидаемый результат
+                                </a>
+                              </div>
+                              <div v-else>
                                 <div
-                                  v-if="!skill.exercises.length"
-                                  class="skill-table__cell"
+                                  v-for="result in skill.exercises" 
+                                  :key="result.id"
+                                  class="skill-table__cell skill-table__cell_sticky skill-table-result"
                                 >
-                                  <a @click="$emit('onAddItem', {type: 4, item: skill})">
-                                    Добавить упражнение
-                                  </a>
-                                </div>
-                                <div v-else>
-                                  <div
-                                    v-for="exercise in skill.exercises"
-                                    :key="exercise.id"
-                                    class="skill-table__cell"
+                                  <a-icon
+                                    class="icon-button icon-show"
+                                    :type="shownResults.includes(result.id) ? 'down' : 'right'"
+                                    @click="toggleNode(shownResults, result.id)"
+                                  />
+                                  <span>
+                                    {{
+                                      [ area.number, direction.number, skill.number, result.number].join(".") +
+                                      '. ' + result.name
+                                    }}
+                                  </span>
+                                  <a-dropdown
+                                    :trigger="['click']"
+                                    placement="bottomLeft"
+                                    class="dropdown--hover"
                                   >
-                                    <span>
-                                      {{
-                                        [ area.number, direction.number, skill.number, exercise.number].join(".") +
-                                        '. ' + exercise.name
-                                      }}
-                                    </span>
-                                    <a-dropdown
-                                      :trigger="['click']"
-                                      placement="bottomLeft"
-                                      class="dropdown--hover"
-                                    >
-                                      <a-icon
-                                        class="icon-button icon-actions"
-                                        type="more"
-                                      ></a-icon>
-                                      <a-menu slot="overlay">
-                                        <a-menu-item
-                                          key="1"
-                                          @click="$emit('onEditItem', { type: 4, item: exercise })"
-                                        >
-                                          Изменить
-                                        </a-menu-item>
-                                        <a-menu-item
-                                          key="2"
-                                          @click="
-                                            $emit('onDeleteItem', {
-                                              id: exercise.id,
-                                              name:
-                                                [
-                                                  area.number,
-                                                  direction.number,
-                                                  skill.number,
-                                                  exercise.number
-                                                ].join('.') +
-                                                '. ' +
-                                                exercise.name,
-                                              type: 4
-                                            })
-                                          "
-                                        >
-                                          <span> Удалить </span>
-                                        </a-menu-item>
-                                      </a-menu>
-                                    </a-dropdown>
-                                  </div>
+                                    <a-icon
+                                      class="icon-button icon-actions"
+                                      type="more"
+                                    ></a-icon>
+                                    <a-menu slot="overlay">
+                                      <a-menu-item
+                                        key="1"
+                                        @click="$emit('onEditItem', { type: 4, item: exercise })"
+                                      >
+                                        Изменить
+                                      </a-menu-item>
+                                      <a-menu-item
+                                        key="2"
+                                        @click="
+                                          $emit('onDeleteItem', {
+                                            id: exercise.id,
+                                            name:
+                                              [
+                                                area.number,
+                                                direction.number,
+                                                skill.number,
+                                                exercise.number
+                                              ].join('.') +
+                                              '. ' +
+                                              exercise.name,
+                                            type: 4
+                                          })
+                                        "
+                                      >
+                                        <span> Удалить </span>
+                                      </a-menu-item>
+                                    </a-menu>
+                                  </a-dropdown>
                                 </div>
+                                <Transition name="show">
+                                  <div v-if="shownSkills.includes(skill.id)">
+                                    <div
+                                      v-if="!skill.exercises.length"
+                                      class="skill-table__cell skill-table__cell_sticky skill-table-exercise"
+                                    >
+                                      <a @click="$emit('onAddItem', {type: 4, item: skill})">
+                                        Добавить диагностическое упражнение
+                                      </a>
+                                    </div>
+                                    <div v-else>
+                                      <div
+                                        v-for="exercise in skill.exercises"
+                                        :key="exercise.id"
+                                        class="skill-table__cell skill-table__cell_sticky skill-table-exercise"
+                                      >
+                                        <span>
+                                          {{
+                                            [ area.number, direction.number, skill.number, exercise.number, 'n'].join(".") +
+                                            '. ' + 'Диагностическое упражнение'
+                                          }}
+                                        </span>
+                                        <a-dropdown
+                                          :trigger="['click']"
+                                          placement="bottomLeft"
+                                          class="dropdown--hover"
+                                        >
+                                          <a-icon
+                                            class="icon-button icon-actions"
+                                            type="more"
+                                          ></a-icon>
+                                          <a-menu slot="overlay">
+                                            <a-menu-item
+                                              key="1"
+                                              @click="$emit('onEditItem', { type: 4, item: exercise })"
+                                            >
+                                              Изменить
+                                            </a-menu-item>
+                                            <a-menu-item
+                                              key="2"
+                                              @click="
+                                                $emit('onDeleteItem', {
+                                                  id: exercise.id,
+                                                  name:
+                                                    [
+                                                      area.number,
+                                                      direction.number,
+                                                      skill.number,
+                                                      exercise.number
+                                                    ].join('.') +
+                                                    '. ' +
+                                                    exercise.name,
+                                                  type: 4
+                                                })
+                                              "
+                                            >
+                                              <span> Удалить </span>
+                                            </a-menu-item>
+                                          </a-menu>
+                                        </a-dropdown>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Transition>
                               </div>
                             </div>
-                          </Transition>
+                          </Transition>                          
                         </div>
                       </div>
                     </div>
                   </Transition>
                 </div>
-              </template>
+              </div>
             </div>
           </Transition>
         </div>
@@ -302,6 +366,7 @@ export default {
       shownAreas: [],
       shownDirections: [],
       shownSkills: [],
+      shownResults: [],
     };
   },
   beforeCreate() {
@@ -313,31 +378,14 @@ export default {
         this.shownAreas.push(area.id);
       }
     },
-
-    toggleArea(areaId) {
-      if (this.shownAreas.includes(areaId)) {
-        let index = this.shownAreas.findIndex((item)=>{return item==areaId;});
-        this.shownAreas.splice(index, 1);
+    toggleNode(shownNodes, nodeId){
+      let index = shownNodes.indexOf(nodeId)
+      if (index == -1){
+        shownNodes.push(nodeId);
       } else {
-        this.shownAreas.push(areaId);
+        shownNodes.splice(index, 1);
       }
-    },
-    toggleDirection(directionId) {
-      if (this.shownDirections.includes(directionId)) {
-        let index = this.shownDirections.findIndex((item)=>{return item==directionId;});
-        this.shownDirections.splice(index, 1);
-      } else {
-        this.shownDirections.push(directionId);
-      }
-    },
-    toggleSkill(skillId) {
-      if (this.shownSkills.includes(skillId)) {
-        let index = this.shownSkills.findIndex((item)=>{return item==skillId;});
-        this.shownSkills.splice(index, 1);
-      } else {
-        this.shownSkills.push(skillId);
-      }
-    },
+    }
   }
 };
 </script>
@@ -403,9 +451,17 @@ export default {
     border-bottom: 1px solid #e8e8e8
     padding-left: 55px
 
-  &-exercises
-    display: flex
+  &-result
+    top: 90px
+    z-index: 2
     border-bottom: 1px solid #e8e8e8
+    padding-left: 75px
+
+  &-exercise
+    top: 90px
+    z-index: 2
+    border-bottom: 1px solid #e8e8e8
+    padding-left: 95px
 
     &__title
       padding: 10px 15px

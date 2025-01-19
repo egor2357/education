@@ -74,7 +74,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'education',
 #        'HOST': '192.168.137.100',
-        'USER': 'postgres',
+        'USER': 'egor',
         'ATOMIC_REQUESTS': True,
     }
 }
@@ -97,7 +97,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+# USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
