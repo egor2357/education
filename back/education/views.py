@@ -73,33 +73,168 @@ class UserView(viewsets.ModelViewSet):
 
 class Educational_areaView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Educational_area.objects.all().prefetch_related(
-    'development_direction_set',
-    'development_direction_set__skill_set',
-    'development_direction_set__skill_set__result_set',
-    'development_direction_set__skill_set__result_set__exercises',
-  )
   serializer_class = Educational_areaSerializer
+
+  def get_queryset(self):
+    if self.action == 'set_end':
+      return Educational_area.objects.filter(lifetime__upper_inf=True)
+    else:
+      return getEducational_areaQueryset(self.request)
+
+  @action(
+    detail=True, methods=['patch'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+  )
+  def set_end(self, request, *args, **kwargs):
+    educational_area = self.get_object()
+    today = datetime.date.today()
+    today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект был создан сегодня, то удалить насовсем
+    if educational_area.lifetime.lower==today or educational_area.lifetime.lower is None:
+      educational_area.delete()
+      return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+    educational_area.lifetime = (educational_area.lifetime.lower, today)
+    educational_area.save()
+    directions = educational_area.development_direction_set.all()
+    skills = Skill.objects.filter(direction_id__in=directions.values_list('pk', flat=True))
+    results = Result.objects.filter(skill_id__in=skills.values_list('pk', flat=True))
+    exercises = Exercise.objects.filter(result_id__in=results.values_list('pk', flat=True))
+    prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
+    directions.update(lifetime=prepared_lifetime)
+    skills.update(lifetime=prepared_lifetime)
+    results.update(lifetime=prepared_lifetime)
+    exercises.update(lifetime=prepared_lifetime)
+    return Response({}, status=status.HTTP_200_OK)
 
 class Development_directionView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Development_direction.objects.all().prefetch_related('skill_set__direction__area')
   serializer_class = Development_directionSerializer
+
+  def get_queryset(self):
+    if self.action == 'set_end':
+      return Development_direction.objects.filter(lifetime__upper_inf=True)
+    else:
+      return Development_direction.objects.all().prefetch_related('skill_set__result_set').select_related('area')
+
+  @action(
+    detail=True, methods=['patch'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+  )
+  def set_end(self, request, *args, **kwargs):
+    development_direction = self.get_object()
+    today = datetime.date.today()
+    today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект был создан сегодня, то удалить насовсем
+    if development_direction.lifetime.lower==today or development_direction.lifetime.lower is None:
+      development_direction.delete()
+      return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+    development_direction.lifetime = (development_direction.lifetime.lower, today)
+    development_direction.save()
+    skills = development_direction.skill_set.all()
+    results = Result.objects.filter(skill_id__in=skills.values_list('pk', flat=True))
+    exercises = Exercise.objects.filter(result_id__in=results.values_list('pk', flat=True))
+    prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
+    skills.update(lifetime=prepared_lifetime)
+    results.update(lifetime=prepared_lifetime)
+    exercises.update(lifetime=prepared_lifetime)
+    return Response({}, status=status.HTTP_200_OK)
 
 class ExerciseView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Exercise.objects.all().select_related('result__skill__direction__area')
   serializer_class = ExerciseSerializer
+
+  def get_queryset(self):
+    if self.action == 'set_end':
+      return Exercise.objects.filter(lifetime__upper_inf=True)
+    else:
+      return Exercise.objects.all().select_related('result__skill__direction__area')
+
+  @action(
+    detail=True, methods=['patch'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+  )
+  def set_end(self, request, *args, **kwargs):
+    exercise = self.get_object()
+    today = datetime.date.today()
+    today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект был создан сегодня, то удалить насовсем
+    if exercise.lifetime.lower==today or exercise.lifetime.lower is None:
+      exercise.delete()
+      return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+    exercise.lifetime = (exercise.lifetime.lower, today)
+    exercise.save()
+    return Response({}, status=status.HTTP_200_OK)
 
 class ResultView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Result.objects.all().select_related('skill__direction__area')
   serializer_class = ResultSerializer
+
+  def get_queryset(self):
+    if self.action == 'set_end':
+      return Result.objects.filter(lifetime__upper_inf=True)
+    else:
+      return Result.objects.all().select_related('skill__direction__area')
+
+  @action(
+    detail=True, methods=['patch'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+  )
+  def set_end(self, request, *args, **kwargs):
+    result = self.get_object()
+    today = datetime.date.today()
+    today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект был создан сегодня, то удалить насовсем
+    if result.lifetime.lower==today or result.lifetime.lower is None:
+      result.delete()
+      return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+    result.lifetime = (result.lifetime.lower, today)
+    result.save()
+    exercises = result.exercises.all()
+    prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
+    exercises.update(lifetime=prepared_lifetime)
+    return Response({}, status=status.HTTP_200_OK)
+
 
 class SkillView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Skill.objects.all().select_related('direction__area')
   serializer_class = SkillSerializer
+
+  def get_queryset(self):
+    if self.action == 'set_end':
+      return Skill.objects.filter(lifetime__upper_inf=True)
+    else:
+      return Skill.objects.all().select_related('direction__area').prefetch_related('result_set')
+
+  @action(
+    detail=True, methods=['patch'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+  )
+  def set_end(self, request, *args, **kwargs):
+    skill = self.get_object()
+    today = datetime.date.today()
+    today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект был создан сегодня, то удалить насовсем
+    if skill.lifetime.lower==today or skill.lifetime.lower is None:
+      skill.delete()
+      return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+    skill.lifetime = (skill.lifetime.lower, today)
+    skill.save()
+    results = skill.result_set.all()
+    exercises = Exercise.objects.filter(result_id__in=results.values_list('pk', flat=True))
+    prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
+    results.update(lifetime=prepared_lifetime)
+    exercises.update(lifetime=prepared_lifetime)
+    return Response({}, status=status.HTTP_200_OK)
 
 class FormView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
@@ -798,7 +933,6 @@ class EducationalAreasAllView(viewsets.GenericViewSet, mixins.ListModelMixin):
   permission_classes = (permissions.IsAuthenticated, )
   queryset = Educational_area.objects.all()
   serializer_class = EducationalAreaOnlySerializer
-
 
 class NotificationView(viewsets.GenericViewSet, mixins.ListModelMixin):
   permission_classes = (permissions.IsAuthenticated, )
