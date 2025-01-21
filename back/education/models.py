@@ -17,6 +17,25 @@ import os
 from PIL import Image
 from io import BytesIO
 
+from django.db.models import Transform
+
+class UpperInc(Transform):
+    lookup_name = "upper_inc"
+    function = "UPPER_INC"
+DateRangeField.register_lookup(UpperInc)
+class UpperInf(Transform):
+  lookup_name = "upper_inf"
+  function = "UPPER_INF"
+DateRangeField.register_lookup(UpperInf)
+class LowerInc(Transform):
+  lookup_name = "lower_inc"
+  function = "LOWER_INC"
+DateRangeField.register_lookup(LowerInc)
+class LowerInf(Transform):
+  lookup_name = "lower_inf"
+  function = "LOWER_INF"
+DateRangeField.register_lookup(LowerInf)
+
 class Educational_area(models.Model):
   name = models.TextField(unique=True, verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
