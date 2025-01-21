@@ -1,8 +1,7 @@
 from rest_framework import status, viewsets, views, filters, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from django.db.models import Q, Count
-
+from django.db.models import Q, Count, F, Func
 
 from django.contrib.auth import login, logout
 
@@ -22,9 +21,16 @@ from .service import (
 
   send_messages_after_create_appeal, send_messages_after_delete_appeal,
   send_messages_after_close_appeal,
-
-
 )
+from .querysets import getEducational_areaQueryset
+
+class UpdateRightBound(Func):
+  """
+  Первый параметр - имя поля DateRange
+  Второй параметр именованный right_bound - строка с датой
+  """
+  function = 'daterange'
+  template = '%(function)s(LOWER(%(expressions)s), \'%(right_bound)s\')'
 
 class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
                                         mixins.ListModelMixin,
