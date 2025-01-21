@@ -93,14 +93,6 @@ class SkillSerializer(FlexFieldsModelSerializer):
       'exercises',
     )
 
-class Activity_skillSerializer(serializers.ModelSerializer):
-  skill_id = serializers.PrimaryKeyRelatedField(
-    queryset=Skill.objects.all(), write_only=True
-  )
-  class Meta:
-    model = Activity
-    fields = ('skill_id',)
-
 class ActivitySerializer(FlexFieldsModelSerializer):
   skills = serializers.PrimaryKeyRelatedField(
     many=True, read_only=True
@@ -110,11 +102,7 @@ class ActivitySerializer(FlexFieldsModelSerializer):
     fields = (
       'id',
       'name', 'color',
-      'skills',
     )
-    expandable_fields = {
-      'skills': SkillSerializer,
-    }
 
 class ScheduleSerializer(serializers.ModelSerializer):
   activity_id = serializers.PrimaryKeyRelatedField(

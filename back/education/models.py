@@ -266,8 +266,6 @@ class Method(models.Model):
     return self.name
 
 class Activity(models.Model):
-  skills = models.ManyToManyField(Skill, verbose_name='Развиваемые навыки')
-
   name = models.TextField(unique=True, verbose_name='Название')
   color = models.CharField(max_length=7, default='#CCCCCC', blank=True, verbose_name='Код цвета')
 

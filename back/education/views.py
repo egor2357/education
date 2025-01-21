@@ -244,31 +244,7 @@ class ScheduleView(viewsets.ModelViewSet):
 class ActivityView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = ActivitySerializer
-  queryset = Activity.objects.all().prefetch_related('skills')
-
-  @action(detail=True, methods=['get'], serializer_class=Activity_skillSerializer)
-  def skills(self, request, *args, **kwargs):
-    activity = self.get_object()
-    serializer = ActivitySerializer(activity, fields=['skills'])
-    return Response(serializer.data)
-
-  @skills.mapping.put
-  def add_skill(self, request, *args, **kwargs):
-    activity = self.get_object()
-    serializer = Activity_skillSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    skill = serializer.validated_data['skill_id']
-    activity.skills.add(skill)
-    return Response(ActivitySerializer(activity, fields=['skills']).data)
-
-  @skills.mapping.delete
-  def delete_skill(self, request, *args, **kwargs):
-    activity = self.get_object()
-    serializer = Activity_skillSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    skill = serializer.validated_data['skill_id']
-    activity.skills.remove(skill)
-    return Response(ActivitySerializer(activity, fields=['skills']).data)
+  queryset = Activity.objects.all()
 
 class Option_fileView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrOption_fileOwnerOrNoUpdateDelete)

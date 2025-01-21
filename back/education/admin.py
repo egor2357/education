@@ -90,7 +90,6 @@ admin.site.register(Schedule, ScheduleAdmin)
 class ActivityAdmin(admin.ModelAdmin):
   search_fields = ('name',)
   list_display = ('name', 'color')
-  filter_horizontal = ('skills',)
   inlines = (ScheduleInline,)
 
 admin.site.register(Activity, ActivityAdmin)
