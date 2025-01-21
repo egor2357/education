@@ -60,6 +60,9 @@ class ExerciseSerializer(FlexFieldsModelSerializer):
   direction_number = serializers.IntegerField(source='result.skill.direction.number', read_only=True)
   area_number = serializers.IntegerField(source='result.skill.direction.area.number', read_only=True)
 
+  def create(self, validated_data):
+    return Exercise.objects.create(lifetime=(datetime.date.today(), None), **validated_data)
+
   class Meta:
     model = Exercise
     fields = (
@@ -82,6 +85,9 @@ class ResultSerializer(FlexFieldsModelSerializer):
   direction_number = serializers.IntegerField(source='skill.direction.number', read_only=True)
   area_number = serializers.IntegerField(source='skill.direction.area.number', read_only=True)
 
+  def create(self, validated_data):
+    return Result.objects.create(lifetime=(datetime.date.today(), None), **validated_data)
+
   class Meta:
     model = Result
     fields = (
@@ -103,6 +109,9 @@ class SkillSerializer(FlexFieldsModelSerializer):
 
   area_number = serializers.IntegerField(source='direction.area.number', read_only=True)
   direction_number = serializers.IntegerField(source='direction.number', read_only=True)
+
+  def create(self, validated_data):
+    return Skill.objects.create(lifetime=(datetime.date.today(), None), **validated_data)
 
   class Meta:
     model = Skill
@@ -368,6 +377,10 @@ class Development_directionSerializer(serializers.ModelSerializer):
   skills = SkillSerializer(
     source='skill_set', many=True, read_only=True
   )
+
+  def create(self, validated_data):
+    return Development_direction.objects.create(lifetime=(datetime.date.today(), None), **validated_data)
+
   class Meta:
     model = Development_direction
     fields = (
@@ -380,6 +393,10 @@ class Educational_areaSerializer(FlexFieldsModelSerializer):
   development_directions = Development_directionSerializer(
     source='development_direction_set', many=True, read_only=True,
   )
+
+  def create(self, validated_data):
+    return Educational_area.objects.create(lifetime=(datetime.date.today(), None), **validated_data)
+
   class Meta:
     model = Educational_area
     fields = ('id', 'name', 'number', 'development_directions')
