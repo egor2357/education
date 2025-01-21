@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete, post_save
 from django.dispatch.dispatcher import receiver
 from django.core.files.base import ContentFile
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, DateRangeField
 from rest_framework.serializers import ValidationError
 from django.conf import settings
 from .utils import send_message, loop
@@ -20,6 +20,7 @@ from io import BytesIO
 class Educational_area(models.Model):
   name = models.TextField(unique=True, verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
+  lifetime = DateRangeField(verbose_name='Время жизни')
 
   class Meta:
     db_table = 'educational_area'
@@ -39,6 +40,7 @@ class Development_direction(models.Model):
 
   name = models.TextField(verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
+  lifetime = DateRangeField(verbose_name='Время жизни')
 
   class Meta:
     db_table = 'development_direction'
@@ -58,6 +60,7 @@ class Skill(models.Model):
 
   name = models.TextField(verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
+  lifetime = DateRangeField(verbose_name='Время жизни')
 
   class Meta:
     db_table = 'skill'
@@ -77,6 +80,7 @@ class Result(models.Model):
 
   name = models.TextField(verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
+  lifetime = DateRangeField(verbose_name='Время жизни')
 
   class Meta:
     db_table = 'result'
@@ -96,6 +100,7 @@ class Exercise(models.Model):
 
   name = models.TextField(verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
+  lifetime = DateRangeField(verbose_name='Время жизни')
 
   class Meta:
     db_table = 'exercise'
