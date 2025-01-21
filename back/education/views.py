@@ -81,6 +81,9 @@ class Educational_areaView(viewsets.ModelViewSet):
     else:
       return getEducational_areaQueryset(self.request)
 
+  def perform_create(self, serializer):
+    serializer.save(lifetime=(datetime.date.today(), None))
+
   @action(
     detail=True, methods=['patch'],
     permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
@@ -117,6 +120,9 @@ class Development_directionView(viewsets.ModelViewSet):
       return Development_direction.objects.filter(lifetime__upper_inf=True)
     else:
       return Development_direction.objects.all().prefetch_related('skill_set__result_set').select_related('area')
+
+  def perform_create(self, serializer):
+    serializer.save(lifetime=(datetime.date.today(), None))
 
   @action(
     detail=True, methods=['patch'],
@@ -181,6 +187,9 @@ class ResultView(viewsets.ModelViewSet):
     else:
       return Result.objects.all().select_related('skill__direction__area')
 
+  def perform_create(self, serializer):
+    serializer.save(lifetime=(datetime.date.today(), None))
+
   @action(
     detail=True, methods=['patch'],
     permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
@@ -212,6 +221,9 @@ class SkillView(viewsets.ModelViewSet):
       return Skill.objects.filter(lifetime__upper_inf=True)
     else:
       return Skill.objects.all().select_related('direction__area').prefetch_related('result_set')
+
+  def perform_create(self, serializer):
+    serializer.save(lifetime=(datetime.date.today(), None))
 
   @action(
     detail=True, methods=['patch'],
@@ -619,6 +631,9 @@ class Exercise_reportView(viewsets.ModelViewSet):
                               'job__activity',
                               'job__specialist',
                             )
+
+  def perform_create(self, serializer):
+    serializer.save(lifetime=(datetime.date.today(), None))
 
   @action(detail=False, methods=['get'])
   def statistics(self, request, *args, **kwargs):
