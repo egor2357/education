@@ -29,9 +29,16 @@ class SkillAdmin(admin.ModelAdmin):
 
 admin.site.register(Skill, SkillAdmin)
 
-class ExerciseAdmin(admin.ModelAdmin):
+class ResultAdmin(admin.ModelAdmin):
   search_fields = ('name', 'number')
   list_display = ('number', 'name', 'skill')
+  list_filter = ('skill',)
+
+admin.site.register(Result, ResultAdmin)
+
+class ExerciseAdmin(admin.ModelAdmin):
+  search_fields = ('name', 'number')
+  list_display = ('number', 'name', 'result')
 
 admin.site.register(Exercise, ExerciseAdmin)
 

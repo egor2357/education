@@ -69,10 +69,29 @@ class Skill(models.Model):
   def __str__(self):
     return self.name
 
-class Exercise(models.Model):
+class Result(models.Model):
   skill = models.ForeignKey(
-    Skill, null=False, related_name='exercises',
+    Skill, null=False,
     on_delete=models.CASCADE, verbose_name='Навык'
+  )
+
+  name = models.TextField(verbose_name='Название')
+  number = models.PositiveSmallIntegerField(verbose_name='Номер')
+
+  class Meta:
+    db_table = 'result'
+    verbose_name = 'Ожидаемый результат'
+    verbose_name_plural = 'Ожидаемые результаты'
+    ordering = ['skill', 'number']
+    unique_together = ('skill', 'name',)
+
+  def __str__(self):
+    return self.name
+
+class Exercise(models.Model):
+  result = models.ForeignKey(
+    Result, null=False, related_name='exercises',
+    on_delete=models.CASCADE, verbose_name='Ожидаемый результат'
   )
 
   name = models.TextField(verbose_name='Название')
@@ -82,8 +101,8 @@ class Exercise(models.Model):
     db_table = 'exercise'
     verbose_name = 'Упражнение'
     verbose_name_plural = 'Упражнения'
-    ordering = ['skill', 'number']
-    unique_together = ('skill', 'name',)
+    ordering = ['result', 'number']
+    unique_together = ('result', 'name',)
 
   def __str__(self):
     return self.name
