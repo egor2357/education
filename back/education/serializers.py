@@ -51,17 +51,39 @@ class LoginSerializer(serializers.Serializer):
     return {'user': user}
 
 class ExerciseSerializer(FlexFieldsModelSerializer):
-  skill_id = serializers.PrimaryKeyRelatedField(
-    source='skill', queryset=Skill.objects.all()
+  result_id = serializers.PrimaryKeyRelatedField(
+    source='result', queryset=Result.objects.all()
   )
-  skill_number = serializers.IntegerField(source='skill.number', read_only=True)
 
-  area_number = serializers.IntegerField(source='skill.direction.area.number', read_only=True)
-
-  direction_number = serializers.IntegerField(source='skill.direction.number', read_only=True)
+  result_number = serializers.IntegerField(source='result.number', read_only=True)
+  skill_number = serializers.IntegerField(source='result.skill.number', read_only=True)
+  direction_number = serializers.IntegerField(source='result.skill.direction.number', read_only=True)
+  area_number = serializers.IntegerField(source='result.skill.direction.area.number', read_only=True)
 
   class Meta:
     model = Exercise
+    fields = (
+      'id',
+      'name', 'number',
+      'result_id',
+      'result_number',
+      'direction_number',
+      'area_number',
+    )
+
+class ResultSerializer(FlexFieldsModelSerializer):
+  exercises = ExerciseSerializer(many=True, read_only=True)
+
+  skill_id = serializers.PrimaryKeyRelatedField(
+    source='skill', queryset=Skill.objects.all()
+  )
+
+  skill_number = serializers.IntegerField(source='skill.number', read_only=True)
+  direction_number = serializers.IntegerField(source='skill.direction.number', read_only=True)
+  area_number = serializers.IntegerField(source='skill.direction.area.number', read_only=True)
+
+  class Meta:
+    model = Result
     fields = (
       'id',
       'name', 'number',
@@ -69,17 +91,17 @@ class ExerciseSerializer(FlexFieldsModelSerializer):
       'skill_number',
       'direction_number',
       'area_number',
+      'exercises',
     )
 
 class SkillSerializer(FlexFieldsModelSerializer):
-  exercises = ExerciseSerializer(many=True, read_only=True)
+  results = ResultSerializer(source='result_set', many=True, read_only=True)
 
   direction_id = serializers.PrimaryKeyRelatedField(
     source='direction', queryset=Development_direction.objects.all()
   )
 
   area_number = serializers.IntegerField(source='direction.area.number', read_only=True)
-
   direction_number = serializers.IntegerField(source='direction.number', read_only=True)
 
   class Meta:
@@ -90,13 +112,10 @@ class SkillSerializer(FlexFieldsModelSerializer):
       'direction_id',
       'direction_number',
       'area_number',
-      'exercises',
+      'results',
     )
 
 class ActivitySerializer(FlexFieldsModelSerializer):
-  skills = serializers.PrimaryKeyRelatedField(
-    many=True, read_only=True
-  )
   class Meta:
     model = Activity
     fields = (
@@ -111,7 +130,6 @@ class ScheduleSerializer(serializers.ModelSerializer):
   )
   activity = ActivitySerializer(
     read_only=True,
-    omit=['skills']
   )
   class Meta:
     model = Schedule

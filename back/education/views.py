@@ -70,7 +70,8 @@ class Educational_areaView(viewsets.ModelViewSet):
   queryset = Educational_area.objects.all().prefetch_related(
     'development_direction_set',
     'development_direction_set__skill_set',
-    'development_direction_set__skill_set__exercises',
+    'development_direction_set__skill_set__result_set',
+    'development_direction_set__skill_set__result_set__exercises',
   )
   serializer_class = Educational_areaSerializer
 
@@ -81,8 +82,13 @@ class Development_directionView(viewsets.ModelViewSet):
 
 class ExerciseView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Exercise.objects.all().select_related('skill__direction__area')
+  queryset = Exercise.objects.all().select_related('result__skill__direction__area')
   serializer_class = ExerciseSerializer
+
+class ResultView(viewsets.ModelViewSet):
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
+  queryset = Result.objects.all().select_related('skill__direction__area')
+  serializer_class = ResultSerializer
 
 class SkillView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
@@ -157,7 +163,7 @@ class JobView(viewsets.ModelViewSet):
       )
       .prefetch_related(
         'job_file_set', 'job_report_file_set',
-        'exercise_report_set__exercise__skill__direction__area',
+        'exercise_report_set__exercise__result__skill__direction__area',
         'methods__form',
       )
       .annotate(
@@ -262,7 +268,7 @@ class OptionView(viewsets.ModelViewSet):
     Option.objects.all()
                   .prefetch_related(
                     'option_file_set',
-                    'exercises__skill__direction__area',
+                    'exercises__result__skill__direction__area',
                     'methods__form',
                   )
   )
@@ -468,7 +474,7 @@ class Exercise_reportView(viewsets.ModelViewSet):
     qs =  Exercise_report.objects.all()
 
     return qs.select_related(
-                              'exercise__skill__direction__area',
+                              'exercise__result__skill__direction__area',
                               'job__activity',
                               'job__specialist',
                             )
