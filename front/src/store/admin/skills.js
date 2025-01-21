@@ -37,7 +37,6 @@ const getters = {
 
 const actions = {
   async fetchAreas({commit}, state=false) {
-  console.log(state)
     try {
       let res = await this.$axios.get(`/api/educational_areas/?deleted=${state}`);
       if (res.status === 200) {
@@ -59,6 +58,7 @@ const actions = {
       commit("setAreasAll", {data: [], success: false});
     }
   },
+
   async addArea(context, payload) {
     return post(this.$axios, "/api/educational_areas/", payload);
   },
@@ -68,6 +68,7 @@ const actions = {
   async deleteArea(context, id) {
     return deleteAxios(this.$axios, `/api/educational_areas/${id}/`, {});
   },
+
   async addDirection(context, payload) {
     return post(this.$axios, "/api/development_directions/", payload);
   },
@@ -77,6 +78,7 @@ const actions = {
   async deleteDirection(context, id) {
     return deleteAxios(this.$axios, `/api/development_directions/${id}/`, {});
   },
+
   async addSkill(context, payload) {
     return post(this.$axios, "/api/skills/", payload);
   },
@@ -86,6 +88,17 @@ const actions = {
   async deleteSkill(context, id) {
     return deleteAxios(this.$axios, `/api/skills/${id}/`, {});
   },
+
+  async addResult(context, payload) {
+    return post(this.$axios, "/api/results/", payload);
+  },
+  async editResult(context, payload) {
+    return patch(this.$axios, `/api/results/${payload.id}/`, payload);
+  },
+  async deleteResult(context, id) {
+    return deleteAxios(this.$axios, `/api/results/${id}/`, {});
+  },
+
   async addExercise(context, payload) {
     return post(this.$axios, "/api/exercises/", payload);
   },
@@ -93,8 +106,12 @@ const actions = {
     return patch(this.$axios, `/api/exercises/${payload.id}/`, payload);
   },
   async deleteExercise(context, id) {
+    return patch(this.$axios, `/api/exercises/${id}/set_end/`, {});
+  },
+  async deleteForeverExercise(context, id) {
     return deleteAxios(this.$axios, `/api/exercises/${id}/`, {});
   },
+  
 };
 
 const mutations = {

@@ -116,45 +116,50 @@ export default {
           if (valid) {
             this.loadingButton = true;
             let dispatchName = "";
-            let successCode = 0;
             let successMessage = "";
-
-            if (this.type === 1 && this.adding) {
-              dispatchName = "skills/addArea";
-              successCode = 201;
-              successMessage = "Образовательная область успешно добавлена";
-            } else if (this.type === 1 && !this.adding) {
-              dispatchName = "skills/editArea";
-              successCode = 200;
-              successMessage = "Образовательная область успешно изменена";
-            } else if (this.type === 2 && this.adding) {
-              dispatchName = "skills/addDirection";
-              successCode = 201;
-              successMessage = "Направление развития успешно добавлено";
-            } else if (this.type === 2 && !this.adding) {
-              dispatchName = "skills/editDirection";
-              successCode = 200;
+            let statusCode = 0;
+            
+            if (this.adding) {
+              statusCode = 201;
+              if (this.type === 1){
+                dispatchName = "skills/addArea";
+                successMessage = "Образовательная область успешно добавлена";
+              } else if (this.type === 2) {
+                dispatchName = "skills/addDirection";
+                successMessage = "Направление развития успешно добавлено";
+              } else if (this.type === 3) {
+                dispatchName = "skills/addSkill";
+                successMessage = "Навык успешно добавлен";
+              } else if (this.type === 4) {
+                dispatchName = "skills/addResult";
+                successMessage = "Ожидаемый результат успешно добавлен";
+              } else if (this.type === 5) {
+                dispatchName = "skills/addExercise";
+                successMessage = "Диагностическое упражнение успешно добавлено";
+              }
+            } else {
+              statusCode = 200;
+              if (this.type === 1){
+                dispatchName = "skills/editArea";
+                successMessage = "Образовательная область успешно изменена";
+              } else if (this.type === 2) {
+                dispatchName = "skills/editDirection";
               successMessage = "Направлние развития успешно изменено";
-            } else if (this.type === 3 && this.adding) {
-              dispatchName = "skills/addSkill";
-              successCode = 201;
-              successMessage = "Навык успешно добавлен";
-            } else if (this.type === 3 && !this.adding) {
-              dispatchName = "skills/editSkill";
-              successCode = 200;
-              successMessage = "Навык успешно изменен";
-            } else if (this.type === 4 && this.adding) {
-              dispatchName = "skills/addExercise";
-              successCode = 201;
-              successMessage = "Упражнение успешно добавлено";
-            } else if (this.type === 4 && !this.adding) {
-              dispatchName = "skills/editExercise";
-              successCode = 200;
-              successMessage = "Упражнение успешно изменено";
+              } else if (this.type === 3) {
+                dispatchName = "skills/editSkill";
+                successMessage = "Навык успешно изменен";
+              } else if (this.type === 4) {
+                dispatchName = "skills/editResult";
+                successMessage = "Ожидаемый результат успешно изменен";
+              } else if (this.type === 5) {
+                dispatchName = "skills/editExercise";
+                successMessage = "Диагностическое упражнение успешно изменено";
+              }
             }
+            
             try {
               let res = await this.$store.dispatch(dispatchName, this.form);
-              if (res.status === successCode) {
+              if (res.status === statusCode) {
                 this.$message.success(successMessage);
                 this.$emit("closeSuccess");
               } else if (res.status === 400) {
@@ -231,11 +236,19 @@ export default {
       this.editableData.skillId
         ? (this.form.skill_id = this.editableData.skillId)
         : "";
+      this.editableData.lastNumberResult
+        ? (this.form.number = this.editableData.lastNumberResult)
+        : "";
+      this.title += "ожидаемого результата";
+    } else if (this.type === 5) {
+      this.editableData.resultId
+        ? (this.form.result_id = this.editableData.resultId)
+        : "";
       this.editableData.lastNumberExercise
         ? (this.form.number = this.editableData.lastNumberExercise)
         : "";
       this.title += "упражнения";
-    }
+    } 
     document.addEventListener("keydown", this.keydown);
   },
   mounted() {

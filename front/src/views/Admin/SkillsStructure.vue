@@ -2,7 +2,9 @@
   <a-spin :spinning="loading">
     <div class="skills-structure">
       <div class="top-bar">
-        <div class="top-bar__side-block left"></div>
+        <div class="top-bar__side-block left">
+          <a-input v-model.trim="searchText" placeholder="Поиск" class="search-input" allow-clear/>
+        </div>
         <div class="title">Структура навыков</div>
         <div class="top-bar__side-block right">
           <a-button icon="plus" type="secondary" @click="openModalAdd(1)"
@@ -15,6 +17,7 @@
           ref="table"
           :loading="loading"
           :areas="areas"
+          :searchText="searchText"
           @onDeleteItem="displayConfirmDelete"
           @onEditItem="openModalEdit"
           @onAddItem="openModalAdd($event.type, $event.item)"
@@ -58,7 +61,8 @@ export default {
       modalType: 0,
       modalEditableData: {},
       showDeleted: false,
-      actualDate: null
+      actualDate: null,
+      searchText: ''
     };
   },
   async created() {
@@ -82,22 +86,28 @@ export default {
       }
       if (type === 2) {
         this.modalEditableData.areaId = item.id;
-        this.modalEditableData.lastNumberDirection = item.development_directions
+        this.modalEditableData.lastNumberDirection = item.children
           .length
-          ? item.development_directions[item.development_directions.length - 1]
+          ? item.children[item.children.length - 1]
               .number + 1
           : 1;
       }
       if (type === 3) {
         this.modalEditableData.directionId = item.id;
-        this.modalEditableData.lastNumberSkill = item.skills.length
-          ? item.skills[item.skills.length - 1].number + 1
+        this.modalEditableData.lastNumberSkill = item.children.length
+          ? item.children[item.children.length - 1].number + 1
           : 1;
       }
       if (type === 4) {
         this.modalEditableData.skillId = item.id;
-        this.modalEditableData.lastNumberExercise = item.exercises.length
-          ? item.exercises[item.exercises.length - 1].number + 1
+        this.modalEditableData.lastNumberResult = item.children.length
+          ? item.children[item.children.length - 1].number + 1
+          : 1;
+      }
+      if (type === 5) {
+        this.modalEditableData.resultId = item.id;
+        this.modalEditableData.lastNumberExercise = item.children.length
+          ? item.children[item.children.length - 1].number + 1
           : 1;
       }
     },
@@ -127,8 +137,11 @@ export default {
         dispatchName = "skills/deleteSkill";
         successMessage = "Навык успешно удален";
       } else if (type === 4) {
+        dispatchName = "skills/deleteResult";
+        successMessage = "Ожидаемый результат успешно удален";
+      } else if (type === 5) {
         dispatchName = "skills/deleteExercise";
-        successMessage = "Упражнение успешно удален";
+        successMessage = "Упражнение успешно удалено";
       } else {
         this.loading = false;
         return;
@@ -154,14 +167,17 @@ export default {
       let type = payload.type;
       if (type === 1) {
         title = `Вы действительно хотите удалить образовательную область "${name}"?`;
-        content = "Будут удалены все связанные направления развития и навыки.";
+        content = "Будут удалены все связанные направления развития, навыки, ожидаемые результаты и диагностические упражнения.";
       } else if (type === 2) {
         title = `Вы действительно хотите удалить направление развития "${name}"?`;
-        content = "Будут удалены все связанные навыки.";
+        content = "Будут удалены все связанные навыки, ожидаемые результаты и диагностические упражнения.";
       } else if (type === 3) {
         title = `Вы действительно хотите удалить навык "${name}"?`;
-        content = "";
+        content = "Будут удалены все связанные ожидаемые результаты и диагностические упражнения.";
       } else if (type === 4) {
+        title = `Вы действительно хотите удалить ожидаемый результат "${name}"?`;
+        content = "Будут удалены все связанные диагностические упражнения.";
+      } else if (type === 5) {
         title = `Вы действительно хотите удалить упражнение "${name}"?`;
         content = "";
       }
@@ -208,6 +224,10 @@ export default {
 
   .top-bar__side-block
     flex: 1
+
+    &.left
+      .search-input
+        width: 300px
 
     &.right
       text-align: right
