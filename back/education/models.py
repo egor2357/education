@@ -146,6 +146,7 @@ class Specialist(models.Model):
   )
 
   activities = models.ManyToManyField('Activity', through='Specialty', verbose_name='Направления деятельности')
+  exercises = models.ManyToManyField(Exercise, verbose_name='Разрешенные упражнения')
 
   surname = models.CharField(max_length=50, blank=True, default='', verbose_name='Фамилия')
   name = models.CharField(max_length=50, blank=True, default='', verbose_name='Имя')
