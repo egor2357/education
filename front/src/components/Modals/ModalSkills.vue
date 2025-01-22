@@ -6,30 +6,28 @@
     @cancel="handleCancel"
   >
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
-      <template v-for="(field, index) in fields">
-        <a-form-model-item
-          :prop="field.name"
-          :label="field.label"
-          :key="field.name"
-          :validateStatus="field.validateStatus"
-          :help="field.help"
-        >
-          <a-input
-            v-if="field.type === 'text'"
-            v-model="form[field.name]"
-            @change="fieldChanged(field)"
-            :ref="`field${index}`"
-            type="textarea"
-            allow-clear
-          />
-          <a-input-number
-            v-else-if="field.type === 'number'"
-            v-model="form[field.name]"
-            @change="fieldChanged(field)"
-            :min="0"
-          />
-        </a-form-model-item>
-      </template>
+      <a-form-model-item v-for="(field, index) in fields"
+        :prop="field.name"
+        :label="field.label"
+        :key="field.name"
+        :validateStatus="field.validateStatus"
+        :help="field.help"
+      >
+        <a-input
+          v-if="field.type === 'text'"
+          v-model="form[field.name]"
+          @change="fieldChanged(field)"
+          :ref="`field${index}`"
+          type="textarea"
+          allow-clear
+        />
+        <a-input-number
+          v-else-if="field.type === 'number'"
+          v-model="form[field.name]"
+          @change="fieldChanged(field)"
+          :min="0"
+        />
+      </a-form-model-item>
     </a-form-model>
     <template slot="footer">
       <a-button @click="handleCancel"> Отмена </a-button>
@@ -156,7 +154,7 @@ export default {
                 successMessage = "Диагностическое упражнение успешно изменено";
               }
             }
-            
+
             try {
               let res = await this.$store.dispatch(dispatchName, this.form);
               if (res.status === statusCode) {
