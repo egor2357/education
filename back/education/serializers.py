@@ -18,6 +18,10 @@ class OnlyDateSerializer(serializers.Serializer):
 class JobByOptionSerializer(serializers.Serializer):
   option_id = serializers.IntegerField(max_value=None, min_value=1)
 
+class GetAreasByDateSerializer(serializers.Serializer):
+  by_date = serializers.DateField(default=datetime.date.today, required=False, label='Созданы до указанной даты')
+  deleted = serializers.BooleanField(default=False, required=False, label='Удалены')
+
 # /////////////////////////////////////////////////
 
 class LoginSerializer(serializers.Serializer):
@@ -799,3 +803,140 @@ class NotificationSerializer(serializers.ModelSerializer):
     model = Notification
     fields = ('type', 'user')
 
+
+
+
+# ------------------------ BY DATE SERIALIZERS -----------------------
+
+class ByDateExerciseSerializer(FlexFieldsModelSerializer):
+  result_id = serializers.PrimaryKeyRelatedField(
+    source='result', queryset=Result.objects.all()
+  )
+
+  result_number = serializers.IntegerField(source='result.number', read_only=True)
+  skill_number = serializers.IntegerField(source='result.skill.number', read_only=True)
+  direction_number = serializers.IntegerField(source='result.skill.direction.number', read_only=True)
+  area_number = serializers.IntegerField(source='result.skill.direction.area.number', read_only=True)
+  def get_deleted(self, instance):
+    by_date = self.context['by_date']
+    if instance.lifetime and instance.lifetime.upper:
+      return instance.lifetime.upper <= by_date
+    else:
+      return False
+  deleted = serializers.SerializerMethodField(label='Было удалено', read_only=True)
+
+  class Meta:
+    model = Exercise
+    fields = (
+      'id',
+      'name', 'number',
+      'result_id',
+      'skill_number',
+      'result_number',
+      'direction_number',
+      'area_number',
+      'deleted',
+    )
+
+class ByDateResultSerializer(FlexFieldsModelSerializer):
+  exercises = ByDateExerciseSerializer(source='exercises_by_date', many=True, read_only=True)
+
+  skill_id = serializers.PrimaryKeyRelatedField(
+    source='skill', queryset=Skill.objects.all()
+  )
+
+  skill_number = serializers.IntegerField(source='skill.number', read_only=True)
+  direction_number = serializers.IntegerField(source='skill.direction.number', read_only=True)
+  area_number = serializers.IntegerField(source='skill.direction.area.number', read_only=True)
+  def get_deleted(self, instance):
+    by_date = self.context['by_date']
+    if instance.lifetime and instance.lifetime.upper:
+      return instance.lifetime.upper <= by_date
+    else:
+      return False
+  deleted = serializers.SerializerMethodField(label='Было удалено', read_only=True)
+
+  class Meta:
+    model = Result
+    fields = (
+      'id',
+      'name', 'number',
+      'skill_id',
+      'skill_number',
+      'direction_number',
+      'area_number',
+      'exercises',
+      'deleted',
+    )
+
+class ByDateSkillSerializer(FlexFieldsModelSerializer):
+  results = ByDateResultSerializer(source='result_by_date', many=True, read_only=True)
+
+  direction_id = serializers.PrimaryKeyRelatedField(
+    source='direction', queryset=Development_direction.objects.all()
+  )
+
+  area_number = serializers.IntegerField(source='direction.area.number', read_only=True)
+  direction_number = serializers.IntegerField(source='direction.number', read_only=True)
+  def get_deleted(self, instance):
+    by_date = self.context['by_date']
+    if instance.lifetime and instance.lifetime.upper:
+      return instance.lifetime.upper <= by_date
+    else:
+      return False
+  deleted = serializers.SerializerMethodField(label='Было удалено', read_only=True)
+
+  class Meta:
+    model = Skill
+    fields = (
+      'id',
+      'name', 'number',
+      'direction_id',
+      'direction_number',
+      'area_number',
+      'results',
+      'deleted',
+    )
+
+class ByDateDevelopment_directionSerializer(serializers.ModelSerializer):
+  area_id = serializers.PrimaryKeyRelatedField(
+    source='area', queryset=Educational_area.objects.all()
+  )
+  skills = ByDateSkillSerializer(
+    source='skill_by_date', many=True, read_only=True
+  )
+  def get_deleted(self, instance):
+    by_date = self.context['by_date']
+    if instance.lifetime and instance.lifetime.upper:
+      return instance.lifetime.upper <= by_date
+    else:
+      return False
+  deleted = serializers.SerializerMethodField(label='Было удалено', read_only=True)
+
+  class Meta:
+    model = Development_direction
+    fields = (
+      'id', 'area_id',
+      'skills',
+      'name', 'number',
+      'deleted',
+    )
+
+class ByDateEducational_areaSerializer(FlexFieldsModelSerializer):
+  development_directions = ByDateDevelopment_directionSerializer(
+    source='development_direction_by_date', many=True, read_only=True,
+  )
+  def get_deleted(self, instance):
+    by_date = self.context['by_date']
+    if instance.lifetime and instance.lifetime.upper:
+      return instance.lifetime.upper <= by_date
+    else:
+      return False
+  deleted = serializers.SerializerMethodField(label='Было удалено', read_only=True)
+
+  class Meta:
+    model = Educational_area
+    fields = (
+      'id', 'name', 'number', 'development_directions',
+      'deleted',
+    )
