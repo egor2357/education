@@ -35,6 +35,14 @@ class LowerInf(Transform):
   lookup_name = "lower_inf"
   function = "LOWER_INF"
 DateRangeField.register_lookup(LowerInf)
+class DateRangeLower(Transform):
+  lookup_name = "lower"
+  function = "LOWER"
+DateRangeField.register_lookup(DateRangeLower)
+class DateRangeUpper(Transform):
+  lookup_name = "upper"
+  function = "UPPER"
+DateRangeField.register_lookup(DateRangeUpper)
 
 class Educational_area(models.Model):
   name = models.TextField(unique=True, verbose_name='Название')
