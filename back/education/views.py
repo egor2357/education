@@ -79,7 +79,7 @@ class Educational_areaView(viewsets.ModelViewSet):
 
   def get_queryset(self):
     if self.action == 'set_end':
-      return Educational_area.objects.filter(lifetime__upper_inf=True)
+      return Educational_area.objects.all()
     if self.action == 'by_date':
       return Educational_area.objects.all()
     else:
@@ -96,6 +96,10 @@ class Educational_areaView(viewsets.ModelViewSet):
     educational_area = self.get_object()
     today = datetime.date.today()
     today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект уже деактивирован, то ничего не делать
+    if educational_area.lifetime and educational_area.lifetime.upper:
+      return Response({}, status=status.HTTP_200_OK)
 
     # Если объект был создан сегодня, то удалить насовсем
     if educational_area.lifetime.lower==today or educational_area.lifetime.lower is None:
@@ -167,7 +171,7 @@ class Development_directionView(viewsets.ModelViewSet):
 
   def get_queryset(self):
     if self.action == 'set_end':
-      return Development_direction.objects.filter(lifetime__upper_inf=True)
+      return Development_direction.objects.all()
     else:
       return Development_direction.objects.all().prefetch_related('skill_set__result_set').select_related('area')
 
@@ -182,6 +186,10 @@ class Development_directionView(viewsets.ModelViewSet):
     development_direction = self.get_object()
     today = datetime.date.today()
     today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект уже деактивирован, то ничего не делать
+    if development_direction.lifetime and development_direction.lifetime.upper:
+      return Response({}, status=status.HTTP_200_OK)
 
     # Если объект был создан сегодня, то удалить насовсем
     if development_direction.lifetime.lower==today or development_direction.lifetime.lower is None:
@@ -205,7 +213,7 @@ class ExerciseView(viewsets.ModelViewSet):
 
   def get_queryset(self):
     if self.action == 'set_end':
-      return Exercise.objects.filter(lifetime__upper_inf=True)
+      return Exercise.objects.all()
     else:
       return Exercise.objects.all().select_related('result__skill__direction__area')
 
@@ -220,6 +228,10 @@ class ExerciseView(viewsets.ModelViewSet):
     exercise = self.get_object()
     today = datetime.date.today()
     today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект уже деактивирован, то ничего не делать
+    if exercise.lifetime and exercise.lifetime.upper:
+      return Response({}, status=status.HTTP_200_OK)
 
     # Если объект был создан сегодня, то удалить насовсем
     if exercise.lifetime.lower==today or exercise.lifetime.lower is None:
@@ -236,7 +248,7 @@ class ResultView(viewsets.ModelViewSet):
 
   def get_queryset(self):
     if self.action == 'set_end':
-      return Result.objects.filter(lifetime__upper_inf=True)
+      return Result.objects.all()
     else:
       return Result.objects.all().select_related('skill__direction__area')
 
@@ -251,6 +263,10 @@ class ResultView(viewsets.ModelViewSet):
     result = self.get_object()
     today = datetime.date.today()
     today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект уже деактивирован, то ничего не делать
+    if result.lifetime and result.lifetime.upper:
+      return Response({}, status=status.HTTP_200_OK)
 
     # Если объект был создан сегодня, то удалить насовсем
     if result.lifetime.lower==today or result.lifetime.lower is None:
@@ -271,7 +287,7 @@ class SkillView(viewsets.ModelViewSet):
 
   def get_queryset(self):
     if self.action == 'set_end':
-      return Skill.objects.filter(lifetime__upper_inf=True)
+      return Skill.objects.all()
     else:
       return Skill.objects.all().select_related('direction__area').prefetch_related('result_set')
 
@@ -286,6 +302,10 @@ class SkillView(viewsets.ModelViewSet):
     skill = self.get_object()
     today = datetime.date.today()
     today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект уже деактивирован, то ничего не делать
+    if skill.lifetime and skill.lifetime.upper:
+      return Response({}, status=status.HTTP_200_OK)
 
     # Если объект был создан сегодня, то удалить насовсем
     if skill.lifetime.lower==today or skill.lifetime.lower is None:
