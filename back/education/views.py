@@ -159,6 +159,9 @@ class ExerciseView(viewsets.ModelViewSet):
     else:
       return Exercise.objects.all().select_related('result__skill__direction__area')
 
+  def perform_create(self, serializer):
+    serializer.save(lifetime=(datetime.date.today(), None))
+
   @action(
     detail=True, methods=['patch'],
     permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
@@ -631,9 +634,6 @@ class Exercise_reportView(viewsets.ModelViewSet):
                               'job__activity',
                               'job__specialist',
                             )
-
-  def perform_create(self, serializer):
-    serializer.save(lifetime=(datetime.date.today(), None))
 
   @action(detail=False, methods=['get'])
   def statistics(self, request, *args, **kwargs):
