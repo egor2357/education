@@ -73,6 +73,36 @@ class UserView(viewsets.ModelViewSet):
     login(request, user)
     return Response(UserSerializer(user).data)
 
+
+def get_prefetched_structure(param_filter, queryset):
+  areas = queryset.filter(param_filter)
+
+  directions_prefetch = Prefetch(
+    'development_direction_set',
+    queryset=Development_direction.objects.filter(param_filter),
+    to_attr='development_direction_by_date'
+  )
+  skills_prefetch = Prefetch(
+    'development_direction_by_date__skill_set',
+    queryset=Skill.objects.filter(param_filter),
+    to_attr='skill_by_date'
+  )
+  results_prefetch = Prefetch(
+    'development_direction_by_date__skill_by_date__result_set',
+    queryset=Result.objects.filter(param_filter),
+    to_attr='result_by_date'
+  )
+  exercises_prefetch = Prefetch(
+    'development_direction_by_date__skill_by_date__result_by_date__exercises',
+    queryset=Exercise.objects.filter(param_filter),
+    to_attr='exercises_by_date'
+  )
+
+  areas = areas.prefetch_related(
+    directions_prefetch, skills_prefetch, results_prefetch, exercises_prefetch
+  )
+  return areas
+
 class Educational_areaView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = Educational_areaSerializer
@@ -136,32 +166,30 @@ class Educational_areaView(viewsets.ModelViewSet):
     if not deleted:
       param_filter = param_filter & ~Q(Q(lifetime__upper_inf=False) & Q(lifetime__upper__lte=by_date))
 
-    areas = queryset.filter(param_filter)
-    directions_prefetch = Prefetch(
-      'development_direction_set',
-      queryset=Development_direction.objects.filter(param_filter),
-      to_attr='development_direction_by_date'
-    )
-    skills_prefetch = Prefetch(
-      'development_direction_by_date__skill_set',
-      queryset=Skill.objects.filter(param_filter),
-      to_attr='skill_by_date'
-    )
-    results_prefetch = Prefetch(
-      'development_direction_by_date__skill_by_date__result_set',
-      queryset=Result.objects.filter(param_filter),
-      to_attr='result_by_date'
-    )
-    exercises_prefetch = Prefetch(
-      'development_direction_by_date__skill_by_date__result_by_date__exercises',
-      queryset=Exercise.objects.filter(param_filter),
-      to_attr='exercises_by_date'
-    )
-    areas = areas.prefetch_related(
-      directions_prefetch, skills_prefetch, results_prefetch, exercises_prefetch
-    )
+    areas = get_prefetched_structure(param_filter, queryset)
 
     response_data = ByDateEducational_areaSerializer(areas, many=True, context={'by_date': by_date}).data
+
+    return Response(response_data, status=status.HTTP_200_OK)
+
+  @action(
+    detail=False, methods=['get'],
+    permission_classes=(permissions.IsAuthenticated,),
+    serializer_class=GetAreasByIntervalSerializer
+  )
+  def by_interval(self, request, *args, **kwargs):
+    serializer = self.get_serializer(data=request.GET)
+    serializer.is_valid(raise_exception=True)
+    queryset = self.get_queryset()
+
+    start = serializer.validated_data['start']
+    end = serializer.validated_data['end']
+
+    param_filter = Q(lifetime__overlap=DateRange(start, end, '[]'))
+
+    areas = get_prefetched_structure(param_filter, queryset)
+
+    response_data = ByDateEducational_areaSerializer(areas, many=True, context={'by_date': end}).data
 
     return Response(response_data, status=status.HTTP_200_OK)
 
