@@ -11,34 +11,34 @@ admin.site.register(Session, SessionAdmin)
 # Register your models here.
 class Educational_areaAdmin(admin.ModelAdmin):
   search_fields = ('name', 'number')
-  list_display = ('number', 'name', 'lifetime')
+  list_display = ('pk', 'number', 'name', 'lifetime')
 
 admin.site.register(Educational_area, Educational_areaAdmin)
 
 class Development_directionAdmin(admin.ModelAdmin):
   search_fields = ('name', 'number')
-  list_display = ('number', 'name', 'area', 'lifetime')
+  list_display = ('pk', 'number', 'name', 'area', 'lifetime')
   list_filter = ('area',)
 
 admin.site.register(Development_direction, Development_directionAdmin)
 
 class SkillAdmin(admin.ModelAdmin):
   search_fields = ('name', 'number')
-  list_display = ('number', 'name', 'direction', 'lifetime')
+  list_display = ('pk', 'number', 'name', 'direction', 'lifetime')
   list_filter = ('direction',)
 
 admin.site.register(Skill, SkillAdmin)
 
 class ResultAdmin(admin.ModelAdmin):
   search_fields = ('name', 'number')
-  list_display = ('number', 'name', 'skill', 'lifetime')
+  list_display = ('pk', 'number', 'name', 'skill', 'lifetime')
   list_filter = ('skill',)
 
 admin.site.register(Result, ResultAdmin)
 
 class ExerciseAdmin(admin.ModelAdmin):
   search_fields = ('name', 'number')
-  list_display = ('number', 'name', 'result', 'lifetime')
+  list_display = ('pk', 'number', 'name', 'result', 'lifetime')
 
 admin.site.register(Exercise, ExerciseAdmin)
 
