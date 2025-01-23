@@ -22,6 +22,10 @@ class GetAreasByDateSerializer(serializers.Serializer):
   by_date = serializers.DateField(default=datetime.date.today, required=False, label='Созданы до указанной даты')
   deleted = serializers.BooleanField(default=False, required=False, label='Удалены')
 
+class GetAreasByIntervalSerializer(serializers.Serializer):
+  start = serializers.DateField(label='Начало интервала')
+  end = serializers.DateField(label='Окончание интервала')
+
 # /////////////////////////////////////////////////
 
 class LoginSerializer(serializers.Serializer):
@@ -236,7 +240,7 @@ class UserSerializer(FlexFieldsModelSerializer):
       'username', 'is_staff',
       'specialist',
     ]
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+
 class SpecialtySerializer(FlexFieldsModelSerializer):
   activity_id = serializers.PrimaryKeyRelatedField(
     source='activity', queryset=Activity.objects.all()
