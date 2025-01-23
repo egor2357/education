@@ -143,10 +143,10 @@ class Educational_areaView(viewsets.ModelViewSet):
     results = Result.objects.filter(skill_id__in=skills.values_list('pk', flat=True))
     exercises = Exercise.objects.filter(result_id__in=results.values_list('pk', flat=True))
     prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
-    directions.update(lifetime=prepared_lifetime)
-    skills.update(lifetime=prepared_lifetime)
-    results.update(lifetime=prepared_lifetime)
-    exercises.update(lifetime=prepared_lifetime)
+    directions.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    skills.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    results.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    exercises.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
     return Response({}, status=status.HTTP_200_OK)
 
   @action(
@@ -230,9 +230,9 @@ class Development_directionView(viewsets.ModelViewSet):
     results = Result.objects.filter(skill_id__in=skills.values_list('pk', flat=True))
     exercises = Exercise.objects.filter(result_id__in=results.values_list('pk', flat=True))
     prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
-    skills.update(lifetime=prepared_lifetime)
-    results.update(lifetime=prepared_lifetime)
-    exercises.update(lifetime=prepared_lifetime)
+    skills.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    results.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    exercises.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
     return Response({}, status=status.HTTP_200_OK)
 
 class ExerciseView(viewsets.ModelViewSet):
@@ -305,7 +305,7 @@ class ResultView(viewsets.ModelViewSet):
     result.save()
     exercises = result.exercises.all()
     prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
-    exercises.update(lifetime=prepared_lifetime)
+    exercises.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
     return Response({}, status=status.HTTP_200_OK)
 
 
@@ -345,8 +345,8 @@ class SkillView(viewsets.ModelViewSet):
     results = skill.result_set.all()
     exercises = Exercise.objects.filter(result_id__in=results.values_list('pk', flat=True))
     prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
-    results.update(lifetime=prepared_lifetime)
-    exercises.update(lifetime=prepared_lifetime)
+    results.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    exercises.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
     return Response({}, status=status.HTTP_200_OK)
 
 class FormView(viewsets.ModelViewSet):
