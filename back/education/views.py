@@ -688,7 +688,8 @@ class SpecialistView(viewsets.ModelViewSet):
                                   .prefetch_related(
                                     'specialty_set__activity',
                                     'presence_set__presence',
-                                    'presence_set__main_interval'
+                                    'presence_set__main_interval',
+                                    'exercises',
                                   ))
   serializer_class = SpecialistSerializer
   filter_backends = (DjangoFilterBackend,)

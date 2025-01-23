@@ -273,6 +273,8 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
     fields=['activity', 'is_main', 'id']
   )
 
+  exercises = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
+
   is_active = serializers.BooleanField(required=False, read_only=True)
 
   username = serializers.CharField(required=False, write_only=True)
@@ -363,6 +365,7 @@ class SpecialistSerializer(FlexFieldsModelSerializer):
       'activities',
       'user',
       'username', 'password', 'is_staff',
+      'exercises',
       '__str__'
     )
     expandable_fields = {
