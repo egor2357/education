@@ -36,9 +36,9 @@ const getters = {
 };
 
 const actions = {
-  async fetchAreas({commit}) {
+  async fetchAreas({commit}, state=false) {
     try {
-      let res = await this.$axios.get("/api/educational_areas/");
+      let res = await this.$axios.get(`/api/educational_areas/by_date/?deleted=${state}`);
       if (res.status === 200) {
         commit("setAreas", {data: res.data, success: true})
       }
@@ -58,6 +58,7 @@ const actions = {
       commit("setAreasAll", {data: [], success: false});
     }
   },
+
   async addArea(context, payload) {
     return post(this.$axios, "/api/educational_areas/", payload);
   },
@@ -65,8 +66,12 @@ const actions = {
     return patch(this.$axios, `/api/educational_areas/${payload.id}/`, payload);
   },
   async deleteArea(context, id) {
+    return patch(this.$axios, `/api/educational_areas/${id}/set_end/`, {});
+  },
+  async deleteAreaForever(context, id) {
     return deleteAxios(this.$axios, `/api/educational_areas/${id}/`, {});
   },
+
   async addDirection(context, payload) {
     return post(this.$axios, "/api/development_directions/", payload);
   },
@@ -74,8 +79,12 @@ const actions = {
     return patch(this.$axios, `/api/development_directions/${payload.id}/`, payload);
   },
   async deleteDirection(context, id) {
+    return patch(this.$axios, `/api/development_directions/${id}/set_end/`, {});
+  },
+  async deleteDirectionForever(context, id) {
     return deleteAxios(this.$axios, `/api/development_directions/${id}/`, {});
   },
+
   async addSkill(context, payload) {
     return post(this.$axios, "/api/skills/", payload);
   },
@@ -83,8 +92,25 @@ const actions = {
     return patch(this.$axios, `/api/skills/${payload.id}/`, payload);
   },
   async deleteSkill(context, id) {
+    return patch(this.$axios, `/api/skills/${id}/set_end/`, {});
+  },
+  async deleteSkillForever(context, id) {
     return deleteAxios(this.$axios, `/api/skills/${id}/`, {});
   },
+
+  async addResult(context, payload) {
+    return post(this.$axios, "/api/results/", payload);
+  },
+  async editResult(context, payload) {
+    return patch(this.$axios, `/api/results/${payload.id}/`, payload);
+  },
+  async deleteResult(context, id) {
+    return patch(this.$axios, `/api/results/${id}/set_end/`, {});
+  },
+  async deleteResultForever(context, id) {
+    return deleteAxios(this.$axios, `/api/results/${id}/`, {});
+  },
+
   async addExercise(context, payload) {
     return post(this.$axios, "/api/exercises/", payload);
   },
@@ -92,8 +118,12 @@ const actions = {
     return patch(this.$axios, `/api/exercises/${payload.id}/`, payload);
   },
   async deleteExercise(context, id) {
+    return patch(this.$axios, `/api/exercises/${id}/set_end/`, {});
+  },
+  async deleteExerciseForever(context, id) {
     return deleteAxios(this.$axios, `/api/exercises/${id}/`, {});
   },
+  
 };
 
 const mutations = {

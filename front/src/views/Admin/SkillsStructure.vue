@@ -1,8 +1,10 @@
 <template>
   <a-spin :spinning="loading">
-    <div class="slills-structure">
+    <div class="skills-structure">
       <div class="top-bar">
-        <div class="top-bar__side-block left"></div>
+        <div class="top-bar__side-block left">
+          <a-input v-model.trim="searchText" placeholder="Поиск" class="search-input" allow-clear/>
+        </div>
         <div class="title">Структура навыков</div>
         <div class="top-bar__side-block right">
           <a-button icon="plus" type="secondary" @click="openModalAdd(1)"
@@ -15,10 +17,19 @@
           ref="table"
           :loading="loading"
           :areas="areas"
+          :searchText="searchText"
           @onDeleteItem="displayConfirmDelete"
           @onEditItem="openModalEdit"
           @onAddItem="openModalAdd($event.type, $event.item)"
         />
+      </div>
+      <div class="skills-structure__params-container">
+        <div class="skills-structure__param">
+          <a-checkbox v-model="showDeleted" @change="refetchAreas">Показывать удаленные элементы</a-checkbox>
+        </div>
+        <div class="skills-structure__param">
+
+        </div>
       </div>
       <ModalSkills
         v-if="displayModal"
@@ -35,7 +46,7 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import ModalSkills from "@/components/Modals/ModalSkills";
-import SkillsTable from "@/components/Skills/SkillsTableNew";
+import SkillsTable from "@/components/Skills/SkillsTable";
 export default {
   name: "SkillsStructure",
   components: {
@@ -48,7 +59,10 @@ export default {
       displayModal: false,
       modalAdding: true,
       modalType: 0,
-      modalEditableData: {}
+      modalEditableData: {},
+      showDeleted: false,
+      actualDate: null,
+      searchText: ''
     };
   },
   async created() {
@@ -66,28 +80,34 @@ export default {
       this.modalType = type;
       this.displayModal = true;
       if (type === 1) {
-        this.modalEditableData.lastNumberArea = this.areas.length
+        this.modalEditableData.lastNumberArea = this.areas.filter(item => !item.deleted).length
           ? this.areas[this.areas.length - 1].number + 1
           : 1;
       }
       if (type === 2) {
         this.modalEditableData.areaId = item.id;
-        this.modalEditableData.lastNumberDirection = item.development_directions
+        this.modalEditableData.lastNumberDirection = item.children
           .length
-          ? item.development_directions[item.development_directions.length - 1]
+          ? item.children[item.children.length - 1]
               .number + 1
           : 1;
       }
       if (type === 3) {
         this.modalEditableData.directionId = item.id;
-        this.modalEditableData.lastNumberSkill = item.skills.length
-          ? item.skills[item.skills.length - 1].number + 1
+        this.modalEditableData.lastNumberSkill = item.children.length
+          ? item.children[item.children.length - 1].number + 1
           : 1;
       }
       if (type === 4) {
         this.modalEditableData.skillId = item.id;
-        this.modalEditableData.lastNumberExercise = item.exercises.length
-          ? item.exercises[item.exercises.length - 1].number + 1
+        this.modalEditableData.lastNumberResult = item.children.length
+          ? item.children[item.children.length - 1].number + 1
+          : 1;
+      }
+      if (type === 5) {
+        this.modalEditableData.resultId = item.id;
+        this.modalEditableData.lastNumberExercise = item.children.length
+          ? item.children[item.children.length - 1].number + 1
           : 1;
       }
     },
@@ -99,33 +119,35 @@ export default {
     },
     async closeSuccess() {
       this.displayModal = false;
-      this.loading = true;
-      await this.fetchAreas();
-      this.loading = false;
+      this.refetchAreas();
     },
-    async deleteRecord(itemId, type) {
+    async deleteRecord(itemId, type, forever) {      
       let dispatchName = "";
       let successMessage = "";
       this.loading = true;
       if (type === 1) {
-        dispatchName = "skills/deleteArea";
+        dispatchName = "skills/deleteArea" + (forever ? 'Forever' : '');
         successMessage = "Образовательная область успешно удалена";
       } else if (type === 2) {
-        dispatchName = "skills/deleteDirection";
+        dispatchName = "skills/deleteDirection" + (forever ? 'Forever' : '');
         successMessage = "Направление развития успешно удалено";
       } else if (type === 3) {
-        dispatchName = "skills/deleteSkill";
+        dispatchName = "skills/deleteSkill" + (forever ? 'Forever' : '');
         successMessage = "Навык успешно удален";
       } else if (type === 4) {
-        dispatchName = "skills/deleteExercise";
-        successMessage = "Упражнение успешно удален";
+        dispatchName = "skills/deleteResult" + (forever ? 'Forever' : '');
+        successMessage = "Ожидаемый результат успешно удален";
+      } else if (type === 5) {
+        dispatchName = "skills/deleteExercise" + (forever ? 'Forever' : '');
+        successMessage = "Упражнение успешно удалено";
       } else {
         this.loading = false;
         return;
       }
-      try {
+      try {        
         let res = await this.$store.dispatch(dispatchName, itemId);
-        if (res.status === 204) {
+        console.log(res.status)      
+        if (res.status === 204 || res.status === 200 ) {
           this.$message.success(successMessage);
           await this.closeSuccess();
         } else {
@@ -144,14 +166,17 @@ export default {
       let type = payload.type;
       if (type === 1) {
         title = `Вы действительно хотите удалить образовательную область "${name}"?`;
-        content = "Будут удалены все связанные направления развития и навыки.";
+        content = "Будут удалены все связанные направления развития, навыки, ожидаемые результаты и диагностические упражнения.";
       } else if (type === 2) {
         title = `Вы действительно хотите удалить направление развития "${name}"?`;
-        content = "Будут удалены все связанные навыки.";
+        content = "Будут удалены все связанные навыки, ожидаемые результаты и диагностические упражнения.";
       } else if (type === 3) {
         title = `Вы действительно хотите удалить навык "${name}"?`;
-        content = "";
+        content = "Будут удалены все связанные ожидаемые результаты и диагностические упражнения.";
       } else if (type === 4) {
+        title = `Вы действительно хотите удалить ожидаемый результат "${name}"?`;
+        content = "Будут удалены все связанные диагностические упражнения.";
+      } else if (type === 5) {
         title = `Вы действительно хотите удалить упражнение "${name}"?`;
         content = "";
       }
@@ -161,9 +186,14 @@ export default {
         content: content,
         okType: "danger",
         onOk() {
-          that.deleteRecord(payload.id, type);
+          that.deleteRecord(payload.id, type, payload.forever);
         }
       });
+    },
+    async refetchAreas() {
+      this.loading = true;
+      await this.fetchAreas(this.showDeleted);
+      this.loading = false;
     }
   },
   computed: {
@@ -176,7 +206,7 @@ export default {
 </script>
 
 <style lang="sass">
-.slills-structure
+.skills-structure
   height: 100%
   display: flex
   flex-direction: column
@@ -194,10 +224,17 @@ export default {
   .top-bar__side-block
     flex: 1
 
+    &.left
+      .search-input
+        width: 300px
+
     &.right
       text-align: right
 
   .table-container
     flex: 1
     overflow: hidden
+
+  &__params-container
+    margin-top: 20px
 </style>
