@@ -7,7 +7,7 @@
         </div>
         <div class="title">Структура навыков</div>
         <div class="top-bar__side-block right">
-          <a-button icon="plus" type="secondary" @click="openModalAdd(1)"
+          <a-button icon="plus" type="secondary" @click="openModalAdd(1)" :disabled="showByDate"
             >Добавить образовательную область
           </a-button>
         </div>
@@ -18,6 +18,7 @@
           :loading="loading"
           :areas="areas"
           :searchText="searchText"
+          :disableActions="showByDate"
           @onDeleteItem="displayConfirmDelete"
           @onEditItem="openModalEdit"
           @onAddItem="openModalAdd($event.type, $event.item)"
@@ -28,7 +29,15 @@
           <a-checkbox v-model="showDeleted" @change="refetchAreas">Показывать удаленные элементы</a-checkbox>
         </div>
         <div class="skills-structure__param">
-
+          <a-checkbox v-model="showByDate" @change="showByDateHandle">Показывать данные, актуальные на</a-checkbox>
+          <a-date-picker
+            v-model="calendarDate"
+            type="date"
+            format="DD.MM.YYYY"
+            :open="calendarShown"
+            @change="changeCalendarDate"
+            @openChange="handleCalendarOpenChange"
+          />
         </div>
       </div>
       <ModalSkills
@@ -66,13 +75,15 @@ export default {
         number: null
       },
       showDeleted: false,
-      actualDate: null,
+      showByDate: false,
+      calendarDate: null,
+      calendarShown: false,
       searchText: ''
     };
   },
   async created() {
     this.loading = true;
-    await this.fetchAreas();
+    await this.fetchAreas({deletedState: false, byDate: null});
     this.loading = false;
     this.$refs.table.initShownAreas();
   },
@@ -184,8 +195,39 @@ export default {
     },
     async refetchAreas() {
       this.loading = true;
-      await this.fetchAreas(this.showDeleted);
+      await this.fetchAreas({deletedState: this.showDeleted, byDate: this.calendarDate ? this.calendarDate.format('YYYY-MM-DD') : null});
       this.loading = false;
+    },
+    handleCalendarOpenChange(status){
+      console.log('handleCalendarOpenChange1')
+      this.calendarShown = status;
+      
+      console.log(status)
+      console.log(this.showByDate)
+      if (status)
+      this.showByDate = true;
+      if (!status && !this.calendarDate && this.showByDate)
+        this.showByDate = false;      
+      console.log('handleCalendarOpenChange2')
+    },
+    showByDateHandle()
+    {
+      console.log('showByDateHandle1')
+      this.calendarShown = this.showByDate;
+      if (!this.showByDate)
+      {
+        this.calendarDate = null;
+        this.refetchAreas();
+      }
+      console.log('showByDateHandle2')
+    },
+    changeCalendarDate()
+    {
+      if (!this.showByDate)
+        this.showByDate = true;
+      if (!this.calendarDate)
+        this.showByDate = false;
+      this.refetchAreas();
     }
   },
   computed: {
