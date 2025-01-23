@@ -29,7 +29,7 @@
           <a-checkbox v-model="showDeleted" @change="refetchAreas">Показывать удаленные элементы</a-checkbox>
         </div>
         <div class="skills-structure__param">
-          <a-checkbox v-model="showByDate" @change="showByDateHandle">Показывать данные, актуальные на</a-checkbox>
+          <a-checkbox v-model="showByDate" @click.prevent="showByDateHandle">Показывать данные, актуальные на</a-checkbox>
           <a-date-picker
             v-model="calendarDate"
             type="date"
@@ -199,27 +199,20 @@ export default {
       this.loading = false;
     },
     handleCalendarOpenChange(status){
-      console.log('handleCalendarOpenChange1')
       this.calendarShown = status;
-      
-      console.log(status)
-      console.log(this.showByDate)
-      if (status)
-      this.showByDate = true;
+    
       if (!status && !this.calendarDate && this.showByDate)
         this.showByDate = false;      
-      console.log('handleCalendarOpenChange2')
     },
     showByDateHandle()
     {
-      console.log('showByDateHandle1')
-      this.calendarShown = this.showByDate;
-      if (!this.showByDate)
+      this.calendarShown = !this.showByDate;
+      if (this.showByDate)
       {
         this.calendarDate = null;
         this.refetchAreas();
+        this.showByDate = false;
       }
-      console.log('showByDateHandle2')
     },
     changeCalendarDate()
     {
