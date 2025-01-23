@@ -212,6 +212,12 @@ export default {
               class: "submenu--two-lines",
               to: { name: "AvailableChart" },
             },
+            {
+              key: "3.7",
+              title: "Упражнения специалистов",
+              class: "submenu--two-lines",
+              to: { name: "ExercisesForSpecialists" },
+            },
           ],
         },
         {

@@ -57,6 +57,15 @@ const router = new VueRouter({
           },
         },
         {
+          path: "exercises-for-specialists",
+          name: "ExercisesForSpecialists",
+          component: () => import("@/views/Admin/ExercisesForSpecialists"),
+          meta: {
+            staffOnly: true,
+            specOnly: false,
+          },
+        },
+        {
           path: "schedule",
           name: "Schedule",
           component: () => import("@/views/Admin/Schedule"),
