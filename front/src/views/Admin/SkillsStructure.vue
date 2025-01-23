@@ -46,7 +46,7 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import ModalSkills from "@/components/Modals/ModalSkills";
-import SkillsTable from "@/components/Skills/SkillsTableNew";
+import SkillsTable from "@/components/Skills/SkillsTable";
 export default {
   name: "SkillsStructure",
   components: {
@@ -80,7 +80,7 @@ export default {
       this.modalType = type;
       this.displayModal = true;
       if (type === 1) {
-        this.modalEditableData.lastNumberArea = this.areas.length
+        this.modalEditableData.lastNumberArea = this.areas.filter(item => !item.deleted).length
           ? this.areas[this.areas.length - 1].number + 1
           : 1;
       }
@@ -119,36 +119,35 @@ export default {
     },
     async closeSuccess() {
       this.displayModal = false;
-      this.loading = true;
-      await this.fetchAreas();
-      this.loading = false;
+      this.refetchAreas();
     },
-    async deleteRecord(itemId, type) {
+    async deleteRecord(itemId, type, forever) {      
       let dispatchName = "";
       let successMessage = "";
       this.loading = true;
       if (type === 1) {
-        dispatchName = "skills/deleteArea";
+        dispatchName = "skills/deleteArea" + (forever ? 'Forever' : '');
         successMessage = "Образовательная область успешно удалена";
       } else if (type === 2) {
-        dispatchName = "skills/deleteDirection";
+        dispatchName = "skills/deleteDirection" + (forever ? 'Forever' : '');
         successMessage = "Направление развития успешно удалено";
       } else if (type === 3) {
-        dispatchName = "skills/deleteSkill";
+        dispatchName = "skills/deleteSkill" + (forever ? 'Forever' : '');
         successMessage = "Навык успешно удален";
       } else if (type === 4) {
-        dispatchName = "skills/deleteResult";
+        dispatchName = "skills/deleteResult" + (forever ? 'Forever' : '');
         successMessage = "Ожидаемый результат успешно удален";
       } else if (type === 5) {
-        dispatchName = "skills/deleteExercise";
+        dispatchName = "skills/deleteExercise" + (forever ? 'Forever' : '');
         successMessage = "Упражнение успешно удалено";
       } else {
         this.loading = false;
         return;
       }
-      try {
+      try {        
         let res = await this.$store.dispatch(dispatchName, itemId);
-        if (res.status === 204) {
+        console.log(res.status)      
+        if (res.status === 204 || res.status === 200 ) {
           this.$message.success(successMessage);
           await this.closeSuccess();
         } else {
@@ -187,7 +186,7 @@ export default {
         content: content,
         okType: "danger",
         onOk() {
-          that.deleteRecord(payload.id, type);
+          that.deleteRecord(payload.id, type, payload.forever);
         }
       });
     },

@@ -38,7 +38,7 @@ const getters = {
 const actions = {
   async fetchAreas({commit}, state=false) {
     try {
-      let res = await this.$axios.get(`/api/educational_areas/?deleted=${state}`);
+      let res = await this.$axios.get(`/api/educational_areas/by_date/?deleted=${state}`);
       if (res.status === 200) {
         commit("setAreas", {data: res.data, success: true})
       }
@@ -66,6 +66,9 @@ const actions = {
     return patch(this.$axios, `/api/educational_areas/${payload.id}/`, payload);
   },
   async deleteArea(context, id) {
+    return patch(this.$axios, `/api/educational_areas/${id}/set_end/`, {});
+  },
+  async deleteAreaForever(context, id) {
     return deleteAxios(this.$axios, `/api/educational_areas/${id}/`, {});
   },
 
@@ -76,6 +79,9 @@ const actions = {
     return patch(this.$axios, `/api/development_directions/${payload.id}/`, payload);
   },
   async deleteDirection(context, id) {
+    return patch(this.$axios, `/api/development_directions/${id}/set_end/`, {});
+  },
+  async deleteDirectionForever(context, id) {
     return deleteAxios(this.$axios, `/api/development_directions/${id}/`, {});
   },
 
@@ -86,6 +92,9 @@ const actions = {
     return patch(this.$axios, `/api/skills/${payload.id}/`, payload);
   },
   async deleteSkill(context, id) {
+    return patch(this.$axios, `/api/skills/${id}/set_end/`, {});
+  },
+  async deleteSkillForever(context, id) {
     return deleteAxios(this.$axios, `/api/skills/${id}/`, {});
   },
 
@@ -96,6 +105,9 @@ const actions = {
     return patch(this.$axios, `/api/results/${payload.id}/`, payload);
   },
   async deleteResult(context, id) {
+    return patch(this.$axios, `/api/results/${id}/set_end/`, {});
+  },
+  async deleteResultForever(context, id) {
     return deleteAxios(this.$axios, `/api/results/${id}/`, {});
   },
 
@@ -108,7 +120,7 @@ const actions = {
   async deleteExercise(context, id) {
     return patch(this.$axios, `/api/exercises/${id}/set_end/`, {});
   },
-  async deleteForeverExercise(context, id) {
+  async deleteExerciseForever(context, id) {
     return deleteAxios(this.$axios, `/api/exercises/${id}/`, {});
   },
   
