@@ -445,9 +445,11 @@ const filter = (arr, str, prefix) => (arr || [])
         id: n.id, 
         number: n.number,
         deleted: n.deleted,
+        nodes: n.development_directions || n.skills || n.results || n.exercises,
         children: filter(n.development_directions || n.skills || n.results || n.exercises, (prefix+n.number+'. '+n.name.toLowerCase()).includes(str) ? '' : str, prefix+n.number+'.') 
       })
-  ).filter(
+  )
+  .filter(
     n => (prefix+n.number+'. '+n.name.toLowerCase()).includes(str) || n.children.length
   );
 

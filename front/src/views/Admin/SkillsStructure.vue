@@ -59,7 +59,12 @@ export default {
       displayModal: false,
       modalAdding: true,
       modalType: 0,
-      modalEditableData: {},
+      modalEditableData: {
+        id: null,
+        parentId: null,
+        name: '',
+        number: null
+      },
       showDeleted: false,
       actualDate: null,
       searchText: ''
@@ -75,43 +80,29 @@ export default {
     ...mapActions({
       fetchAreas: "skills/fetchAreas"
     }),
-    openModalAdd(type, item) {
+    openModalAdd(type, item) {  // добавление нового элемента, здесь в item приходит родительский элемнет, id=null, parentId получаем из item.id, name='', number вычисляем из item.nodes (без фильтрации по имени)
       this.modalAdding = true;
       this.modalType = type;
       this.displayModal = true;
-      if (type === 1) {
-        this.modalEditableData.lastNumberArea = this.areas.filter(item => !item.deleted).length
-          ? this.areas[this.areas.length - 1].number + 1
-          : 1;
+      this.modalEditableData.id = null;
+      this.modalEditableData.name = '';
+      let list; 
+      if (type === 1) // добавляется образовательная область
+      {
+        this.modalEditableData.parentId = null;
+        list = this.areas.filter(el => !el.deleted);
       }
-      if (type === 2) {
-        this.modalEditableData.areaId = item.id;
-        this.modalEditableData.lastNumberDirection = item.children
-          .length
-          ? item.children[item.children.length - 1]
-              .number + 1
-          : 1;
+      else // добавляется другой элемент (направление развития и т.д.)
+      {
+        this.modalEditableData.parentId = item.id;
+        list = item.nodes.filter(el => !el.deleted);
       }
-      if (type === 3) {
-        this.modalEditableData.directionId = item.id;
-        this.modalEditableData.lastNumberSkill = item.children.length
-          ? item.children[item.children.length - 1].number + 1
-          : 1;
-      }
-      if (type === 4) {
-        this.modalEditableData.skillId = item.id;
-        this.modalEditableData.lastNumberResult = item.children.length
-          ? item.children[item.children.length - 1].number + 1
-          : 1;
-      }
-      if (type === 5) {
-        this.modalEditableData.resultId = item.id;
-        this.modalEditableData.lastNumberExercise = item.children.length
-          ? item.children[item.children.length - 1].number + 1
-          : 1;
-      }
+      if (list.length)
+        this.modalEditableData.number = list[list.length - 1].number + 1;
+      else
+        this.modalEditableData.number = 1;
     },
-    openModalEdit(payload) {
+    openModalEdit(payload) { // изменение элемнта, здесь в payload.item приходит изменяемый элемент
       this.modalAdding = false;
       this.modalType = payload.type;
       this.modalEditableData = payload.item;
@@ -177,7 +168,7 @@ export default {
         title = `Вы действительно хотите удалить ожидаемый результат "${name}"?`;
         content = "Будут удалены все связанные диагностические упражнения.";
       } else if (type === 5) {
-        title = `Вы действительно хотите удалить упражнение "${name}"?`;
+        title = `Вы действительно хотите удалить диагностическое упражнение "${name}"?`;
         content = "";
       }
       let that = this;
@@ -185,6 +176,7 @@ export default {
         title: title,
         content: content,
         okType: "danger",
+        width: 800,
         onOk() {
           that.deleteRecord(payload.id, type, payload.forever);
         }
