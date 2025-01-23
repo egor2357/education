@@ -728,67 +728,70 @@ class Exercise_reportView(viewsets.ModelViewSet):
     qs =  Exercise_report.objects.all()
 
     return qs.select_related(
-                              'exercise__result__skill__direction__area',
-                              'job__activity',
-                              'job__specialist',
-                            )
+      'exercise__result__skill__direction__area',
+      'job__activity',
+      'job__specialist',
+    )
 
   @action(detail=False, methods=['get'])
   def statistics(self, request, *args, **kwargs):
     exercise_reports = self.filter_queryset(self.get_queryset())
     exercise_reports = exercise_reports.select_related(None)
 
-    exercise_reports = exercise_reports.values('exercise_id', 'mark', 'exercise__skill_id')
+    exercise_reports = exercise_reports.values(
+      'exercise_id', 'mark', 'exercise__result_id', 'exercise__result__skill_id'
+    )
 
     mark_coeffs = [0.33, 0.66, 1]
     exercise_calls_by_id = {}
+    result_calls_by_id = {}
     skill_calls_by_id = {}
 
     for exercise_report in exercise_reports:
       exercise_id = exercise_report['exercise_id']
-      skill_id = exercise_report['exercise__skill_id']
+      result_id = exercise_report['exercise__result_id']
+      skill_id = exercise_report['exercise__result__skill_id']
 
       if not exercise_id in exercise_calls_by_id.keys():
         exercise_calls_by_id[exercise_id] = {
-          'planned': 0,
-          'called': 0,
-          'value': 0,
+          'called': 0, 'value': 0,
         }
-
+      if not result_id in result_calls_by_id.keys():
+        result_calls_by_id[skill_id] = {
+          'called': 0, 'value': 0,
+        }
       if not skill_id in skill_calls_by_id.keys():
         skill_calls_by_id[skill_id] = {
-          'planned': 0,
-          'called': 0,
-          'value': 0,
+          'called': 0, 'value': 0,
         }
-
-      exercise_call = exercise_calls_by_id[exercise_id]
-      skill_call = skill_calls_by_id[skill_id]
-
-      exercise_call['planned'] += 1
-      skill_call['planned'] += 1
 
       mark = exercise_report['mark']
 
       if not mark is None:
+        exercise_call = exercise_calls_by_id[exercise_id]
         exercise_call['called'] += 1
         exercise_call['value'] += mark_coeffs[mark]
-
-      if not mark is None:
+        result_call = result_calls_by_id[result_id]
+        result_call['called'] += 1
+        result_call['value'] += mark_coeffs[mark]
+        skill_call = skill_calls_by_id[skill_id]
         skill_call['called'] += 1
         skill_call['value'] += mark_coeffs[mark]
 
     for exercise_id in exercise_calls_by_id.keys():
       exercise_calls_by_id[exercise_id]['value'] = round(
-        exercise_calls_by_id[exercise_id]['value'] / exercise_calls_by_id[exercise_id]['planned'], 2
+        exercise_calls_by_id[exercise_id]['value'] / exercise_calls_by_id[exercise_id]['called'], 2
       )
-
+    for result_id in result_calls_by_id.keys():
+      result_calls_by_id[result_id]['value'] = round(
+        result_calls_by_id[result_id]['value'] / result_calls_by_id[result_id]['called'], 2
+      )
     for skill_id in skill_calls_by_id.keys():
       skill_calls_by_id[skill_id]['value'] = round(
-        skill_calls_by_id[skill_id]['value'] / skill_calls_by_id[skill_id]['planned'], 2
+        skill_calls_by_id[skill_id]['value'] / skill_calls_by_id[skill_id]['called'], 2
       )
 
-    return Response({'reports': exercise_calls_by_id, 'skills': skill_calls_by_id})
+    return Response({'reports': exercise_calls_by_id, 'results': result_calls_by_id, 'skills': skill_calls_by_id})
 
 
 class SpecialtyView(viewsets.ModelViewSet):
