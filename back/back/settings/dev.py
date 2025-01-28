@@ -2,7 +2,7 @@ from .settings import *
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.137.100', '82.146.55.188']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.137.100', '82.146.55.188', '192.168.64.100']
 
 INSTALLED_APPS.append('debug_toolbar')
 
