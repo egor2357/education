@@ -36,7 +36,7 @@ const getters = {
 };
 
 const actions = {
-  async fetchAreas({commit}, payload) {
+  async fetchAreas({commit}, payload = {deletedState: false}) {
     try {
       let res = await this.$axios.get(`/api/educational_areas/by_date/?deleted=${payload.deletedState}${payload.byDate ? '&by_date=' + payload.byDate : ''}`);
       if (res.status === 200) {
