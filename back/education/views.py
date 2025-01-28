@@ -112,11 +112,17 @@ class Educational_areaView(viewsets.ModelViewSet):
       return Educational_area.objects.all()
     if self.action == 'by_date':
       return Educational_area.objects.all()
+    if self.action == 'by_date2':
+      return Educational_area.objects.all()
+
     else:
       return getEducational_areaQueryset(self.request)
 
   def perform_create(self, serializer):
     serializer.save(lifetime=(datetime.date.today(), None))
+
+  def list(self, request, *args, **kwargs):
+    return super(Educational_areaView, self).list(self, request, *args, **kwargs)
 
   @action(
     detail=True, methods=['patch'],
@@ -154,6 +160,31 @@ class Educational_areaView(viewsets.ModelViewSet):
     permission_classes=(permissions.IsAuthenticated,),
     serializer_class=GetAreasByDateSerializer
   )
+  def by_date2(self, request, *args, **kwargs):
+    serializer = self.get_serializer(data=request.GET)
+    serializer.is_valid(raise_exception=True)
+    queryset = self.get_queryset()
+
+    by_date = serializer.validated_data['by_date']
+    deleted = serializer.validated_data['deleted']
+
+    param_filter = Q(lifetime__lower__lte=by_date)
+
+    if not deleted:
+      param_filter = param_filter & ~Q(Q(lifetime__upper_inf=False) & Q(lifetime__upper__lte=by_date))
+
+    areas = get_prefetched_structure(param_filter, queryset)
+    response_data = ByDateEducational_areaSerializer(areas, many=True, context={'by_date': by_date}).data
+
+    response_data = []
+
+    return Response(response_data, status=status.HTTP_200_OK)
+
+  @action(
+    detail=False, methods=['get'],
+    permission_classes=(permissions.IsAuthenticated,),
+    serializer_class=GetAreasByDateSerializer
+  )
   def by_date(self, request, *args, **kwargs):
     serializer = self.get_serializer(data=request.GET)
     serializer.is_valid(raise_exception=True)
@@ -163,12 +194,54 @@ class Educational_areaView(viewsets.ModelViewSet):
     deleted = serializer.validated_data['deleted']
 
     param_filter = Q(lifetime__lower__lte=by_date)
+
     if not deleted:
       param_filter = param_filter & ~Q(Q(lifetime__upper_inf=False) & Q(lifetime__upper__lte=by_date))
 
     areas = get_prefetched_structure(param_filter, queryset)
-
-    response_data = ByDateEducational_areaSerializer(areas, many=True, context={'by_date': by_date}).data
+    response_data = [{
+      'id': area.pk,
+      'name': area.name,
+      'number': area.number,
+      'deleted': bool(area.lifetime) and bool(area.lifetime.upper) and (area.lifetime.upper <= by_date),
+      'development_directions': [{
+        'id': direction.pk,
+        'area_id': area.pk,
+        'name': direction.name,
+        'number': direction.number,
+        'deleted': bool(direction.lifetime) and bool(direction.lifetime.upper) and (direction.lifetime.upper <= by_date),
+        'skills': [{
+          'id': skill.pk,
+          'direction_id': direction.pk,
+          'area_number': area.number,
+          'direction_number': direction.number,
+          'name': skill.name,
+          'number': skill.number,
+          'deleted': bool(skill.lifetime) and bool(skill.lifetime.upper) and (skill.lifetime.upper <= by_date),
+          'results': [{
+            'id': result.pk,
+            'skill_id': skill.pk,
+            'area_number': area.number,
+            'direction_number': direction.number,
+            'skill_number': skill.number,
+            'name': result.name,
+            'number': result.number,
+            'deleted': bool(result.lifetime) and bool(result.lifetime.upper) and (result.lifetime.upper <= by_date),
+            'exercises': [{
+              'id': exercise.pk,
+              'result_id': result.pk,
+              'area_number': area.number,
+              'direction_number': direction.number,
+              'skill_number': skill.number,
+              'result_number': result.number,
+              'name': exercise.name,
+              'number': exercise.number,
+              'deleted': bool(exercise.lifetime) and bool(exercise.lifetime.upper) and (exercise.lifetime.upper <= by_date),
+            } for exercise in result.exercises_by_date]
+          } for result in skill.result_by_date]
+        } for skill in direction.skill_by_date]
+      } for direction in area.development_direction_by_date]
+    } for area in areas]
 
     return Response(response_data, status=status.HTTP_200_OK)
 
