@@ -1,7 +1,18 @@
 import json
-from .models import *
-from .utils import (loop, send_message)
+import os
+
+from django.core.files.base import ContentFile
 from django.conf import settings
+from django.contrib.auth.models import User
+
+from rest_framework.serializers import ValidationError
+
+from .models import (
+  Option_file, Exercise, Method, Job_file, Job_report_file,
+  Exercise_report, Presence, Notification,
+)
+from .utils import (loop, send_message)
+
 
 def option_update_related(option, request):
   #Требует FormData для передачи файлов

@@ -1,13 +1,21 @@
+import datetime
+import os
+
 from rest_framework import serializers
 from rest_flex_fields import FlexFieldsModelSerializer
 
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate
-from django.db.models import Q
 
-from .models import *
+from .models import (
+  Exercise, Skill, Result, Development_direction,
+  Activity, Schedule, Presence, Specialist, Specialty,
+  Educational_area, Method, Form, Option_file, Option,
+  Job_file, Job, Exercise_report, Job_report_file,
+  Mission, Announcement, Notification, Appeal,
+  Message, Task_group, Talent
+)
 
-from .service import check_presence_clashes
 #create your serializers here.
 
 # /////////////////////////////////////////////////

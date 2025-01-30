@@ -1,6 +1,13 @@
 from rest_framework import routers
 from django.urls import path, include
-from .views import *
+from .views import (
+  UserView, Educational_areaView, EducationalAreasAllView,
+  Development_directionView, SkillView, ResultView, ExerciseView,
+  FormView, MethodView, Option_fileView, ActivityView, ScheduleView,
+  SpecialistView, OptionView, PresenceView, Job_fileView, Job_report_fileView,
+  Exercise_reportView, JobView, SpecialtyView, MissionView, AnnouncementView,
+  AppealView, MessageView, Task_groupView, TalentView, NotificationView
+)
 
 router = routers.DefaultRouter()
 router.register(r'users', UserView, basename='User')

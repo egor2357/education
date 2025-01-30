@@ -1,11 +1,13 @@
 import django_filters
-from django_filters.rest_framework import DjangoFilterBackend
 from django_filters.rest_framework import FilterSet
 from rest_framework.pagination import PageNumberPagination
 
-from .views import *
-from .models import *
-from .serializers import *
+from .models import (
+  Job, Presence, Specialist, Exercise_report, Option,
+  Mission, Announcement, Appeal, Message, Task_group, Talent
+)
+
+from rest_framework.response import Response
 
 
 class NumberInFilter(django_filters.BaseInFilter, django_filters.NumberFilter):

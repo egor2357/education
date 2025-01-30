@@ -1,4 +1,4 @@
-from .models import *
+from .models import Educational_area
 
 def getEducational_areaQueryset(request):
     return Educational_area.objects.all().prefetch_related(

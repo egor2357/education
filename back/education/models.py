@@ -6,7 +6,6 @@ from django.db.models.signals import pre_delete, post_save
 from django.dispatch.dispatcher import receiver
 from django.core.files.base import ContentFile
 from django.contrib.postgres.fields import JSONField, DateRangeField
-from rest_framework.serializers import ValidationError
 from django.conf import settings
 from .utils import send_message, loop
 

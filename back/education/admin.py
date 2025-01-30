@@ -1,6 +1,12 @@
 from django.contrib import admin
 from django.contrib.sessions.models import Session
-from .models import *
+from .models import (
+  Educational_area, Development_direction, Skill, Result,
+  Exercise, Form, Method, Specialty, Specialist, Presence,
+  Schedule, Activity, Option_file, Option, Job_file,
+  Job_report_file, Exercise_report, Job, Mission,
+  Announcement, Appeal, Message, Task_group, Talent, Notification
+)
 
 class SessionAdmin(admin.ModelAdmin):
   def _session_data(self, obj):
