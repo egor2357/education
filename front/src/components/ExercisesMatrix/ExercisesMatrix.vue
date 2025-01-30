@@ -2,9 +2,14 @@
   <div class="exercises-matrix-container">
     <div class="specialist-list">
       <a-tag
-        color="green"
         class="specialist-label"
         v-for="specialist in specialists" :key="specialist.id"
+        :color="
+          selectedSpecialists.includes(specialist.id)
+          ? specialistToItsMeta[specialist.id].color
+          : '#c6c6c6'
+        "
+        @click="toggleSpecialistTag(specialist.id)"
       >
         {{
           specialist.surname
@@ -27,6 +32,11 @@
             />
             <span v-else class="placeholder"></span>
             <text-highlight :queries="searchText">{{ [area.number, area.name].join(". ") }}</text-highlight>
+            <div class="exercise__spectialist__filler" />
+            <a-icon v-if="area.children.length"
+              class="icon-button icon-show"
+              type="plus"
+            />
 
           </div>
           <Transition name="show">
@@ -44,7 +54,11 @@
                     />
                     <span v-else class="placeholder"></span>
                     <text-highlight :queries="searchText">{{ [area.number, direction.number].join(".") + ". " + direction.name }}</text-highlight>
-
+                    <div class="exercise__spectialist__filler" />
+                    <a-icon v-if="direction.children.length"
+                      class="icon-button icon-show"
+                      type="plus"
+                    />
                   </div>
                   <Transition name="show">
                     <div v-if="shownDirections.includes(direction.id)">
@@ -61,7 +75,11 @@
                             />
                             <span v-else class="placeholder"></span>
                             <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number].join(".") + ". " + skill.name }}</text-highlight>
-
+                            <div class="exercise__spectialist__filler" />
+                            <a-icon v-if="skill.children.length"
+                              class="icon-button icon-show"
+                              type="plus"
+                            />
                           </div>
                           <Transition name="show">
                             <div v-if="shownSkills.includes(skill.id)">
@@ -79,7 +97,11 @@
                                     <span v-else class="placeholder"></span>
 
                                     <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number, result.number].join(".") + '. ' + result.name }}</text-highlight>
-
+                                    <div class="exercise__spectialist__filler" />
+                                    <a-icon v-if="result.children.length"
+                                      class="icon-button icon-show"
+                                      type="plus"
+                                    />
                                   </div>
                                   <Transition name="show">
                                   <div v-if="shownResults.includes(result.id)">
@@ -91,22 +113,43 @@
                                         <text-highlight :queries="searchText" class="skill-table-exercise-name">
                                           {{ [ area.number, direction.number, skill.number, result.number, exercise.number].join(".") + '. ' + exercise.name }}
                                         </text-highlight>
-                                        <div class="exercise__spectialist__flip_button">
-                                          <div class="exercise__spectialist__flip_button__inner">
-                                            <a-button
-                                              type="primary" shape="circle" size="small"
-                                              class="exercise__spectialist__flip_button__front"
+                                        <div class="exercise__spectialist__filler" />
+                                        
+                                        <template v-if="exercise.id in exerciseToSpecialists">
+                                          <div
+                                            v-for="specialistId in exerciseToSpecialists[exercise.id]"
+                                            :key="specialistId + '.' + exercise.id"
+                                            :style="
+                                              {
+                                                backgroundColor: selectedSpecialists.includes(specialistId)
+                                                ? specialistToItsMeta[specialistId].color
+                                                : '#c6c6c6'
+                                              }
+                                            "
+                                            class="exercise__spectialist__delete_button"
+                                          >
+                                            <a-popover title="Убрать упражнение" placement="top">
+                                            <div                                              
+                                              class="exercise__spectialist__delete_button__front"
                                             >
-                                              AВ
-                                            </a-button>
-                                            <a-button
-                                              type="primary" shape="circle" size="small"
-                                              class="exercise__spectialist__flip_button__back"
+                                              {{ specialistToItsMeta[specialistId].label }}
+                                            </div>
+                                            <div
+                                              class="exercise__spectialist__delete_button__back"
                                             >
-                                              X
-                                            </a-button>
+                                              <a-icon class="exercise__spectialist__delete_button__close_icon" type="close" />
+                                            </div>
+                                            <template #content>
+                                              Специалист {{ specialistToItsMeta[specialistId].fullLabel }} больше не сможет контролировать выбранное упражнение
+                                            </template>
+                                            </a-popover>
                                           </div>
-                                        </div>
+                                        </template>
+                                        
+                                        <a-icon
+                                          class="icon-button icon-show"
+                                          type="plus"
+                                        />
 
                                       </div>
                                     </div>
@@ -169,6 +212,13 @@ export default {
       shownSkills: [],
       shownResults: [],
       searchText: '',
+      colorPresets: [
+        '#83A944', '#CC9E08', '#363A57', '#206777', '#FD8A04',
+        '#7945BF', '#FFB190', '#FFC9D8', '#264A46', '#DED7EC', '#85D0E0',
+        '#FBD1D1', '#E1F7B0', '#FF5563', '#A95AF3', '#545375', '#D1314B',
+        '#FEC305', '#5ACB65', '#203763', '#461234', '#EB4444', '#4F8D08', '#C4EA70', 
+      ],
+      selectedSpecialists: [],
     };
   },
   async created() {
@@ -192,6 +242,13 @@ export default {
         shownNodes.splice(index, 1);
       }
     },
+    toggleSpecialistTag (specialistId) {
+      if (this.selectedSpecialists.includes(specialistId)) {
+        this.selectedSpecialists.splice(this.selectedSpecialists.findIndex(id=>id===specialistId), 1);
+      } else {
+        this.selectedSpecialists.push(specialistId);
+      }
+    },
   },
   computed: {
     ...mapGetters({
@@ -201,12 +258,45 @@ export default {
     }),
     filteredAreas(){
       return filter(this.areas, this.searchText.toLowerCase(), '');
-    }
+    },
+    exerciseToSpecialists () {
+      const exerciseToSpecialistsObject = {};
+      for (const specialist of this.specialists) {
+        if (specialist.exercises.length) {
+          for (const exerciseKey of specialist.exercises) {
+            if (exerciseKey in exerciseToSpecialistsObject) {
+              exerciseToSpecialistsObject[exerciseKey].push(specialist.id);
+            } else {
+              exerciseToSpecialistsObject[exerciseKey] = [specialist.id];
+            }
+          }
+        }
+      }
+      return exerciseToSpecialistsObject
+    },
+    specialistToItsMeta () {
+      const specialistToItsMetaObject = {};
+      const colorPresetsCount = this.colorPresets.length;
+      for (let i=0; i<this.specialists.length; i++) {
+        const specialist = this.specialists[i];
+        specialistToItsMetaObject[specialist.id] = {
+          label: specialist.surname[0].toUpperCase() + specialist.name[0].toUpperCase(),
+          fullLabel: this.formatSpecialistFull(specialist),
+          color: this.colorPresets[i%colorPresetsCount]
+        };
+      }
+      return specialistToItsMetaObject;
+    },
   },
 };
 </script>
 
 <style lang="sass">
+.specialist-label
+  font-size: 16px
+  padding: 4px 6px
+  cursor: pointer
+
 .exercises-matrix-container
   height: 100%
   display: flex
@@ -317,32 +407,44 @@ export default {
     padding: 50px 0
     border: 1px solid #e8e8e8
 
-.exercise__spectialist__flip_button
-  background-color: transparent
+.exercise__spectialist__filler
+  flex-grow: 1
 
-/* This container is needed to position the front and back side */
-.exercise__spectialist__flip_button__inner
+.exercise__spectialist__delete_button
+  width: 30px
+  height: 30px
+  overflow: hidden
+  border-radius: 15px
   position: relative
+  color: white
+  cursor: pointer
+  margin-left: 6px
+  font-weight: bold
+
+.exercise__spectialist__delete_button__front
   width: 100%
   height: 100%
-  text-align: center
-  transition: transform 0.8s
-  transform-style: preserve-3d
-
-/* Do an horizontal flip when you move the mouse over the flip box container */
-.exercise__spectialist__flip_button:hover .exercise__spectialist__flip_button__inner
-  transform: rotateY(180deg)
-
-/* Position the front and back side */
-.exercise__spectialist__flip_button__front, .exercise__spectialist__flip_button__back
+  display: flex
+  align-items: center
+  justify-content: center
+  transition: opacity 0.3s
+  
+.exercise__spectialist__delete_button__back
+  opacity: 0
   position: absolute
   width: 100%
   height: 100%
-  -webkit-backface-visibility: hidden /* Safari */
-  backface-visibility: hidden
+  z-index: 10
+  top: 0
+  left: 0
+  display: flex
+  align-items: center
+  justify-content: center
+  transition: opacity 0.3s
+.exercise__spectialist__delete_button:hover .exercise__spectialist__delete_button__back
+  opacity: 1
+.exercise__spectialist__delete_button:hover .exercise__spectialist__delete_button__front
+  opacity: 0
 
-/* Style the back side */
-.exercise__spectialist__flip_button__back
-  transform: rotateY(180deg)
 
 </style>
