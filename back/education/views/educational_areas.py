@@ -1,7 +1,7 @@
 import datetime
 
 from django.db.models import Prefetch, Q
-from education.models import Educational_area, Development_direction, Skill, Result, Exercise
+from education.models import Educational_area, Development_direction, Skill, Result, Exercise, Specialist
 from education.serializers import Educational_areaSerializer, EducationalAreaOnlySerializer
 from education.permissions import IsAdminOrReadOnly
 from education.querysets import getEducational_areaQueryset

@@ -6,3 +6,4 @@ from .views import (
   Task_groupView, TalentView, NotificationView
 )
 from .educational_areas import Educational_areaView, EducationalAreasAllView
+from .exercises_to_specialists import Exercises_to_specialistsView

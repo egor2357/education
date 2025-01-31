@@ -6,7 +6,8 @@ from .views import (
   FormView, MethodView, Option_fileView, ActivityView, ScheduleView,
   SpecialistView, OptionView, PresenceView, Job_fileView, Job_report_fileView,
   Exercise_reportView, JobView, SpecialtyView, MissionView, AnnouncementView,
-  AppealView, MessageView, Task_groupView, TalentView, NotificationView
+  AppealView, MessageView, Task_groupView, TalentView, NotificationView,
+  Exercises_to_specialistsView
 )
 
 router = routers.DefaultRouter()
@@ -37,6 +38,7 @@ router.register(r'messages', MessageView, basename='Message')
 router.register(r'task_groups', Task_groupView, basename='Task_group')
 router.register(r'talents', TalentView, basename='Talent')
 router.register(r'notifications', NotificationView, basename='Notification')
+router.register(r'exercises_to_specialists', Exercises_to_specialistsView, basename='Exercises_to_specialists')
 
 
 urlpatterns = [
