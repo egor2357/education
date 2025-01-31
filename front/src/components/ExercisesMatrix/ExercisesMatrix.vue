@@ -119,6 +119,7 @@
                                           <div
                                             v-for="specialistId in exerciseToSpecialists[exercise.id]"
                                             :key="specialistId + '.' + exercise.id"
+                                            @click="removeExercise(exercise.id, [specialistId])"
                                             :style="
                                               {
                                                 backgroundColor: selectedSpecialists.includes(specialistId)
@@ -196,6 +197,7 @@ const filter = (arr, str, prefix) => (arr || [])
 
 import { Empty } from "ant-design-vue";
 import TextHighlight from 'vue-text-highlight';
+import post from "@/middleware/post";
 import { mapActions, mapGetters } from "vuex";
 import common from "@/mixins/common";
 export default {
@@ -232,6 +234,7 @@ export default {
   methods: {
     ...mapActions({
       fetchSpecialists: "specialists/fetchSpecialists",
+      removeExercises: "specialists/removeExercises",
       fetchAreas: "skills/fetchAreas",
     }),
     toggleNode(shownNodes, nodeId){
@@ -247,6 +250,25 @@ export default {
         this.selectedSpecialists.splice(this.selectedSpecialists.findIndex(id=>id===specialistId), 1);
       } else {
         this.selectedSpecialists.push(specialistId);
+      }
+    },
+    async removeExercise (exerciseId, specialistsIds) {
+      const successCode = 204;
+      const successMessage = "Упражнение успешно исключено";
+      let res = await post(
+        this.$axios,
+        `/api/exercises_to_specialists/remove_exercise/`,
+        {
+          exercise: exerciseId,
+          specialists: specialistsIds
+        }
+      );
+
+      if (res.status === successCode) {
+        this.$message.success(successMessage);
+        this.removeExercises([exerciseId], specialistsIds)
+      } else {
+        this.$message.error("Произошла ошибка");
       }
     },
   },
