@@ -268,7 +268,7 @@ export default {
 
       if (res.status === successCode) {
         this.$message.success(successMessage);
-        this.removeExercises([exerciseId], specialistsIds)
+        this.removeExercises({ exercisesIds: [exerciseId], specialistsIds });
       } else {
         this.$message.error("Произошла ошибка");
       }
@@ -287,7 +287,7 @@ export default {
 
       if (res.status === successCode) {
         this.$message.success(successMessage);
-        this.setExercises([exerciseId], specialistsIds)
+        this.setExercises({ exercisesIds: [exerciseId], specialistsIds })
       } else {
         this.$message.error("Произошла ошибка");
       }
