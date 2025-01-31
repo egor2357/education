@@ -235,6 +235,7 @@ export default {
     ...mapActions({
       fetchSpecialists: "specialists/fetchSpecialists",
       removeExercises: "specialists/removeExercises",
+      setExercises: "specialists/setExercises",
       fetchAreas: "skills/fetchAreas",
     }),
     toggleNode(shownNodes, nodeId){
@@ -267,6 +268,25 @@ export default {
       if (res.status === successCode) {
         this.$message.success(successMessage);
         this.removeExercises([exerciseId], specialistsIds)
+      } else {
+        this.$message.error("Произошла ошибка");
+      }
+    },
+    async setExercise (exerciseId, specialistsIds) {
+      const successCode = 200;
+      const successMessage = "Упражнение успешно добавлено";
+      let res = await post(
+        this.$axios,
+        `/api/exercises_to_specialists/set_exercise/`,
+        {
+          exercise: exerciseId,
+          specialists: specialistsIds
+        }
+      );
+
+      if (res.status === successCode) {
+        this.$message.success(successMessage);
+        this.setExercises([exerciseId], specialistsIds)
       } else {
         this.$message.error("Произошла ошибка");
       }

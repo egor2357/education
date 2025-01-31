@@ -30,3 +30,19 @@ class Exercises_to_specialistsView(viewsets.GenericViewSet):
 
     exercise.specialists.remove(*specialists)
     return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+  @action(
+    detail=False, methods=['post'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+  )
+  def set_exercise(self, request, *args, **kwargs):
+    try:
+      exercise = Exercise.objects.get(pk=request.data['exercise'])
+    except:
+      raise serializers.ValidationError(
+        'Ошибка получения упражнения'
+      )
+    specialists = Specialist.objects.filter(pk__in=request.data['specialists'])
+
+    exercise.specialists.add(*specialists)
+    return Response({}, status=status.HTTP_200_OK)
