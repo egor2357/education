@@ -7,7 +7,7 @@
         :color="
           selectedSpecialists.includes(specialist.id)
           ? specialistToItsMeta[specialist.id].color
-          : '#c6c6c6'
+          : null
         "
         @click="toggleSpecialistTag(specialist.id)"
       >
@@ -120,13 +120,14 @@
                                             v-for="specialistId in exerciseToSpecialists[exercise.id]"
                                             :key="specialistId + '.' + exercise.id"
                                             @click="removeExercise(exercise.id, [specialistId])"
-                                            :style="
-                                              {
-                                                backgroundColor: selectedSpecialists.includes(specialistId)
+                                            :style="{
+                                              backgroundColor: (selectedSpecialists.includes(specialistId)
                                                 ? specialistToItsMeta[specialistId].color
-                                                : '#c6c6c6'
-                                              }
-                                            "
+                                                : null),
+                                              color: (selectedSpecialists.includes(specialistId)
+                                                ? 'white'
+                                                : null),
+                                            }"
                                             class="exercise__spectialist__delete_button"
                                           >
                                             <a-popover title="Убрать упражнение" placement="top">
@@ -458,10 +459,11 @@ export default {
   overflow: hidden
   border-radius: 15px
   position: relative
-  color: white
   cursor: pointer
   margin-left: 6px
-  font-weight: bold
+  color: rgba(0, 0, 0, 0.65)
+  border: 1px solid #d9d9d9
+  background-color: #fff
 
 .exercise__spectialist__delete_button__front
   width: 100%
