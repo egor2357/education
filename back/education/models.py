@@ -138,6 +138,23 @@ class Exercise(models.Model):
   def __str__(self):
     return self.name
 
+class Exercise_to_specialist(models.Model):
+  exercise = models.ForeignKey(
+    Exercise, null=False,
+    on_delete=models.CASCADE, verbose_name='Упражнение'
+  )
+  specialist = models.ForeignKey(
+    'Specialist', null=False,
+    on_delete=models.CASCADE, verbose_name='Специалист'
+  )
+
+  class Meta:
+    db_table = 'exercise_to_specialist'
+    verbose_name = 'Упражнение для специалиста'
+    verbose_name_plural = 'Упражнения для специалистов'
+    unique_together = ('specialist', 'exercise')
+
+
 class Specialist(models.Model):
   user = models.OneToOneField(
     User, null=True, blank=True,
@@ -145,7 +162,10 @@ class Specialist(models.Model):
   )
 
   activities = models.ManyToManyField('Activity', through='Specialty', verbose_name='Направления деятельности')
-  exercises = models.ManyToManyField(Exercise, related_name='specialists', verbose_name='Разрешенные упражнения')
+  exercises = models.ManyToManyField(
+    Exercise, related_name='specialists',
+    through='Exercise_to_specialist', verbose_name='Разрешенные упражнения'
+  )
 
   surname = models.CharField(max_length=50, blank=True, default='', verbose_name='Фамилия')
   name = models.CharField(max_length=50, blank=True, default='', verbose_name='Имя')

@@ -5,7 +5,8 @@ from .models import (
   Exercise, Form, Method, Specialty, Specialist, Presence,
   Schedule, Activity, Option_file, Option, Job_file,
   Job_report_file, Exercise_report, Job, Mission,
-  Announcement, Appeal, Message, Task_group, Talent, Notification
+  Announcement, Appeal, Message, Task_group, Talent, Notification,
+  Exercise_to_specialist
 )
 
 class SessionAdmin(admin.ModelAdmin):
@@ -211,3 +212,9 @@ class NotificationAdmin(admin.ModelAdmin):
   list_display = ('user', 'type')
 
 admin.site.register(Notification, NotificationAdmin)
+
+class Exercise_to_specialistAdmin(admin.ModelAdmin):
+  list_filter = ('specialist', 'exercise')
+  list_display = ('specialist', 'exercise')
+
+admin.site.register(Exercise_to_specialist, Exercise_to_specialistAdmin)
