@@ -49,7 +49,7 @@ class Exercises_to_specialistsView(viewsets.ModelViewSet):
     specialists = Specialist.objects.filter(pk__in=request.data['specialists'])
 
     exercise.specialists.remove(*specialists)
-    return Response({}, status=status.HTTP_204_NO_CONTENT)
+    return Response({}, status=status.HTTP_200_OK)
   @action(
     detail=False, methods=['post'],
     permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
@@ -79,12 +79,14 @@ class Exercises_to_specialistsView(viewsets.ModelViewSet):
       )
     specialists = Specialist.objects.filter(pk__in=request.data['specialists'])
 
-    exercises = result.exercises.all()
-    Exercise_to_specialist.objects.filter(specialist__in=specialists, exercise__in=exercises).delete()
+    exercises_id = result.exercises.all().values_list('pk', flat=True)
+    Exercise_to_specialist.objects.filter(
+      specialist__in=specialists, exercise_id__in=exercises_id
+    ).delete()
 
     return Response(
-      {'exercises': exercises.values_list('pk', flat=True)},
-      status=status.HTTP_204_NO_CONTENT
+      {'exercises': exercises_id},
+      status=status.HTTP_200_OK
     )
 
   @action(
@@ -105,7 +107,6 @@ class Exercises_to_specialistsView(viewsets.ModelViewSet):
     for specialist in specialists.prefetch_related('exercises'):
       for exercise in exercises:
         if exercise in specialist.exercises.all():
-          print(exercise)
           continue
         exercises_to_specialist_to_create.append(
           Exercise_to_specialist(exercise_id=exercise.id, specialist_id=specialist.pk)
@@ -115,5 +116,5 @@ class Exercises_to_specialistsView(viewsets.ModelViewSet):
 
     return Response(
       {'exercises': exercises.values_list('pk', flat=True)},
-      status=status.HTTP_204_NO_CONTENT
+      status=status.HTTP_200_OK
     )

@@ -98,10 +98,25 @@
 
                                     <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number, result.number].join(".") + '. ' + result.name }}</text-highlight>
                                     <div class="exercise__spectialist__filler" />
-                                    <a-icon v-if="result.children.length"
-                                      class="icon-button icon-show"
-                                      type="plus"
-                                    />
+                                    <a-dropdown :trigger="['click']"
+                                      placement="bottomLeft" class="dropdown--hover"
+                                    >
+                                      <a-icon class="icon-button icon-actions" type="more" />
+                                      <a-menu slot="overlay">
+                                        <a-menu-item 
+                                          key="0"
+                                          @click="setResult(result.id, selectedSpecialists)"
+                                        >
+                                          Добавить все упражнения ожидаемого результата для выбранных специалистов
+                                        </a-menu-item>
+                                        <a-menu-item 
+                                          key="1"
+                                          @click="removeResult(result.id, selectedSpecialists)"
+                                        >
+                                          Убрать все упражнения ожидаемого результата для выбранных специалистов
+                                        </a-menu-item>
+                                      </a-menu>
+                                    </a-dropdown>
                                   </div>
                                   <Transition name="show">
                                   <div v-if="shownResults.includes(result.id)">
@@ -148,10 +163,30 @@
                                           </div>
                                         </template>
                                         
-                                        <a-icon
-                                          class="icon-button icon-show"
-                                          type="plus"
-                                        />
+                                        <a-dropdown
+                                          :trigger="['click']"
+                                          placement="bottomLeft"
+                                          class="dropdown--hover"
+                                        >
+                                          <a-icon
+                                            class="icon-button icon-actions"
+                                            type="more"
+                                          ></a-icon>
+                                          <a-menu slot="overlay">
+                                            <a-menu-item 
+                                              key="0"
+                                              @click="setExercise(exercise.id, selectedSpecialists)"
+                                            >
+                                              Добавить упражнение для выбранных специалистов
+                                            </a-menu-item>
+                                            <a-menu-item 
+                                              key="1"
+                                              @click="removeExercise(exercise.id, selectedSpecialists)"
+                                            >
+                                              Убрать упражнение для выбранных специалистов
+                                            </a-menu-item>
+                                          </a-menu>
+                                        </a-dropdown>
 
                                       </div>
                                     </div>
@@ -255,7 +290,7 @@ export default {
       }
     },
     async removeExercise (exerciseId, specialistsIds) {
-      const successCode = 204;
+      const successCode = 200;
       const successMessage = "Упражнение успешно исключено";
       let res = await post(
         this.$axios,
@@ -288,6 +323,44 @@ export default {
       if (res.status === successCode) {
         this.$message.success(successMessage);
         this.setExercises({ exercisesIds: [exerciseId], specialistsIds })
+      } else {
+        this.$message.error("Произошла ошибка");
+      }
+    },
+    async removeResult (resultId, specialistsIds) {
+      const successCode = 200;
+      const successMessage = "Все упражнения ожидаемого результата успешно исключены для выбранных специалистов";
+      let res = await post(
+        this.$axios,
+        `/api/exercises_to_specialists/remove_result/`,
+        {
+          result: resultId,
+          specialists: specialistsIds
+        }
+      );
+
+      if (res.status === successCode) {
+        this.$message.success(successMessage);
+        this.removeExercises({ exercisesIds: res.data.exercises, specialistsIds });
+      } else {
+        this.$message.error("Произошла ошибка");
+      }
+    },
+    async setResult (resultId, specialistsIds) {
+      const successCode = 200;
+      const successMessage = "Все упражнения ожидаемого результата успешно добавлены";
+      let res = await post(
+        this.$axios,
+        `/api/exercises_to_specialists/set_result/`,
+        {
+          result: resultId,
+          specialists: specialistsIds
+        }
+      );
+
+      if (res.status === successCode) {
+        this.$message.success(successMessage);
+        this.setExercises({ exercisesIds: res.data.exercises, specialistsIds })
       } else {
         this.$message.error("Произошла ошибка");
       }
