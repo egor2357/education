@@ -105,13 +105,19 @@
                                       <a-menu slot="overlay">
                                         <a-menu-item 
                                           key="0"
-                                          @click="setResult(result.id, selectedSpecialists)"
+                                          @click="setObjectsExercises(
+                                            'result', result.id, selectedSpecialists,
+                                            'Все упражнения ожидаемого результата успешно добавлены'
+                                          )"
                                         >
                                           Добавить все упражнения ожидаемого результата для выбранных специалистов
                                         </a-menu-item>
                                         <a-menu-item 
                                           key="1"
-                                          @click="removeResult(result.id, selectedSpecialists)"
+                                          @click="removeObjectsExercises(
+                                            'result', result.id, selectedSpecialists,
+                                            'Все упражнения ожидаемого результата успешно исключены для выбранных специалистов'
+                                          )"
                                         >
                                           Убрать все упражнения ожидаемого результата для выбранных специалистов
                                         </a-menu-item>
@@ -134,7 +140,10 @@
                                           <div
                                             v-for="specialistId in exerciseToSpecialists[exercise.id]"
                                             :key="specialistId + '.' + exercise.id"
-                                            @click="removeExercise(exercise.id, [specialistId])"
+                                            @click="removeObjectsExercises(
+                                              'exercise', exercise.id, [specialistId],
+                                              'Упражнение успешно исключено'
+                                            )"
                                             :style="{
                                               backgroundColor: (selectedSpecialists.includes(specialistId)
                                                 ? specialistToItsMeta[specialistId].color
@@ -175,13 +184,19 @@
                                           <a-menu slot="overlay">
                                             <a-menu-item 
                                               key="0"
-                                              @click="setExercise(exercise.id, selectedSpecialists)"
+                                              @click="setObjectsExercises(
+                                                'exercise', exercise.id, selectedSpecialists,
+                                                'Упражнение успешно добавлено'
+                                              )"
                                             >
                                               Добавить упражнение для выбранных специалистов
                                             </a-menu-item>
                                             <a-menu-item 
                                               key="1"
-                                              @click="removeExercise(exercise.id, selectedSpecialists)"
+                                              @click="removeObjectsExercises(
+                                                'exercise', exercise.id, selectedSpecialists,
+                                                'Упражнение успешно исключено'
+                                              )"
                                             >
                                               Убрать упражнение для выбранных специалистов
                                             </a-menu-item>
@@ -289,71 +304,13 @@ export default {
         this.selectedSpecialists.push(specialistId);
       }
     },
-    async removeExercise (exerciseId, specialistsIds) {
+    async setObjectsExercises (objectName, objectId, specialistsIds, successMessage) {
       const successCode = 200;
-      const successMessage = "Упражнение успешно исключено";
       let res = await post(
         this.$axios,
-        `/api/exercises_to_specialists/remove_exercise/`,
+        `/api/exercises_to_specialists/set_${objectName}/`,
         {
-          exercise: exerciseId,
-          specialists: specialistsIds
-        }
-      );
-
-      if (res.status === successCode) {
-        this.$message.success(successMessage);
-        this.removeExercises({ exercisesIds: [exerciseId], specialistsIds });
-      } else {
-        this.$message.error("Произошла ошибка");
-      }
-    },
-    async setExercise (exerciseId, specialistsIds) {
-      const successCode = 200;
-      const successMessage = "Упражнение успешно добавлено";
-      let res = await post(
-        this.$axios,
-        `/api/exercises_to_specialists/set_exercise/`,
-        {
-          exercise: exerciseId,
-          specialists: specialistsIds
-        }
-      );
-
-      if (res.status === successCode) {
-        this.$message.success(successMessage);
-        this.setExercises({ exercisesIds: [exerciseId], specialistsIds })
-      } else {
-        this.$message.error("Произошла ошибка");
-      }
-    },
-    async removeResult (resultId, specialistsIds) {
-      const successCode = 200;
-      const successMessage = "Все упражнения ожидаемого результата успешно исключены для выбранных специалистов";
-      let res = await post(
-        this.$axios,
-        `/api/exercises_to_specialists/remove_result/`,
-        {
-          result: resultId,
-          specialists: specialistsIds
-        }
-      );
-
-      if (res.status === successCode) {
-        this.$message.success(successMessage);
-        this.removeExercises({ exercisesIds: res.data.exercises, specialistsIds });
-      } else {
-        this.$message.error("Произошла ошибка");
-      }
-    },
-    async setResult (resultId, specialistsIds) {
-      const successCode = 200;
-      const successMessage = "Все упражнения ожидаемого результата успешно добавлены";
-      let res = await post(
-        this.$axios,
-        `/api/exercises_to_specialists/set_result/`,
-        {
-          result: resultId,
+          [objectName]: objectId,
           specialists: specialistsIds
         }
       );
@@ -361,6 +318,24 @@ export default {
       if (res.status === successCode) {
         this.$message.success(successMessage);
         this.setExercises({ exercisesIds: res.data.exercises, specialistsIds })
+      } else {
+        this.$message.error("Произошла ошибка");
+      }
+    },
+    async removeObjectsExercises (objectName, objectId, specialistsIds, successMessage) {
+      const successCode = 200;
+      let res = await post(
+        this.$axios,
+        `/api/exercises_to_specialists/remove_${objectName}/`,
+        {
+          [objectName]: objectId,
+          specialists: specialistsIds
+        }
+      );
+
+      if (res.status === successCode) {
+        this.$message.success(successMessage);
+        this.removeExercises({ exercisesIds: res.data.exercises, specialistsIds });
       } else {
         this.$message.error("Произошла ошибка");
       }
