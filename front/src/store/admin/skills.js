@@ -33,6 +33,50 @@ const getters = {
   getSkillDevelopmentTreeState(state) {
     return state.skillDevelopmentTreeState;
   },
+  exerciseOptions(state) {
+    const options = [];
+    for (let area of state.areas) {
+      const areaNode = {
+        id: 'area' + area.id,
+        label: `${area.number}. ${area.name}`,
+        children: []
+      };
+      for (let direction of area.development_directions) {
+        const directionNode = {
+          id: 'direction' + direction.id,
+          label: `${area.number}.${direction.number}. ${direction.name}`,
+          children: [],
+        }
+        for (let skill of direction.skills) {
+          const skillNode = {
+            id: 'skill' + skill.id,
+            label: `${area.number}.${direction.number}.${skill.number}. ${skill.name}`,
+            children: [],
+          }
+          for (let result of skill.results) {
+            const resultNode = {
+              id: 'result' + result.id,
+              label: `${area.number}.${direction.number}.${skill.number}.${result.number}. ${result.name}`,
+              children: [],
+            }
+            for (let exercise of result.exercises) {
+              const exerciseNode = {
+                id: exercise.id,
+                label: `${area.number}.${direction.number}.${skill.number}.${result.number}.${exercise.number}. ${exercise.name}`,
+              }
+
+              resultNode.children.push(exerciseNode);
+            }
+            skillNode.children.push(resultNode);
+          }
+          directionNode.children.push(skillNode);
+        }
+        areaNode.children.push(directionNode);
+      }
+      options.push(areaNode);
+    }
+    return options;
+  },
 };
 
 const actions = {

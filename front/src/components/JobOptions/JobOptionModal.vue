@@ -37,6 +37,7 @@
           :backspaceRemoves="false"
           noChildrenText="У этого узла нет элементов"
           noOptionsText="Структура навыков не определена"
+          noResultsText="Поиск не дал результатов"
         />
       </a-form-model-item>
 
@@ -216,46 +217,10 @@ export default {
     ...mapGetters({
       areasFetched: "skills/getFetched",
       areas: "skills/getAreas",
+      exercisesOptions: "skills/exerciseOptions",
       formsFetched: "forms/getFetched",
       forms: "forms/getForms",
     }),
-
-    exercisesOptions() {
-      let options = [];
-      for (let area of this.areas) {
-        let areaNode = {
-          id: 'area' + area.id,
-          label: `${area.number}. ${area.name}`,
-          children: []
-        };
-        for (let direction of area.development_directions) {
-          let directionNode = {
-            id: 'direction' + direction.id,
-            label: `${area.number}.${direction.number}. ${direction.name}`,
-            children: [],
-          }
-          for (let skill of direction.skills) {
-            let skillNode = {
-              id: 'skill' + skill.id,
-              label: `${area.number}.${direction.number}.${skill.number}. ${skill.name}`,
-              children: [],
-            }
-            for (let exercise of skill.exercises) {
-              let exerciseNode = {
-                id: exercise.id,
-                label: `${area.number}.${direction.number}.${skill.number}.${exercise.number}. ${exercise.name}`,
-              }
-
-              skillNode.children.push(exerciseNode);
-            }
-            directionNode.children.push(skillNode);
-          }
-          areaNode.children.push(directionNode);
-        }
-        options.push(areaNode);
-      }
-      return options;
-    },
 
     methodsOptions() {
       let options = [];
