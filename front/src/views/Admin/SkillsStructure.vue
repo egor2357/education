@@ -71,6 +71,7 @@ export default {
   },
   data() {
     return {
+      selfAreas: [], // Структура навыков при отображении удаленных, либо на дату (в стор не укладывается)
       loading: false,
       displayModal: false,
       modalAdding: true,
@@ -85,19 +86,36 @@ export default {
       showByDate: false,
       calendarDate: null,
       calendarShown: false,
-      searchText: ''
+      searchText: '',
+
     };
   },
   async created() {
     this.loading = true;
-    await this.fetchAreas({deletedState: false, byDate: null});
+    await this.fetchAreasByStore();
     this.loading = false;
-    this.$refs.table.initShownAreas();
+    if (!this.fetchedByStore)
+      this.$message.error("Произошла ошибка получения данных");
+    else
+      this.$refs.table.initShownAreas();
   },
   methods: {
     ...mapActions({
-      fetchAreas: "skills/fetchAreas"
+      fetchAreasByStore: "skills/fetchAreas"
     }),
+    async fetchAreasByComponent(deleted, byDate){
+      try {
+        let res = await this.$axios.get(`/api/educational_areas/by_date/?deleted=${deleted}${byDate ? '&by_date=' + byDate : ''}`);
+        if (res.status === 200) {
+          this.selfAreas = res.data;
+        }
+        else
+          this.$message.error("Произошла ошибка получения данных");
+      }
+      catch (e) {
+        this.$message.error("Произошла ошибка получения данных");
+      }
+    },
     openModalAdd(type, item) {  // добавление нового элемента, здесь в item приходит родительский элемнет, id=null, parentId получаем из item.id, name='', number вычисляем из item.nodes (без фильтрации по имени)
       this.modalAdding = true;
       this.modalType = type;
@@ -202,7 +220,10 @@ export default {
     },
     async refetchAreas() {
       this.loading = true;
-      await this.fetchAreas({deletedState: this.showDeleted, byDate: this.calendarDate ? this.calendarDate.format('YYYY-MM-DD') : null});
+      if (this.showDeleted || this.calendarDate)
+        await this.fetchAreasByComponent(this.showDeleted, this.calendarDate ? this.calendarDate.format('YYYY-MM-DD') : null);
+      else
+        await this.fetchAreasByStore();
       this.loading = false;
     },
     handleCalendarOpenChange(status){
@@ -232,9 +253,15 @@ export default {
   },
   computed: {
     ...mapGetters({
-      areas: "skills/getAreas",
-      fetched: "skills/getFetched"
-    })
+      areasByStore: "skills/getAreas",
+      fetchedByStore: "skills/getFetched"
+    }),
+    areas(){
+      if (this.showDeleted || this.calendarDate)
+        return this.selfAreas;
+      else
+        return this.areasByStore;
+    }
   }
 };
 </script>
