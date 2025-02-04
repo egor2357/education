@@ -7,7 +7,7 @@
         </div>
         <div class="title">Структура навыков</div>
         <div class="top-bar__side-block right">
-          <a-button icon="plus" type="secondary" @click="openModalAdd(1)"
+          <a-button icon="plus" type="secondary" @click="openModalAdd(1)" :disabled="showByDate"
             >Добавить образовательную область
           </a-button>
         </div>
@@ -18,6 +18,7 @@
           :loading="loading"
           :areas="areas"
           :searchText="searchText"
+          :disableActions="showByDate"
           @onDeleteItem="displayConfirmDelete"
           @onEditItem="openModalEdit"
           @onAddItem="openModalAdd($event.type, $event.item)"
@@ -28,7 +29,15 @@
           <a-checkbox v-model="showDeleted" @change="refetchAreas">Показывать удаленные элементы</a-checkbox>
         </div>
         <div class="skills-structure__param">
-
+          <a-checkbox v-model="showByDate" @click.prevent="showByDateHandle">Показывать данные, актуальные на</a-checkbox>
+          <a-date-picker
+            v-model="calendarDate"
+            type="date"
+            format="DD.MM.YYYY"
+            :open="calendarShown"
+            @change="changeCalendarDate"
+            @openChange="handleCalendarOpenChange"
+          />
         </div>
       </div>
       <ModalSkills
@@ -59,15 +68,22 @@ export default {
       displayModal: false,
       modalAdding: true,
       modalType: 0,
-      modalEditableData: {},
+      modalEditableData: {
+        id: null,
+        parentId: null,
+        name: '',
+        number: null
+      },
       showDeleted: false,
-      actualDate: null,
+      showByDate: false,
+      calendarDate: null,
+      calendarShown: false,
       searchText: ''
     };
   },
   async created() {
     this.loading = true;
-    await this.fetchAreas();
+    await this.fetchAreas({deletedState: false, byDate: null});
     this.loading = false;
     this.$refs.table.initShownAreas();
   },
@@ -75,43 +91,29 @@ export default {
     ...mapActions({
       fetchAreas: "skills/fetchAreas"
     }),
-    openModalAdd(type, item) {
+    openModalAdd(type, item) {  // добавление нового элемента, здесь в item приходит родительский элемнет, id=null, parentId получаем из item.id, name='', number вычисляем из item.nodes (без фильтрации по имени)
       this.modalAdding = true;
       this.modalType = type;
       this.displayModal = true;
-      if (type === 1) {
-        this.modalEditableData.lastNumberArea = this.areas.filter(item => !item.deleted).length
-          ? this.areas[this.areas.length - 1].number + 1
-          : 1;
+      this.modalEditableData.id = null;
+      this.modalEditableData.name = '';
+      let list; 
+      if (type === 1) // добавляется образовательная область
+      {
+        this.modalEditableData.parentId = null;
+        list = this.areas.filter(el => !el.deleted);
       }
-      if (type === 2) {
-        this.modalEditableData.areaId = item.id;
-        this.modalEditableData.lastNumberDirection = item.children
-          .length
-          ? item.children[item.children.length - 1]
-              .number + 1
-          : 1;
+      else // добавляется другой элемент (направление развития и т.д.)
+      {
+        this.modalEditableData.parentId = item.id;
+        list = item.nodes.filter(el => !el.deleted);
       }
-      if (type === 3) {
-        this.modalEditableData.directionId = item.id;
-        this.modalEditableData.lastNumberSkill = item.children.length
-          ? item.children[item.children.length - 1].number + 1
-          : 1;
-      }
-      if (type === 4) {
-        this.modalEditableData.skillId = item.id;
-        this.modalEditableData.lastNumberResult = item.children.length
-          ? item.children[item.children.length - 1].number + 1
-          : 1;
-      }
-      if (type === 5) {
-        this.modalEditableData.resultId = item.id;
-        this.modalEditableData.lastNumberExercise = item.children.length
-          ? item.children[item.children.length - 1].number + 1
-          : 1;
-      }
+      if (list.length)
+        this.modalEditableData.number = list[list.length - 1].number + 1;
+      else
+        this.modalEditableData.number = 1;
     },
-    openModalEdit(payload) {
+    openModalEdit(payload) { // изменение элемнта, здесь в payload.item приходит изменяемый элемент
       this.modalAdding = false;
       this.modalType = payload.type;
       this.modalEditableData = payload.item;
@@ -177,7 +179,7 @@ export default {
         title = `Вы действительно хотите удалить ожидаемый результат "${name}"?`;
         content = "Будут удалены все связанные диагностические упражнения.";
       } else if (type === 5) {
-        title = `Вы действительно хотите удалить упражнение "${name}"?`;
+        title = `Вы действительно хотите удалить диагностическое упражнение "${name}"?`;
         content = "";
       }
       let that = this;
@@ -185,6 +187,7 @@ export default {
         title: title,
         content: content,
         okType: "danger",
+        width: 800,
         onOk() {
           that.deleteRecord(payload.id, type, payload.forever);
         }
@@ -192,8 +195,32 @@ export default {
     },
     async refetchAreas() {
       this.loading = true;
-      await this.fetchAreas(this.showDeleted);
+      await this.fetchAreas({deletedState: this.showDeleted, byDate: this.calendarDate ? this.calendarDate.format('YYYY-MM-DD') : null});
       this.loading = false;
+    },
+    handleCalendarOpenChange(status){
+      this.calendarShown = status;
+    
+      if (!status && !this.calendarDate && this.showByDate)
+        this.showByDate = false;      
+    },
+    showByDateHandle()
+    {
+      this.calendarShown = !this.showByDate;
+      if (this.showByDate)
+      {
+        this.calendarDate = null;
+        this.refetchAreas();
+        this.showByDate = false;
+      }
+    },
+    changeCalendarDate()
+    {
+      if (!this.showByDate)
+        this.showByDate = true;
+      if (!this.calendarDate)
+        this.showByDate = false;
+      this.refetchAreas();
     }
   },
   computed: {

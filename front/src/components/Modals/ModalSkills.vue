@@ -4,6 +4,7 @@
     :title="title"
     v-if="type !== 0"
     @cancel="handleCancel"
+    :width="800"
   >
     <a-form-model :model="form" v-bind="layout" :rules="rules" ref="form">
       <a-form-model-item v-for="(field, index) in fields"
@@ -199,54 +200,31 @@ export default {
     },
   },
   created() {
+    let titles = {
+      1: "образовательной области",
+      2: "направления развития",
+      3: "навыка",
+      4: "ожидаемого результата",
+      5: "диагностического упражнения"
+    };
     if (this.adding) {
-      this.title += "Добавление ";
+      this.title = "Добавление ";
+      if (this.type === 2)
+        this.form.area_id = this.editableData.parentId;
+      else if (this.type === 3)
+        this.form.direction_id = this.editableData.parentId;
+      else if (this.type === 4)
+        this.form.skill_id = this.editableData.parentId;
+      else if (this.type === 5)
+        this.form.result_id = this.editableData.parentId;
+
     } else {
       this.title += "Изменение ";
-      this.editableData.id ? (this.form.id = this.editableData.id) : "";
-      this.editableData.name ? (this.form.name = this.editableData.name) : "";
-      this.editableData.number
-        ? (this.form.number = this.editableData.number)
-        : "";
+      this.form.id = this.editableData.id
+      this.form.name = this.editableData.name;
     }
-    if (this.type === 1) {
-      this.title += "образовательной области";
-      this.editableData.lastNumberArea
-        ? (this.form.number = this.editableData.lastNumberArea)
-        : "";
-    } else if (this.type === 2) {
-      this.editableData.areaId
-        ? (this.form.area_id = this.editableData.areaId)
-        : "";
-      this.editableData.lastNumberDirection
-        ? (this.form.number = this.editableData.lastNumberDirection)
-        : "";
-      this.title += "направления развития";
-    } else if (this.type === 3) {
-      this.editableData.directionId
-        ? (this.form.direction_id = this.editableData.directionId)
-        : "";
-      this.editableData.lastNumberSkill
-        ? (this.form.number = this.editableData.lastNumberSkill)
-        : "";
-      this.title += "навыка";
-    } else if (this.type === 4) {
-      this.editableData.skillId
-        ? (this.form.skill_id = this.editableData.skillId)
-        : "";
-      this.editableData.lastNumberResult
-        ? (this.form.number = this.editableData.lastNumberResult)
-        : "";
-      this.title += "ожидаемого результата";
-    } else if (this.type === 5) {
-      this.editableData.resultId
-        ? (this.form.result_id = this.editableData.resultId)
-        : "";
-      this.editableData.lastNumberExercise
-        ? (this.form.number = this.editableData.lastNumberExercise)
-        : "";
-      this.title += "упражнения";
-    } 
+    this.form.number = this.editableData.number
+    this.title += titles[this.type];
     document.addEventListener("keydown", this.keydown);
   },
   mounted() {

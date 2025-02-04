@@ -7,21 +7,21 @@
             class="skill-table__cell skill-table__cell_sticky skill-table-area"
             :class="{'skill-table__cell_deleted' : area.deleted}"
           >
-            <a-icon v-if="!area.deleted || area.children.length"
+            <a-icon v-if="(!area.deleted && !disableActions) || area.children.length"
               class="icon-button icon-show"
               :type="shownAreas.includes(area.id) ? 'down' : 'right'"
               @click="toggleNode(shownAreas, area.id)"
             />
             <span v-else class="placeholder"></span>
             <text-highlight :queries="searchText">{{ [area.number, area.name].join(". ") }}</text-highlight>
-            <a-dropdown
+            <a-dropdown v-if="!disableActions"
               :trigger="['click']"
               placement="bottomLeft"
               class="dropdown--hover"
             >
               <a-icon class="icon-button icon-actions" type="more"></a-icon>
               <a-menu slot="overlay">
-                <a-menu-item v-if="!area.deleted"
+                <a-menu-item v-if="!area.deleted && !disableActions"
                   key="0"
                   @click="$emit('onAddItem', { type: 2, item: area })"
                 >
@@ -66,7 +66,7 @@
             <div v-if="shownAreas.includes(area.id)">
               <div
                 class="skill-table__cell skill-table__cell_sticky skill-table-direction"
-                v-if="!area.children.length && !area.deleted"
+                v-if="!area.children.length && !area.deleted && !disableActions"
               >
                 <a @click="$emit('onAddItem', { type: 2, item: area })">Добавить направление развития</a>
               </div>
@@ -76,14 +76,14 @@
                     class="skill-table__cell skill-table__cell_sticky skill-table-direction"
                     :class="{'skill-table__cell_deleted' : direction.deleted}"
                   >
-                    <a-icon v-if="!direction.deleted || direction.children.length"
+                    <a-icon v-if="(!direction.deleted && !disableActions) || direction.children.length"
                       class="icon-button icon-show"
                       :type="shownDirections.includes(direction.id) ? 'down' : 'right'"
                       @click="toggleNode(shownDirections, direction.id)"
                     />
                     <span v-else class="placeholder"></span>              
                     <text-highlight :queries="searchText">{{ [area.number, direction.number].join(".") + ". " + direction.name }}</text-highlight>
-                    <a-dropdown
+                    <a-dropdown v-if="!disableActions"
                       :trigger="['click']"
                       placement="bottomLeft"
                       class="dropdown--hover"
@@ -147,7 +147,7 @@
                   <Transition name="show">
                     <div v-if="shownDirections.includes(direction.id)">
                       <div
-                        v-if="!direction.children.length && !direction.deleted"
+                        v-if="!direction.children.length && !direction.deleted  && !disableActions"
                         class="skill-table__cell skill-table__cell_sticky skill-table-skill"
                       >
                         <a
@@ -162,14 +162,14 @@
                             class="skill-table__cell skill-table__cell_sticky skill-table-skill"
                             :class="{'skill-table__cell_deleted' : skill.deleted}"
                           >
-                            <a-icon v-if="!skill.deleted || skill.children.length"
+                            <a-icon v-if="(!skill.deleted && !disableActions) || skill.children.length"
                               class="icon-button icon-show"
                               :type="shownSkills.includes(skill.id) ? 'down' : 'right'"
                               @click="toggleNode(shownSkills, skill.id)"
                             />
                             <span v-else class="placeholder"></span>
                             <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number].join(".") + ". " + skill.name }}</text-highlight>
-                            <a-dropdown
+                            <a-dropdown v-if="!disableActions"
                               :trigger="['click']"
                               placement="bottomLeft"
                               class="dropdown--hover"
@@ -239,7 +239,7 @@
                           <Transition name="show">
                             <div v-if="shownSkills.includes(skill.id)">
                               <div
-                                v-if="!skill.children.length && !skill.deleted"
+                                v-if="!skill.children.length && !skill.deleted  && !disableActions"
                                 class="skill-table__cell skill-table__cell_sticky skill-table-result"
                               >
                                 <a @click="$emit('onAddItem', {type: 4, item: skill})">
@@ -252,7 +252,7 @@
                                     class="skill-table__cell skill-table__cell_sticky skill-table-result"
                                     :class="{'skill-table__cell_deleted' : result.deleted}"  
                                   >
-                                    <a-icon v-if="!result.deleted || result.children.length"
+                                    <a-icon v-if="(!result.deleted && !disableActions) || result.children.length"
                                       class="icon-button icon-show"
                                       :type="shownResults.includes(result.id) ? 'down' : 'right'"
                                       @click="toggleNode(shownResults, result.id)"
@@ -260,7 +260,7 @@
                                     <span v-else class="placeholder"></span>
 
                                     <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number, result.number].join(".") + '. ' + result.name }}</text-highlight>
-                                    <a-dropdown
+                                    <a-dropdown v-if="!disableActions"
                                       :trigger="['click']"
                                       placement="bottomLeft"
                                       class="dropdown--hover"
@@ -332,7 +332,7 @@
                                   <Transition name="show">
                                   <div v-if="shownResults.includes(result.id)">
                                     <div
-                                      v-if="!result.children.length && !result.deleted"
+                                      v-if="!result.children.length && !result.deleted  && !disableActions"
                                       class="skill-table__cell skill-table__cell_sticky skill-table-exercise"
                                     >
                                       <a @click="$emit('onAddItem', {type: 5, item: result})">
@@ -345,7 +345,7 @@
                                         :class="{'skill-table__cell_deleted' : exercise.deleted}"
                                       >
                                         <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number, result.number, exercise.number].join(".") + '. ' + exercise.name }}</text-highlight>
-                                        <a-dropdown
+                                        <a-dropdown v-if="!disableActions"
                                           :trigger="['click']"
                                           placement="bottomLeft"
                                           class="dropdown--hover"
@@ -445,9 +445,11 @@ const filter = (arr, str, prefix) => (arr || [])
         id: n.id, 
         number: n.number,
         deleted: n.deleted,
+        nodes: n.development_directions || n.skills || n.results || n.exercises,
         children: filter(n.development_directions || n.skills || n.results || n.exercises, (prefix+n.number+'. '+n.name.toLowerCase()).includes(str) ? '' : str, prefix+n.number+'.') 
       })
-  ).filter(
+  )
+  .filter(
     n => (prefix+n.number+'. '+n.name.toLowerCase()).includes(str) || n.children.length
   );
 
@@ -470,7 +472,11 @@ export default {
     searchText: {
       type: String,
       default: ''
-    }    
+    },
+    disableActions: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
