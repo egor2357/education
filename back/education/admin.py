@@ -1,6 +1,13 @@
 from django.contrib import admin
 from django.contrib.sessions.models import Session
-from .models import *
+from .models import (
+  Educational_area, Development_direction, Skill, Result,
+  Exercise, Form, Method, Specialty, Specialist, Presence,
+  Schedule, Activity, Option_file, Option, Job_file,
+  Job_report_file, Exercise_report, Job, Mission,
+  Announcement, Appeal, Message, Task_group, Talent, Notification,
+  Exercise_to_specialist
+)
 
 class SessionAdmin(admin.ModelAdmin):
   def _session_data(self, obj):
@@ -11,27 +18,34 @@ admin.site.register(Session, SessionAdmin)
 # Register your models here.
 class Educational_areaAdmin(admin.ModelAdmin):
   search_fields = ('name', 'number')
-  list_display = ('number', 'name')
+  list_display = ('pk', 'number', 'name', 'lifetime')
 
 admin.site.register(Educational_area, Educational_areaAdmin)
 
 class Development_directionAdmin(admin.ModelAdmin):
   search_fields = ('name', 'number')
-  list_display = ('number', 'name', 'area')
+  list_display = ('pk', 'number', 'name', 'area', 'lifetime')
   list_filter = ('area',)
 
 admin.site.register(Development_direction, Development_directionAdmin)
 
 class SkillAdmin(admin.ModelAdmin):
   search_fields = ('name', 'number')
-  list_display = ('number', 'name', 'direction')
+  list_display = ('pk', 'number', 'name', 'direction', 'lifetime')
   list_filter = ('direction',)
 
 admin.site.register(Skill, SkillAdmin)
 
+class ResultAdmin(admin.ModelAdmin):
+  search_fields = ('name', 'number')
+  list_display = ('pk', 'number', 'name', 'skill', 'lifetime')
+  list_filter = ('skill',)
+
+admin.site.register(Result, ResultAdmin)
+
 class ExerciseAdmin(admin.ModelAdmin):
   search_fields = ('name', 'number')
-  list_display = ('number', 'name', 'skill')
+  list_display = ('pk', 'number', 'name', 'result', 'lifetime')
 
 admin.site.register(Exercise, ExerciseAdmin)
 
@@ -90,7 +104,6 @@ admin.site.register(Schedule, ScheduleAdmin)
 class ActivityAdmin(admin.ModelAdmin):
   search_fields = ('name',)
   list_display = ('name', 'color')
-  filter_horizontal = ('skills',)
   inlines = (ScheduleInline,)
 
 admin.site.register(Activity, ActivityAdmin)
@@ -199,3 +212,9 @@ class NotificationAdmin(admin.ModelAdmin):
   list_display = ('user', 'type')
 
 admin.site.register(Notification, NotificationAdmin)
+
+class Exercise_to_specialistAdmin(admin.ModelAdmin):
+  list_filter = ('specialist', 'exercise')
+  list_display = ('specialist', 'exercise')
+
+admin.site.register(Exercise_to_specialist, Exercise_to_specialistAdmin)

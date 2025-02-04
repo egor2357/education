@@ -5,8 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete, post_save
 from django.dispatch.dispatcher import receiver
 from django.core.files.base import ContentFile
-from django.contrib.postgres.fields import JSONField
-from rest_framework.serializers import ValidationError
+from django.contrib.postgres.fields import JSONField, DateRangeField
 from django.conf import settings
 from .utils import send_message, loop
 
@@ -17,9 +16,37 @@ import os
 from PIL import Image
 from io import BytesIO
 
+from django.db.models import Transform
+
+class UpperInc(Transform):
+    lookup_name = "upper_inc"
+    function = "UPPER_INC"
+DateRangeField.register_lookup(UpperInc)
+class UpperInf(Transform):
+  lookup_name = "upper_inf"
+  function = "UPPER_INF"
+DateRangeField.register_lookup(UpperInf)
+class LowerInc(Transform):
+  lookup_name = "lower_inc"
+  function = "LOWER_INC"
+DateRangeField.register_lookup(LowerInc)
+class LowerInf(Transform):
+  lookup_name = "lower_inf"
+  function = "LOWER_INF"
+DateRangeField.register_lookup(LowerInf)
+class DateRangeLower(Transform):
+  lookup_name = "lower"
+  function = "LOWER"
+DateRangeField.register_lookup(DateRangeLower)
+class DateRangeUpper(Transform):
+  lookup_name = "upper"
+  function = "UPPER"
+DateRangeField.register_lookup(DateRangeUpper)
+
 class Educational_area(models.Model):
   name = models.TextField(unique=True, verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
+  lifetime = DateRangeField(verbose_name='Время жизни')
 
   class Meta:
     db_table = 'educational_area'
@@ -39,6 +66,7 @@ class Development_direction(models.Model):
 
   name = models.TextField(verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
+  lifetime = DateRangeField(verbose_name='Время жизни')
 
   class Meta:
     db_table = 'development_direction'
@@ -58,6 +86,7 @@ class Skill(models.Model):
 
   name = models.TextField(verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
+  lifetime = DateRangeField(verbose_name='Время жизни')
 
   class Meta:
     db_table = 'skill'
@@ -69,24 +98,62 @@ class Skill(models.Model):
   def __str__(self):
     return self.name
 
-class Exercise(models.Model):
+class Result(models.Model):
   skill = models.ForeignKey(
-    Skill, null=False, related_name='exercises',
+    Skill, null=False,
     on_delete=models.CASCADE, verbose_name='Навык'
   )
 
   name = models.TextField(verbose_name='Название')
   number = models.PositiveSmallIntegerField(verbose_name='Номер')
+  lifetime = DateRangeField(verbose_name='Время жизни')
 
   class Meta:
-    db_table = 'exercise'
-    verbose_name = 'Упражнение'
-    verbose_name_plural = 'Упражнения'
+    db_table = 'result'
+    verbose_name = 'Ожидаемый результат'
+    verbose_name_plural = 'Ожидаемые результаты'
     ordering = ['skill', 'number']
     unique_together = ('skill', 'name',)
 
   def __str__(self):
     return self.name
+
+class Exercise(models.Model):
+  result = models.ForeignKey(
+    Result, null=False, related_name='exercises',
+    on_delete=models.CASCADE, verbose_name='Ожидаемый результат'
+  )
+
+  name = models.TextField(verbose_name='Название')
+  number = models.PositiveSmallIntegerField(verbose_name='Номер')
+  lifetime = DateRangeField(verbose_name='Время жизни')
+
+  class Meta:
+    db_table = 'exercise'
+    verbose_name = 'Упражнение'
+    verbose_name_plural = 'Упражнения'
+    ordering = ['result', 'number']
+    unique_together = ('result', 'name',)
+
+  def __str__(self):
+    return self.name
+
+class Exercise_to_specialist(models.Model):
+  exercise = models.ForeignKey(
+    Exercise, null=False,
+    on_delete=models.CASCADE, verbose_name='Упражнение'
+  )
+  specialist = models.ForeignKey(
+    'Specialist', null=False,
+    on_delete=models.CASCADE, verbose_name='Специалист'
+  )
+
+  class Meta:
+    db_table = 'exercise_to_specialist'
+    verbose_name = 'Упражнение для специалиста'
+    verbose_name_plural = 'Упражнения для специалистов'
+    unique_together = ('specialist', 'exercise')
+
 
 class Specialist(models.Model):
   user = models.OneToOneField(
@@ -95,6 +162,10 @@ class Specialist(models.Model):
   )
 
   activities = models.ManyToManyField('Activity', through='Specialty', verbose_name='Направления деятельности')
+  exercises = models.ManyToManyField(
+    Exercise, related_name='specialists',
+    through='Exercise_to_specialist', verbose_name='Разрешенные упражнения'
+  )
 
   surname = models.CharField(max_length=50, blank=True, default='', verbose_name='Фамилия')
   name = models.CharField(max_length=50, blank=True, default='', verbose_name='Имя')
@@ -266,8 +337,6 @@ class Method(models.Model):
     return self.name
 
 class Activity(models.Model):
-  skills = models.ManyToManyField(Skill, verbose_name='Развиваемые навыки')
-
   name = models.TextField(unique=True, verbose_name='Название')
   color = models.CharField(max_length=7, default='#CCCCCC', blank=True, verbose_name='Код цвета')
 

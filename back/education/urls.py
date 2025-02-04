@@ -1,6 +1,14 @@
 from rest_framework import routers
 from django.urls import path, include
-from .views import *
+from .views import (
+  UserView, Educational_areaView, EducationalAreasAllView,
+  Development_directionView, SkillView, ResultView, ExerciseView,
+  FormView, MethodView, Option_fileView, ActivityView, ScheduleView,
+  SpecialistView, OptionView, PresenceView, Job_fileView, Job_report_fileView,
+  Exercise_reportView, JobView, SpecialtyView, MissionView, AnnouncementView,
+  AppealView, MessageView, Task_groupView, TalentView, NotificationView,
+  Exercises_to_specialistsView
+)
 
 router = routers.DefaultRouter()
 router.register(r'users', UserView, basename='User')
@@ -8,6 +16,7 @@ router.register(r'educational_areas', Educational_areaView, basename='Educationa
 router.register(r'educational_areas_all', EducationalAreasAllView, basename='EducationalAreasAll')
 router.register(r'development_directions', Development_directionView, basename='Development_direction')
 router.register(r'skills', SkillView, basename='Skill')
+router.register(r'results', ResultView, basename='Result')
 router.register(r'exercises', ExerciseView, basename='Exercise')
 router.register(r'forms', FormView, basename='Form')
 router.register(r'methods', MethodView, basename='Method')
@@ -29,6 +38,7 @@ router.register(r'messages', MessageView, basename='Message')
 router.register(r'task_groups', Task_groupView, basename='Task_group')
 router.register(r'talents', TalentView, basename='Talent')
 router.register(r'notifications', NotificationView, basename='Notification')
+router.register(r'exercises_to_specialists', Exercises_to_specialistsView, basename='Exercises_to_specialists')
 
 
 urlpatterns = [

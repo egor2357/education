@@ -115,6 +115,29 @@ const actions = {
       commit("updateSpecialist", specialistRequest.data);
     return res;
   },
+
+  removeExercises ({ state }, { exercisesIds, specialistsIds }) {
+    for (let specialist of state.specialists) {
+      if (specialistsIds.includes(specialist.id)) {
+        for (let exerciseId of exercisesIds) {
+          if (specialist.exercises.includes(exerciseId)) {
+            specialist.exercises.splice(specialist.exercises.findIndex(id=>id===exerciseId), 1);
+          }
+        }
+      }
+    }
+  },
+  setExercises ({ state }, { exercisesIds, specialistsIds }) {
+    for (let specialist of state.specialists) {
+      if (specialistsIds.includes(specialist.id)) {
+        for (let exerciseId of exercisesIds) {
+          if (!specialist.exercises.includes(exerciseId)) {
+            specialist.exercises.push(exerciseId);
+          }
+        }
+      }
+    }
+  },
 };
 
 const mutations = {

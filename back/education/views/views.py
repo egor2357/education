@@ -1,16 +1,47 @@
-from rest_framework import status, viewsets, views, filters, mixins
+import datetime
+
+from rest_framework import status, viewsets, filters, mixins, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action
+
+from django_filters.rest_framework import DjangoFilterBackend
+
 from django.db.models import Q, Count
-
-
+from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 
-from .models import *
-from .permissions import *
-from .serializers import *
-from .filters import *
-from .service import (
+from education.models import (
+  Development_direction, Result, Exercise, Exercise_report,
+  Skill, Form, Specialist, Job, Specialty, Schedule,
+  Appeal, Notification, Activity, Option_file, Talent,
+  Job_file, Option, Mission, Message, Presence, Method,
+  Job_report_file, Announcement, Task_group,
+)
+from education.permissions import (
+  IsAdminOrReadOnly, NotDeleteIfNotAdmin, IsAdminOrReadCreateOnly,
+  IsAdminOrOptionOwnerOrNoUpdateDelete, IsAdminOrOption_fileOwnerOrNoUpdateDelete,
+  CreateOptionIfHaveSpecialtyOrIsAdmin, IsAdminOrReadPartialUpdateOnly
+)
+from education.serializers import (
+  LoginSerializer, UserSerializer, Development_directionSerializer,
+  ExerciseSerializer, Exercise_reportSerializer, ResultSerializer,
+  SkillSerializer, FormSerializer, Option_fileSerializer,
+  TalentSerializer, Job_fileSerializer, SpecialistSerializer,
+  PresenceSummarySerializer, PresenceSerializer, OptionSerializer,
+  JobSerializer, MissionSerializer, ScheduleSerializer,
+  MessageSerializer, AppealSerializer, MethodSerializer,
+  Task_groupAdminSerializer, Task_groupUserSerializer,
+  ActivitySerializer, SpecialtySerializer, AnnouncementSerializer,
+  Job_report_fileSerializer, NotificationSerializer,
+  OnlyDateSerializer,
+)
+from education.filters import (
+  CommonPagination, JobFilter,
+  PresenceFilter, SpecialistFilter, Exercise_reportFilter,
+  OptionFilter, MissionFilter, AnnouncementFilter, AppealFilter,
+  MessageFilter, Task_groupFilter, TalentFilter
+)
+from education.service import (
   option_update_related, job_update_related, check_presence_clashes,
 
   send_messages_after_list_mission, send_messages_after_create_mission,
@@ -22,18 +53,18 @@ from .service import (
 
   send_messages_after_create_appeal, send_messages_after_delete_appeal,
   send_messages_after_close_appeal,
-
-
 )
+
+from .service import UpdateRightBound
 
 class CreateListRetrieveDestroyViewSet(mixins.CreateModelMixin,
                                         mixins.ListModelMixin,
                                         mixins.RetrieveModelMixin,
                                         mixins.DestroyModelMixin,
                                         viewsets.GenericViewSet):
-  '''
+  """
     ViewSet without update actions
-  '''
+  """
   pass
 
 
@@ -65,29 +96,161 @@ class UserView(viewsets.ModelViewSet):
     login(request, user)
     return Response(UserSerializer(user).data)
 
-class Educational_areaView(viewsets.ModelViewSet):
-  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Educational_area.objects.all().prefetch_related(
-    'development_direction_set',
-    'development_direction_set__skill_set',
-    'development_direction_set__skill_set__exercises',
-  )
-  serializer_class = Educational_areaSerializer
-
 class Development_directionView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Development_direction.objects.all().prefetch_related('skill_set__direction__area')
   serializer_class = Development_directionSerializer
+
+  def get_queryset(self):
+    if self.action == 'set_end':
+      return Development_direction.objects.all()
+    else:
+      return Development_direction.objects.all().prefetch_related('skill_set__result_set').select_related('area')
+
+  def perform_create(self, serializer):
+    serializer.save(lifetime=(datetime.date.today(), None))
+
+  @action(
+    detail=True, methods=['patch'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+  )
+  def set_end(self, request, *args, **kwargs):
+    development_direction = self.get_object()
+    today = datetime.date.today()
+    today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект уже деактивирован, то ничего не делать
+    if development_direction.lifetime and development_direction.lifetime.upper:
+      return Response({}, status=status.HTTP_200_OK)
+
+    # Если объект был создан сегодня, то удалить насовсем
+    if development_direction.lifetime.lower==today or development_direction.lifetime.lower is None:
+      development_direction.delete()
+      return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+    development_direction.lifetime = (development_direction.lifetime.lower, today)
+    development_direction.save()
+    skills = development_direction.skill_set.all()
+    results = Result.objects.filter(skill_id__in=skills.values_list('pk', flat=True))
+    exercises = Exercise.objects.filter(result_id__in=results.values_list('pk', flat=True))
+    prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
+    skills.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    results.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    exercises.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    return Response({}, status=status.HTTP_200_OK)
 
 class ExerciseView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Exercise.objects.all().select_related('skill__direction__area')
   serializer_class = ExerciseSerializer
+
+  def get_queryset(self):
+    if self.action == 'set_end':
+      return Exercise.objects.all()
+    else:
+      return Exercise.objects.all().select_related('result__skill__direction__area')
+
+  def perform_create(self, serializer):
+    serializer.save(lifetime=(datetime.date.today(), None))
+
+  @action(
+    detail=True, methods=['patch'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+  )
+  def set_end(self, request, *args, **kwargs):
+    exercise = self.get_object()
+    today = datetime.date.today()
+    today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект уже деактивирован, то ничего не делать
+    if exercise.lifetime and exercise.lifetime.upper:
+      return Response({}, status=status.HTTP_200_OK)
+
+    # Если объект был создан сегодня, то удалить насовсем
+    if exercise.lifetime.lower==today or exercise.lifetime.lower is None:
+      exercise.delete()
+      return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+    exercise.lifetime = (exercise.lifetime.lower, today)
+    exercise.save()
+    return Response({}, status=status.HTTP_200_OK)
+
+class ResultView(viewsets.ModelViewSet):
+  permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
+  serializer_class = ResultSerializer
+
+  def get_queryset(self):
+    if self.action == 'set_end':
+      return Result.objects.all()
+    else:
+      return Result.objects.all().select_related('skill__direction__area')
+
+  def perform_create(self, serializer):
+    serializer.save(lifetime=(datetime.date.today(), None))
+
+  @action(
+    detail=True, methods=['patch'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+  )
+  def set_end(self, request, *args, **kwargs):
+    result = self.get_object()
+    today = datetime.date.today()
+    today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект уже деактивирован, то ничего не делать
+    if result.lifetime and result.lifetime.upper:
+      return Response({}, status=status.HTTP_200_OK)
+
+    # Если объект был создан сегодня, то удалить насовсем
+    if result.lifetime.lower==today or result.lifetime.lower is None:
+      result.delete()
+      return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+    result.lifetime = (result.lifetime.lower, today)
+    result.save()
+    exercises = result.exercises.all()
+    prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
+    exercises.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    return Response({}, status=status.HTTP_200_OK)
+
 
 class SkillView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
-  queryset = Skill.objects.all().select_related('direction__area')
   serializer_class = SkillSerializer
+
+  def get_queryset(self):
+    if self.action == 'set_end':
+      return Skill.objects.all()
+    else:
+      return Skill.objects.all().select_related('direction__area').prefetch_related('result_set')
+
+  def perform_create(self, serializer):
+    serializer.save(lifetime=(datetime.date.today(), None))
+
+  @action(
+    detail=True, methods=['patch'],
+    permission_classes=(permissions.IsAuthenticated, permissions.IsAdminUser),
+  )
+  def set_end(self, request, *args, **kwargs):
+    skill = self.get_object()
+    today = datetime.date.today()
+    today_str = today.strftime('%Y-%m-%d')
+
+    # Если объект уже деактивирован, то ничего не делать
+    if skill.lifetime and skill.lifetime.upper:
+      return Response({}, status=status.HTTP_200_OK)
+
+    # Если объект был создан сегодня, то удалить насовсем
+    if skill.lifetime.lower==today or skill.lifetime.lower is None:
+      skill.delete()
+      return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+    skill.lifetime = (skill.lifetime.lower, today)
+    skill.save()
+    results = skill.result_set.all()
+    exercises = Exercise.objects.filter(result_id__in=results.values_list('pk', flat=True))
+    prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
+    results.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    exercises.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    return Response({}, status=status.HTTP_200_OK)
 
 class FormView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
@@ -157,7 +320,7 @@ class JobView(viewsets.ModelViewSet):
       )
       .prefetch_related(
         'job_file_set', 'job_report_file_set',
-        'exercise_report_set__exercise__skill__direction__area',
+        'exercise_report_set__exercise__result__skill__direction__area',
         'methods__form',
       )
       .annotate(
@@ -244,31 +407,7 @@ class ScheduleView(viewsets.ModelViewSet):
 class ActivityView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrReadOnly)
   serializer_class = ActivitySerializer
-  queryset = Activity.objects.all().prefetch_related('skills')
-
-  @action(detail=True, methods=['get'], serializer_class=Activity_skillSerializer)
-  def skills(self, request, *args, **kwargs):
-    activity = self.get_object()
-    serializer = ActivitySerializer(activity, fields=['skills'])
-    return Response(serializer.data)
-
-  @skills.mapping.put
-  def add_skill(self, request, *args, **kwargs):
-    activity = self.get_object()
-    serializer = Activity_skillSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    skill = serializer.validated_data['skill_id']
-    activity.skills.add(skill)
-    return Response(ActivitySerializer(activity, fields=['skills']).data)
-
-  @skills.mapping.delete
-  def delete_skill(self, request, *args, **kwargs):
-    activity = self.get_object()
-    serializer = Activity_skillSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    skill = serializer.validated_data['skill_id']
-    activity.skills.remove(skill)
-    return Response(ActivitySerializer(activity, fields=['skills']).data)
+  queryset = Activity.objects.all()
 
 class Option_fileView(viewsets.ModelViewSet):
   permission_classes = (permissions.IsAuthenticated, IsAdminOrOption_fileOwnerOrNoUpdateDelete)
@@ -286,7 +425,7 @@ class OptionView(viewsets.ModelViewSet):
     Option.objects.all()
                   .prefetch_related(
                     'option_file_set',
-                    'exercises__skill__direction__area',
+                    'exercises__result__skill__direction__area',
                     'methods__form',
                   )
   )
@@ -452,7 +591,8 @@ class SpecialistView(viewsets.ModelViewSet):
                                   .prefetch_related(
                                     'specialty_set__activity',
                                     'presence_set__presence',
-                                    'presence_set__main_interval'
+                                    'presence_set__main_interval',
+                                    'exercises',
                                   ))
   serializer_class = SpecialistSerializer
   filter_backends = (DjangoFilterBackend,)
@@ -492,67 +632,70 @@ class Exercise_reportView(viewsets.ModelViewSet):
     qs =  Exercise_report.objects.all()
 
     return qs.select_related(
-                              'exercise__skill__direction__area',
-                              'job__activity',
-                              'job__specialist',
-                            )
+      'exercise__result__skill__direction__area',
+      'job__activity',
+      'job__specialist',
+    )
 
   @action(detail=False, methods=['get'])
   def statistics(self, request, *args, **kwargs):
     exercise_reports = self.filter_queryset(self.get_queryset())
     exercise_reports = exercise_reports.select_related(None)
 
-    exercise_reports = exercise_reports.values('exercise_id', 'mark', 'exercise__skill_id')
+    exercise_reports = exercise_reports.values(
+      'exercise_id', 'mark', 'exercise__result_id', 'exercise__result__skill_id'
+    )
 
     mark_coeffs = [0.33, 0.66, 1]
     exercise_calls_by_id = {}
+    result_calls_by_id = {}
     skill_calls_by_id = {}
 
     for exercise_report in exercise_reports:
       exercise_id = exercise_report['exercise_id']
-      skill_id = exercise_report['exercise__skill_id']
+      result_id = exercise_report['exercise__result_id']
+      skill_id = exercise_report['exercise__result__skill_id']
 
       if not exercise_id in exercise_calls_by_id.keys():
         exercise_calls_by_id[exercise_id] = {
-          'planned': 0,
-          'called': 0,
-          'value': 0,
+          'called': 0, 'value': 0,
         }
-
+      if not result_id in result_calls_by_id.keys():
+        result_calls_by_id[skill_id] = {
+          'called': 0, 'value': 0,
+        }
       if not skill_id in skill_calls_by_id.keys():
         skill_calls_by_id[skill_id] = {
-          'planned': 0,
-          'called': 0,
-          'value': 0,
+          'called': 0, 'value': 0,
         }
-
-      exercise_call = exercise_calls_by_id[exercise_id]
-      skill_call = skill_calls_by_id[skill_id]
-
-      exercise_call['planned'] += 1
-      skill_call['planned'] += 1
 
       mark = exercise_report['mark']
 
       if not mark is None:
+        exercise_call = exercise_calls_by_id[exercise_id]
         exercise_call['called'] += 1
         exercise_call['value'] += mark_coeffs[mark]
-
-      if not mark is None:
+        result_call = result_calls_by_id[result_id]
+        result_call['called'] += 1
+        result_call['value'] += mark_coeffs[mark]
+        skill_call = skill_calls_by_id[skill_id]
         skill_call['called'] += 1
         skill_call['value'] += mark_coeffs[mark]
 
     for exercise_id in exercise_calls_by_id.keys():
       exercise_calls_by_id[exercise_id]['value'] = round(
-        exercise_calls_by_id[exercise_id]['value'] / exercise_calls_by_id[exercise_id]['planned'], 2
+        exercise_calls_by_id[exercise_id]['value'] / exercise_calls_by_id[exercise_id]['called'], 2
       )
-
+    for result_id in result_calls_by_id.keys():
+      result_calls_by_id[result_id]['value'] = round(
+        result_calls_by_id[result_id]['value'] / result_calls_by_id[result_id]['called'], 2
+      )
     for skill_id in skill_calls_by_id.keys():
       skill_calls_by_id[skill_id]['value'] = round(
-        skill_calls_by_id[skill_id]['value'] / skill_calls_by_id[skill_id]['planned'], 2
+        skill_calls_by_id[skill_id]['value'] / skill_calls_by_id[skill_id]['called'], 2
       )
 
-    return Response({'reports': exercise_calls_by_id, 'skills': skill_calls_by_id})
+    return Response({'reports': exercise_calls_by_id, 'results': result_calls_by_id, 'skills': skill_calls_by_id})
 
 
 class SpecialtyView(viewsets.ModelViewSet):
@@ -805,12 +948,6 @@ class TalentView(viewsets.ModelViewSet):
     user = self.request.user
     if user.specialist is not None:
       serializer.save(specialist=user.specialist)
-
-class EducationalAreasAllView(viewsets.GenericViewSet, mixins.ListModelMixin):
-  permission_classes = (permissions.IsAuthenticated, )
-  queryset = Educational_area.objects.all()
-  serializer_class = EducationalAreaOnlySerializer
-
 
 class NotificationView(viewsets.GenericViewSet, mixins.ListModelMixin):
   permission_classes = (permissions.IsAuthenticated, )
