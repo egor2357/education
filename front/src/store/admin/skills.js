@@ -36,9 +36,9 @@ const getters = {
 };
 
 const actions = {
-  async fetchAreas({commit}, payload = {deletedState: false}) {
+  async fetchAreas({commit}) {
     try {
-      let res = await this.$axios.get(`/api/educational_areas/by_date/?deleted=${payload.deletedState}${payload.byDate ? '&by_date=' + payload.byDate : ''}`);
+      let res = await this.$axios.get(`/api/educational_areas/by_date/?deleted=false`);
       if (res.status === 200) {
         commit("setAreas", {data: res.data, success: true})
       }
