@@ -26,10 +26,17 @@
       </div>
       <div class="skills-structure__params-container">
         <div class="skills-structure__param">
-          <a-checkbox v-model="showDeleted" @change="refetchAreas">Показывать удаленные элементы</a-checkbox>
+          <a-checkbox v-model="showDeleted" @change="refetchAreas">
+            Показывать удаленные элементы
+          </a-checkbox>
         </div>
         <div class="skills-structure__param">
-          <a-checkbox v-model="showByDate" @click.prevent="showByDateHandle">Показывать данные, актуальные на</a-checkbox>
+          <a-checkbox
+            v-model="showByDate"
+            @click.prevent="showByDateHandle"
+          >
+            Показывать данные, актуальные на
+          </a-checkbox>
           <a-date-picker
             v-model="calendarDate"
             type="date"
@@ -264,4 +271,11 @@ export default {
 
   &__params-container
     margin-top: 20px
+    display: flex
+    flex-direction: row
+    align-items: center
+
+  &__param
+    margin-right: 20px
+
 </style>
