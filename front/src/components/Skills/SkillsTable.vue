@@ -436,22 +436,7 @@
 <script>
 import { Empty } from "ant-design-vue";
 import TextHighlight from 'vue-text-highlight';
-
-const filter = (arr, str, prefix) => (arr || [])
-  .map(
-    n => (
-      { 
-        name: n.name, 
-        id: n.id, 
-        number: n.number,
-        deleted: n.deleted,
-        nodes: n.development_directions || n.skills || n.results || n.exercises,
-        children: filter(n.development_directions || n.skills || n.results || n.exercises, (prefix+n.number+'. '+n.name.toLowerCase()).includes(str) ? '' : str, prefix+n.number+'.') 
-      })
-  )
-  .filter(
-    n => (prefix+n.number+'. '+n.name.toLowerCase()).includes(str) || n.children.length
-  );
+import { filterBySubstr } from '@/utils/skillStructureFilters';
 
 export default {
   name: "SkillsTable",
@@ -488,7 +473,7 @@ export default {
   },
   computed: {    
     filteredAreas(){
-      return filter(this.areas, this.searchText.toLowerCase(), '');
+      return filterBySubstr(this.areas, this.searchText.toLowerCase(), '');
     }
   },
   beforeCreate() {
