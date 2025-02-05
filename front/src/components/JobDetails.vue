@@ -179,7 +179,7 @@
                   :key="report.id"
                 >
                   <div class="job-details__report-name">
-                    {{ `${report.exercise.area_number}.${report.exercise.direction_number}.${report.exercise.skill_number}.${report.exercise.number}. ${report.exercise.name}` }}
+                    {{ `${report.exercise.area_number}.${report.exercise.direction_number}.${report.exercise.skill_number}.${report.exercise.result_number}.${report.exercise.number}. ${report.exercise.name}` }}
                   </div>
                   <div class="job-details__report-marks">
                     <div

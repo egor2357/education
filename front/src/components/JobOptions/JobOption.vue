@@ -15,7 +15,7 @@
             v-for="exercise in option.exercises"
             :key="exercise.id"
           >
-            {{ `${exercise.area_number}.${exercise.direction_number}.${exercise.skill_number}.${exercise.number}. ${exercise.name}` }}
+            {{ `${exercise.area_number}.${exercise.direction_number}.${exercise.skill_number}.${exercise.result_number}.${exercise.number}. ${exercise.name}` }}
           </div>
         </template>
         <div class="job-option-exercise job-option-exercise--empty" v-else>
