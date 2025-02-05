@@ -7,13 +7,15 @@
             class="skill-table__cell skill-table__cell_sticky skill-table-area"
             :class="{'skill-table__cell_deleted' : area.deleted}"
           >
-            <a-icon v-if="(!area.deleted && !disableActions) || area.children.length"
-              class="icon-button icon-show"
-              :type="shownAreas.includes(area.id) ? 'down' : 'right'"
-              @click="toggleNode(shownAreas, area.id)"
-            />
-            <span v-else class="placeholder"></span>
-            <text-highlight :queries="searchText">{{ [area.number, area.name].join(". ") }}</text-highlight>
+            <div class="skill-table__cell-wrapper">
+              <a-icon v-if="(!area.deleted && !disableActions) || area.children.length"
+                class="icon-button icon-show"
+                :type="shownAreas.includes(area.id) ? 'down' : 'right'"
+                @click="toggleNode(shownAreas, area.id)"
+              />
+              <span v-else class="placeholder"></span>
+              <text-highlight :queries="searchText">{{ [area.number, area.name].join(". ") }}</text-highlight>
+            </div>
             <a-dropdown v-if="!disableActions"
               :trigger="['click']"
               placement="bottomLeft"
@@ -60,7 +62,7 @@
                   <span> Удалить навсегда</span>
                 </a-menu-item>
               </a-menu>
-            </a-dropdown>
+            </a-dropdown>            
           </div>
           <Transition name="show">
             <div v-if="shownAreas.includes(area.id)">
@@ -76,13 +78,15 @@
                     class="skill-table__cell skill-table__cell_sticky skill-table-direction"
                     :class="{'skill-table__cell_deleted' : direction.deleted}"
                   >
-                    <a-icon v-if="(!direction.deleted && !disableActions) || direction.children.length"
-                      class="icon-button icon-show"
-                      :type="shownDirections.includes(direction.id) ? 'down' : 'right'"
-                      @click="toggleNode(shownDirections, direction.id)"
-                    />
-                    <span v-else class="placeholder"></span>              
-                    <text-highlight :queries="searchText">{{ [area.number, direction.number].join(".") + ". " + direction.name }}</text-highlight>
+                    <div class="skill-table__cell-wrapper">  
+                      <a-icon v-if="(!direction.deleted && !disableActions) || direction.children.length"
+                          class="icon-button icon-show"
+                          :type="shownDirections.includes(direction.id) ? 'down' : 'right'"
+                          @click="toggleNode(shownDirections, direction.id)"
+                        />
+                        <span v-else class="placeholder"></span>              
+                        <text-highlight :queries="searchText">{{ [area.number, direction.number].join(".") + ". " + direction.name }}</text-highlight>
+                    </div>
                     <a-dropdown v-if="!disableActions"
                       :trigger="['click']"
                       placement="bottomLeft"
@@ -142,8 +146,9 @@
                           <span> Удалить навсегда</span>
                         </a-menu-item>
                       </a-menu>
-                    </a-dropdown>
+                    </a-dropdown> 
                   </div>
+                                   
                   <Transition name="show">
                     <div v-if="shownDirections.includes(direction.id)">
                       <div
@@ -162,13 +167,15 @@
                             class="skill-table__cell skill-table__cell_sticky skill-table-skill"
                             :class="{'skill-table__cell_deleted' : skill.deleted}"
                           >
-                            <a-icon v-if="(!skill.deleted && !disableActions) || skill.children.length"
-                              class="icon-button icon-show"
-                              :type="shownSkills.includes(skill.id) ? 'down' : 'right'"
-                              @click="toggleNode(shownSkills, skill.id)"
-                            />
-                            <span v-else class="placeholder"></span>
-                            <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number].join(".") + ". " + skill.name }}</text-highlight>
+                            <div class="skill-table__cell-wrapper">
+                              <a-icon v-if="(!skill.deleted && !disableActions) || skill.children.length"
+                                class="icon-button icon-show"
+                                :type="shownSkills.includes(skill.id) ? 'down' : 'right'"
+                                @click="toggleNode(shownSkills, skill.id)"
+                              />
+                              <span v-else class="placeholder"></span>
+                              <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number].join(".") + ". " + skill.name }}</text-highlight>
+                            </div>
                             <a-dropdown v-if="!disableActions"
                               :trigger="['click']"
                               placement="bottomLeft"
@@ -252,14 +259,16 @@
                                     class="skill-table__cell skill-table__cell_sticky skill-table-result"
                                     :class="{'skill-table__cell_deleted' : result.deleted}"  
                                   >
-                                    <a-icon v-if="(!result.deleted && !disableActions) || result.children.length"
-                                      class="icon-button icon-show"
-                                      :type="shownResults.includes(result.id) ? 'down' : 'right'"
-                                      @click="toggleNode(shownResults, result.id)"
-                                    />
-                                    <span v-else class="placeholder"></span>
+                                    <div class="skill-table__cell-wrapper">
+                                      <a-icon v-if="(!result.deleted && !disableActions) || result.children.length"
+                                        class="icon-button icon-show"
+                                        :type="shownResults.includes(result.id) ? 'down' : 'right'"
+                                        @click="toggleNode(shownResults, result.id)"
+                                      />
+                                      <span v-else class="placeholder"></span>
 
-                                    <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number, result.number].join(".") + '. ' + result.name }}</text-highlight>
+                                      <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number, result.number].join(".") + '. ' + result.name }}</text-highlight>
+                                    </div>
                                     <a-dropdown v-if="!disableActions"
                                       :trigger="['click']"
                                       placement="bottomLeft"
@@ -341,7 +350,7 @@
                                     </div>
                                     <div v-else>
                                       <div v-for="exercise in result.children" :key="exercise.id"
-                                        class="skill-table__cell skill-table__cell_sticky skill-table-exercise"
+                                        class="skill-table__cell skill-table-exercise"
                                         :class="{'skill-table__cell_deleted' : exercise.deleted}"
                                       >
                                         <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number, result.number, exercise.number].join(".") + '. ' + exercise.name }}</text-highlight>
@@ -528,19 +537,21 @@ export default {
     border-right: 1px solid #e8e8e8
 
   &__cell
-    padding: 10px 15px
+    padding: 5px 15px
+    display: flex
+    align-items: center
     transition: background 0.3s
     cursor: default
     word-break: break-word
     position: relative
     background-color: #fff
+    min-height: 45px
 
     &_deleted
       text-decoration: line-through
       color: #999
 
     .icon-show
-      padding: 5px 0
       margin-right: 5px
 
     i.icon-actions
@@ -567,32 +578,33 @@ export default {
       position: -webkit-sticky
       background-color: #fff
 
+  &__cell-wrapper
+    line-height: 16px
+
   &-area
     top: 0
-    z-index: 4
+    z-index: 5
     border-bottom: 1px solid #e8e8e8
 
   &-direction
     top: 45px
-    z-index: 3
+    z-index: 4
     border-bottom: 1px solid #e8e8e8
     padding-left: 35px
 
   &-skill
     top: 90px
-    z-index: 2
+    z-index: 3
     border-bottom: 1px solid #e8e8e8
     padding-left: 55px
 
   &-result
-    top: 90px
+    top: 135px
     z-index: 2
     border-bottom: 1px solid #e8e8e8
     padding-left: 75px
 
   &-exercise
-    top: 90px
-    z-index: 2
     border-bottom: 1px solid #e8e8e8
     padding-left: 114px
 
