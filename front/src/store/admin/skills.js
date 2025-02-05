@@ -2,6 +2,7 @@ import post from "@/middleware/post";
 import put from "@/middleware/put";
 import patch from "@/middleware/patch";
 import deleteAxios from "@/middleware/deleteAxios";
+import { filterByExercises } from "@/utils/skillStructureFilters";
 
 const state = () => ({
   areas: [],
@@ -33,33 +34,41 @@ const getters = {
   getSkillDevelopmentTreeState(state) {
     return state.skillDevelopmentTreeState;
   },
-  exerciseOptions(state) {
+  exerciseOptions(state, getters, rootState) {
+    if (rootState.auth.isAuth === null) {
+      return [];
+    }
+
+    const allowedStructure = filterByExercises(
+      state.areas, rootState.auth.userInfo.exercisesId
+    );
+    
     const options = [];
-    for (let area of state.areas) {
+    for (let area of allowedStructure) {
       const areaNode = {
         id: 'area' + area.id,
         label: `${area.number}. ${area.name}`,
         children: []
       };
-      for (let direction of area.development_directions) {
+      for (let direction of area.children) {
         const directionNode = {
           id: 'direction' + direction.id,
           label: `${area.number}.${direction.number}. ${direction.name}`,
           children: [],
         }
-        for (let skill of direction.skills) {
+        for (let skill of direction.children) {
           const skillNode = {
             id: 'skill' + skill.id,
             label: `${area.number}.${direction.number}.${skill.number}. ${skill.name}`,
             children: [],
           }
-          for (let result of skill.results) {
+          for (let result of skill.children) {
             const resultNode = {
               id: 'result' + result.id,
               label: `${area.number}.${direction.number}.${skill.number}.${result.number}. ${result.name}`,
               children: [],
             }
-            for (let exercise of result.exercises) {
+            for (let exercise of result.children) {
               const exerciseNode = {
                 id: exercise.id,
                 label: `${area.number}.${direction.number}.${skill.number}.${result.number}.${exercise.number}. ${exercise.name}`,
