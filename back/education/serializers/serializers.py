@@ -228,6 +228,9 @@ class UserSpecialistSerializer(FlexFieldsModelSerializer):
   activities_id = serializers.PrimaryKeyRelatedField(
     source='activities', many=True, queryset=Activity.objects.all()
   )
+  exercises_id = serializers.PrimaryKeyRelatedField(
+    source='exercises', many=True, read_only=True
+  )
 
   class Meta:
     model = Specialist
@@ -236,6 +239,7 @@ class UserSpecialistSerializer(FlexFieldsModelSerializer):
       'surname', 'name',
       'patronymic', 'role',
       'activities_id',
+      'exercises_id',
       '__str__',
     )
 

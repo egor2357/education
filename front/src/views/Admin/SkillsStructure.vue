@@ -173,7 +173,6 @@ export default {
       }
       try {        
         let res = await this.$store.dispatch(dispatchName, itemId);
-        console.log(res.status)      
         if (res.status === 204 || res.status === 200 ) {
           this.$message.success(successMessage);
           await this.closeSuccess();
