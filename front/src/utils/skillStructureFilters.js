@@ -1,5 +1,3 @@
-import { recursiveFilter } from "@/utils/treeUtils";
-
 const filterBySubstr = (arr, str, prefix) => (arr || []).map(
   n => (
     { 
@@ -38,6 +36,19 @@ const filterByExercises = (arr, exercises, level=1) => (arr || []).map(
       return n.children.length;
     }
   }
+);
+
+const returnWithFormat = (arr) => (arr || []).map(
+  n => (
+    { 
+      name: n.name, 
+      id: n.id, 
+      number: n.number,
+      deleted: n.deleted,
+      children: returnWithFormat(
+        n.development_directions || n.skills || n.results || n.exercises,
+      )
+    })
 );
 
 export { filterBySubstr, filterByExercises };
