@@ -257,6 +257,16 @@ export default {
     TextHighlight,
   },
   mixins: [common],
+  props: {
+    showMode: {
+      type: Number,
+      default: 1
+    },
+    searchText: {
+      type: String,
+      default: ''
+    },
+  },
   data() {
     return {
       loading: false,
@@ -264,12 +274,11 @@ export default {
       shownDirections: [],
       shownSkills: [],
       shownResults: [],
-      searchText: '',
       colorPresets: [
         '#83A944', '#CC9E08', '#363A57', '#206777', '#FD8A04',
-        '#7945BF', '#FFB190', '#FFC9D8', '#264A46', '#DED7EC', '#85D0E0',
-        '#FBD1D1', '#E1F7B0', '#FF5563', '#A95AF3', '#545375', '#D1314B',
-        '#FEC305', '#5ACB65', '#203763', '#461234', '#EB4444', '#4F8D08', '#C4EA70', 
+        '#7945BF', '#F46F36', '#AC0E3A', '#264A46', '#266ECA', '#85D0E0',
+        '#C82873', '#3AAA07', '#FF5563', '#A95AF3', '#545375', '#D1314B',
+        '#FEC305', '#5ACB65', '#203763', '#461234', '#EB4444', '#4F8D08', '#04BDE8', 
       ],
       selectedSpecialists: [],
     };
@@ -383,18 +392,23 @@ export default {
 </script>
 
 <style lang="sass">
+.specialist-list
+  padding-bottom: 10px
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  gap: 10px
+
 .specialist-label
   font-size: 16px
   padding: 4px 6px
   cursor: pointer
+  margin-right: 0
 
 .exercises-matrix-container
   height: 100%
   display: flex
   flex-direction: column
-
-.specialist-list
-  padding-bottom: 10px
 
 .skill-table
   overflow: auto

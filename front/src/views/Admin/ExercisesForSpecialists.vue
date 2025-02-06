@@ -1,11 +1,34 @@
 <template>
   <div class="exercises-for-specialists-container">
     <div class="top-bar">
-      <div class="top-bar__side-block left"></div>
+      <div class="top-bar__side-block left">
+        <a-input v-model.trim="searchText" placeholder="Поиск" class="search-input" allow-clear/>
+      </div>
       <div class="title">Упражнения специалистов</div>
-      <div class="top-bar__side-block right"></div>
+      <div class="top-bar__side-block right">
+        <a-select
+          v-model="showMode"
+          class="mode-select"
+        >
+          <a-select-option
+            :key="1"
+          >
+            Все упражнения
+          </a-select-option>
+          <a-select-option
+            :key="2"
+          >
+            Только назначенные выбранным специалистам
+          </a-select-option>
+          <a-select-option
+            :key="3"
+          >
+            Только неназначенные упражнения
+          </a-select-option>
+        </a-select>
+      </div>
     </div>
-    <ExercisesMatrix />
+    <ExercisesMatrix :showMode="showMode" :searchText="searchText" />
   </div>
 </template>
 
@@ -16,6 +39,12 @@ export default {
   components: {
     ExercisesMatrix
   },
+  data () {
+    return {
+      showMode: 1,
+      searchText: '',
+    }
+  }
 };
 </script>
 
@@ -38,7 +67,13 @@ export default {
   .top-bar__side-block
     flex: 1
 
+    &.left
+      .search-input
+        width: 300px
+
     &.right
       text-align: right
+      .mode-select
+        width: 400px
 
 </style>
