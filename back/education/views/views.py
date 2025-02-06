@@ -683,19 +683,26 @@ class Exercise_reportView(viewsets.ModelViewSet):
         skill_call['value'] += mark_coeffs[mark]
 
     for exercise_id in exercise_calls_by_id.keys():
-      exercise_calls_by_id[exercise_id]['value'] = round(
-        exercise_calls_by_id[exercise_id]['value'] / exercise_calls_by_id[exercise_id]['called'], 2
-      )
+      if exercise_calls_by_id[exercise_id]['called']:
+        exercise_calls_by_id[exercise_id]['value'] = round(
+          exercise_calls_by_id[exercise_id]['value'] / exercise_calls_by_id[exercise_id]['called'], 2
+        )
     for result_id in result_calls_by_id.keys():
-      result_calls_by_id[result_id]['value'] = round(
-        result_calls_by_id[result_id]['value'] / result_calls_by_id[result_id]['called'], 2
-      )
+      if result_calls_by_id[result_id]['called']:
+        result_calls_by_id[result_id]['value'] = round(
+          result_calls_by_id[result_id]['value'] / result_calls_by_id[result_id]['called'], 2
+        )
     for skill_id in skill_calls_by_id.keys():
-      skill_calls_by_id[skill_id]['value'] = round(
-        skill_calls_by_id[skill_id]['value'] / skill_calls_by_id[skill_id]['called'], 2
-      )
+      if skill_calls_by_id[skill_id]['called']:
+        skill_calls_by_id[skill_id]['value'] = round(
+          skill_calls_by_id[skill_id]['value'] / skill_calls_by_id[skill_id]['called'], 2
+        )
 
-    return Response({'reports': exercise_calls_by_id, 'results': result_calls_by_id, 'skills': skill_calls_by_id})
+    return Response({
+      'reports': exercise_calls_by_id,
+      'results': result_calls_by_id,
+      'skills': skill_calls_by_id
+    })
 
 
 class SpecialtyView(viewsets.ModelViewSet):
