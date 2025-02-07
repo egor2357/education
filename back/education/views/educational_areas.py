@@ -1,7 +1,9 @@
 import datetime
 
 from django.db.models import Prefetch, Q
-from education.models import Educational_area, Development_direction, Skill, Result, Exercise, Specialist
+from education.models import (
+  Educational_area, Development_direction, Skill, Result, Exercise, Specialist, Exercise_to_option
+)
 from education.serializers import Educational_areaSerializer, EducationalAreaOnlySerializer
 from education.permissions import IsAdminOrReadOnly
 from education.querysets import getEducational_areaQueryset
@@ -143,6 +145,8 @@ class Educational_areaView(viewsets.ModelViewSet):
     skills.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
     results.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
     exercises.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    # Удалить упражнение из всех шаблонов занятий
+    Exercise_to_option.objects.filter(exercise__in=exercises).delete()
     return Response({}, status=status.HTTP_200_OK)
 
   @action(

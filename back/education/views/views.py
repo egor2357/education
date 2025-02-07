@@ -16,6 +16,7 @@ from education.models import (
   Appeal, Notification, Activity, Option_file, Talent,
   Job_file, Option, Mission, Message, Presence, Method,
   Job_report_file, Announcement, Task_group,
+  Exercise_to_option,
 )
 from education.permissions import (
   IsAdminOrReadOnly, NotDeleteIfNotAdmin, IsAdminOrReadCreateOnly,
@@ -136,6 +137,8 @@ class Development_directionView(viewsets.ModelViewSet):
     skills.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
     results.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
     exercises.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    # Удалить упражнение из всех шаблонов занятий
+    Exercise_to_option.objects.filter(exercise__in=exercises).delete()
     return Response({}, status=status.HTTP_200_OK)
 
 class ExerciseView(viewsets.ModelViewSet):
@@ -171,6 +174,8 @@ class ExerciseView(viewsets.ModelViewSet):
 
     exercise.lifetime = (exercise.lifetime.lower, today)
     exercise.save()
+    # Удалить упражнение из всех шаблонов занятий
+    Exercise_to_option.objects.filter(exercise_id=exercise.pk).delete()
     return Response({}, status=status.HTTP_200_OK)
 
 class ResultView(viewsets.ModelViewSet):
@@ -209,6 +214,8 @@ class ResultView(viewsets.ModelViewSet):
     exercises = result.exercises.all()
     prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
     exercises.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    # Удалить упражнение из всех шаблонов занятий
+    Exercise_to_option.objects.filter(exercise__in=exercises).delete()
     return Response({}, status=status.HTTP_200_OK)
 
 
@@ -250,6 +257,8 @@ class SkillView(viewsets.ModelViewSet):
     prepared_lifetime = UpdateRightBound('lifetime', right_bound=today_str)
     results.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
     exercises.filter(lifetime__upper=None).update(lifetime=prepared_lifetime)
+    # Удалить упражнение из всех шаблонов занятий
+    Exercise_to_option.objects.filter(exercise__in=exercises).delete()
     return Response({}, status=status.HTTP_200_OK)
 
 class FormView(viewsets.ModelViewSet):
