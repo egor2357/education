@@ -32,7 +32,7 @@ def option_update_related(option, request):
 
   if 'exercises' in request.data:
     exercises = json.loads(request.data['exercises'])
-    exercises = Exercise.objects.filter(pk__in=exercises)
+    exercises = request.user.specialist.exercises.filter(pk__in=exercises)
     option.exercises.clear()
     option.exercises.set(exercises)
 
@@ -86,9 +86,16 @@ def job_update_related(job, request):
     Job_file.objects.bulk_create(option_files_to_save)
 
   if 'reports' in request.data:
-    exercises = json.loads(request.data['reports'])
+    exercises_id = json.loads(request.data['reports'])
+    exercises = list(
+      request.user.specialist.exercises.filter(
+        pk__in=exercises_id
+      ).values_list('pk', flat=True)
+    )
 
-    curr_exercise_reports_ids = list(job.exercise_report_set.all().values_list('exercise_id', flat=True))
+    curr_exercise_reports_ids = list(
+      job.exercise_report_set.all().values_list('exercise_id', flat=True)
+    )
 
     exercises_to_save = []
     remaining_exercises = []
