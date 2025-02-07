@@ -103,6 +103,8 @@ class Educational_areaView(viewsets.ModelViewSet):
       return Educational_area.objects.all()
     if self.action == 'by_date':
       return Educational_area.objects.all()
+    if self.action == 'by_interval':
+      return Educational_area.objects.all()
     else:
       return getEducational_areaQueryset(self.request)
 
