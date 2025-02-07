@@ -9,7 +9,11 @@ const state = () => ({
   fetched: false,
   areasAll: [],
   fetchedAll: false,
+  developedSkills: [],
+  developedPeriod: null,
+  developedStatistics: null,
   skillDevelopmentTreeState: null,
+  developedSkillsCacheTimer: null,
                           // {
                           //   scrollPosition: 0,
                           //   shownAreas: [],
@@ -33,6 +37,15 @@ const getters = {
   },
   getSkillDevelopmentTreeState(state) {
     return state.skillDevelopmentTreeState;
+  },
+  getDevelopedSkills(state){
+    return state.developedSkills;
+  },
+  getDevelopedPeriod(state){
+    return state.developedPeriod;
+  },
+  getDevelopedStatistics(state){
+    return state.developedStatistics;
   },
   exerciseOptions(state, getters, rootState) {
     if (rootState.auth.isAuth === null) {
@@ -89,6 +102,7 @@ const getters = {
 };
 
 const actions = {
+  
   async fetchAreas({commit}) {
     try {
       let res = await this.$axios.get(`/api/educational_areas/by_date/?deleted=false`);
@@ -100,6 +114,7 @@ const actions = {
       commit("setAreas", {data: [], success: false});
     }
   },
+
   async fetchAreasAll({commit}) {
     try {
       let res = await this.$axios.get("/api/educational_areas_all/");
@@ -109,6 +124,28 @@ const actions = {
     }
     catch (e) {
       commit("setAreasAll", {data: [], success: false});
+    }
+  },
+
+  async fetchDevelopedSkills({commit}, payload){    
+    if (
+        !this.state.skills.developedSkillsCacheTimer // Кэш еще не устанавливался
+        || this.state.skills.developedPeriod.start !== payload.start // не совпадает дата начала
+        || this.state.skills.developedPeriod.end !== payload.end // не совпадает да конца
+        || (new Date() - this.state.skills.developedSkillsCacheTimer > 60000)) // прошло больше минуты
+    {
+      try {      
+        let fetches = [];
+        fetches.push(this.$axios.get(`/api/educational_areas/by_interval/?start=${payload.start}&end=${payload.end}`));
+        fetches.push(this.$axios.get(`/api/exercise_reports/statistics/?date_from=${payload.start}&date_to${payload.end}`));
+        let responses = await Promise.all(fetches);
+        if (responses[0].status === 200 && responses[1].status === 200) {
+          commit("setDevelopedSkills", {structure: responses[0].data, statistics: responses[1].data, success: true, period: {start: payload.start, end: payload.end}})
+        }
+      }
+      catch (e) {
+        commit("setDevelopedSkills", {structure: [], statistics: null, success: false, period: null});
+      }
     }
   },
 
@@ -194,6 +231,12 @@ const mutations = {
   },
   setSkillDevelopmentTreeState(state, payload) {
     state.skillDevelopmentTreeState = payload;
+  },
+  setDevelopedSkills(state, payload){
+    state.developedSkills = payload.structure;
+    state.developedStatistics = payload.statistics;
+    state.developedPeriod = payload.period;
+    state.developedSkillsCacheTimer = new Date();
   }
 };
 

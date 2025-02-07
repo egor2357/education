@@ -8,7 +8,7 @@ name: 'MarkBar',
   props: {
     value: {
       type: Number,
-      default: 1
+      default: NaN
     },
     min: {
       type: Number,
@@ -16,19 +16,19 @@ name: 'MarkBar',
     },
     max: {
       type: Number,
-      default: 100
+      default: 1
     }
   },
   data() {
     return {
-      colorStart: [255, 0, 0],
-      colorsMiddle: [255, 255, 0],
-      colorsEnd: [0, 255, 0]
+      colorStart: [255, 80, 80],
+      colorsMiddle: [255, 255, 80],
+      colorsEnd: [80, 255, 80]
     };
   },
   computed: {
     width(){
-      return Math.max(this.min, this.value)/this.max;
+      return isNaN(this.value) ? .5 : Math.max(this.min, this.value)/this.max;
     },
     percent() {
       const diff = this.max - this.min;
@@ -36,6 +36,8 @@ name: 'MarkBar',
       return diffVal / diff;
     },
     color() {
+      if (isNaN(this.value))
+        return [230, 230, 230];
       if (this.percent <= 0.5) {
         return this.getColorsDiff(this.colorStart, this.colorsMiddle, this.percent * 2);
       } else {
@@ -60,6 +62,6 @@ name: 'MarkBar',
   border-radius: 10px;
   transition: width .35s ease;
   margin: 5px;
-  box-shadow: 0 0 1px 1px rgba(0,0,0,.15);
+  box-shadow: 0 0 4px 1px rgba(0,0,0,.25);
 }
 </style>

@@ -506,7 +506,7 @@ export default {
 };
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .skill-table
   overflow: auto
   height: 100%
