@@ -56,12 +56,11 @@ name: 'MarkBar',
 };
 </script>
 
-<style scoped>
-.mark-bar {
-  height: 15px;
-  border-radius: 10px;
-  transition: width .35s ease;
-  margin: 5px;
-  box-shadow: 0 0 4px 1px rgba(0,0,0,.25);
-}
+<style lang="sass" scoped>
+.mark-bar 
+  height: 15px
+  border-radius: 10px
+  transition: width .35s ease
+  margin: 5px
+  box-shadow: 0 0 4px 1px rgba(0,0,0,.25)  
 </style>

@@ -82,7 +82,15 @@
                               </div>                                                         
                             </div>
                             <div class="skill-table__mark-bar-container">
-                                <mark-bar :min=0.33 :max:=1 :value="developedStatistics.skills[skill.id] && developedStatistics.skills[skill.id].value"/>
+                              <a-popover title="Уровень освоения навыка" placement="left">                                          
+                                <mark-bar :min=0.33 :max:=1 :value="developedStatistics.skills[skill.id] && developedStatistics.skills[skill.id].value"/>      
+                                <template #content>
+                                  Количество выполненных упражнений за период: {{ (developedStatistics.skills[skill.id] && developedStatistics.skills[skill.id].called) || 0 }}
+                                  <br>
+                                  Средняя оценка выполненных упражнений: {{ (developedStatistics.skills[skill.id] && developedStatistics.skills[skill.id].value) || '-' }}
+                                </template>  
+                              </a-popover>  
+                              
                               </div>
                           </div>
                           <Transition name="show">
@@ -103,7 +111,14 @@
                                     </div>
                                   </div>
                                   <div class="skill-table__mark-bar-container">
-                                    <mark-bar :min=0.33 :max:=1 :value="developedStatistics.results[result.id] && developedStatistics.results[result.id].value"/>
+                                    <a-popover title="Уровень достижения ожидаемого результата" placement="left">                                          
+                                      <mark-bar :min=0.33 :max:=1 :value="developedStatistics.results[result.id] && developedStatistics.results[result.id].value"/>
+                                      <template #content>
+                                        Количество выполненных упражнений за период: {{ (developedStatistics.results[result.id] && developedStatistics.results[result.id].called) || 0 }}
+                                        <br>
+                                        Средняя оценка выполненных упражнений: {{ (developedStatistics.results[result.id] && developedStatistics.results[result.id].value) || '-' }}
+                                      </template>  
+                                    </a-popover>                                    
                                   </div>
                                 </div>
                                 <Transition name="show">
@@ -125,7 +140,15 @@
                                         </span>  
                                       </div>
                                       <div class="skill-table__mark-bar-container">
-                                        <mark-bar :min=0.33 :max:=1 :value="developedStatistics.reports[exercise.id] && developedStatistics.reports[exercise.id].value"/>
+                                        
+                                        <a-popover title="Оценка диагностического упражненения" placement="left">                                          
+                                          <mark-bar :min=0.33 :max:=1 :value="developedStatistics.reports[exercise.id] && developedStatistics.reports[exercise.id].value"/>
+                                          <template #content>
+                                            Количество выполненных упражнений за период: {{ (developedStatistics.reports[exercise.id] && developedStatistics.reports[exercise.id].called) || 0 }}
+                                            <br>
+                                            Средняя оценка выполненных упражнений: {{ (developedStatistics.reports[exercise.id] && developedStatistics.reports[exercise.id].value) || '-' }}
+                                          </template>  
+                                        </a-popover>
                                       </div>
                                     </div>
                                   </div>
@@ -679,6 +702,7 @@ export default {
 
   &__body
     border-left: 1px solid #e8e8e8
+    border-right: 1px solid #e8e8e8
 
   &__cell-container
     display: flex
