@@ -430,6 +430,22 @@ class Specialty(models.Model):
       self.activity
     )
 
+class Exercise_to_option(models.Model):
+  exercise = models.ForeignKey(
+    Exercise, null=False,
+    on_delete=models.CASCADE, verbose_name='Упражнение'
+  )
+  option = models.ForeignKey(
+    'Option', null=False,
+    on_delete=models.CASCADE, verbose_name='Вариант занятия'
+  )
+
+  class Meta:
+    db_table = 'option_exercises'
+    verbose_name = 'Упражнение в шаблоне занятия'
+    verbose_name_plural = 'Упражнения в шаблонах занятий'
+    unique_together = ('exercise', 'option')
+
 class Option(models.Model):
   specialist = models.ForeignKey(
     Specialist, null=True,
@@ -440,7 +456,10 @@ class Option(models.Model):
     on_delete=models.CASCADE, verbose_name='Вид деятельсности')
 
   methods = models.ManyToManyField(Method, verbose_name='Формы')
-  exercises = models.ManyToManyField(Exercise, verbose_name='Выполняемые на занятии упражнения')
+  exercises = models.ManyToManyField(
+    Exercise, through=Exercise_to_option,
+    verbose_name='Выполняемые на занятии упражнения'
+  )
 
   topic = models.TextField(verbose_name='Тема занятия')
   comment = models.TextField(blank=True, verbose_name='Комментарий по занятию')
