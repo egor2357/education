@@ -506,6 +506,13 @@ export default {
 };
 </script>
 
+<style lang="sass">
+.text__highlight
+  background: #1890ff 
+  color: #fff
+  padding: 0
+</style>
+
 <style lang="sass" scoped>
 .skill-table
   overflow: auto
@@ -513,9 +520,6 @@ export default {
   position: relative
   border-top: 1px solid #e8e8e8
 
-  .text__highlight
-    background: #1890ff 
-    color: #fff
 
   &__body
     border-left: 1px solid #e8e8e8

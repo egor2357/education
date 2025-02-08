@@ -162,166 +162,15 @@
                   </div>
                 </div>
               </Transition>
-            </div>
-            <!-- <div v-for="area in filteredAreas" :key="area.id">
-              <div
-                class="skill-table__cell skill-table__cell_sticky skill-table-area"
-              >
-                <a-icon
-                  class="icon-button icon-show"
-                  :class="{'icon-show-hidden': !area.development_directions.length}"
-                  :type="shownAreas.includes(area.id) ? 'down' : 'right'"
-                  @click="toggleArea(area.id)"
-                />
-                <span
-                  >
-                  {{ [area.number, area.name].join(". ") }}</span
-                >
-              </div>
-              <Transition name="show">
-                <div v-if="shownAreas.includes(area.id)" class="skill-table-direction-wrapper">
-                  <div
-                    v-for="direction in area.development_directions"
-                    :key="direction.id"
-                  >
-                    <div
-                      class="skill-table__cell skill-table__cell_sticky skill-table-direction"
-                    >
-                      <a-icon
-                        class="icon-button icon-show"
-                        :class="{'icon-show-hidden': !direction.skills.length}"
-                        :type="shownDirections.includes(direction.id) ? 'down' : 'right'"
-                        @click="toggleDirection(direction.id)"
-                      />
-                      <span>
-                        {{
-                          [area.number, direction.number].join(".") +
-                            ". " +
-                            direction.name
-                        }}
-                      </span>
-                    </div>
-                    <Transition name="show">
-                      <div v-if="shownDirections.includes(direction.id)">
-                        <div v-for="skill in direction.skills" :key="skill.id">
-                          <div
-                            class="skill-table__skill-cell skill-table__cell_sticky"
-                          >
-                            <div class="skill-table__skill__name">
-                              <a-icon
-                                class="icon-button icon-show"
-                                :class="{'icon-show-hidden': !skill.exercises.length}"
-                                :type="shownSkills.includes(skill.id)  ? 'down' : 'right'"
-                                @click="toggleSkill(skill.id)"
-                              />
-                              <span>
-                                {{ [ area.number, direction.number, skill.number].join(".") +
-                                    ". " + skill.name }}
-                              </span>
-                            </div>
-                            <div class="skill-table__skill__calls">
-                              <a-popover title="Выполнение плана" placement="left">
-                                {{
-                                  skill.id in skillsStatisticsById
-                                    ? skillsStatisticsById[skill.id].called
-                                    : 0
-                                }}
-                                /
-                                {{
-                                  skill.id in skillsStatisticsById
-                                    ? skillsStatisticsById[skill.id].planned
-                                    : 0
-                                }}
-                                <template #content>
-                                  <b>Оцененные</b> упражнения <b>/</b> <b>Запланированные</b> упражнения
-                                </template>
-                              </a-popover>
-                            </div>
-                            <div class="skill-table__skill__mark">
-                              <a-popover title="Уровень освоения" placement="left">
-                                {{
-                                  skill.id in skillsStatisticsById
-                                    ? skillsStatisticsById[skill.id].value
-                                    : "-"
-                                }}
-                                <template #content>
-                                  Среднее значение уровня выполнения всех<br>
-                                  <b>запланированных</b> занятий
-                                </template>
-                              </a-popover>
-                            </div>
-                          </div>
-                          <Transition name="show">
-                            <div
-                              v-if="shownSkills.includes(skill.id)"
-                              class="skill-table-exercises"
-                            >
-                              <div class="skill-table-exercises__content">
-                                <div
-                                  v-for="exercise in skill.exercises"
-                                  :key="exercise.id"
-                                  class="skill-table__exercise-cell"
-                                >
-                                  <div class="skill-table__exercise-cell__name">
-                                    <span
-                                      :class="{
-                                        'exercise-link': reportsStatisticsById[exercise.id]
-                                      }"
-                                      @click="goToExercise(exercise.id)"
-                                    >
-                                      {{
-                                        [ area.number, direction.number, skill.number, exercise.number].join(".") +
-                                        '. ' + exercise.name
-                                      }}
-                                    </span>
-                                  </div>
-                                  <div class="skill-table__exercise-cell__calls">
-                                    <a-popover title="Выполнение плана" placement="left">
-                                      {{
-                                        exercise.id in reportsStatisticsById
-                                          ? reportsStatisticsById[exercise.id].called
-                                          : 0
-                                      }}
-                                      /
-                                      {{
-                                        exercise.id in reportsStatisticsById
-                                          ? reportsStatisticsById[exercise.id].planned
-                                          : 0
-                                      }}
-                                      <template #content>
-                                        <b>Оцененные</b> упражнения <b>/</b> <b>Запланированные</b> упражнения
-                                      </template>
-                                    </a-popover>
-                                  </div>
-                                  <div class="skill-table__exercise-cell__mark">
-                                    <a-popover title="Уровень освоения" placement="left">
-                                      {{
-                                        exercise.id in reportsStatisticsById
-                                          ? reportsStatisticsById[exercise.id].value
-                                          : "-"
-                                      }}
-                                      <template #content>
-                                        Среднее значение уровня выполнения всех<br>
-                                        <b>запланированных</b> занятий
-                                      </template>
-                                    </a-popover>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </Transition>
-                        </div>
-                      </div>
-                    </Transition>
-                  </div>
-                </div>
-              </Transition>
-            </div> -->
+            </div>            
           </div>
           <div v-else class="skill-table__no-data">
             <a-empty :image="simpleImage" />
           </div>
         </div>
+      </div>
+      <div class="bottom-bar">
+        <a-input v-model.trim="searchText" placeholder="Поиск" class="search-input" allow-clear/>
       </div>
 
     </div>
@@ -371,8 +220,6 @@ export default {
   computed: {
 
     ...mapGetters({
-      areasFetched: "skills/getFetched",
-      areas: "skills/getAreas",
       skillDevelopmentTreeState: "skills/getSkillDevelopmentTreeState",
       developedSkills: "skills/getDevelopedSkills",
       developedPeriod: "skills/getDevelopedPeriod",
@@ -509,7 +356,6 @@ export default {
   methods: {
 
     ...mapActions({
-      fetchAreas: "skills/fetchAreas",
       fetchDevelopedSkills: "skills/fetchDevelopedSkills"
     }),
 
@@ -525,35 +371,6 @@ export default {
         shownNodes.splice(index, 1);
       }
     },
-
-
-
-    // async fetchSkillReportsStatistics() {
-    //   try {
-    //     console.log(this.dateRange[0])
-    //     // this.loading = true;
-    //     let firstQParameter = `date_from=${this.dateRange[0].format(
-    //       "YYYY-MM-DD"
-    //     )}`;
-    //     let secondQParameter = `date_to=${this.dateRange[1].format(
-    //       "YYYY-MM-DD"
-    //     )}`;
-    //     let QParameters = `?${firstQParameter}&${secondQParameter}`;        
-    //     let res = await this.$axios.get(
-    //       `/api/exercise_reports/statistics/${QParameters}`
-    //     );
-    //     if (res.status === 200) {
-    //       this.reportsStatisticsById = res.data.reports;
-    //       this.skillsStatisticsById = res.data.skills;
-    //     } else {
-    //       this.$message.error("Произошла ошибка при загрузке отчетов");
-    //     }
-    //   } catch (e) {
-    //     this.$message.error("Произошла ошибка при загрузке отчетов");
-    //   } finally {
-    //     // this.loading = false;
-    //   }
-    // },
 
     dateRangeChange(value) {
       let queryObj = {
@@ -580,7 +397,6 @@ export default {
         }
       });
     },
-
 
     setupSkillDevelopmentTreeState(){
       if (this.skillDevelopmentTreeState) {
@@ -619,6 +435,7 @@ export default {
         shownResults: this.shownResults,
       });
     },
+    
     clearSkillDevelopmentTreeState() {
       this.setSkillDevelopmentTreeState(null);
     },
@@ -635,6 +452,13 @@ export default {
   }
 };
 </script>
+
+<style lang="sass">
+mark.text__highlight
+  background: #1890ff 
+  color: #fff
+  padding: 0
+</style>
 
 <style lang="sass" scoped>
 .skill-development
@@ -666,6 +490,9 @@ export default {
       width: 220px
       text-align: center
 
+  .bottom-bar
+    margin-top: 20px
+
 .sticky
   position: sticky
   position: -webkit-sticky
@@ -695,10 +522,6 @@ export default {
   overflow: auto
   height: 100%
   border-top: 1px solid #e8e8e8
-
-  .text__highlight
-    background: #1890ff 
-    color: #fff
 
   &__body
     border-left: 1px solid #e8e8e8
