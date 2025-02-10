@@ -20,22 +20,66 @@
       </a-tag>
     </div>
     
-    <div class="skill-table">
+    <div class="exercise-specialist-table">
       <div>
-        <div v-if="filteredAreas.length" class="skill-table__body">
+        <div v-if="filteredAreas.length" class="exercise-specialist-table__body">
           <div v-for="area in filteredAreas" :key="area.id">
             <div
-              class="skill-table__cell skill-table__cell_sticky skill-table-area"
-              :class="{'skill-table__cell_deleted' : area.deleted}"
+              class="exercise-specialist-table__cell exercise-specialist-table__cell_sticky exercise-specialist-table-area"
+              :class="{'exercise-specialist-table__cell_deleted' : area.deleted}"
             >
-              <div class="skill-table__cell-wrapper">
-                <a-icon v-if="area.children.length"
-                  class="icon-button icon-show"
-                  :type="shownAreas.includes(area.id) ? 'down' : 'right'"
-                  @click="toggleNode(shownAreas, area.id)"
-                />
-                <span v-else class="placeholder"></span>
-                <text-highlight :queries="searchText">{{ [area.number, area.name].join(". ") }}</text-highlight>
+              <div class="exercise-specialist-table__cell-wrapper">
+                <div class="exercise-specialist-table__cell-label">
+                  <a-icon v-if="area.children.length"
+                    class="icon-button icon-show"
+                    :type="shownAreas.includes(area.id) ? 'down' : 'right'"
+                    @click="toggleNode(shownAreas, area.id)"
+                  />
+                  <span v-else class="placeholder"></span>
+                  <text-highlight :queries="searchText">{{ [area.number, area.name].join(". ") }}</text-highlight>
+                </div>
+                <div class="exercise_specialist_buttons_wrapper">
+                  <a-popover title="Добавить упражнения" placement="top">
+                    <a-icon
+                      @click="setObjectsExercises(
+                        'area', area.id, selectedSpecialists,
+                        'Упражнения успешно добавлены'
+                      )"
+                      class="exercise_specialist_button_add_button"
+                      :class="{
+                        'exercise_specialist_button_disabled': selectedSpecialists.length == 0
+                      }"
+                      type="pushpin"
+                    />
+                    <template #content>
+                      {{
+                        selectedSpecialists.length
+                        ? 'Выбранные специалисты смогут контролировать все упражнения этой образовательной области'
+                        : 'Ни один специалист не выбран'
+                      }}
+                    </template>
+                  </a-popover>
+                  <a-popover title="Убрать упражнения" placement="top">
+                    <a-icon
+                      @click="removeObjectsExercises(
+                        'area', area.id, selectedSpecialists,
+                        'Упражнения успешно исключены'
+                      )"
+                      class="exercise_specialist_button_delete_button"
+                      :class="{
+                        'exercise_specialist_button_disabled': selectedSpecialists.length == 0
+                      }"
+                      type="delete"
+                    />
+                    <template #content>
+                      {{
+                        selectedSpecialists.length
+                        ? 'Выбранные специалисты больше не смогут контролировать упражнения этой образовательной области'
+                        : 'Ни один специалист не выбран'
+                      }}
+                    </template>
+                  </a-popover>
+                </div>
               </div>
             </div>
             <Transition name="show">
@@ -43,17 +87,61 @@
                 <div>
                   <div v-for="direction in area.children" :key="direction.id">
                     <div 
-                      class="skill-table__cell skill-table__cell_sticky skill-table-direction"
-                      :class="{'skill-table__cell_deleted' : direction.deleted}"
+                      class="exercise-specialist-table__cell exercise-specialist-table__cell_sticky exercise-specialist-table-direction"
+                      :class="{'exercise-specialist-table__cell_deleted' : direction.deleted}"
                     >
-                      <div class="skill-table__cell-wrapper">  
-                        <a-icon v-if="direction.children.length"
-                            class="icon-button icon-show"
-                            :type="shownDirections.includes(direction.id) ? 'down' : 'right'"
-                            @click="toggleNode(shownDirections, direction.id)"
-                          />
+                      <div class="exercise-specialist-table__cell-wrapper">
+                        <div class="exercise-specialist-table__cell-label">
+                          <a-icon v-if="direction.children.length"
+                              class="icon-button icon-show"
+                              :type="shownDirections.includes(direction.id) ? 'down' : 'right'"
+                              @click="toggleNode(shownDirections, direction.id)"
+                            />
                           <span v-else class="placeholder"></span>              
                           <text-highlight :queries="searchText">{{ [area.number, direction.number].join(".") + ". " + direction.name }}</text-highlight>
+                        </div>
+                        <div class="exercise_specialist_buttons_wrapper">
+                          <a-popover title="Добавить упражнения" placement="top">
+                            <a-icon
+                              @click="setObjectsExercises(
+                                'direction', direction.id, selectedSpecialists,
+                                'Упражнения успешно добавлены'
+                              )"
+                              class="exercise_specialist_button_add_button"
+                              :class="{
+                                'exercise_specialist_button_disabled': selectedSpecialists.length == 0
+                              }"
+                              type="pushpin"
+                            />
+                            <template #content>
+                              {{
+                                selectedSpecialists.length
+                                ? 'Выбранные специалисты смогут контролировать все упражнения этого направления развития'
+                                : 'Ни один специалист не выбран'
+                              }}
+                            </template>
+                          </a-popover>
+                          <a-popover title="Убрать упражнения" placement="top">
+                            <a-icon
+                              @click="removeObjectsExercises(
+                                'direction', direction.id, selectedSpecialists,
+                                'Упражнения успешно исключены'
+                              )"
+                              class="exercise_specialist_button_delete_button"
+                              :class="{
+                                'exercise_specialist_button_disabled': selectedSpecialists.length == 0
+                              }"
+                              type="delete"
+                            />
+                            <template #content>
+                              {{
+                                selectedSpecialists.length
+                                ? 'Выбранные специалисты больше не смогут контролировать упражнения этого направления развития'
+                                : 'Ни один специалист не выбран'
+                              }}
+                            </template>
+                          </a-popover>
+                        </div>
                       </div>
                     </div>
                                     
@@ -62,17 +150,61 @@
                         <div>
                           <div v-for="skill in direction.children" :key="skill.id">
                             <div
-                              class="skill-table__cell skill-table__cell_sticky skill-table-skill"
-                              :class="{'skill-table__cell_deleted' : skill.deleted}"
+                              class="exercise-specialist-table__cell exercise-specialist-table__cell_sticky exercise-specialist-table-skill"
+                              :class="{'exercise-specialist-table__cell_deleted' : skill.deleted}"
                             >
-                              <div class="skill-table__cell-wrapper">
-                                <a-icon v-if="skill.children.length"
-                                  class="icon-button icon-show"
-                                  :type="shownSkills.includes(skill.id) ? 'down' : 'right'"
-                                  @click="toggleNode(shownSkills, skill.id)"
-                                />
-                                <span v-else class="placeholder"></span>
-                                <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number].join(".") + ". " + skill.name }}</text-highlight>
+                              <div class="exercise-specialist-table__cell-wrapper">
+                                <div class="exercise-specialist-table__cell-label">
+                                  <a-icon v-if="skill.children.length"
+                                    class="icon-button icon-show"
+                                    :type="shownSkills.includes(skill.id) ? 'down' : 'right'"
+                                    @click="toggleNode(shownSkills, skill.id)"
+                                  />
+                                  <span v-else class="placeholder"></span>
+                                  <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number].join(".") + ". " + skill.name }}</text-highlight>
+                                </div>
+                                <div class="exercise_specialist_buttons_wrapper">
+                                  <a-popover title="Добавить упражнения" placement="top">
+                                    <a-icon
+                                      @click="setObjectsExercises(
+                                        'skill', skill.id, selectedSpecialists,
+                                        'Упражнения успешно добавлены'
+                                      )"
+                                      class="exercise_specialist_button_add_button"
+                                      :class="{
+                                        'exercise_specialist_button_disabled': selectedSpecialists.length == 0
+                                      }"
+                                      type="pushpin"
+                                    />
+                                    <template #content>
+                                      {{
+                                        selectedSpecialists.length
+                                        ? 'Выбранные специалисты смогут контролировать все упражнения этого навыка'
+                                        : 'Ни один специалист не выбран'
+                                      }}
+                                    </template>
+                                  </a-popover>
+                                  <a-popover title="Убрать упражнения" placement="top">
+                                    <a-icon
+                                      @click="removeObjectsExercises(
+                                        'skill', skill.id, selectedSpecialists,
+                                        'Упражнения успешно исключены'
+                                      )"
+                                      class="exercise_specialist_button_delete_button"
+                                      :class="{
+                                        'exercise_specialist_button_disabled': selectedSpecialists.length == 0
+                                      }"
+                                      type="delete"
+                                    />
+                                    <template #content>
+                                      {{
+                                        selectedSpecialists.length
+                                        ? 'Выбранные специалисты больше не смогут контролировать упражнения этого навыка'
+                                        : 'Ни один специалист не выбран'
+                                      }}
+                                    </template>
+                                  </a-popover>
+                                </div>
                               </div>
                             </div>
                             <Transition name="show">
@@ -80,26 +212,70 @@
                                 <div>
                                   <div v-for="result in skill.children" :key="result.id">
                                     <div 
-                                      class="skill-table__cell skill-table__cell_sticky skill-table-result"
-                                      :class="{'skill-table__cell_deleted' : result.deleted}"  
+                                      class="exercise-specialist-table__cell exercise-specialist-table__cell_sticky exercise-specialist-table-result"
+                                      :class="{'exercise-specialist-table__cell_deleted' : result.deleted}"  
                                     >
-                                      <div class="skill-table__cell-wrapper">
-                                        <a-icon v-if="result.children.length"
-                                          class="icon-button icon-show"
-                                          :type="shownResults.includes(result.id) ? 'down' : 'right'"
-                                          @click="toggleNode(shownResults, result.id)"
-                                        />
-                                        <span v-else class="placeholder"></span>
+                                      <div class="exercise-specialist-table__cell-wrapper">
+                                        <div class="exercise-specialist-table__cell-label">
+                                          <a-icon v-if="result.children.length"
+                                            class="icon-button icon-show"
+                                            :type="shownResults.includes(result.id) ? 'down' : 'right'"
+                                            @click="toggleNode(shownResults, result.id)"
+                                          />
+                                          <span v-else class="placeholder"></span>
 
-                                        <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number, result.number].join(".") + '. ' + result.name }}</text-highlight>
+                                          <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number, result.number].join(".") + '. ' + result.name }}</text-highlight>
+                                        </div>
+                                        <div class="exercise_specialist_buttons_wrapper">
+                                          <a-popover title="Добавить упражнения" placement="top">
+                                            <a-icon
+                                              @click="setObjectsExercises(
+                                                'result', result.id, selectedSpecialists,
+                                                'Упражнения успешно добавлены'
+                                              )"
+                                              class="exercise_specialist_button_add_button"
+                                              :class="{
+                                                'exercise_specialist_button_disabled': selectedSpecialists.length == 0
+                                              }"
+                                              type="pushpin"
+                                            />
+                                            <template #content>
+                                              {{
+                                                selectedSpecialists.length
+                                                ? 'Выбранные специалисты смогут контролировать все упражнения этого ожидаемого результата'
+                                                : 'Ни один специалист не выбран'
+                                              }}
+                                            </template>
+                                          </a-popover>
+                                          <a-popover title="Убрать упражнения" placement="top">
+                                            <a-icon
+                                              @click="removeObjectsExercises(
+                                                'result', result.id, selectedSpecialists,
+                                                'Упражнения успешно исключены'
+                                              )"
+                                              class="exercise_specialist_button_delete_button"
+                                              :class="{
+                                                'exercise_specialist_button_disabled': selectedSpecialists.length == 0
+                                              }"
+                                              type="delete"
+                                            />
+                                            <template #content>
+                                              {{
+                                                selectedSpecialists.length
+                                                ? 'Выбранные специалисты больше не смогут контролировать упражнения этого ожидаемого результата'
+                                                : 'Ни один специалист не выбран'
+                                              }}
+                                            </template>
+                                          </a-popover>
+                                        </div>
                                       </div>
                                     </div>
                                     <Transition name="show">
                                     <div v-if="shownResults.includes(result.id)">
                                       <div>
                                         <div v-for="exercise in result.children" :key="exercise.id"
-                                          class="skill-table__cell skill-table-exercise"
-                                          :class="{'skill-table__cell_deleted' : exercise.deleted}"
+                                          class="exercise-specialist-table__cell exercise-specialist-table-exercise"
+                                          :class="{'exercise-specialist-table__cell_deleted' : exercise.deleted}"
                                         >
                                           <text-highlight :queries="searchText">
                                             {{ [ area.number, direction.number, skill.number, result.number, exercise.number].join(".") + '. ' + exercise.name }}
@@ -200,7 +376,7 @@
             </Transition>
           </div>
         </div>
-        <div class="skill-table__no-data" v-else>
+        <div class="exercise-specialist-table__no-data" v-else>
           <a-empty :image="simpleImage" />
         </div>
       </div>
@@ -393,7 +569,7 @@ export default {
   display: flex
   flex-direction: column
 
-.skill-table
+.exercise-specialist-table
   overflow: auto
   height: 100%
   position: relative
@@ -451,6 +627,12 @@ export default {
 
   &__cell-wrapper
     line-height: 16px
+    width: 100%
+    display: flex
+    flex-direction: row
+
+  &__cell-label
+    flex: 1
 
   &-area
     top: 0
@@ -487,7 +669,7 @@ export default {
     &__content
       flex: 1 1 90%
 
-      .skill-table__cell
+      .exercise-specialist-table__cell
         padding-left: 108px
         border-top: 1px solid #e8e8e8
         &:first-child
@@ -550,8 +732,6 @@ export default {
   justify-content: center
   width: 50px
   margin-left: 20px
- 
-
 .exercise_specialist_button_add_button
   margin-right: 10px
   color: red
@@ -566,5 +746,9 @@ export default {
   cursor: default
   color: #a2a2a2
   opacity: 1  
+.exercise-specialist-table__cell-wrapper .exercise_specialist_buttons_wrapper
+  opacity: 0
+.exercise-specialist-table__cell-wrapper:hover .exercise_specialist_buttons_wrapper
+  opacity: 1
 
 </style>
