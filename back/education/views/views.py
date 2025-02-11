@@ -648,7 +648,7 @@ class Exercise_reportView(viewsets.ModelViewSet):
 
   @action(detail=False, methods=['get'])
   def statistics(self, request, *args, **kwargs):
-    exercise_reports = self.filter_queryset(self.get_queryset())
+    exercise_reports = self.filter_queryset(self.get_queryset()).filter(mark__isnull=False)
     exercise_reports = exercise_reports.select_related(None)
 
     exercise_reports = exercise_reports.values(
@@ -670,7 +670,7 @@ class Exercise_reportView(viewsets.ModelViewSet):
           'called': 0, 'value': 0,
         }
       if not result_id in result_calls_by_id.keys():
-        result_calls_by_id[skill_id] = {
+        result_calls_by_id[result_id] = {
           'called': 0, 'value': 0,
         }
       if not skill_id in skill_calls_by_id.keys():
