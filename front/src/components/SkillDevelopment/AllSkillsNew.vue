@@ -26,6 +26,9 @@
           />
         </div>
       </div>
+      <div class="top-bar">
+        <a-input v-model.trim="searchText" placeholder="Поиск" class="search-input" allow-clear/>
+      </div>
 
       <div id="table" ref="table" class="skill-table">
         <div>
@@ -169,10 +172,6 @@
           </div>
         </div>
       </div>
-      <div class="bottom-bar">
-        <a-input v-model.trim="searchText" placeholder="Поиск" class="search-input" allow-clear/>
-      </div>
-
     </div>
   </a-spin>
 </template>
@@ -489,9 +488,6 @@ mark.text__highlight
     .date-range-input
       width: 220px
       text-align: center
-
-  .bottom-bar
-    margin-top: 20px
 
 .sticky
   position: sticky

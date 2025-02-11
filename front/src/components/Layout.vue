@@ -13,38 +13,31 @@
         :defaultOpenKeys="openKeys"
         mode="inline"
       >
-        <template v-for="item in menu">
+        <template v-for="(item, i) in userMenu">
           <a-sub-menu
-            :key="item.key"
-            v-if="
-              (item.childrens.length && !item.staffOnly && !item.specOnly) ||
-              (item.staffOnly && userInfo.staff) ||
-              (item.specOnly && !userInfo.staff && item.childrens.length)
-            "
+            :key="i"
+            v-if="item.children.length"              
           >
             <span slot="title">
               <a-icon :type="item.icon" />
               <span>{{ item.title }}</span>
             </span>
-            <a-menu-item :key="child.key" v-for="child in item.childrens">
-              <router-link :to="child.to" :class="child.class">
-                {{ child.title }}</router-link
-              >
+            <a-menu-item :key="child.key" v-for="child in item.children">
+              <router-link :to="child.to" class="menu-title">
+                <div>{{ child.title }}</div>
+              </router-link>
             </a-menu-item>
           </a-sub-menu>
           <a-menu-item
-            v-else-if="
-              item.childrens.length === 0 && !(userInfo.staff && item.specOnly)
-            "
-            :key="item.key"
+            v-else
+            :key="i"
           >
             <router-link
               :to="item.to"
-              :class="item.twoLines ? 'menu-two-lines' : ''"
+              class="menu-title"
             >
               <a-icon :type="item.icon" />
-              <span v-if="!item.twoLines">{{ item.title }}</span>
-              <div v-else>{{ item.title }}</div>
+              <div>{{ item.title }}</div>
               <a-badge
                 v-if="
                   item.unread &&
@@ -56,7 +49,7 @@
                   'box-shadow': 'unset',
                 }"
                 :count="notifications[item.unread]"
-              />
+              />              
             </router-link>
           </a-menu-item>
         </template>
@@ -100,7 +93,7 @@ export default {
           staffOnly: false,
           specOnly: false,
           to: { name: "JobWrapper" },
-          childrens: [],
+          children: [],
         },
         {
           icon: "rise",
@@ -109,7 +102,7 @@ export default {
           staffOnly: false,
           specOnly: false,
           to: { name: "AllSkillsNew" },
-          childrens: [],
+          children: [],
         },
         {
           icon: "issues-close",
@@ -118,7 +111,7 @@ export default {
           staffOnly: false,
           specOnly: false,
           to: { name: "Missions" },
-          childrens: [],
+          children: [],
           unread: "0",
         },
         {
@@ -128,8 +121,7 @@ export default {
           staffOnly: false,
           specOnly: false,
           to: { name: "TaskGroups" },
-          childrens: [],
-          twoLines: true,
+          children: [],
         },
         {
           icon: "bulb",
@@ -138,7 +130,7 @@ export default {
           staffOnly: false,
           specOnly: false,
           to: { name: "Talents" },
-          childrens: [],
+          children: [],
         },
         {
           icon: "mail",
@@ -147,8 +139,7 @@ export default {
           staffOnly: false,
           specOnly: false,
           to: { name: "Appeals" },
-          childrens: [],
-          twoLines: true,
+          children: [],
           childrenRoutes: ["AppealDetails"],
           unread: "1",
         },
@@ -159,8 +150,7 @@ export default {
           staffOnly: false,
           specOnly: false,
           to: { name: "Announcements" },
-          childrens: [],
-          twoLines: true,
+          children: [],
           unread: "2",
         },
         {
@@ -170,8 +160,7 @@ export default {
           staffOnly: false,
           specOnly: true,
           to: { name: "Summary" },
-          childrens: [],
-          twoLines: false,
+          children: [],
         },
         {
           icon: "setting",
@@ -179,7 +168,7 @@ export default {
           title: "Настройки",
           staffOnly: true,
           specOnly: false,
-          childrens: [
+          children: [
             {
               key: "3.1",
               title: "Структура навыков",
@@ -203,19 +192,16 @@ export default {
             {
               key: "3.5",
               title: "Методы и формы занятий",
-              class: "submenu--two-lines",
               to: { name: "Forms" },
             },
             {
               key: "3.6",
               title: "График присутствия специалистов",
-              class: "submenu--two-lines",
               to: { name: "AvailableChart" },
             },
             {
               key: "3.7",
               title: "Упражнения специалистов",
-              class: "submenu--two-lines",
               to: { name: "ExercisesForSpecialists" },
             },
           ],
@@ -226,7 +212,7 @@ export default {
           key: "4",
           staffOnly: false,
           specOnly: true,
-          childrens: [
+          children: [
             {
               key: "4.1",
               title: "Профиль",
@@ -283,11 +269,11 @@ export default {
       if (this.selectedKeys.length) this.selectedKeys.splice(0);
       let matched = false;
       for (let parent of this.menu) {
-        if (parent.childrens.length) {
-          for (let children of parent.childrens) {
-            if (children.to.name === to.name) {
+        if (parent.children.length) {
+          for (let child of parent.children) {
+            if (child.to.name === to.name) {
               this.openKeys.push(parent.key);
-              this.selectedKeys.push(children.key);
+              this.selectedKeys.push(child.key);
               matched = true;
               break;
             }
@@ -505,6 +491,11 @@ export default {
       notifications: "notifications/getNotifications",
       socket: "notifications/getSocket",
     }),
+    userMenu(){
+      return this.menu.filter(
+        item => (!item.staffOnly && !item.specOnly) || (this.userInfo.staff == item.staffOnly) // общий пункт меню, либо только для админов и пришел админ, либо пришел неадмини пункт не только для админов
+      );
+    },
   },
   async beforeRouteUpdate(to, from, next) {
     this.setSelectedMenuItem(to);
@@ -566,6 +557,7 @@ export default {
         }
       }
     },
+
     userInfo(value) {
       if (value.id) {
         this.socketReg();
@@ -634,20 +626,17 @@ export default {
 
 .ant-menu
   .ant-menu-item
-    .ant-badge
-      float: right
-      margin-top: 10px
 
-    .menu-two-lines
+    .menu-title
       display: flex
-      flex-direction: row
-      .anticon
-        align-self: center
+      align-items: center
+      height: 100%      
+      line-height: 16px
+
       div
-        line-height: 16px
-        padding: 2px 0 2px 0
         white-space: normal
-        max-width: 125px
+        width: 130px
+        padding-bottom: 4px   
 
     .anticon
       font-size: 18px
@@ -658,23 +647,14 @@ export default {
       float: unset
       margin-bottom: 10px
     .ant-menu-item
-      .menu-two-lines
-        .ant-badge
-          margin-bottom: 0
-          margin-top: 15px
-        div
-          opacity: 0
-          max-width: 0
-        .anticon
-          align-self: baseline
-          margin-top: 2px
-
       .anticon
         font-size: 18px
 
   .ant-menu-submenu
     .anticon
       font-size: 18px !important
+      vertical-align: middle
+      padding-bottom: 2px
 
 .content
   .ant-spin-nested-loading

@@ -137,7 +137,7 @@ const actions = {
       try {      
         let fetches = [];
         fetches.push(this.$axios.get(`/api/educational_areas/by_interval/?start=${payload.start}&end=${payload.end}`));
-        fetches.push(this.$axios.get(`/api/exercise_reports/statistics/?date_from=${payload.start}&date_to${payload.end}`));
+        fetches.push(this.$axios.get(`/api/exercise_reports/statistics/?date_from=${payload.start}&date_to=${payload.end}`));
         let responses = await Promise.all(fetches);
         if (responses[0].status === 200 && responses[1].status === 200) {
           commit("setDevelopedSkills", {structure: responses[0].data, statistics: responses[1].data, success: true, period: {start: payload.start, end: payload.end}})
