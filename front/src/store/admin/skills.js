@@ -9,6 +9,8 @@ const state = () => ({
   fetched: false,
   areasAll: [],
   fetchedAll: false,
+  allowedAreas: [],
+  allowedFetched: false,
   skillDevelopmentTreeState: null,
                           // {
                           //   scrollPosition: 0,
@@ -25,11 +27,17 @@ const getters = {
   getAreasAll(state) {
     return state.areasAll;
   },
+  getAllowedAreas(state) {
+    return state.allowedAreas;
+  },
   getFetched(state) {
     return state.fetched;
   },
   getFetchedAll(state) {
     return state.fetchedAll;
+  },
+  getAllowedFetched(state) {
+    return state.allowedFetched;
   },
   getSkillDevelopmentTreeState(state) {
     return state.skillDevelopmentTreeState;
@@ -38,37 +46,33 @@ const getters = {
     if (rootState.auth.isAuth === null) {
       return [];
     }
-
-    const allowedStructure = filterByExercises(
-      state.areas, rootState.auth.userInfo.exercisesId
-    );
     
     const options = [];
-    for (let area of allowedStructure) {
+    for (let area of state.allowedAreas) {
       const areaNode = {
         id: 'area' + area.id,
         label: `${area.number}. ${area.name}`,
         children: []
       };
-      for (let direction of area.children) {
+      for (let direction of area.development_directions) {
         const directionNode = {
           id: 'direction' + direction.id,
           label: `${area.number}.${direction.number}. ${direction.name}`,
           children: [],
         }
-        for (let skill of direction.children) {
+        for (let skill of direction.skills) {
           const skillNode = {
             id: 'skill' + skill.id,
             label: `${area.number}.${direction.number}.${skill.number}. ${skill.name}`,
             children: [],
           }
-          for (let result of skill.children) {
+          for (let result of skill.results) {
             const resultNode = {
               id: 'result' + result.id,
               label: `${area.number}.${direction.number}.${skill.number}.${result.number}. ${result.name}`,
               children: [],
             }
-            for (let exercise of result.children) {
+            for (let exercise of result.exercises) {
               const exerciseNode = {
                 id: exercise.id,
                 label: `${area.number}.${direction.number}.${skill.number}.${result.number}.${exercise.number}. ${exercise.name}`,
@@ -109,6 +113,17 @@ const actions = {
     }
     catch (e) {
       commit("setAreasAll", {data: [], success: false});
+    }
+  },
+  async fetchAllowedAreas({commit}) {
+    try {
+      let res = await this.$axios.get("/api/educational_areas/by_specialist/");
+      if (res.status === 200) {
+        commit("setAllowedAreas", {data: res.data, success: true})
+      }
+    }
+    catch (e) {
+      commit("setAllowedAreas", {data: [], success: false});
     }
   },
 
@@ -191,6 +206,10 @@ const mutations = {
   setAreasAll(state, payload) {
     state.areasAll = payload.data;
     state.fetchedAll = payload.success;
+  },
+  setAllowedAreas(state, payload) {
+    state.allowedAreas = payload.data;
+    state.allowedFetched = payload.success;
   },
   setSkillDevelopmentTreeState(state, payload) {
     state.skillDevelopmentTreeState = payload;

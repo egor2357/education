@@ -215,8 +215,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      areasFetched: "skills/getFetched",
-      areas: "skills/getAreas",
+      allowedFetched: "skills/getAllowedFetched",
+      allowedAreas: "skills/getAllowedAreas",
       exercisesOptions: "skills/exerciseOptions",
       formsFetched: "forms/getFetched",
       forms: "forms/getForms",
@@ -244,7 +244,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      fetchAreas: "skills/fetchAreas",
+      fetchAllowedAreas: "skills/fetchAllowedAreas",
       fetchForms: "forms/fetchForms",
     }),
 
@@ -348,8 +348,8 @@ export default {
   },
   async created() {
     let fetches = [];
-    if (!this.areasFetched) {
-      fetches.push(this.fetchAreas());
+    if (!this.allowedFetched) {
+      fetches.push(this.fetchAllowedAreas());
     }
     if (!this.formsFetched) {
       fetches.push(this.fetchForms());

@@ -345,8 +345,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      areasFetched: "skills/getFetched",
-      areas: "skills/getAreas",
+      allowedFetched: "skills/getAllowedFetched",
+      allowedAreas: "skills/getAllowedAreas",
       exerciseOptions: "skills/exerciseOptions",
       formsFetched: "forms/getFetched",
       forms: "forms/getForms",
@@ -377,7 +377,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      fetchAreas: "skills/fetchAreas",
+      fetchAllowedAreas: "skills/fetchAllowedAreas",
       fetchForms: "forms/fetchForms",
       fetchSpecialists: "specialists/fetchSpecialists",
       fetchActivities: "activities/fetchActivities",
@@ -674,8 +674,8 @@ export default {
       fetches.push(this.fetchActivities());
     }
 
-    if (!this.areasFetched) {
-      fetches.push(this.fetchAreas());
+    if (!this.allowedFetched) {
+      fetches.push(this.fetchAllowedAreas());
     }
     if (!this.formsFetched) {
       fetches.push(this.fetchForms());
