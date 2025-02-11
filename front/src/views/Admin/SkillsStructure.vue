@@ -97,7 +97,7 @@ export default {
     if (!this.fetchedByStore)
       this.$message.error("Произошла ошибка получения данных");
     else
-      this.$refs.table.initShownAreas();
+      this.$refs.table && this.$refs.table.initShownAreas();
   },
   methods: {
     ...mapActions({
