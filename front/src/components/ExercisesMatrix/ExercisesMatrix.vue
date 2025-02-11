@@ -39,7 +39,7 @@
                   <text-highlight :queries="searchText">{{ [area.number, area.name].join(". ") }}</text-highlight>
                 </div>
                 <div class="exercise_specialist_buttons_wrapper">
-                  <a-popover title="Добавить упражнения" placement="top">
+                  <a-popover title="Добавить упражнения" placement="topRight">
                     <a-icon
                       @click="setObjectsExercises(
                         'area', area.id, selectedSpecialists,
@@ -59,7 +59,7 @@
                       }}
                     </template>
                   </a-popover>
-                  <a-popover title="Убрать упражнения" placement="top">
+                  <a-popover title="Убрать упражнения" placement="topRight">
                     <a-icon
                       @click="removeObjectsExercises(
                         'area', area.id, selectedSpecialists,
@@ -101,7 +101,7 @@
                           <text-highlight :queries="searchText">{{ [area.number, direction.number].join(".") + ". " + direction.name }}</text-highlight>
                         </div>
                         <div class="exercise_specialist_buttons_wrapper">
-                          <a-popover title="Добавить упражнения" placement="top">
+                          <a-popover title="Добавить упражнения" placement="topRight">
                             <a-icon
                               @click="setObjectsExercises(
                                 'direction', direction.id, selectedSpecialists,
@@ -121,7 +121,7 @@
                               }}
                             </template>
                           </a-popover>
-                          <a-popover title="Убрать упражнения" placement="top">
+                          <a-popover title="Убрать упражнения" placement="topRight">
                             <a-icon
                               @click="removeObjectsExercises(
                                 'direction', direction.id, selectedSpecialists,
@@ -164,7 +164,7 @@
                                   <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number].join(".") + ". " + skill.name }}</text-highlight>
                                 </div>
                                 <div class="exercise_specialist_buttons_wrapper">
-                                  <a-popover title="Добавить упражнения" placement="top">
+                                  <a-popover title="Добавить упражнения" placement="topRight">
                                     <a-icon
                                       @click="setObjectsExercises(
                                         'skill', skill.id, selectedSpecialists,
@@ -184,7 +184,7 @@
                                       }}
                                     </template>
                                   </a-popover>
-                                  <a-popover title="Убрать упражнения" placement="top">
+                                  <a-popover title="Убрать упражнения" placement="topRight">
                                     <a-icon
                                       @click="removeObjectsExercises(
                                         'skill', skill.id, selectedSpecialists,
@@ -227,7 +227,7 @@
                                           <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number, result.number].join(".") + '. ' + result.name }}</text-highlight>
                                         </div>
                                         <div class="exercise_specialist_buttons_wrapper">
-                                          <a-popover title="Добавить упражнения" placement="top">
+                                          <a-popover title="Добавить упражнения" placement="topRight">
                                             <a-icon
                                               @click="setObjectsExercises(
                                                 'result', result.id, selectedSpecialists,
@@ -247,7 +247,7 @@
                                               }}
                                             </template>
                                           </a-popover>
-                                          <a-popover title="Убрать упражнения" placement="top">
+                                          <a-popover title="Убрать упражнения" placement="topRight">
                                             <a-icon
                                               @click="removeObjectsExercises(
                                                 'result', result.id, selectedSpecialists,
@@ -299,7 +299,7 @@
                                               }"
                                               class="exercise__spectialist__delete_button"
                                             >
-                                              <a-popover title="Убрать упражнение" placement="top">
+                                              <a-popover title="Убрать упражнение" placement="topRight">
                                               <div                                              
                                                 class="exercise__spectialist__delete_button__front"
                                               >
@@ -317,7 +317,7 @@
                                             </div>
                                           </template>
                                           <div class="exercise_specialist_buttons_wrapper">
-                                            <a-popover title="Добавить упражнение" placement="top">
+                                            <a-popover title="Добавить упражнение" placement="topRight">
                                               <a-icon
                                                 @click="setObjectsExercises(
                                                   'exercise', exercise.id, selectedSpecialists,
@@ -337,7 +337,7 @@
                                                 }}
                                               </template>
                                             </a-popover>
-                                            <a-popover title="Убрать упражнение" placement="top">
+                                            <a-popover title="Убрать упражнение" placement="topRight">
                                               <a-icon
                                                 @click="removeObjectsExercises(
                                                   'exercise', exercise.id, selectedSpecialists,
@@ -394,17 +394,75 @@ const filter = (arr, str, prefix) => (arr || [])
         id: n.id,
         number: n.number,
         deleted: n.deleted,
-        children: filter(n.development_directions || n.skills || n.results || n.exercises, (prefix+n.number+'. '+n.name.toLowerCase()).includes(str) ? '' : str, prefix+n.number+'.')
+        children: filter(
+          n.children,
+          (prefix+n.number+'. '+n.name.toLowerCase()).includes(str) ? '' : str,
+          prefix+n.number+'.'
+        )
       })
   ).filter(
     n => (prefix+n.number+'. '+n.name.toLowerCase()).includes(str) || n.children.length
   );
+
+const filterByAssigned = (arr, exercisesOfSelectedSpecialists, level=1) => (arr || [])
+  .map(
+    n => (
+      {
+        name: n.name,
+        id: n.id,
+        number: n.number,
+        deleted: n.deleted,
+        children: filterByAssigned(
+          n.development_directions || n.skills || n.results || n.exercises,
+          exercisesOfSelectedSpecialists,
+          level+1
+        )
+      })
+  ).filter(
+    n => level===5 ? exercisesOfSelectedSpecialists.includes(n.id) : n.children.length
+  );
+  const filterByNotAssigned = (arr, assignedExercises, level=1) => (arr || [])
+  .map(
+    n => (
+      {
+        name: n.name,
+        id: n.id,
+        number: n.number,
+        deleted: n.deleted,
+        children: filterByNotAssigned(
+          n.development_directions || n.skills || n.results || n.exercises,
+          assignedExercises,
+          level+1
+        )
+      })
+  ).filter(
+    n => level===5 ? !assignedExercises.includes(n.id) : n.children.length
+  );
+  const filterBySelfOrNoones = (arr, assignedExercises, exercisesOfSelectedSpecialists, level=1) => (arr || [])
+  .map(
+    n => (
+      {
+        name: n.name,
+        id: n.id,
+        number: n.number,
+        deleted: n.deleted,
+        children: filterBySelfOrNoones(
+          n.development_directions || n.skills || n.results || n.exercises,
+          assignedExercises, exercisesOfSelectedSpecialists,
+          level+1
+        )
+      })
+  ).filter(
+    n => level===5 ? !assignedExercises.includes(n.id) || exercisesOfSelectedSpecialists.includes(n.id) : n.children.length
+  );
+
 
 import { Empty } from "ant-design-vue";
 import TextHighlight from 'vue-text-highlight';
 import post from "@/middleware/post";
 import { mapActions, mapGetters } from "vuex";
 import common from "@/mixins/common";
+import { returnWithFormat } from "@/utils/skillStructureFilters";
 export default {
   name: "ExercisesMatrix",
   components: {
@@ -486,7 +544,7 @@ export default {
         this.setExercises({ exercisesIds: res.data.exercises, specialistsIds })
       } else {
         this.$message.error("Произошла ошибка");
-      }
+      } 
     },
     async removeObjectsExercises (objectName, objectId, specialistsIds, successMessage) {
       if (specialistsIds.length === 0) {
@@ -509,14 +567,44 @@ export default {
         this.$message.error("Произошла ошибка");
       }
     },
+    
   },
   computed: {
     ...mapGetters({
       specialists: "specialists/getSpecialists",
       areas: "skills/getAreas",
     }),
+    assignedExercises() {
+      return Object.keys(this.exerciseToSpecialists).map(item=>Number(item));
+    },
+    exercisesOfSelectedSpecialists () {
+      const exercises = new Set();
+      for (let specialist of this.specialists) {
+        if (this.selectedSpecialists.includes(specialist.id)) {
+          for (let exercise of specialist.exercises) {
+            exercises.add(exercise);
+          }
+        }
+      }
+      return Array.from(exercises);
+    },
+    filteredByShowMode(){
+      if (this.showMode === 1) {
+        return returnWithFormat(this.areas);
+      } else if (this.showMode === 2) {
+        return filterByAssigned(this.areas, this.exercisesOfSelectedSpecialists);
+      } else if (this.showMode === 3) {
+        return filterByNotAssigned(this.areas, this.assignedExercises);
+      } else {
+        return filterBySelfOrNoones(this.areas, this.assignedExercises, this.exercisesOfSelectedSpecialists);
+      }
+    },
     filteredAreas(){
-      return filter(this.areas, this.searchText.toLowerCase(), '');
+      if (this.searchText) {
+        return filter(this.filteredByShowMode, this.searchText.toLowerCase(), '');
+      } else {
+        return this.filteredByShowMode;
+      }
     },
     exerciseToSpecialists () {
       const exerciseToSpecialistsObject = {};
@@ -734,16 +822,16 @@ export default {
   margin-left: 20px
 .exercise_specialist_button_add_button
   margin-right: 10px
-  color: red
-.exercise_specialist_button_delete_button
   color: #40a9ff
+.exercise_specialist_button_delete_button
+  color: red
 .exercise_specialist_button_add_button, .exercise_specialist_button_delete_button
   cursor: pointer
   opacity: 0.6
 .exercise_specialist_button_add_button:hover, .exercise_specialist_button_delete_button:hover
   opacity: 1
 .exercise_specialist_button_disabled
-  cursor: default
+  cursor: default !important
   color: #a2a2a2
   opacity: 1  
 .exercise-specialist-table__cell-wrapper .exercise_specialist_buttons_wrapper

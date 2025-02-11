@@ -51,4 +51,4 @@ const returnWithFormat = (arr) => (arr || []).map(
     })
 );
 
-export { filterBySubstr, filterByExercises };
+export { filterBySubstr, filterByExercises, returnWithFormat };
