@@ -13,9 +13,9 @@
         :defaultOpenKeys="openKeys"
         mode="inline"
       >
-        <template v-for="(item, i) in userMenu">
+        <template v-for="item in userMenu">
           <a-sub-menu
-            :key="i"
+            :key="item.key"
             v-if="item.children.length"              
           >
             <span slot="title">
@@ -30,7 +30,7 @@
           </a-sub-menu>
           <a-menu-item
             v-else
-            :key="i"
+            :key="item.key"
           >
             <router-link
               :to="item.to"
@@ -649,12 +649,24 @@ export default {
     .ant-menu-item
       .anticon
         font-size: 18px
+        .ant-badge
+        margin-bottom: 0
+        margin-top: 15px
+      div
+        opacity: 0
+        max-width: 0
+      .anticon
+        align-self: baseline
+        margin-top: 2px
 
   .ant-menu-submenu
     .anticon
       font-size: 18px !important
       vertical-align: middle
       padding-bottom: 2px
+    
+    .ant-menu-submenu-arrow
+      margin-top: 2px
 
 .content
   .ant-spin-nested-loading

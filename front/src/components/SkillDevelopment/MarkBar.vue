@@ -24,6 +24,9 @@ name: 'MarkBar',
       colorStart: [255, 80, 80],
       colorsMiddle: [255, 255, 80],
       colorsEnd: [80, 255, 80]
+      // colorStart: [255, 0, 0],
+      // colorsMiddle: [255, 255, 0],
+      // colorsEnd: [0, 255, 0]
     };
   },
   computed: {
@@ -59,8 +62,8 @@ name: 'MarkBar',
 <style lang="sass" scoped>
 .mark-bar 
   height: 15px
-  border-radius: 10px
+  border-radius: 6px
   transition: width .35s ease
   margin: 5px
-  box-shadow: 0 0 4px 1px rgba(0,0,0,.25)  
+  box-shadow: 0 0 2px 1px rgba(0,0,0,.15)  
 </style>

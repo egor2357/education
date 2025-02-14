@@ -144,10 +144,12 @@ const actions = {
 
   async fetchDevelopedSkills({commit}, payload){    
     if (
-        !this.state.skills.developedSkillsCacheTimer // Кэш еще не устанавливался
+        // !this.state.skills.developedSkillsCacheTimer || // Кэш еще не устанавливался
+        !this.state.skills.developedPeriod 
         || this.state.skills.developedPeriod.start !== payload.start // не совпадает дата начала
         || this.state.skills.developedPeriod.end !== payload.end // не совпадает да конца
-        || (new Date() - this.state.skills.developedSkillsCacheTimer > 60000)) // прошло больше минуты
+        // || (new Date() - this.state.skills.developedSkillsCacheTimer > 60000) // прошло больше минуты
+      ) 
     {
       try {      
         let fetches = [];
