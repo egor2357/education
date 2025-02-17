@@ -1,44 +1,47 @@
 <template>
-  <div class="exercises-for-specialists-container">
-    <div class="top-bar">
-      <div class="top-bar__side-block left">
-        <a-input v-model.trim="searchText" placeholder="Поиск" class="search-input" allow-clear/>
+  <a-spin :spinning="loading">
+    <div class="exercises-for-specialists-container">
+      <div class="top-bar">
+        <div class="top-bar__side-block left">
+          <a-input v-model.trim="searchText" placeholder="Поиск" class="search-input" allow-clear/>
+        </div>
+        <div class="title">Упражнения специалистов</div>
+        <div class="top-bar__side-block right">
+          <a-select
+            v-model="showMode"
+            class="mode-select"
+          >
+            <a-select-option
+              :key="1"
+            >
+              Все упражнения
+            </a-select-option>
+            <a-select-option
+              :key="2"
+            >
+              Только назначенные выбранным специалистам
+            </a-select-option>
+            <a-select-option
+              :key="3"
+            >
+              Только неназначенные упражнения
+            </a-select-option>
+            <a-select-option
+              :key="4"
+            >
+              Назначенные выбранным специалистам или не назаченные никому
+            </a-select-option>
+          </a-select>
+        </div>
       </div>
-      <div class="title">Упражнения специалистов</div>
-      <div class="top-bar__side-block right">
-        <a-select
-          v-model="showMode"
-          class="mode-select"
-        >
-          <a-select-option
-            :key="1"
-          >
-            Все упражнения
-          </a-select-option>
-          <a-select-option
-            :key="2"
-          >
-            Только назначенные выбранным специалистам
-          </a-select-option>
-          <a-select-option
-            :key="3"
-          >
-            Только неназначенные упражнения
-          </a-select-option>
-          <a-select-option
-            :key="4"
-          >
-            Назначенные выбранным специалистам или не назаченные никому
-          </a-select-option>
-        </a-select>
-      </div>
+      <ExercisesMatrix :showMode="showMode" :searchText="searchText" />
     </div>
-    <ExercisesMatrix :showMode="showMode" :searchText="searchText" />
-  </div>
+  </a-spin>
 </template>
 
 <script>
 import ExercisesMatrix from "@/components/ExercisesMatrix/ExercisesMatrix"
+import { mapActions, mapGetters } from "vuex";
 export default {
   name: "ExercisesForSpecialists",
   components: {
@@ -48,8 +51,31 @@ export default {
     return {
       showMode: 1,
       searchText: '',
+      loading: true
     }
-  }
+  },
+  computed: {
+    ...mapGetters({
+      specialistsFetched: "specialists/getFetched",
+      areasFetched: "skills/getFetched",
+    }),
+  },
+  async created() {
+    let promises = [];
+    if (!this.specialistsFetched)
+      promises.push(this.fetchSpecialists());
+    if (!this.areasFetched)
+      promises.push(this.fetchAreas());
+    await Promise.all(promises);
+    this.loading = false;
+  },
+  methods: {
+    ...mapActions({
+      fetchSpecialists: "specialists/fetchSpecialists",
+      fetchAreas: "skills/fetchAreas",
+    }),
+  },
+
 };
 </script>
 
@@ -57,7 +83,7 @@ export default {
 .exercises-for-specialists-container
   height: 100%
   display: flex
-  flex-direction: column
+  flex-direction: column  
 
   .top-bar
     display: flex

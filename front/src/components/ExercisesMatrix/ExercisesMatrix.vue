@@ -1,6 +1,5 @@
 <template>
-  <div class="exercises-matrix-container">
-    <a-spin :spinning="loading">
+  <div class="exercises-matrix-container">    
     <div class="specialist-list">
       <a-tag
         class="specialist-label"
@@ -380,9 +379,8 @@
           <a-empty :image="simpleImage" />
         </div>
       </div>
-    </div>
-    </a-spin>
-  </div>
+    </div>   
+  </div>  
 </template>
 
 <script>
@@ -481,7 +479,6 @@ export default {
   },
   data() {
     return {
-      loading: false,
       shownAreas: [],
       shownDirections: [],
       shownSkills: [],
@@ -494,11 +491,6 @@ export default {
       ],
       selectedSpecialists: [],
     };
-  },
-  async created() {
-    this.loading = true;
-    await Promise.all([this.fetchSpecialists(), this.fetchAreas()]);
-    this.loading = false;
   },
   beforeCreate() {
     this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
@@ -656,6 +648,8 @@ export default {
   height: 100%
   display: flex
   flex-direction: column
+  overflow: hidden
+  flex: 1
 
 .exercise-specialist-table
   overflow: auto
