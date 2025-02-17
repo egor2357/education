@@ -237,6 +237,12 @@ const mutations = {
   clear(state){
     state.areas = [];
     state.fetched = false;
+    state.developedSkills = [];
+    state.developedPeriod = null;
+    state.developedStatistics = null;
+    state.allowedAreas = [];
+    state.allowedFetched = false;
+    state.skillDevelopmentTreeState = null;
   },
   setAreas(state, payload) {
     state.areas = payload.data;
