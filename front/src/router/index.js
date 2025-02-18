@@ -133,7 +133,7 @@ const router = new VueRouter({
               path: "/",
               name: "AllSkillsNew",
               component: () =>
-                import("@/components/SkillDevelopment/AllSkillsNew"),
+                import("@/components/SkillDevelopment/AllSkills"),
               meta: {
                 staffOnly: false,
                 specOnly: false,

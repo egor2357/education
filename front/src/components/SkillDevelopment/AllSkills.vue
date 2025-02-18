@@ -3,9 +3,15 @@
     <div class="skill-development">
       <div class="top-bar">
         <div class="top-bar__side-block left">
-          <a-checkbox v-model="doNotShowNotCalled" @change="changeShowCalled">
-            Скрыть незатронутые навыки
-          </a-checkbox>
+          <a-select
+            :value="displayMode"
+            @change="changeDisplayMode"
+            style="width: 340px"
+          >
+            <a-select-option value="all">Все навыки и упражнения</a-select-option>
+            <a-select-option value="called">Только затронутые навыки и упражнения</a-select-option>
+            <a-select-option value="notCalled">Только не затронутые навыки и упражнения</a-select-option>
+          </a-select>
         </div>
         <div class="title">Развитие навыков</div>
         <div class="top-bar__side-block right">
@@ -20,109 +26,148 @@
           />
         </div>
       </div>
+      <div class="top-bar">
+        <a-input v-model.trim="searchText" placeholder="Поиск" class="search-input" allow-clear/>
+      </div>
 
-      <div id="table" class="table-holder">
+      <div id="table" ref="table" class="skill-table">
         <div>
-          <div class="table-header">
-            <div class="table-header__column table-header__column_area">
-              <div class="table-cell">Образовательная область</div>
-            </div>
-            <div class="table-header__column table-header__column_direction">
-              <div class="table-cell">Направление развития</div>
-            </div>
-            <div class="table-header__column table-header__column_skill">
-              <div class="table-cell">Навык</div>
-            </div>
-            <div class="table-header__column table-header__column_count">
-              <div class="table-cell">
-                Количество обращений к навыку за период
-              </div>
-            </div>
-            <div class="table-header__column table-header__column_mark">
-              <div class="table-cell">
-                Оценка освоения навыка
-              </div>
-            </div>
-          </div>
-          <div class="table-body" v-if="filteredAreas.length">
-            <div class="table-row" v-for="area in filteredAreas" :key="area.id">
-              <div class="table-row__column table-row__column_area">
-                <div class="table-cell">
-                  {{ [area.number, area.name].join(". ") }}
-                </div>
-              </div>
-              <div class="table-row__container">
+          <div v-if="filteredAreasByText.length" class="skill-table__body">
+            <div v-for="area in filteredAreasByText" :key="area.id">
+              <div class="skill-table__cell-container sticky sticky_area">
                 <div
-                  class="table-row"
-                  v-for="direction in area.development_directions"
-                  :key="direction.id"
+                  class="skill-table__cell skill-table__cell_sticky skill-table-area"                
                 >
-                  <div class="table-row__column table-row__column_direction">
-                    <div class="table-cell">
-                      {{
-                        [area.number, direction.number].join(".") +
-                          ". " +
-                          direction.name
-                      }}
-                    </div>
+                  <div class="skill-table__cell-wrapper">
+                    <a-icon 
+                      class="icon-button icon-show"
+                      :type="shownAreas.includes(area.id) ? 'down' : 'right'"
+                      @click="toggleNode(shownAreas, area.id)"
+                    />
+                    <text-highlight :queries="searchText">{{ [area.number, area.name].join(". ") }}</text-highlight>
                   </div>
-                  <div class="table-row__container">
-                    <div
-                      class="table-row"
-                      v-for="skill in direction.skills"
-                      :key="skill.id"
-                    >
-                      <div class="table-row__column_skill">
-                        <div class="table-cell">
-                          <span
-                            :class="{
-                              'skill-link': reportsStatisticsById[skill.id]
-                            }"
-                            @click="goToSkill(skill.id)"
-                          >
-                            {{
-                              [
-                                area.number,
-                                direction.number,
-                                skill.number
-                              ].join(".") +
-                                ". " +
-                                skill.name
-                            }}
-                          </span>
-                        </div>
-                      </div>
-                      <div class="table-row__column_count">
-                        <div class="table-cell">
-                          {{
-                            skill.id in reportsStatisticsById
-                              ? reportsStatisticsById[skill.id].called
-                              : 0
-                          }}
-                          /
-                          {{
-                            skill.id in reportsStatisticsById
-                              ? reportsStatisticsById[skill.id].planned
-                              : 0
-                          }}
-                        </div>
-                      </div>
-                      <div class="table-row__column_mark">
-                        <div class="table-cell">
-                          {{
-                            skill.id in reportsStatisticsById
-                              ? reportsStatisticsById[skill.id].value
-                              : "-"
-                          }}
+                </div>    
+              </div>
+              <Transition name="show">
+                <div v-if="shownAreas.includes(area.id)">
+                  <div v-for="direction in area.children" :key="direction.id">
+                    <div class="skill-table__cell-container sticky sticky_direction">
+                      <div 
+                        class="skill-table__cell"
+                        :class="{'skill-table__cell_deleted' : direction.deleted}"
+                      >
+                        <div class="skill-table__cell-wrapper">  
+                          <a-icon
+                            class="icon-button icon-show"
+                            :type="shownDirections.includes(direction.id) ? 'down' : 'right'"
+                            @click="toggleNode(shownDirections, direction.id)"
+                          />         
+                          <text-highlight :queries="searchText">{{ [area.number, direction.number].join(".") + ". " + direction.name }}</text-highlight>
                         </div>
                       </div>
                     </div>
+                                    
+                    <Transition name="show">
+                      <div v-if="shownDirections.includes(direction.id)">
+                        <div v-for="skill in direction.children" :key="skill.id">
+                          <div class="skill-table__cell-container sticky sticky_skill">
+                            <div
+                              class="skill-table__cell"
+                              :class="{'skill-table__cell_deleted' : skill.deleted}"
+                            >
+                              <div class="skill-table__cell-wrapper">
+                                <a-icon
+                                  class="icon-button icon-show"
+                                  :type="shownSkills.includes(skill.id) ? 'down' : 'right'"
+                                  @click="toggleNode(shownSkills, skill.id)"
+                                />
+                                <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number].join(".") + ". " + skill.name }}</text-highlight>
+                              </div>                                                         
+                            </div>
+                            <div class="skill-table__mark-bar-container">
+                              <a-popover title="Уровень освоения навыка" placement="left">                                          
+                                <mark-bar :min=0.33 :max:=1 :value="developedStatistics.skills[skill.id] && developedStatistics.skills[skill.id].value"/>      
+                                <template #content>
+                                  Количество выполненных упражнений за период: {{ (developedStatistics.skills[skill.id] && developedStatistics.skills[skill.id].called) || 0 }}
+                                  <br>
+                                  Средняя оценка выполненных упражнений: {{ (developedStatistics.skills[skill.id] && developedStatistics.skills[skill.id].value) || '-' }}
+                                </template>  
+                              </a-popover>  
+                              
+                              </div>
+                          </div>
+                          <Transition name="show">
+                            <div v-if="shownSkills.includes(skill.id)">
+                              <div v-for="result in skill.children" :key="result.id">
+                                <div class="skill-table__cell-container sticky sticky_result">
+                                  <div 
+                                    class="skill-table__cell skill-table__cell_sticky skill-table-result"
+                                    :class="{'skill-table__cell_deleted' : result.deleted}"  
+                                  >
+                                    <div class="skill-table__cell-wrapper">
+                                      <a-icon
+                                        class="icon-button icon-show"
+                                        :type="shownResults.includes(result.id) ? 'down' : 'right'"
+                                        @click="toggleNode(shownResults, result.id)"
+                                      />
+                                      <text-highlight :queries="searchText">{{ [ area.number, direction.number, skill.number, result.number].join(".") + '. ' + result.name }}</text-highlight>
+                                    </div>
+                                  </div>
+                                  <div class="skill-table__mark-bar-container">
+                                    <a-popover title="Уровень достижения ожидаемого результата" placement="left">                                          
+                                      <mark-bar :min=0.33 :max:=1 :value="developedStatistics.results[result.id] && developedStatistics.results[result.id].value"/>
+                                      <template #content>
+                                        Количество выполненных упражнений за период: {{ (developedStatistics.results[result.id] && developedStatistics.results[result.id].called) || 0 }}
+                                        <br>
+                                        Средняя оценка выполненных упражнений: {{ (developedStatistics.results[result.id] && developedStatistics.results[result.id].value) || '-' }}
+                                      </template>  
+                                    </a-popover>                                    
+                                  </div>
+                                </div>
+                                <Transition name="show">
+                                  <div v-if="shownResults.includes(result.id)">                                    
+                                    <div v-for="exercise in result.children" :key="exercise.id"
+                                      class="skill-table__cell-container"
+                                    >
+                                      <div 
+                                        class="skill-table__cell skill-table-exercise"
+                                        :class="{'skill-table__cell_deleted' : exercise.deleted}"
+                                      >
+                                        <span
+                                          :class="{'exercise-link': developedStatistics.reports[exercise.id]}"
+                                          @click="goToExercise(exercise.id)"
+                                        >
+                                          <text-highlight :queries="searchText">
+                                            {{ [ area.number, direction.number, skill.number, result.number, exercise.number].join(".") + '. ' + exercise.name }}
+                                          </text-highlight>
+                                        </span>  
+                                      </div>
+                                      <div class="skill-table__mark-bar-container">
+                                        
+                                        <a-popover title="Оценка диагностического упражненения" placement="left">                                          
+                                          <mark-bar :min=0.33 :max:=1 :value="developedStatistics.reports[exercise.id] && developedStatistics.reports[exercise.id].value"/>
+                                          <template #content>
+                                            Количество выполненных упражнений за период: {{ (developedStatistics.reports[exercise.id] && developedStatistics.reports[exercise.id].called) || 0 }}
+                                            <br>
+                                            Средняя оценка выполненных упражнений: {{ (developedStatistics.reports[exercise.id] && developedStatistics.reports[exercise.id].value) || '-' }}
+                                          </template>  
+                                        </a-popover>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Transition>
+                              </div>
+                            </div>
+                          </Transition>                          
+                        </div>
+                      </div>
+                    </Transition>
                   </div>
                 </div>
-              </div>
-            </div>
+              </Transition>
+            </div>            
           </div>
-          <div class="no-data" v-else>
+          <div v-else class="skill-table__no-data">
             <a-empty :image="simpleImage" />
           </div>
         </div>
@@ -134,10 +179,16 @@
 <script>
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import { Empty } from "ant-design-vue";
+import TextHighlight from 'vue-text-highlight';
 import moment from "moment";
+import { filterBySubstr } from '@/utils/skillStructureFilters';
+import MarkBar from '@/components/SkillDevelopment/MarkBar' 
 
 export default {
-  components: {},
+  components: {
+    TextHighlight,
+    MarkBar
+  },
   props: {
     dateRangeInit: {
       type: Array,
@@ -149,27 +200,48 @@ export default {
   name: "AllSkills",
   data() {
     return {
-      loading: true,
+      searchText: '',
+      loading: false,
 
       dateRange: [],
-      doNotShowNotCalled: false,
+      displayMode: "all",
 
-      reportsStatisticsById: {}
+      reportsStatisticsById: {},
+      skillsStatisticsById: {},
+
+      shownAreas: [],
+      shownDirections: [],
+      shownSkills: [],
+      shownResults: [],
     };
   },
 
   computed: {
+
     ...mapGetters({
-      areasFetched: "skills/getFetched",
-      areas: "skills/getFilteredAreas",
-      scrollPosition: "skills/getScrollPosition"
+      skillDevelopmentTreeState: "skills/getSkillDevelopmentTreeState",
+      developedSkills: "skills/getDevelopedSkills",
+      developedPeriod: "skills/getDevelopedPeriod",
+      developedStatistics: "skills/getDevelopedStatistics"
     }),
+
     filteredAreas() {
-      if (!this.doNotShowNotCalled) {
-        return this.areas;
+      let checkFunction;
+      if (this.displayMode == "called") {
+        checkFunction = (exercise) => {
+          return String(exercise.id) in this.developedStatistics.reports;
+        }
+      } else if (this.displayMode == "notCalled") {
+        checkFunction = (exercise) => {
+          return !(String(exercise.id) in this.developedStatistics.reports);
+        }
+      } else {
+        checkFunction = (exercise) => {
+          return true;
+        }
       }
 
-      return this.areas
+      return this.developedSkills
         .map(area => {
           return {
             id: area.id,
@@ -182,15 +254,36 @@ export default {
                   area_id: dir.area_id,
                   name: dir.name,
                   number: dir.number,
-                  skills: dir.skills.filter(
-                    skill => String(skill.id) in this.reportsStatisticsById
-                  )
+                  skills: dir.skills
+                    .map(skill => {
+                      return {
+                        id: skill.id,
+                        direction_id: skill.direction_id,
+                        name: skill.name,
+                        number: skill.number,
+                        results: skill.results
+                        .map(result => {
+                          return {
+                            id: result.id,
+                            skill_id: result.skill_id,
+                            name: result.name,
+                            number: result.number,
+                            exercises: result.exercises.filter(checkFunction)
+                          }
+                        }).filter(result => result.exercises.length)
+                      };
+                    })
+                    .filter(skill => skill.results.length)
                 };
               })
               .filter(direction => direction.skills.length)
           };
         })
         .filter(area => area.development_directions.length);
+    },
+
+    filteredAreasByText(){
+      return filterBySubstr(this.filteredAreas, this.searchText.toLowerCase(), '');
     }
   },
 
@@ -199,163 +292,174 @@ export default {
   },
 
   async created() {
-    let fetches = [];
-
-    if (!this.areasFetched) {
-      fetches.push(this.fetchAreas());
+    if (!this.$route.query.dateFrom) //  Параметров нет, значит, переход был из главного меню
+    {      
+      this.$router.replace({
+        name: this.$route.name,
+        query: {
+          dateFrom: this.developedPeriod ? this.developedPeriod.start : moment(new Date()).weekday(0).format("YYYY-MM-DD"),
+          dateTo: this.developedPeriod ? this.developedPeriod.end : moment(new Date()).weekday(6).format("YYYY-MM-DD"),
+          displayMode: this.displayMode
+        }
+      })
     }
-
-    if (this.$route.query.showCalled) {
-      this.doNotShowNotCalled = this.$route.query.showCalled === "true";
-    }
-
-    this.loading = true;
-    await Promise.all(fetches);
-    this.loading = false;
-
-    if (!this.setDateRange(this.$route)) {
-      this.dateRangeChange(this.dateRange, true);
-      return;
-    }
-
-    this.fetchSkillReportsStatistics();
+    else // Переход по ссылке либо возврат назад из развития конкретного навыка
+    {
+      if (this.$route.query.displayMode) {
+        this.displayMode = this.$route.query.displayMode;
+      }
+      this.dateRange.push(moment(this.$route.query.dateFrom));
+      this.dateRange.push(moment(this.$route.query.dateTo));
+      this.loading = true;
+      await this.fetchDevelopedSkills({start: this.dateRange[0].format("YYYY-MM-DD"), end: this.dateRange[1].format("YYYY-MM-DD")});
+      this.loading = false; 
+      this.setupSkillDevelopmentTreeState();
+    }    
   },
 
-  beforeRouteUpdate(to, from, next) {
-    if (!this.setDateRange(to)) {
-      this.dateRangeChange(this.dateRange, true);
-      return;
+  async beforeRouteUpdate(to, from, next) {
+    if (from.name != 'ExerciseDetails') {
+      this.clearSkillDevelopmentTreeState();
     }
-    this.fetchSkillReportsStatistics();
+
+    this.dateRange.splice(0);
+    this.dateRange.push(moment(to.query.dateFrom));
+    this.dateRange.push(moment(to.query.dateTo));
+
+    if (to.query.displayMode) {
+      this.displayMode = to.query.displayMode;
+    }
+    if (from.query.dateFrom !== to.query.dateFrom || from.query.dateTo !== to.query.dateTo)
+    {
+      this.loading = true;
+      await this.fetchDevelopedSkills({start: to.query.dateFrom, end: to.query.dateTo});
+      this.loading = false;
+    }
+    this.setupSkillDevelopmentTreeState();
     next();
   },
 
-  updated() {
-    const table = document.getElementById("table");
-    if (table) {
-      if (this.scrollPosition) {
-        table.scrollTop = this.scrollPosition;
-      }
-      table.addEventListener("scroll", this.saveScrollPosition);
+  async beforeRouteLeave(to, from, next) {
+    // Для всех путей,кроме просмотра отчета по упражнению
+    // Скидываем состояние дерева и скролла
+    if (to.name == 'ExerciseDetails') {
+      this.saveSkillDevelopmentTreeState();
+    } else {
+      this.clearSkillDevelopmentTreeState();
     }
+
+    next();
   },
 
-  beforeDestroy() {
-    const table = document.getElementById("table");
-    if (table) {
-      table.removeEventListener("scroll", this.saveScrollPosition);
-    }
-  },
 
   methods: {
-    ...mapActions({
-      fetchAreas: "skills/fetchAreas"
-    }),
-    ...mapMutations({
-      setScrollPosition: "skills/setScrollPosition"
-    }),
-    async fetchSkillReportsStatistics() {
-      try {
-        this.loading = true;
-        let firstQParameter = `date_from=${this.dateRange[0].format(
-          "YYYY-MM-DD"
-        )}`;
-        let secondQParameter = `date_to=${this.dateRange[1].format(
-          "YYYY-MM-DD"
-        )}`;
-        let QParameters = `?${firstQParameter}&${secondQParameter}`;
-        let res = await this.$axios.get(
-          `/api/skill_reports/statistics/${QParameters}`
-        );
-        if (res.status === 200) {
-          this.reportsStatisticsById = res.data;
-        } else {
-          this.$message.error("Произошла ошибка при загрузке отчетов");
-        }
-      } catch (e) {
-        this.$message.error("Произошла ошибка при загрузке отчетов");
-      } finally {
-        this.loading = false;
-      }
-    },
-    goToSkill(skillId) {
-      if (this.reportsStatisticsById[skillId]) {
-        this.$router.push({
-          name: "SkillDetails",
-          params: { id: skillId },
-          query: {
-            dateFrom: this.$route.query.dateFrom,
-            dateTo: this.$route.query.dateTo,
-            showCalled: this.$route.query.showCalled
-          }
-        });
-      }
-    },
-    dateRangeChange(value, replace = false) {
-      if (
-        value[0].format("YYYY-MM-DD") == this.$route.query.dateFrom &&
-        value[1].format("YYYY-MM-DD") == this.$route.query.dateTo
-      ) {
-        return;
-      }
 
+    ...mapActions({
+      fetchDevelopedSkills: "skills/fetchDevelopedSkills"
+    }),
+
+    ...mapMutations({
+      setSkillDevelopmentTreeState: "skills/setSkillDevelopmentTreeState"
+    }),
+
+    toggleNode(shownNodes, nodeId){
+      let index = shownNodes.indexOf(nodeId)
+      if (index == -1){
+        shownNodes.push(nodeId);
+      } else {
+        shownNodes.splice(index, 1);
+      }
+    },
+
+    dateRangeChange(value) {
       let queryObj = {
         dateFrom: value[0].format("YYYY-MM-DD"),
         dateTo: value[1].format("YYYY-MM-DD"),
-        showCalled: this.doNotShowNotCalled
+        displayMode: this.displayMode
       };
 
-      if (replace) {
-        this.$router
-          .replace({
-            name: this.$route.name,
-            query: queryObj
-          })
-          .catch(() => {});
-      } else {
-        this.$router
-          .push({
-            name: this.$route.name,
-            query: queryObj
-          })
-          .catch(() => {});
-      }
-    },
-    setDateRange(route) {
-      let query = route.query;
-      if (
-        !Object.prototype.hasOwnProperty.call(query, "dateFrom") ||
-        !Object.prototype.hasOwnProperty.call(query, "dateTo")
-      ) {
-        this.dateRange.splice(0);
-        this.dateRange.push(this.dateRangeInit[0].clone());
-        this.dateRange.push(this.dateRangeInit[1].clone());
-        return false;
-      } else {
-        this.dateRange.splice(0);
-        this.dateRange.push(moment(query.dateFrom, "YYYY-MM-DD"));
-        this.dateRange.push(moment(query.dateTo, "YYYY-MM-DD"));
-        return true;
-      }
+      this.$router
+        .replace({
+          name: this.$route.name,
+          query: queryObj
+        })
+        .catch(() => {});
     },
 
-    changeShowCalled(event) {
-      if (this.$route.query.showCalled != event.target.checked) {
-        this.$router.replace({
-          name: this.$route.name,
-          query: { ...this.$route.query, showCalled: event.target.checked }
+
+    changeDisplayMode(value) {
+      this.$router.replace({
+        name: this.$route.name,
+        query: {
+          ...this.$route.query,
+          displayMode: value,
+        }
+      });
+    },
+
+    setupSkillDevelopmentTreeState(){
+      if (this.skillDevelopmentTreeState) {
+        // const table = document.getElementById("table");
+        const table = this.$refs.table;
+        if (table) {
+          this.shownAreas = this.skillDevelopmentTreeState.shownAreas;
+          this.shownDirections = this.skillDevelopmentTreeState.shownDirections;
+          this.shownSkills = this.skillDevelopmentTreeState.shownSkills;
+          this.shownResults = this.skillDevelopmentTreeState.shownResults;
+          this.$nextTick(()=>{
+            table.scrollTop = this.skillDevelopmentTreeState.scrollPosition;
+          });
+
+        }
+      } else {
+        for (let area of this.developedSkills) {
+          this.shownAreas.push(area.id);
+        }
+      }
+    },
+    
+    saveSkillDevelopmentTreeState() {
+      const table = document.getElementById("table");
+
+      let scrollPosition = 0;
+      if (table) {
+        scrollPosition = table.scrollTop;
+      }
+
+      this.setSkillDevelopmentTreeState({
+        scrollPosition: scrollPosition,
+        shownAreas: this.shownAreas,
+        shownDirections: this.shownDirections,
+        shownSkills: this.shownSkills,
+        shownResults: this.shownResults,
+      });
+    },
+    
+    clearSkillDevelopmentTreeState() {
+      this.setSkillDevelopmentTreeState(null);
+    },
+
+    goToExercise(exerciseId) {
+      if (this.developedStatistics.reports[exerciseId]) {        
+        this.$router.push({
+          name: "ExerciseDetails",
+          params: { id: exerciseId },
+          query: this.$route.query,
         });
       }
     },
-
-    saveScrollPosition(e) {
-      this.setScrollPosition(e.target.scrollTop);
-    }
   }
 };
 </script>
 
 <style lang="sass">
+mark.text__highlight
+  background: #1890ff 
+  color: #fff
+  padding: 0
+</style>
+
+<style lang="sass" scoped>
 .skill-development
   display: flex
   flex-direction: column
@@ -385,118 +489,120 @@ export default {
       width: 220px
       text-align: center
 
-  .table-holder
-    flex: 1
-    overflow: auto
+.sticky
+  position: sticky
+  position: -webkit-sticky
+  background-color: #fff  
 
-  .table-header
-    display: flex
-    height: 60px
-    align-items: center
-    background: #fafafa
-    border: 1px solid #e8e8e8
-    overflow: hidden
-    line-height: 15px
-    z-index: 3
-    position: sticky
-    position: -webkit-sticky
+  &_area
     top: 0
+    z-index: 5
 
-  .table-header__column
-    overflow: hidden
-    display: flex
-    align-items: center
-    height: 100%
+  &_direction
+    top: 46px
+    z-index: 4
+    padding-left: 20px
 
-  .table-header__column_area
-    width: 20%
+  &_skill
+    top: 92px
+    z-index: 3
+    padding-left: 40px
 
-  .table-header__column_direction
-    width: 20%
+  &_result
+    top: 138px
+    z-index: 2
+    padding-left: 60px
+
+
+.skill-table
+  overflow: auto
+  height: 100%
+  border-top: 1px solid #e8e8e8
+
+  &__body
     border-left: 1px solid #e8e8e8
+    border-right: 1px solid #e8e8e8
 
-  .table-header__column_skill
+  &__cell-container
+    display: flex
+    transition: background .3s
+    background: #fff
+    border-bottom: 1px solid #e8e8e8
+
+    &:hover
+      background: #e6f7ff
+    
+    .skill-table-exercise
+      padding-left: 114px
+
+  &__cell
+    padding: 5px 15px
+    display: flex
+    align-items: center    
+    cursor: default
+    word-break: break-word    
+    min-height: 45px
     flex: 1
-    border-left: 1px solid #e8e8e8
 
-  .table-header__column_count
-    width: 160px
+
+
+  &__cell-wrapper
+    line-height: 16px
+  
+  //&-area
+  //  top: 0
+  //  z-index: 5
+  //  border-bottom: 1px solid #e8e8e8
+
+  //&-direction
+  //  top: 45px
+  //  z-index: 4
+  //  border-bottom: 1px solid #e8e8e8
+  //  padding-left: 35px
+
+  //&-skill
+  //  top: 90px
+  //  z-index: 3
+  //  border-bottom: 1px solid #e8e8e8
+  //  padding-left: 55px
+
+  //&-result
+  //  top: 135px
+  //  z-index: 2
+  //  border-bottom: 1px solid #e8e8e8
+  //  padding-left: 75px
+
+  //&-exercise
+  //  border-bottom: 1px solid #e8e8e8
+  //  padding-left: 80px
+
+  &__mark-bar-container
+    width: 150px
     border-left: 1px solid #e8e8e8
     display: flex
     align-items: center
 
-  .table-header__column_mark
-    width: 160px
-    border-left: 1px solid #e8e8e8
-    display: flex
-    align-items: center
+.icon-show
+  margin-right: 5px
 
-  .table-cell
-    padding: 10px 15px
-    display: flex
-    align-items: center
-    min-height: 52px
-    word-break: break-word
+.exercise-link
+  color: #1890ff
+  cursor: pointer
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)
 
-  .table-body
-    border: 1px solid #e8e8e8
-    border-top: 0 none
+  &:hover
+    color: #40a9ff
 
-    .table-row
-        border-top: 1px solid #e8e8e8
-        display: flex
-        flex: 1 1 auto
-
-    .table-row__column
-      .table-cell
-        position: sticky
-        position: -webkit-sticky
-        z-index: 1
-        top: 60px
-
-    .table-row__container
-      flex: 1
-      display: flex
-      flex-direction: column
-
-    .table-row:first-child
-      border-top: 0 none
-
-    .table-row__column_area
-      width: 20%
-
-    .table-row__column_direction
-      width: 25%
-      border-left: 1px solid #e8e8e8
-
-    .table-row__column_skill
-      flex: 1
-      border-left: 1px solid #e8e8e8
-
-    .table-row__column_count
-      width: 160px
-      border-left: 1px solid #e8e8e8
-      display: flex
-      align-items: center
-      justify-content: center
-
-    .table-row__column_mark
-      width: 160px
-      border-left: 1px solid #e8e8e8
-      display: flex
-      align-items: center
-      justify-content: center
-
-    .skill-link
-      color: #1890ff
-      cursor: pointer
-      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)
-
-    .skill-link:hover
-      color: #40a9ff
-
-  .no-data
+  &__no-data
     padding: 50px 0
     border: 1px solid #e8e8e8
-    border-top: 0 none
+  
+.show-enter-active, .show-leave-active
+  transition: opacity 0.3s
+  
+.show-enter, .show-leave-to
+  opacity: 0
+
+mark
+  padding: 0 1px
 </style>
