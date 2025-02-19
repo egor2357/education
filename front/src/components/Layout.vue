@@ -49,7 +49,7 @@
                   'box-shadow': 'unset',
                 }"
                 :count="notifications[item.unread]"
-              />              
+              />
             </router-link>
           </a-menu-item>
         </template>
@@ -635,7 +635,7 @@ export default {
 
       div
         white-space: normal
-        width: 130px
+        flex: 1
         padding-bottom: 4px   
 
     .anticon
@@ -649,7 +649,6 @@ export default {
     .ant-menu-item
       .anticon
         font-size: 18px
-        .ant-badge
         margin-bottom: 0
         margin-top: 15px
       div
@@ -658,6 +657,11 @@ export default {
       .anticon
         align-self: baseline
         margin-top: 2px
+
+    .ant-menu-submenu
+      .anticon
+        padding-bottom: 0
+        padding-top: 2px
 
   .ant-menu-submenu
     .anticon

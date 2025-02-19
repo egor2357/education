@@ -619,7 +619,7 @@ export default {
       for (let i=0; i<this.specialists.length; i++) {
         const specialist = this.specialists[i];
         specialistToItsMetaObject[specialist.id] = {
-          label: specialist?.surname[0].toUpperCase() || '' + specialist?.name[0].toUpperCase() || '',
+          label: (specialist.surname[0] + (specialist?.name[0] || '')).toUpperCase(),
           fullLabel: this.formatSpecialist(specialist),
           color: this.colorPresets[i%colorPresetsCount]
         };
