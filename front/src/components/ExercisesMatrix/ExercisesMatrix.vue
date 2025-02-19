@@ -563,7 +563,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      specialists: "specialists/getSpecialists",
+      specialists: "specialists/getOnlySpecialists",
       areas: "skills/getAreas",
     }),
     assignedExercises() {
@@ -619,8 +619,8 @@ export default {
       for (let i=0; i<this.specialists.length; i++) {
         const specialist = this.specialists[i];
         specialistToItsMetaObject[specialist.id] = {
-          label: specialist.surname[0].toUpperCase() + specialist.name[0].toUpperCase(),
-          fullLabel: this.formatSpecialistFull(specialist),
+          label: specialist?.surname[0].toUpperCase() || '' + specialist?.name[0].toUpperCase() || '',
+          fullLabel: this.formatSpecialist(specialist),
           color: this.colorPresets[i%colorPresetsCount]
         };
       }
@@ -637,6 +637,7 @@ export default {
   flex-direction: row
   flex-wrap: wrap
   gap: 10px
+  justify-content: center
 
 .specialist-label
   font-size: 16px
@@ -646,6 +647,7 @@ export default {
 
 .exercises-matrix-container
   height: 100%
+  padding-top: 10px
   display: flex
   flex-direction: column
   overflow: hidden

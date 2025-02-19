@@ -86,8 +86,7 @@ export default {
   flex-direction: column  
 
   .top-bar
-    display: flex
-    margin-bottom: 10px
+    display: flex    
     line-height: 32px
 
     .title
