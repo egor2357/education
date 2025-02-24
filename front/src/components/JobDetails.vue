@@ -524,7 +524,7 @@ export default {
       try {
         this.loading = true;
         let jobId = this.$route.params.id;
-        let res = await this.$axios.get(`/api/jobs/${jobId}`);
+        let res = await this.$axios.get(`/api/jobs/${jobId}/`);
         if (res.status === 200) {
           this.job = res.data;
           this.jobDateMoment = moment(this.job.date, "YYYY-MM-DD");
@@ -577,6 +577,7 @@ export default {
             if (res.status === 200) {
               this.$message.success("Параметры занятия сохранены");
               await this.fetchJob();
+              this.$store.commit("skills/setDevelopedStatistics", {statistics: null}); // были изменены параметры занятия (возможно, было добавлено упражнение, надо обновить статистику по развитию)
             } else if (res.status === 400) {
               this.$message.error("Проверьте введённые данные");
               for (let key in res.data) {
@@ -629,6 +630,7 @@ export default {
         if (res.status === 200) {
           this.$message.success("Отчет сохранен");
           await this.fetchJob();
+          this.$store.commit("skills/setDevelopedStatistics", {statistics: null}); // были изменены оценки, надо обновить статистику по развитию
         } else if (res.status === 400) {
           this.$message.error("Проверьте введённые данные");
         } else {

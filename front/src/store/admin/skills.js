@@ -143,12 +143,10 @@ const actions = {
   },
 
   async fetchDevelopedSkills({commit}, payload){    
-    if (
-        // !this.state.skills.developedSkillsCacheTimer || // Кэш еще не устанавливался
+    if (      
         !this.state.skills.developedPeriod 
         || this.state.skills.developedPeriod.start !== payload.start // не совпадает дата начала
-        || this.state.skills.developedPeriod.end !== payload.end // не совпадает да конца
-        // || (new Date() - this.state.skills.developedSkillsCacheTimer > 60000) // прошло больше минуты
+        || this.state.skills.developedPeriod.end !== payload.end // не совпадает дата конца
       ) 
     {
       try {      
@@ -162,6 +160,19 @@ const actions = {
       }
       catch (e) {
         commit("setDevelopedSkills", {structure: [], statistics: null, success: false, period: null});
+      }
+    }
+    else if (!this.state.skills.developedStatistics) // была сброшена статистика изз-за изменения параметров занятия
+    {
+      try
+      {
+        let response = await this.$axios.get(`/api/exercise_reports/statistics/?date_from=${payload.start}&date_to=${payload.end}`);
+        if (response.status === 200) {
+          commit("setDevelopedStatistics", {statistics: response.data})
+        }        
+      }
+      catch (e) {
+        commit("setDevelopedStatistics", {statistics: null});
       }
     }
   },
@@ -264,6 +275,9 @@ const mutations = {
     state.developedStatistics = payload.statistics;
     state.developedPeriod = payload.period;
     state.developedSkillsCacheTimer = new Date();
+  },
+  setDevelopedStatistics(state, payload){
+    state.developedStatistics = payload.statistics;
   }
 };
 
