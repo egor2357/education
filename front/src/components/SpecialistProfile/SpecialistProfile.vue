@@ -81,7 +81,7 @@ export default {
     async fetchUserData() {
       try {
         this.loading = true;
-        let res = await this.$axios.get("/api/users/current");
+        let res = await this.$axios.get("/api/users/current/");
         if (res.status === 200) {
           this.userData = res.data;
         } else if (res.status === 400) {

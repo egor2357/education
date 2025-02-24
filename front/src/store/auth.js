@@ -79,7 +79,7 @@ const actions = {
   },
   async checkUser({ commit }) {
     try {
-      let res = await this.$axios.get("/api/users/current");
+      let res = await this.$axios.get("/api/users/current/");
       if (res.status === 200) {
         commit("setIsAuth", true);
         commit("setUserInfo", {

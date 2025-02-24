@@ -32,7 +32,7 @@ export default {
       try {
         this.loading = true;
         let jobId = this.$route.params.id;
-        let res = await this.$axios.get(`/api/jobs/${jobId}`);
+        let res = await this.$axios.get(`/api/jobs/${jobId}/`);
         if (res.status === 200) {
           this.job = res.data;
           if (!this.isEditable) {
