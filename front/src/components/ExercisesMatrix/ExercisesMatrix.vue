@@ -774,6 +774,7 @@ export default {
 
 .exercise__spectialist__delete_button
   width: 30px
+  min-width: 30px
   height: 30px
   overflow: hidden
   border-radius: 15px
@@ -815,6 +816,7 @@ export default {
   align-items: center
   justify-content: center
   width: 50px
+  min-width: 50px
   margin-left: 20px
 .exercise_specialist_button_add_button
   margin-right: 10px
